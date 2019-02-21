@@ -2,3 +2,10 @@ language: go
 
 go:
   - "1.11.x"
+
+addons:
+  sonarcloud:
+    organization: "bazo-blockchain"
+
+script:
+  - sonar-scanner
