@@ -25,7 +25,7 @@ func TestNextLine(t *testing.T) {
 
 func TestString(t *testing.T) {
 	pos := New()
-	assert.Equal(t, pos.String(), "-")
+	assert.Equal(t, pos.String(), "1:0")
 
 	pos.MoveRight()
 	assert.Equal(t, pos.String(), "1:1")
