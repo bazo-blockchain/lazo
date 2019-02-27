@@ -8,7 +8,7 @@ addons:
     organization: "bazo-blockchain"
 
 script:
-  - go test -v ./...
+  - go test -v ./... -coverprofile=coverage.out
   - sonar-scanner
 
 after_success:
