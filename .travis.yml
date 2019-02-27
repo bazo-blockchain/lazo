@@ -9,3 +9,7 @@ addons:
 
 script:
   - sonar-scanner
+  - go test -v ./...
+
+after_success:
+  - go build
