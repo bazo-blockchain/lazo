@@ -7,15 +7,11 @@ type Position struct {
 	Column int
 }
 
-func New() *Position{
+func New() *Position {
 	return &Position{
-		Line: 1,
+		Line:   1,
 		Column: 0,
 	}
-}
-
-func (pos *Position) IsValid() bool {
-	return pos.Line > 0 && pos.Column > 0
 }
 
 func (pos *Position) MoveRight() {
@@ -28,8 +24,5 @@ func (pos *Position) NextLine() {
 }
 
 func (pos Position) String() string {
-	if pos.IsValid() {
-		return fmt.Sprintf("%d:%d", pos.Line, pos.Column)
-	}
-	return "-"
+	return fmt.Sprintf("%d:%d", pos.Line, pos.Column)
 }

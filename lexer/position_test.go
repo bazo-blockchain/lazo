@@ -5,14 +5,6 @@ import (
 	"testing"
 )
 
-func TestIsValid(t *testing.T) {
-	pos := New()
-	assert.Equal(t, pos.IsValid(), false)
-
-	pos.MoveRight()
-	assert.Equal(t, pos.IsValid(), true)
-}
-
 func TestMoveRight(t *testing.T) {
 	pos := New()
 	assert.Equal(t, pos.Line, 1)
