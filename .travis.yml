@@ -8,8 +8,8 @@ addons:
     organization: "bazo-blockchain"
 
 script:
-  - sonar-scanner
   - go test -v ./...
+  - sonar-scanner
 
 after_success:
   - go build
