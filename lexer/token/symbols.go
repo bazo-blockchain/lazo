@@ -50,3 +50,15 @@ var Keywords = map[string]Symbol {
 	"else": Else,
 	"function": Function,
 }
+
+var SingleCharOperations = map[string]Symbol {
+	":": Colon,
+	",": Comma,
+	".": Period,
+	"{": OpenBrace,
+	"}": CloseBrace,
+	"[": OpenBracket,
+	"]": CloseBracket,
+	"(": OpenParen,
+	")": CloseParen,
+}

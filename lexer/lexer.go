@@ -35,6 +35,10 @@ func (lex *Lexer) NextToken() token.Token {
 		return lex.readName()
 	}
 
+	if lex.isSingleCharFixToken() {
+		return lex.readSingleCharFixToken()
+	}
+
 	switch lex.current {
 	case '"':
 		return lex.readString()
@@ -86,6 +90,19 @@ func (lex *Lexer) readInteger() token.Token {
 
 }
 
+func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
+	lexeme := string(lex.current)
+
+	symbol, _ := token.SingleCharOperations[lexeme]
+
+	lex.nextChar()
+
+	return &token.FixToken{
+		AbstractToken: lex.newAbstractToken(lexeme),
+		Value: symbol,
+	}
+}
+
 func (lex *Lexer) readFixToken() *token.FixToken {
 	// TODO Implement correctly
 	lex.nextChar()
@@ -93,6 +110,7 @@ func (lex *Lexer) readFixToken() *token.FixToken {
 }
 
 func (lex *Lexer) readString() token.Token {
+	// TODO Add Escaping
 	// skip opening double quote
 	lex.nextChar()
 
@@ -181,6 +199,11 @@ func (lex *Lexer) isLetter() bool {
 
 func (lex *Lexer) isDigit() bool {
 	return lex.current >= '0' && lex.current <= '9'
+}
+
+func (lex *Lexer) isSingleCharFixToken() bool {
+	_, ok := token.SingleCharOperations[string(lex.current)]
+	return ok
 }
 
 func (lex *Lexer) isHexDigit() bool {
