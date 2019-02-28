@@ -32,7 +32,7 @@ func (lex *Lexer) NextToken() token.Token {
 	}
 
 	if lex.isLetter() {
-		return lex.readIdentifier()
+		return lex.readName()
 	}
 
 	switch lex.current {
@@ -51,14 +51,20 @@ func (lex *Lexer) skipWhiteSpace() {
 	}
 }
 
-func (lex *Lexer) readIdentifier() *token.IdentifierToken {
+func (lex *Lexer) readName() token.Token {
 	lexeme := lex.readLexeme(lex.isLetter)
 
+	abstractToken := lex.newAbstractToken(lexeme)
+
+	if symbol, ok := token.Keywords[lexeme]; ok {
+		return &token.FixToken{
+			AbstractToken: abstractToken,
+			Value: symbol,
+		}
+	}
+
 	return &token.IdentifierToken{
-		AbstractToken: token.AbstractToken{
-			Position: lex.currentPos,
-			Lexeme: lexeme,
-		},
+		AbstractToken: abstractToken,
 	}
 }
 

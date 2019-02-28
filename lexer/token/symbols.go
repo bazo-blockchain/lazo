@@ -32,12 +32,21 @@ const (
 	And
 	Or
 
+	Assign
+
 	// Keywords
 
 	Contract
-	Assign
 	Return
 	If
 	Else
 	Function
 )
+
+var Keywords = map[string]Symbol {
+	"contract": Contract,
+	"return": Return,
+	"if": If,
+	"else": Else,
+	"function": Function,
+}
