@@ -3,8 +3,8 @@ package token
 type Symbol int
 
 const (
-	Plus Symbol = iota
-	Minus
+	Addition Symbol = iota
+	Subtraction
 	Division
 	Multiplication
 	Modulo
@@ -61,4 +61,29 @@ var SingleCharOperations = map[string]Symbol {
 	"]": CloseBracket,
 	"(": OpenParen,
 	")": CloseParen,
+	"+": Addition,
+	"-": Subtraction,
+	"/": Division,
+	"*": Multiplication,
+	"%": Modulo,
 }
+
+var PossibleMultiCharOperation = map[string]Symbol {
+	"=": Assign,
+	">": Greater,
+	"<": Less,
+	"!": Not,
+}
+
+var LogicalOperation = map[string]Symbol {
+	"&&": And,
+	"||": Or,
+}
+
+var MultiCharOperation = map[string]Symbol {
+	"==": Equal,
+	"!=": Unequal,
+	">=": GreaterEqual,
+	"<=": LessEqual,
+}
+

@@ -86,6 +86,46 @@ func (lex *Lexer) readInteger() token.Token {
 
 }
 
+func (lex *Lexer) readFixToken() *token.FixToken {
+
+	if lex.isPossibleMultiCharFixToken() {
+		buf := []rune {lex.current}
+
+		symbol, _ := token.PossibleMultiCharOperation[string(buf)]
+
+		lex.nextChar()
+
+		if lex.isMultiCharFixToken(buf[0]) {
+			buf = append(buf, lex.current)
+			symbol, _ = token.MultiCharOperation[string(buf)]
+			lex.nextChar()
+		}
+
+		abstractToken := lex.newAbstractToken(string(buf))
+
+		return &token.FixToken{
+			AbstractToken: abstractToken,
+			Value: symbol,
+		}
+	}
+
+	if lex.isSingleCharFixToken() {
+		return lex.readSingleCharFixToken()
+	}
+
+/*	if lex.isLogicalFixToken() {
+		// TODO Read Logical Fix Token
+	}*/
+
+	lex.nextChar()
+	return nil
+
+}
+
+/*func (lex *Lexer) readLogicalFixToken() *token.FixToken {
+
+}*/
+
 func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
 	lexeme := string(lex.current)
 
@@ -96,15 +136,6 @@ func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
 	return &token.FixToken{
 		AbstractToken: lex.newAbstractToken(lexeme),
 		Value: symbol,
-	}
-}
-
-func (lex *Lexer) readFixToken() *token.FixToken {
-	if lex.isSingleCharFixToken() {
-		return lex.readSingleCharFixToken()
-	} else {
-		lex.nextChar()
-		return nil
 	}
 }
 
@@ -159,21 +190,23 @@ func (lex *Lexer) readCharacter() token.Token {
 }
 
 func (lex *Lexer) nextChar() {
-	if char, _, err := lex.reader.ReadRune(); err != nil {
+	char, _, err := lex.reader.ReadRune()
+
+	if  err != nil {
 		if err == io.EOF {
 			lex.EOF = true
 		} else {
 			log.Fatal(err)
 		}
 	} else {
-		lex.current = char
-
 		if char == '\n' {
 			lex.currentPos.NextLine()
 		} else {
 			lex.currentPos.MoveRight()
 		}
 	}
+
+	lex.current = char
 }
 
 // Helpers
@@ -200,8 +233,26 @@ func (lex *Lexer) isDigit() bool {
 	return lex.current >= '0' && lex.current <= '9'
 }
 
+// -----TODO Fix Duplicate Code ------
 func (lex *Lexer) isSingleCharFixToken() bool {
 	_, ok := token.SingleCharOperations[string(lex.current)]
+	return ok
+}
+
+func (lex *Lexer) isPossibleMultiCharFixToken() bool {
+	_, ok := token.PossibleMultiCharOperation[string(lex.current)]
+	return ok
+}
+
+func (lex *Lexer) isLogicalFixToken() bool {
+	_, ok := token.LogicalOperation[string(lex.current)]
+	return ok
+}
+// ------------------------------------
+
+func (lex *Lexer) isMultiCharFixToken(char rune) bool {
+	test := string(lex.current)
+	_, ok := token.MultiCharOperation[string(char) + test]
 	return ok
 }
 
