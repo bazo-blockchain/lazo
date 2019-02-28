@@ -48,4 +48,43 @@ func (t *IntegerToken) String() string {
 
 // --------------------------
 
-// todo define tokens
+type BooleanToken struct {
+	abstractToken
+	Value bool
+}
+
+func (t *BooleanToken) String() string {
+	return fmt.Sprintf("[%s] BOOLEAN %s", t.Pos(), t.Literal())
+}
+
+// --------------------------
+
+type StringToken struct {
+	abstractToken
+}
+
+func (t *StringToken) String() string {
+	return fmt.Sprintf("[%s] STRING %s", t.Pos(), t.Literal())
+}
+
+// --------------------------
+
+type CharacterToken struct {
+	abstractToken
+	Value rune
+}
+
+func (t *CharacterToken) String() string {
+	return fmt.Sprintf("[%s] CHAR %s", t.Pos(), t.Literal())
+}
+
+// --------------------------
+
+type FixToken struct {
+	abstractToken
+	Value Symbol
+}
+
+func (t *FixToken) String() string {
+	return fmt.Sprintf("[%s] SYMBOL %s", t.Pos(), t.Literal())
+}
