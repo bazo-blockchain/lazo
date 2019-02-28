@@ -35,10 +35,6 @@ func (lex *Lexer) NextToken() token.Token {
 		return lex.readName()
 	}
 
-	if lex.isSingleCharFixToken() {
-		return lex.readSingleCharFixToken()
-	}
-
 	switch lex.current {
 	case '"':
 		return lex.readString()
@@ -104,9 +100,12 @@ func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
 }
 
 func (lex *Lexer) readFixToken() *token.FixToken {
-	// TODO Implement correctly
-	lex.nextChar()
-	return nil
+	if lex.isSingleCharFixToken() {
+		return lex.readSingleCharFixToken()
+	} else {
+		lex.nextChar()
+		return nil
+	}
 }
 
 func (lex *Lexer) readString() token.Token {
