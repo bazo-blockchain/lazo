@@ -33,19 +33,16 @@ func (lex *Lexer) NextToken() token.Token {
 
 	if lex.isLetter() {
 		return lex.readIdentifier()
-	} else {
-		lex.nextChar()
 	}
 
-	// read string
-	// read character
-	// read other fix tokens
-
-	// todo remove - scan all characters and print
-
-	// ------------
-
-	return nil
+	switch lex.current {
+	case '"':
+		return lex.readString()
+	case '\'':
+		return lex.readCharacter()
+	default:
+		return lex.readFixToken()
+	}
 }
 
 func (lex *Lexer) skipWhiteSpace() {
@@ -84,11 +81,31 @@ func (lex *Lexer) readInteger() token.Token {
 }
 
 func (lex *Lexer) readFixToken() *token.FixToken {
+	// TODO Implement correctly
+	lex.nextChar()
 	return nil
 }
 
-func (lex *Lexer) readString() *token.StringToken {
-	return nil
+func (lex *Lexer) readString() token.Token {
+	// skip opening double quote
+	lex.nextChar()
+
+	lexeme := lex.readLexeme(func() bool {
+		return !lex.isChar('"')
+	})
+
+	abstractToken := lex.newAbstractToken(lexeme)
+
+	if lex.isChar('"') {
+		// skip closing double quote
+		lex.nextChar()
+
+		return &token.StringToken{
+			AbstractToken: abstractToken,
+		}
+	} else {
+		return lex.newErrorToken(abstractToken, "String not closed")
+	}
 }
 
 func (lex *Lexer) readCharacter() *token.CharacterToken {
@@ -142,6 +159,10 @@ func (lex *Lexer) isHexDigit() bool {
 	return lex.isDigit() ||
 		lex.current >='a' && lex.current <='f' ||
 		lex.current >= 'A' && lex.current <='F'
+}
+
+func (lex *Lexer) isChar(char rune) bool {
+	return lex.current == char
 }
 
 func (lex *Lexer) newAbstractToken(lexeme string) token.AbstractToken {
