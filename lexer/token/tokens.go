@@ -39,7 +39,7 @@ func (t *IdentifierToken) String() string {
 
 type IntegerToken struct {
 	AbstractToken
-	Value big.Int
+	Value *big.Int
 }
 
 func (t *IntegerToken) String() string {
@@ -87,4 +87,15 @@ type FixToken struct {
 
 func (t *FixToken) String() string {
 	return fmt.Sprintf("[%s] SYMBOL %s", t.Pos(), t.Literal())
+}
+
+// --------------------------
+
+type ErrorToken struct {
+	AbstractToken
+	Msg string
+}
+
+func (t *ErrorToken) String() string {
+	return fmt.Sprintf("[%s] Error %s - %s", t.Pos(), t.Msg, t.Literal())
 }

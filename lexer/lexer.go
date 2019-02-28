@@ -5,6 +5,7 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"io"
 	"log"
+	"math/big"
 )
 
 type Lexer struct {
@@ -26,9 +27,9 @@ func New(reader *bufio.Reader) *Lexer {
 func (lex *Lexer) NextToken() token.Token {
 	lex.skipWhiteSpace()
 
-/*	if lex.isDigit() {
+	if lex.isDigit() {
 		return lex.readInteger()
-	}*/
+	}
 
 	if lex.isLetter() {
 		return lex.readIdentifier()
@@ -70,8 +71,38 @@ func (lex *Lexer) readIdentifier() *token.IdentifierToken {
 	}
 }
 
-func (lex *Lexer) readInteger() *token.IntegerToken {
-	return nil
+func (lex *Lexer) readInteger() token.Token {
+	buf := []rune{lex.current}
+	lex.nextChar()
+
+	for !lex.EOF && lex.isDigit() {
+		buf = append(buf, lex.current)
+		lex.nextChar()
+	}
+
+	lexeme := string(buf)
+	value := new(big.Int)
+	value, ok := value.SetString(lexeme, 10)
+
+	if !ok {
+		return &token.ErrorToken {
+			AbstractToken: token.AbstractToken{
+				Position: lex.currentPos,
+				Lexeme: string(buf),
+			},
+			Msg: "Error while casting from string to big int.",
+
+		}
+	}
+
+	return &token.IntegerToken{
+		AbstractToken: token.AbstractToken{
+			Position: lex.currentPos,
+			Lexeme:string(buf),
+		},
+		Value: value,
+	}
+
 }
 
 func (lex *Lexer) readFixToken() *token.FixToken {
