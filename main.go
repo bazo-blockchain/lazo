@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/bazo-blockchain/lazo/lexer"
 	"io"
 	"os"
 )
@@ -16,8 +18,11 @@ func main() {
 }
 
 func compile(sourceFile string) {
-	_, err := os.Open(sourceFile)
+	file, err := os.Open(sourceFile)
 	check(err)
+
+	lexer := lexer.New(bufio.NewReader(file))
+	lexer.NextToken()
 }
 
 func check(err error) {

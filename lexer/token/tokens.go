@@ -1,4 +1,4 @@
-package lexer
+package token
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 type Token interface {
-	Pos() *Position
+	Pos() Position
 	Literal() string
 	String() string
 }
@@ -16,8 +16,8 @@ type abstractToken struct {
 	Lexeme string
 }
 
-func (t *abstractToken) Pos() *Position {
-	return &t.Position
+func (t *abstractToken) Pos() Position {
+	return t.Position
 }
 
 func (t *abstractToken) Literal() string {

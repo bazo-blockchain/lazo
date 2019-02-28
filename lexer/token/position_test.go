@@ -1,4 +1,4 @@
-package lexer
+package token
 
 import (
 	"gotest.tools/assert"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestMoveRight(t *testing.T) {
-	pos := New()
+	pos := NewPosition()
 	assert.Equal(t, pos.Line, 1)
 	assert.Equal(t, pos.Column, 0)
 
@@ -16,7 +16,7 @@ func TestMoveRight(t *testing.T) {
 }
 
 func TestNextLine(t *testing.T) {
-	pos := New()
+	pos := NewPosition()
 	pos.MoveRight()
 	pos.NextLine()
 	assert.Equal(t, pos.Line, 2)
@@ -24,7 +24,7 @@ func TestNextLine(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	pos := New()
+	pos := NewPosition()
 	assert.Equal(t, pos.String(), "1:0")
 
 	pos.MoveRight()

@@ -1,4 +1,4 @@
-package lexer
+package token
 
 import "fmt"
 
@@ -7,8 +7,8 @@ type Position struct {
 	Column int
 }
 
-func New() *Position {
-	return &Position{
+func NewPosition() Position {
+	return Position{
 		Line:   1,
 		Column: 0,
 	}
