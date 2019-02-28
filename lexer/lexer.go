@@ -51,23 +51,6 @@ func (lex *Lexer) skipWhiteSpace() {
 	}
 }
 
-func (lex *Lexer) readName() token.Token {
-	lexeme := lex.readLexeme(lex.isLetter)
-
-	abstractToken := lex.newAbstractToken(lexeme)
-
-	if symbol, ok := token.Keywords[lexeme]; ok {
-		return &token.FixToken{
-			AbstractToken: abstractToken,
-			Value: symbol,
-		}
-	}
-
-	return &token.IdentifierToken{
-		AbstractToken: abstractToken,
-	}
-}
-
 func (lex *Lexer) readInteger() token.Token {
 	// TODO: Hex Numbers
 	lexeme := lex.readLexeme(lex.isDigit)
@@ -84,6 +67,23 @@ func (lex *Lexer) readInteger() token.Token {
 		Value: value,
 	}
 
+}
+
+func (lex *Lexer) readName() token.Token {
+	lexeme := lex.readLexeme(lex.isLetter)
+
+	abstractToken := lex.newAbstractToken(lexeme)
+
+	if symbol, ok := token.Keywords[lexeme]; ok {
+		return &token.FixToken{
+			AbstractToken: abstractToken,
+			Value:         symbol,
+		}
+	}
+
+	return &token.IdentifierToken{
+		AbstractToken: abstractToken,
+	}
 }
 
 func (lex *Lexer) readFixToken() token.Token {
