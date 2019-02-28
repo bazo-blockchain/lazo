@@ -7,7 +7,7 @@ import (
 
 func TestIdentifierToken(t *testing.T) {
 	i := IdentifierToken{
-		abstractToken{
+		AbstractToken{
 			Position{
 				Line:   1,
 				Column: 1,

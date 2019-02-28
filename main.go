@@ -22,7 +22,10 @@ func compile(sourceFile string) {
 	check(err)
 
 	lexer := lexer.New(bufio.NewReader(file))
-	lexer.NextToken()
+	for !lexer.EOF {
+		tok := lexer.NextToken()
+		fmt.Printf("%s \n", tok)
+	}
 }
 
 func check(err error) {
