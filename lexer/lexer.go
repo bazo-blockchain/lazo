@@ -108,8 +108,31 @@ func (lex *Lexer) readString() token.Token {
 	}
 }
 
-func (lex *Lexer) readCharacter() *token.CharacterToken {
-	return nil
+func (lex *Lexer) readCharacter() token.Token {
+	// skip opening quote
+	lex.nextChar()
+
+	lexeme := lex.readLexeme(func() bool {
+		return !lex.isChar('\'')
+	})
+
+	abstractToken := lex.newAbstractToken(lexeme)
+
+	if len(lexeme) > 1 {
+		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
+	}
+
+	if lex.isChar('\'') {
+		// skip closing quote
+		lex.nextChar()
+
+		return &token.CharacterToken{
+			AbstractToken: abstractToken,
+		}
+	} else {
+		return lex.newErrorToken(abstractToken, "Character not closed")
+	}
+
 }
 
 func (lex *Lexer) nextChar() {
@@ -135,8 +158,7 @@ func (lex *Lexer) nextChar() {
 type predicate func() bool
 
 func (lex *Lexer) readLexeme(pred predicate) string {
-	buf := []rune{lex.current}
-	lex.nextChar()
+	var buf []rune
 
 	for !lex.EOF && pred() {
 		buf = append(buf, lex.current)
