@@ -86,7 +86,7 @@ func (lex *Lexer) readInteger() token.Token {
 
 }
 
-func (lex *Lexer) readFixToken() *token.FixToken {
+func (lex *Lexer) readFixToken() token.Token {
 
 	if lex.isPossibleMultiCharFixToken() {
 		buf := []rune {lex.current}
@@ -113,18 +113,33 @@ func (lex *Lexer) readFixToken() *token.FixToken {
 		return lex.readSingleCharFixToken()
 	}
 
-/*	if lex.isLogicalFixToken() {
-		// TODO Read Logical Fix Token
-	}*/
+	if lex.current == '&' || lex.current == '|' {
+		return lex.readLogicalFixToken()
+	}
 
 	lex.nextChar()
 	return nil
 
 }
 
-/*func (lex *Lexer) readLogicalFixToken() *token.FixToken {
+func (lex *Lexer) readLogicalFixToken() token.Token {
+	buf := []rune{lex.current}
+	lex.nextChar()
+	buf = append(buf, lex.current)
 
-}*/
+	abstractToken := lex.newAbstractToken(string(buf))
+
+	if symbol, ok := token.LogicalOperation[string(buf)]; ok {
+		lex.nextChar()
+
+		return &token.FixToken{
+			AbstractToken: abstractToken,
+			 Value: symbol,
+		}
+	} else {
+		return lex.newErrorToken(abstractToken, "Unknown Symbol")
+	}
+}
 
 func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
 	lexeme := string(lex.current)
@@ -241,11 +256,6 @@ func (lex *Lexer) isSingleCharFixToken() bool {
 
 func (lex *Lexer) isPossibleMultiCharFixToken() bool {
 	_, ok := token.PossibleMultiCharOperation[string(lex.current)]
-	return ok
-}
-
-func (lex *Lexer) isLogicalFixToken() bool {
-	_, ok := token.LogicalOperation[string(lex.current)]
 	return ok
 }
 // ------------------------------------
