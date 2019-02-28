@@ -5,6 +5,10 @@
 
 Please refer to [lazo-specification](https://github.com/bazo-blockchain/lazo-specification) for the language features.
 
+## Dependency Management
+
+Packages are managed by [dep](https://golang.github.io/dep/). Install dep and run `dep ensure` to install all the dependencies.
+
 ## Run Compiler
 
 `go run main.go program.lazo`
