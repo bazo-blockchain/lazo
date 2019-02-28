@@ -31,7 +31,7 @@ func (lex *Lexer) NextToken() token.Token {
 		return lex.readInteger()
 	}
 
-	if lex.isLetter() {
+	if lex.isLetter() || lex.isChar('_') {
 		return lex.readName()
 	}
 
@@ -66,12 +66,12 @@ func (lex *Lexer) readInteger() token.Token {
 		AbstractToken: abstractToken,
 		Value: value,
 	}
-
 }
 
 func (lex *Lexer) readName() token.Token {
-	lexeme := lex.readLexeme(lex.isLetter)
-
+	lexeme := lex.readLexeme(func() bool {
+		return !lex.isChar(' ')
+	})
 	abstractToken := lex.newAbstractToken(lexeme)
 
 	if symbol, ok := token.Keywords[lexeme]; ok {
