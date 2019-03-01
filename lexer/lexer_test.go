@@ -53,3 +53,42 @@ func TestValidIdentifers(t *testing.T) {
 		tester.assertIdentifer(i, id)
 	}
 }
+
+// Character Tokens
+// ----------------
+func TestCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'c'")
+	tester.assertCharacter(0, 'c')
+}
+
+func TestMultipleCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'c''b'")
+	tester.assertCharacter(0, 'c')
+	tester.assertCharacter(1, 'b')
+}
+
+func TestBackslashCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'\\\\'")
+	tester.assertCharacter(0, '\\')
+}
+
+func TestQuoteCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'\\''")
+	tester.assertCharacter(0, '\'')
+}
+
+func TestNewlineCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'\n'")
+	tester.assertCharacter(0, '\n')
+}
+
+func TestInvalidCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'cc'")
+	tester.assertError(0, "cc")
+}
+
+// String Tokens
+// -------------
+
+// Fix Tokens
+// ----------------

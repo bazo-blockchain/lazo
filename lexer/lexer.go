@@ -208,6 +208,7 @@ func (lex *Lexer) readCharacter() token.Token {
 
 		return &token.CharacterToken{
 			AbstractToken: abstractToken,
+			Value: []rune(lexeme)[0],
 		}
 	} else {
 		return lex.newErrorToken(abstractToken, "Character not closed")
@@ -282,6 +283,10 @@ func (lex *Lexer) readEscapedLexeme(pred predicate) string {
 
 			if lex.current == '"' {
 				escapedChar = '"'
+			}
+
+			if lex.current == '\'' {
+				escapedChar = '\''
 			}
 
 			buf = append(buf, escapedChar)
