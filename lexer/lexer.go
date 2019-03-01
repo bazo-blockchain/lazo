@@ -173,15 +173,39 @@ func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
 }
 
 func (lex *Lexer) readString() token.Token {
-	// TODO Add Escaping
 	// skip opening double quote
 	lex.nextChar()
 
-	lexeme := lex.readLexeme(func() bool {
-		return !lex.isChar('"')
-	})
+	var buf []rune
 
-	abstractToken := lex.newAbstractToken(lexeme)
+	for !lex.EOF && !lex.isChar('"'){
+		// Escaping
+		if lex.isChar('\\') {
+			escapedChar := lex.current
+			lex.nextChar()
+
+			if lex.current == 'n' {
+				escapedChar = '\n'
+			}
+
+			if lex.current == '\\' {
+				escapedChar = '\\'
+			}
+
+			if lex.current == '"' {
+				escapedChar = '"'
+			}
+
+			buf = append(buf, escapedChar)
+			lex.nextChar()
+
+		} else {
+			buf = append(buf, lex.current)
+			lex.nextChar()
+			}
+	}
+
+	abstractToken := lex.newAbstractToken(string(buf))
 
 	if lex.isChar('"') {
 		// skip closing double quote
@@ -196,6 +220,7 @@ func (lex *Lexer) readString() token.Token {
 }
 
 func (lex *Lexer) readCharacter() token.Token {
+	// TODO support \n and other characters
 	// skip opening quote
 	lex.nextChar()
 
@@ -291,8 +316,7 @@ func (lex *Lexer) isPossibleMultiCharFixToken() bool {
 // ------------------------------------
 
 func (lex *Lexer) isMultiCharFixToken(char rune) bool {
-	test := string(lex.current)
-	_, ok := token.MultiCharOperation[string(char) + test]
+	_, ok := token.MultiCharOperation[string(char) + string(lex.current)]
 	return ok
 }
 

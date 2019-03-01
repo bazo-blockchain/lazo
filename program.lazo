@@ -1,7 +1,6 @@
 hello world
 bye world
 123 efv
-"text"
 'c'
 contract
 :
@@ -10,3 +9,4 @@ contract
 =
 &&
 int a = b
+"test \n test\""
