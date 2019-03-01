@@ -88,7 +88,7 @@ func (lex *Lexer) readInteger() token.Token {
 
 func (lex *Lexer) readName() token.Token {
 	lexeme := lex.readLexeme(func() bool {
-		return !lex.isChar(' ')
+		return !lex.isChar(' ') && !lex.isChar('\n')
 	})
 	abstractToken := lex.newAbstractToken(lexeme)
 

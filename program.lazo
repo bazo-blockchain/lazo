@@ -1,7 +1,7 @@
 hello world
 bye world
 123 efv
-"string"
+"text"
 'c'
 contract
 :
@@ -9,3 +9,4 @@ contract
 ==
 =
 &&
+int a = b
