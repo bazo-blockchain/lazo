@@ -11,3 +11,4 @@ contract
 int a = b
 "test \n test\""
 '\n'
+=

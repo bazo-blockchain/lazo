@@ -275,15 +275,16 @@ func (lex *Lexer) readCharacter() token.Token {
 }
 
 func (lex *Lexer) nextChar() {
-	char, _, err := lex.reader.ReadRune()
-
-	if  err != nil {
+	if char, _, err := lex.reader.ReadRune(); err != nil {
+		lex.current = '0'
 		if err == io.EOF {
 			lex.EOF = true
 		} else {
 			log.Fatal(err)
 		}
 	} else {
+		lex.current = char
+
 		if char == '\n' {
 			lex.currentPos.NextLine()
 		} else {
@@ -291,7 +292,7 @@ func (lex *Lexer) nextChar() {
 		}
 	}
 
-	lex.current = char
+
 }
 
 func (lex *Lexer) peekChar() (rune, error) {
