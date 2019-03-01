@@ -31,16 +31,14 @@ func (tester *lexerTester) assertTotal(total int) {
 	assert.Equal(tester.t, len(tester.tokens), total)
 }
 
-func (tester *lexerTester) assertInteger(tokenIndex int, value *big.Int){
-	tok, ok := tester.tokens[tokenIndex].(*token.IntegerToken)
-
-	assert.Equal(tester.t, ok, true)
-	assert.Equal(tester.t, tok.Value.Cmp(value) == 0, true)
+func (tester *lexerTester) assertInteger(index int, value *big.Int){
+	token.AssertInteger(tester.t, tester.tokens[index], value)
 }
 
-func (tester *lexerTester) assertIdentifer(tokenIndex int, value string) {
-	tok, ok := tester.tokens[tokenIndex].(*token.IdentifierToken)
+func (tester *lexerTester) assertIdentifer(index int, value string) {
+	token.AssertIdentifier(tester.t, tester.tokens[index], value)
+}
 
-	assert.Equal(tester.t, ok, true)
-	assert.Equal(tester.t, tok.Literal(), value)
+func (tester *lexerTester) assertError(index int, value string) {
+	token.AssertError(tester.t, tester.tokens[index], value)
 }

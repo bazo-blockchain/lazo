@@ -52,10 +52,27 @@ func (lex *Lexer) skipWhiteSpace() {
 }
 
 func (lex *Lexer) readInteger() token.Token {
-	// TODO: Hex Numbers
-	lexeme := lex.readLexeme(lex.isDigit)
+	var lexeme string
 	value := new(big.Int)
-	value, ok := value.SetString(lexeme, 10)
+	var ok bool
+	var isHex bool
+
+	peekChar, peekError := lex.peekChar()
+	if lex.isChar('0') &&
+		(peekChar == 'x' || peekChar == 'X') && peekError == nil {
+		// skip 0x
+		lex.nextChar()
+		lex.nextChar()
+
+		lexeme = lex.readLexeme(lex.isHexDigit)
+		value, ok = value.SetString(lexeme, 16)
+		isHex = true
+
+		lexeme = "0x" + lexeme
+	} else {
+		lexeme = lex.readLexeme(lex.isDigit)
+		value, ok = value.SetString(lexeme, 10)
+	}
 
 	abstractToken := lex.newAbstractToken(lexeme)
 	if !ok {
@@ -65,6 +82,7 @@ func (lex *Lexer) readInteger() token.Token {
 	return &token.IntegerToken{
 		AbstractToken: abstractToken,
 		Value: value,
+		IsHex: isHex,
 	}
 }
 
@@ -224,7 +242,19 @@ func (lex *Lexer) nextChar() {
 	lex.current = char
 }
 
+func (lex *Lexer) peekChar() (rune, error) {
+	char, _, readError := lex.reader.ReadRune()
+
+	if readError == nil {
+		unreadError := lex.reader.UnreadRune()
+		return char, unreadError
+	} else {
+		return char, readError
+	}
+}
+
 // Helpers
+// -----------------------
 
 type predicate func() bool
 

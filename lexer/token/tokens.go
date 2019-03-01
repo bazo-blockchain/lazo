@@ -40,6 +40,7 @@ func (t *IdentifierToken) String() string {
 type IntegerToken struct {
 	AbstractToken
 	Value *big.Int
+	IsHex bool
 }
 
 func (t *IntegerToken) String() string {
