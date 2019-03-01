@@ -197,12 +197,14 @@ func (lex *Lexer) readString() token.Token {
 			}
 
 			buf = append(buf, escapedChar)
-			lex.nextChar()
 
 		} else {
+
 			buf = append(buf, lex.current)
-			lex.nextChar()
+
 			}
+
+		lex.nextChar()
 	}
 
 	abstractToken := lex.newAbstractToken(string(buf))
@@ -220,17 +222,42 @@ func (lex *Lexer) readString() token.Token {
 }
 
 func (lex *Lexer) readCharacter() token.Token {
-	// TODO support \n and other characters
 	// skip opening quote
 	lex.nextChar()
+	var buf []rune
 
-	lexeme := lex.readLexeme(func() bool {
-		return !lex.isChar('\'')
-	})
+	for !lex.EOF && !lex.isChar('\''){
+		// Escaping
+		if lex.isChar('\\') {
+			escapedChar := lex.current
+			lex.nextChar()
 
-	abstractToken := lex.newAbstractToken(lexeme)
+			if lex.current == 'n' {
+				escapedChar = '\n'
+			}
 
-	if len(lexeme) > 1 {
+			if lex.current == '\\' {
+				escapedChar = '\\'
+			}
+
+			if lex.current == '"' {
+				escapedChar = '"'
+			}
+
+			buf = append(buf, escapedChar)
+
+		} else {
+
+			buf = append(buf, lex.current)
+
+		}
+
+		lex.nextChar()
+	}
+
+	abstractToken := lex.newAbstractToken(string(buf))
+
+	if len(buf) > 1 {
 		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
 	}
 
