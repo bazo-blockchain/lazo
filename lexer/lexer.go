@@ -106,16 +106,16 @@ func (lex *Lexer) readName() token.Token {
 
 func (lex *Lexer) readFixToken() token.Token {
 
-	if lex.isPossibleMultiCharFixToken() {
+	// Check if the character could belong to a multi character operation
+	if symbol, ok := token.PossibleMultiCharOperation[string(lex.current)]; ok {
 		buf := []rune {lex.current}
-
-		symbol, _ := token.PossibleMultiCharOperation[string(buf)]
 
 		lex.nextChar()
 
-		if lex.isMultiCharFixToken(buf[0]) {
+		// Check if the concatenated characters really build a multi character operation
+		if multiCharSymbol, ok := token.MultiCharOperation[string(buf[0]) + string(lex.current)]; ok {
 			buf = append(buf, lex.current)
-			symbol, _ = token.MultiCharOperation[string(buf)]
+			symbol = multiCharSymbol
 			lex.nextChar()
 		}
 
@@ -127,8 +127,8 @@ func (lex *Lexer) readFixToken() token.Token {
 		}
 	}
 
-	if lex.isSingleCharFixToken() {
-		return lex.readSingleCharFixToken()
+	if symbol, ok := token.SingleCharOperations[string(lex.current)]; ok {
+		return lex.createSingleCharFixToken(symbol)
 	}
 
 	if lex.current == '&' || lex.current == '|' {
@@ -159,10 +159,8 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	}
 }
 
-func (lex *Lexer) readSingleCharFixToken() *token.FixToken {
+func (lex *Lexer) createSingleCharFixToken(symbol token.Symbol) *token.FixToken {
 	lexeme := string(lex.current)
-
-	symbol, _ := token.SingleCharOperations[lexeme]
 
 	lex.nextChar()
 
@@ -329,23 +327,6 @@ func (lex *Lexer) isLetter() bool {
 
 func (lex *Lexer) isDigit() bool {
 	return lex.current >= '0' && lex.current <= '9'
-}
-
-// -----TODO Fix Duplicate Code ------
-func (lex *Lexer) isSingleCharFixToken() bool {
-	_, ok := token.SingleCharOperations[string(lex.current)]
-	return ok
-}
-
-func (lex *Lexer) isPossibleMultiCharFixToken() bool {
-	_, ok := token.PossibleMultiCharOperation[string(lex.current)]
-	return ok
-}
-// ------------------------------------
-
-func (lex *Lexer) isMultiCharFixToken(char rune) bool {
-	_, ok := token.MultiCharOperation[string(char) + string(lex.current)]
-	return ok
 }
 
 func (lex *Lexer) isHexDigit() bool {
