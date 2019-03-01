@@ -127,8 +127,15 @@ func (lex *Lexer) readFixToken() token.Token {
 		}
 	}
 
+	// Check if the character is a single character operator
 	if symbol, ok := token.SingleCharOperations[string(lex.current)]; ok {
-		return lex.createSingleCharFixToken(symbol)
+
+		lex.nextChar()
+
+		return &token.FixToken{
+			AbstractToken: lex.newAbstractToken(string(lex.current)),
+			Value: symbol,
+		}
 	}
 
 	if lex.current == '&' || lex.current == '|' {
@@ -159,53 +166,15 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	}
 }
 
-func (lex *Lexer) createSingleCharFixToken(symbol token.Symbol) *token.FixToken {
-	lexeme := string(lex.current)
-
-	lex.nextChar()
-
-	return &token.FixToken{
-		AbstractToken: lex.newAbstractToken(lexeme),
-		Value: symbol,
-	}
-}
-
 func (lex *Lexer) readString() token.Token {
 	// skip opening double quote
 	lex.nextChar()
 
-	var buf []rune
+	lexeme := lex.readEscapedLexeme(func() bool {
+		return !lex.isChar('"')
+	})
 
-	for !lex.EOF && !lex.isChar('"'){
-		// Escaping
-		if lex.isChar('\\') {
-			escapedChar := lex.current
-			lex.nextChar()
-
-			if lex.current == 'n' {
-				escapedChar = '\n'
-			}
-
-			if lex.current == '\\' {
-				escapedChar = '\\'
-			}
-
-			if lex.current == '"' {
-				escapedChar = '"'
-			}
-
-			buf = append(buf, escapedChar)
-
-		} else {
-
-			buf = append(buf, lex.current)
-
-			}
-
-		lex.nextChar()
-	}
-
-	abstractToken := lex.newAbstractToken(string(buf))
+	abstractToken := lex.newAbstractToken(lexeme)
 
 	if lex.isChar('"') {
 		// skip closing double quote
@@ -222,40 +191,14 @@ func (lex *Lexer) readString() token.Token {
 func (lex *Lexer) readCharacter() token.Token {
 	// skip opening quote
 	lex.nextChar()
-	var buf []rune
 
-	for !lex.EOF && !lex.isChar('\''){
-		// Escaping
-		if lex.isChar('\\') {
-			escapedChar := lex.current
-			lex.nextChar()
+	lexeme := lex.readEscapedLexeme(func() bool {
+		return !lex.isChar('\'')
+	})
 
-			if lex.current == 'n' {
-				escapedChar = '\n'
-			}
+	abstractToken := lex.newAbstractToken(lexeme)
 
-			if lex.current == '\\' {
-				escapedChar = '\\'
-			}
-
-			if lex.current == '"' {
-				escapedChar = '"'
-			}
-
-			buf = append(buf, escapedChar)
-
-		} else {
-
-			buf = append(buf, lex.current)
-
-		}
-
-		lex.nextChar()
-	}
-
-	abstractToken := lex.newAbstractToken(string(buf))
-
-	if len(buf) > 1 {
+	if len(lexeme) > 1 {
 		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
 	}
 
@@ -314,6 +257,41 @@ func (lex *Lexer) readLexeme(pred predicate) string {
 
 	for !lex.EOF && pred() {
 		buf = append(buf, lex.current)
+		lex.nextChar()
+	}
+
+	return string(buf)
+}
+
+func (lex *Lexer) readEscapedLexeme(pred predicate) string {
+	var buf []rune
+
+	for !lex.EOF && pred(){
+		// Escaping
+		if lex.isChar('\\') {
+			escapedChar := lex.current
+			lex.nextChar()
+
+			if lex.current == 'n' {
+				escapedChar = '\n'
+			}
+
+			if lex.current == '\\' {
+				escapedChar = '\\'
+			}
+
+			if lex.current == '"' {
+				escapedChar = '"'
+			}
+
+			buf = append(buf, escapedChar)
+
+		} else {
+
+			buf = append(buf, lex.current)
+
+		}
+
 		lex.nextChar()
 	}
 
