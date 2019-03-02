@@ -138,6 +138,36 @@ func (lex *Lexer) readString() token.Token {
 	}
 }
 
+func (lex *Lexer) readCharacter() token.Token {
+	// skip opening quote
+	lex.nextChar()
+
+	lexeme, err := lex.readEscapedLexeme(func() bool {
+		return !lex.isChar('\'')
+	}, allowedCharEscapedCodes)
+
+	abstractToken := lex.newAbstractToken(lexeme)
+	if err != nil {
+		return lex.newErrorToken(abstractToken, err.Error())
+	}
+
+	if len(lexeme) > 1 {
+		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
+	}
+
+	if lex.isChar('\'') {
+		// skip closing quote
+		lex.nextChar()
+
+		return &token.CharacterToken{
+			AbstractToken: abstractToken,
+			Value:         []rune(lexeme)[0],
+		}
+	} else {
+		return lex.newErrorToken(abstractToken, "Character not closed")
+	}
+}
+
 func (lex *Lexer) readFixToken() token.Token {
 
 	// Check if the character could belong to a multi character operation
@@ -198,37 +228,6 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	} else {
 		return lex.newErrorToken(abstractToken, "Unknown Symbol")
 	}
-}
-
-func (lex *Lexer) readCharacter() token.Token {
-	// skip opening quote
-	lex.nextChar()
-
-	lexeme, err := lex.readEscapedLexeme(func() bool {
-		return !lex.isChar('\'')
-	}, allowedCharEscapedCodes)
-
-	abstractToken := lex.newAbstractToken(lexeme)
-	if err != nil {
-		return lex.newErrorToken(abstractToken, err.Error())
-	}
-
-	if len(lexeme) > 1 {
-		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
-	}
-
-	if lex.isChar('\'') {
-		// skip closing quote
-		lex.nextChar()
-
-		return &token.CharacterToken{
-			AbstractToken: abstractToken,
-			Value:         []rune(lexeme)[0],
-		}
-	} else {
-		return lex.newErrorToken(abstractToken, "Character not closed")
-	}
-
 }
 
 func (lex *Lexer) nextChar() {
@@ -311,11 +310,11 @@ func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string
 				if escapedChar, ok := escapedChars[charToEscape]; ok {
 					buf = append(buf, escapedChar)
 				} else {
-					panic(fmt.Sprintf("No escaped character is found for %c", charToEscape))
+					panic(fmt.Sprintf("No escape code is found for %c", charToEscape))
 				}
 			} else {
 				lex.nextChar()
-				return string(buf), errors.New(fmt.Sprintf("Escape char %c is not allowed", charToEscape))
+				return string(buf), errors.New(fmt.Sprintf("Escape code %c is not allowed", charToEscape))
 			}
 		} else {
 			buf = append(buf, lex.current)

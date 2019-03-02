@@ -12,3 +12,4 @@ int a = b
 "new \n line\""
 '\n'
 =
+'\"'

@@ -166,7 +166,7 @@ func TestBackslashCharacter(t *testing.T) {
 	tester.assertCharacter(0, '\\')
 }
 
-func TestQuoteCharacter(t *testing.T) {
+func TestSingleQuoteCharacter(t *testing.T) {
 	tester := newLexerTesterFromInput(t, "'\\''")
 	tester.assertCharacter(0, '\'')
 }
@@ -174,6 +174,16 @@ func TestQuoteCharacter(t *testing.T) {
 func TestNewlineCharacter(t *testing.T) {
 	tester := newLexerTesterFromInput(t, "'\n'")
 	tester.assertCharacter(0, '\n')
+}
+
+func TestEmptyCharacter(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "'\\0'")
+	tester.assertCharacter(0, 0)
+}
+
+func TestCharacterWithInvalidEscape(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `'\"'`)
+	tester.assertError(0, "")
 }
 
 func TestInvalidCharacter(t *testing.T) {
