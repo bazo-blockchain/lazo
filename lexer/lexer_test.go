@@ -1,18 +1,29 @@
 package lexer
 
 import (
+	"bufio"
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"gotest.tools/assert"
 	"math/big"
+	"strings"
 	"testing"
 )
 
-func TestEmptySource(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "")
+func TestEmptyCode(t *testing.T) {
+	lex := New(bufio.NewReader(strings.NewReader("")))
 
-	tester.assertTotal(0)
-	assert.Equal(t, tester.lex.IsEnd, true)
-	assert.Equal(t, tester.lex.current, int32(0))
-	assert.Equal(t, tester.lex.currentPos.String(), "1:0")
+	// initial state without reading the token
+	assert.Equal(t, lex.IsEnd, true)
+	assert.Equal(t, lex.current, int32(0))
+	assert.Equal(t, lex.currentPos.String(), "1:0")
+
+	tok := lex.NextToken()
+	token.AssertFixToken(t, tok, token.EOF)
+
+	// it shouldn't have changed the initial lexer state
+	assert.Equal(t, lex.IsEnd, true)
+	assert.Equal(t, lex.current, int32(0))
+	assert.Equal(t, lex.currentPos.String(), "1:0")
 }
 
 // Integer Tokens

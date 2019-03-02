@@ -27,6 +27,13 @@ func AssertCharacter(t *testing.T, token Token, value rune) {
 	assert.Equal(t, tok.Value, value)
 }
 
+func AssertFixToken(t *testing.T, token Token, value Symbol) {
+	tok, ok := token.(*FixToken)
+
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Value, value)
+}
+
 func AssertError(t *testing.T, token Token, value string) {
 	tok, ok := token.(*ErrorToken)
 

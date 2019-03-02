@@ -3,7 +3,9 @@ package token
 type Symbol int
 
 const (
-	Addition Symbol = iota
+	EOF Symbol = iota
+
+	Addition
 	Subtraction
 	Division
 	Multiplication

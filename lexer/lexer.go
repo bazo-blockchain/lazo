@@ -27,6 +27,13 @@ func New(reader *bufio.Reader) *Lexer {
 func (lex *Lexer) NextToken() token.Token {
 	lex.skipWhiteSpace()
 
+	if lex.IsEnd {
+		return &token.FixToken{
+			AbstractToken: lex.newAbstractToken(""),
+			Value:         token.EOF,
+		}
+	}
+
 	if lex.isDigit() {
 		return lex.readInteger()
 	}
@@ -84,7 +91,6 @@ func (lex *Lexer) readInteger() token.Token {
 		Value:         value,
 		IsHex:         isHex,
 	}
-	}
 }
 
 func (lex *Lexer) readName() token.Token {
@@ -120,7 +126,7 @@ func (lex *Lexer) readFixToken() token.Token {
 			lex.nextChar()
 		}
 
-		abstractToken :=   lex.newAbstractToken(string(buf))
+		abstractToken := lex.newAbstractToken(string(buf))
 
 		return &token.FixToken{
 			AbstractToken: abstractToken,
