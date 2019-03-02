@@ -9,21 +9,38 @@ import (
 	"testing"
 )
 
-func TestEmptyCode(t *testing.T) {
+func TestStateWithoutCode(t *testing.T) {
 	lex := New(bufio.NewReader(strings.NewReader("")))
 
 	// initial state without reading the token
-	assert.Equal(t, lex.IsEnd, true)
-	assert.Equal(t, lex.current, int32(0))
-	assert.Equal(t, lex.currentPos.String(), "1:0")
+	assertLexerState(t, lex, true, 0, "1:0")
 
 	tok := lex.NextToken()
 	token.AssertFixToken(t, tok, token.EOF)
 
 	// it shouldn't have changed the initial lexer state
-	assert.Equal(t, lex.IsEnd, true)
-	assert.Equal(t, lex.current, int32(0))
-	assert.Equal(t, lex.currentPos.String(), "1:0")
+	assertLexerState(t, lex, true, 0, "1:0")
+}
+
+func TestStateWithCode(t *testing.T) {
+	lex := New(bufio.NewReader(strings.NewReader("test")))
+
+	// initial state without reading the token
+	assertLexerState(t, lex, false, 't', "1:1")
+
+	tok := lex.NextToken()
+	token.AssertIdentifier(t, tok, "test")
+	assertLexerState(t, lex, true, 0, "1:4")
+
+	tok = lex.NextToken()
+	token.AssertFixToken(t, tok, token.EOF)
+	assertLexerState(t, lex, true, 0, "1:4")
+}
+
+func assertLexerState(t *testing.T, lex *Lexer, isEnd bool, current rune, pos string) {
+	assert.Equal(t, lex.IsEnd, isEnd)
+	assert.Equal(t, lex.current, current)
+	assert.Equal(t, lex.currentPos.String(), pos)
 }
 
 // Integer Tokens
