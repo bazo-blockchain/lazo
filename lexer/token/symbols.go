@@ -43,15 +43,15 @@ const (
 	Function
 )
 
-var Keywords = map[string]Symbol {
+var Keywords = map[string]Symbol{
 	"contract": Contract,
-	"return": Return,
-	"if": If,
-	"else": Else,
+	"return":   Return,
+	"if":       If,
+	"else":     Else,
 	"function": Function,
 }
 
-var SingleCharOperations = map[string]Symbol {
+var SingleCharOperations = map[string]Symbol{
 	":": Colon,
 	",": Comma,
 	".": Period,
@@ -68,22 +68,21 @@ var SingleCharOperations = map[string]Symbol {
 	"%": Modulo,
 }
 
-var PossibleMultiCharOperation = map[string]Symbol {
+var PossibleMultiCharOperation = map[string]Symbol{
 	"=": Assign,
 	">": Greater,
 	"<": Less,
 	"!": Not,
 }
 
-var LogicalOperation = map[string]Symbol {
+var LogicalOperation = map[string]Symbol{
 	"&&": And,
 	"||": Or,
 }
 
-var MultiCharOperation = map[string]Symbol {
+var MultiCharOperation = map[string]Symbol{
 	"==": Equal,
 	"!=": Unequal,
 	">=": GreaterEqual,
 	"<=": LessEqual,
 }
-

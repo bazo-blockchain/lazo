@@ -17,7 +17,7 @@ type lexerTestUtil struct {
 
 func newLexerTesterFromInput(t *testing.T, input string) *lexerTestUtil {
 	tester := &lexerTestUtil{
-		t: t,
+		t:   t,
 		lex: New(bufio.NewReader(strings.NewReader(input))),
 	}
 
@@ -31,7 +31,7 @@ func (tester *lexerTestUtil) assertTotal(total int) {
 	assert.Equal(tester.t, len(tester.tokens), total)
 }
 
-func (tester *lexerTestUtil) assertInteger(index int, value *big.Int){
+func (tester *lexerTestUtil) assertInteger(index int, value *big.Int) {
 	token.AssertInteger(tester.t, tester.tokens[index], value)
 }
 

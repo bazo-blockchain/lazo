@@ -120,7 +120,7 @@ func (lex *Lexer) readFixToken() token.Token {
 			lex.nextChar()
 		}
 
-		abstractToken := lex.newAbstractToken(string(buf))
+		abstractToken :=   lex.newAbstractToken(string(buf))
 
 		return &token.FixToken{
 			AbstractToken: abstractToken,
