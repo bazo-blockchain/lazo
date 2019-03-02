@@ -39,6 +39,10 @@ func (tester *lexerTestUtil) assertIdentifer(index int, value string) {
 	token.AssertIdentifier(tester.t, tester.tokens[index], value)
 }
 
+func (tester *lexerTestUtil) assertString(index int, value string) {
+	token.AssertString(tester.t, tester.tokens[index], value)
+}
+
 func (tester *lexerTestUtil) assertCharacter(index int, value rune) {
 	token.AssertCharacter(tester.t, tester.tokens[index], value)
 }

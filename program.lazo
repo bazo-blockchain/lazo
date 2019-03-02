@@ -9,6 +9,6 @@ contract
 =
 &&
 int a = b
-"test \n test\""
+"new \n line\""
 '\n'
 =

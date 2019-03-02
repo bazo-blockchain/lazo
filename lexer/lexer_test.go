@@ -102,6 +102,52 @@ func TestValidIdentifers(t *testing.T) {
 	}
 }
 
+
+// String Tokens
+// -------------
+
+func TestEmptyString(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `""`)
+
+	tester.assertTotal(1)
+	tester.assertString(0, "")
+}
+
+func TestStrings(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `"test" "test2"`)
+
+	tester.assertTotal(2)
+	tester.assertString(0, "test")
+	tester.assertString(1, "test2")
+}
+
+func TestStringWithEscapedChars(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `
+		"new \n line"
+		"double quote \""
+		"backslash \\"`)
+
+	tester.assertTotal(3)
+	tester.assertString(0, "new \n line")
+	tester.assertString(1, "double quote \"")
+	tester.assertString(2, "backslash \\")
+}
+
+func TestStringWithNotAllowedEscapeChars(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `"single quote \' "`)
+
+	tester.assertTotal(2)
+	tester.assertError(0, "single quote ")
+	tester.assertError(1, "")
+}
+
+func TestNotClosedString(t *testing.T) {
+	tester := newLexerTesterFromInput(t, `"not closed`)
+
+	tester.assertTotal(1)
+	tester.assertError(0, "not closed")
+}
+
 // Character Tokens
 // ----------------
 func TestCharacter(t *testing.T) {
@@ -134,9 +180,6 @@ func TestInvalidCharacter(t *testing.T) {
 	tester := newLexerTesterFromInput(t, "'cc'")
 	tester.assertError(0, "cc")
 }
-
-// String Tokens
-// -------------
 
 // Fix Tokens
 // ----------------

@@ -20,6 +20,13 @@ func AssertIdentifier(t *testing.T, token Token, value string) {
 	assert.Equal(t, tok.Literal(), value)
 }
 
+func AssertString(t *testing.T, token Token, value string) {
+	tok, ok := token.(*StringToken)
+
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Literal(), value)
+}
+
 func AssertCharacter(t *testing.T, token Token, value rune) {
 	tok, ok := token.(*CharacterToken)
 

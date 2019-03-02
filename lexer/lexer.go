@@ -2,6 +2,8 @@ package lexer
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"io"
 	"log"
@@ -111,6 +113,31 @@ func (lex *Lexer) readName() token.Token {
 	}
 }
 
+func (lex *Lexer) readString() token.Token {
+	// skip opening double quote
+	lex.nextChar()
+
+	lexeme, err := lex.readEscapedLexeme(func() bool {
+		return !lex.isChar('"')
+	}, allowedStringEscapedCodes)
+
+	abstractToken := lex.newAbstractToken(lexeme)
+	if err != nil {
+		return lex.newErrorToken(abstractToken, err.Error())
+	}
+
+	if lex.isChar('"') {
+		// skip closing double quote
+		lex.nextChar()
+
+		return &token.StringToken{
+			AbstractToken: abstractToken,
+		}
+	} else {
+		return lex.newErrorToken(abstractToken, "String not closed")
+	}
+}
+
 func (lex *Lexer) readFixToken() token.Token {
 
 	// Check if the character could belong to a multi character operation
@@ -173,37 +200,18 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	}
 }
 
-func (lex *Lexer) readString() token.Token {
-	// skip opening double quote
-	lex.nextChar()
-
-	lexeme := lex.readEscapedLexeme(func() bool {
-		return !lex.isChar('"')
-	})
-
-	abstractToken := lex.newAbstractToken(lexeme)
-
-	if lex.isChar('"') {
-		// skip closing double quote
-		lex.nextChar()
-
-		return &token.StringToken{
-			AbstractToken: abstractToken,
-		}
-	} else {
-		return lex.newErrorToken(abstractToken, "String not closed")
-	}
-}
-
 func (lex *Lexer) readCharacter() token.Token {
 	// skip opening quote
 	lex.nextChar()
 
-	lexeme := lex.readEscapedLexeme(func() bool {
+	lexeme, err := lex.readEscapedLexeme(func() bool {
 		return !lex.isChar('\'')
-	})
+	}, allowedCharEscapedCodes)
 
 	abstractToken := lex.newAbstractToken(lexeme)
+	if err != nil {
+		return lex.newErrorToken(abstractToken, err.Error())
+	}
 
 	if len(lexeme) > 1 {
 		return lex.newErrorToken(abstractToken, "Characters cannot contain more than one symbol")
@@ -270,43 +278,53 @@ func (lex *Lexer) readLexeme(pred predicate) string {
 	return string(buf)
 }
 
-func (lex *Lexer) readEscapedLexeme(pred predicate) string {
+func contains(s []rune, r rune) bool{
+	for _, c := range s {
+		if c == r {
+			return true
+		}
+	}
+	return false
+}
+
+var allowedCharEscapedCodes = []rune{'0', 'n', '\'', '\\'}
+var allowedStringEscapedCodes = []rune{'n', '"', '\\'}
+
+var escapedChars = map[rune]rune{
+	'0': 0,
+	'n': '\n',
+	'\'': '\'',
+	'\\': '\\',
+	'"': '"',
+}
+
+func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string, error) {
 	var buf []rune
 
 	for !lex.IsEnd && pred() {
-		// Escaping
+		// Escape codes
 		if lex.isChar('\\') {
-			escapedChar := lex.current
 			lex.nextChar()
+			charToEscape := lex.current
 
-			if lex.current == 'n' {
-				escapedChar = '\n'
+			if contains(allowedCodes, charToEscape) {
+				if escapedChar, ok := escapedChars[charToEscape]; ok {
+					buf = append(buf, escapedChar)
+				} else {
+					panic(fmt.Sprintf("No escaped character is found for %c", charToEscape))
+				}
+			} else {
+				lex.nextChar()
+				return string(buf), errors.New(fmt.Sprintf("Escape char %c is not allowed", charToEscape))
 			}
-
-			if lex.current == '\\' {
-				escapedChar = '\\'
-			}
-
-			if lex.current == '"' {
-				escapedChar = '"'
-			}
-
-			if lex.current == '\'' {
-				escapedChar = '\''
-			}
-
-			buf = append(buf, escapedChar)
-
 		} else {
-
 			buf = append(buf, lex.current)
-
 		}
 
 		lex.nextChar()
 	}
 
-	return string(buf)
+	return string(buf), nil
 }
 
 func (lex *Lexer) isLetter() bool {
