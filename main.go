@@ -22,7 +22,7 @@ func compile(sourceFile string) {
 	check(err)
 
 	lexer := lexer.New(bufio.NewReader(file))
-	for !lexer.EOF {
+	for !lexer.IsEnd {
 		tok := lexer.NextToken()
 		fmt.Printf("%s \n", tok)
 	}

@@ -12,12 +12,12 @@ type Lexer struct {
 	reader     *bufio.Reader
 	current    rune
 	currentPos token.Position
-	EOF        bool
+	IsEnd      bool
 }
 
 func New(reader *bufio.Reader) *Lexer {
 	lex := &Lexer{
-		reader: reader,
+		reader:     reader,
 		currentPos: token.NewPosition(),
 	}
 	lex.nextChar()
@@ -46,7 +46,7 @@ func (lex *Lexer) NextToken() token.Token {
 }
 
 func (lex *Lexer) skipWhiteSpace() {
-	for !lex.EOF && lex.current <= ' ' {
+	for !lex.IsEnd && lex.current <= ' ' {
 		lex.nextChar()
 	}
 }
@@ -81,8 +81,9 @@ func (lex *Lexer) readInteger() token.Token {
 
 	return &token.IntegerToken{
 		AbstractToken: abstractToken,
-		Value: value,
-		IsHex: isHex,
+		Value:         value,
+		IsHex:         isHex,
+	}
 	}
 }
 
@@ -108,12 +109,12 @@ func (lex *Lexer) readFixToken() token.Token {
 
 	// Check if the character could belong to a multi character operation
 	if symbol, ok := token.PossibleMultiCharOperation[string(lex.current)]; ok {
-		buf := []rune {lex.current}
+		buf := []rune{lex.current}
 
 		lex.nextChar()
 
 		// Check if the concatenated characters really build a multi character operation
-		if multiCharSymbol, ok := token.MultiCharOperation[string(buf[0]) + string(lex.current)]; ok {
+		if multiCharSymbol, ok := token.MultiCharOperation[string(buf[0])+string(lex.current)]; ok {
 			buf = append(buf, lex.current)
 			symbol = multiCharSymbol
 			lex.nextChar()
@@ -123,7 +124,7 @@ func (lex *Lexer) readFixToken() token.Token {
 
 		return &token.FixToken{
 			AbstractToken: abstractToken,
-			Value: symbol,
+			Value:         symbol,
 		}
 	}
 
@@ -134,7 +135,7 @@ func (lex *Lexer) readFixToken() token.Token {
 
 		return &token.FixToken{
 			AbstractToken: lex.newAbstractToken(string(lex.current)),
-			Value: symbol,
+			Value:         symbol,
 		}
 	}
 
@@ -159,7 +160,7 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 
 		return &token.FixToken{
 			AbstractToken: abstractToken,
-			 Value: symbol,
+			Value:         symbol,
 		}
 	} else {
 		return lex.newErrorToken(abstractToken, "Unknown Symbol")
@@ -208,7 +209,7 @@ func (lex *Lexer) readCharacter() token.Token {
 
 		return &token.CharacterToken{
 			AbstractToken: abstractToken,
-			Value: []rune(lexeme)[0],
+			Value:         []rune(lexeme)[0],
 		}
 	} else {
 		return lex.newErrorToken(abstractToken, "Character not closed")
@@ -218,9 +219,9 @@ func (lex *Lexer) readCharacter() token.Token {
 
 func (lex *Lexer) nextChar() {
 	if char, _, err := lex.reader.ReadRune(); err != nil {
-		lex.current = '0'
+		lex.current = 0
 		if err == io.EOF {
-			lex.EOF = true
+			lex.IsEnd = true
 		} else {
 			log.Fatal(err)
 		}
@@ -233,7 +234,6 @@ func (lex *Lexer) nextChar() {
 			lex.currentPos.MoveRight()
 		}
 	}
-
 
 }
 
@@ -256,7 +256,7 @@ type predicate func() bool
 func (lex *Lexer) readLexeme(pred predicate) string {
 	var buf []rune
 
-	for !lex.EOF && pred() {
+	for !lex.IsEnd && pred() {
 		buf = append(buf, lex.current)
 		lex.nextChar()
 	}
@@ -267,7 +267,7 @@ func (lex *Lexer) readLexeme(pred predicate) string {
 func (lex *Lexer) readEscapedLexeme(pred predicate) string {
 	var buf []rune
 
-	for !lex.EOF && pred(){
+	for !lex.IsEnd && pred() {
 		// Escaping
 		if lex.isChar('\\') {
 			escapedChar := lex.current
@@ -314,8 +314,8 @@ func (lex *Lexer) isDigit() bool {
 
 func (lex *Lexer) isHexDigit() bool {
 	return lex.isDigit() ||
-		lex.current >='a' && lex.current <='f' ||
-		lex.current >= 'A' && lex.current <='F'
+		lex.current >= 'a' && lex.current <= 'f' ||
+		lex.current >= 'A' && lex.current <= 'F'
 }
 
 func (lex *Lexer) isChar(char rune) bool {
@@ -323,15 +323,15 @@ func (lex *Lexer) isChar(char rune) bool {
 }
 
 func (lex *Lexer) newAbstractToken(lexeme string) token.AbstractToken {
-	return token.AbstractToken {
+	return token.AbstractToken{
 		Position: lex.currentPos,
-		Lexeme: lexeme,
+		Lexeme:   lexeme,
 	}
 }
 
 func (lex *Lexer) newErrorToken(abstractToken token.AbstractToken, msg string) *token.ErrorToken {
-	return &token.ErrorToken {
+	return &token.ErrorToken{
 		AbstractToken: abstractToken,
-		Msg: msg,
+		Msg:           msg,
 	}
 }

@@ -1,9 +1,19 @@
 package lexer
 
 import (
+	"gotest.tools/assert"
 	"math/big"
 	"testing"
 )
+
+func TestEmptySource(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "")
+
+	tester.assertTotal(0)
+	assert.Equal(t, tester.lex.IsEnd, true)
+	assert.Equal(t, tester.lex.current, int32(0))
+	assert.Equal(t, tester.lex.currentPos.String(), "1:0")
+}
 
 // Integer Tokens
 // --------------
@@ -33,6 +43,16 @@ func TestInvalidHex(t *testing.T) {
 	tester.assertTotal(2)
 	tester.assertError(0, "0x")
 	tester.assertIdentifer(1, "g")
+}
+
+func TestMixedIntegers(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "123abc 0XAFG")
+
+	tester.assertTotal(4)
+	tester.assertInteger(0, big.NewInt(123))
+	tester.assertIdentifer(1, "abc")
+	tester.assertInteger(2, big.NewInt(0xaf))
+	tester.assertIdentifer(3, "G")
 }
 
 // Identifier Tokens
