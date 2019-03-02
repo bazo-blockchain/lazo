@@ -43,6 +43,10 @@ func (tester *lexerTestUtil) assertCharacter(index int, value rune) {
 	token.AssertCharacter(tester.t, tester.tokens[index], value)
 }
 
+func (tester *lexerTestUtil) assertFixToken(index int, value token.Symbol) {
+	token.AssertFixToken(tester.t, tester.tokens[index], value)
+}
+
 func (tester *lexerTestUtil) assertError(index int, value string) {
 	token.AssertError(tester.t, tester.tokens[index], value)
 }

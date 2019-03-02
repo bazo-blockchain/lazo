@@ -140,3 +140,13 @@ func TestInvalidCharacter(t *testing.T) {
 
 // Fix Tokens
 // ----------------
+
+func TestReservedKeyword(t *testing.T) {
+	tester := newLexerTesterFromInput(t, "contract Contract if IF")
+
+	tester.assertTotal(4)
+	tester.assertFixToken(0, token.Contract)
+	tester.assertIdentifer(1, "Contract")
+	tester.assertFixToken(2, token.If)
+	tester.assertIdentifer(3, "IF")
+}
