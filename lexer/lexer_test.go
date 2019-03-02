@@ -47,7 +47,7 @@ func assertLexerState(t *testing.T, lex *Lexer, isEnd bool, current rune, pos st
 // --------------
 
 func TestDecimalDigits(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "0 001 456")
+	tester := newLexerTestUtil(t, "0 001 456")
 
 	tester.assertTotal(3)
 	tester.assertInteger(0, big.NewInt(0))
@@ -56,7 +56,7 @@ func TestDecimalDigits(t *testing.T) {
 }
 
 func TestHexDigits(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "0x123 0xaf 0x123af")
+	tester := newLexerTestUtil(t, "0x123 0xaf 0x123af")
 
 	tester.assertTotal(3)
 	tester.assertInteger(0, big.NewInt(0x123))
@@ -66,7 +66,7 @@ func TestHexDigits(t *testing.T) {
 }
 
 func TestInvalidHex(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "0xg")
+	tester := newLexerTestUtil(t, "0xg")
 
 	tester.assertTotal(2)
 	tester.assertError(0, "0x")
@@ -74,7 +74,7 @@ func TestInvalidHex(t *testing.T) {
 }
 
 func TestMixedIntegers(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "123abc 0XAFG")
+	tester := newLexerTestUtil(t, "123abc 0XAFG")
 
 	tester.assertTotal(4)
 	tester.assertInteger(0, big.NewInt(123))
@@ -87,7 +87,7 @@ func TestMixedIntegers(t *testing.T) {
 // -----------------
 
 func TestValidIdentifers(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "id test three3 under_score4 _5five")
+	tester := newLexerTestUtil(t, "id test three3 under_score4 _5five")
 	expectedIds := []string{
 		"id",
 		"test",
@@ -102,19 +102,18 @@ func TestValidIdentifers(t *testing.T) {
 	}
 }
 
-
 // String Tokens
 // -------------
 
 func TestEmptyString(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `""`)
+	tester := newLexerTestUtil(t, `""`)
 
 	tester.assertTotal(1)
 	tester.assertString(0, "")
 }
 
 func TestStrings(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `"test" "test2"`)
+	tester := newLexerTestUtil(t, `"test" "test2"`)
 
 	tester.assertTotal(2)
 	tester.assertString(0, "test")
@@ -122,7 +121,7 @@ func TestStrings(t *testing.T) {
 }
 
 func TestStringWithEscapedChars(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `
+	tester := newLexerTestUtil(t, `
 		"new \n line"
 		"double quote \""
 		"backslash \\"`)
@@ -134,7 +133,7 @@ func TestStringWithEscapedChars(t *testing.T) {
 }
 
 func TestStringWithNotAllowedEscapeChars(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `"single quote \' "`)
+	tester := newLexerTestUtil(t, `"single quote \' "`)
 
 	tester.assertTotal(2)
 	tester.assertError(0, "single quote ")
@@ -142,7 +141,7 @@ func TestStringWithNotAllowedEscapeChars(t *testing.T) {
 }
 
 func TestNotClosedString(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `"not closed`)
+	tester := newLexerTestUtil(t, `"not closed`)
 
 	tester.assertTotal(1)
 	tester.assertError(0, "not closed")
@@ -151,43 +150,43 @@ func TestNotClosedString(t *testing.T) {
 // Character Tokens
 // ----------------
 func TestCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'c'")
+	tester := newLexerTestUtil(t, "'c'")
 	tester.assertCharacter(0, 'c')
 }
 
 func TestMultipleCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'c''b'")
+	tester := newLexerTestUtil(t, "'c''b'")
 	tester.assertCharacter(0, 'c')
 	tester.assertCharacter(1, 'b')
 }
 
 func TestBackslashCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'\\\\'")
+	tester := newLexerTestUtil(t, "'\\\\'")
 	tester.assertCharacter(0, '\\')
 }
 
 func TestSingleQuoteCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'\\''")
+	tester := newLexerTestUtil(t, "'\\''")
 	tester.assertCharacter(0, '\'')
 }
 
 func TestNewlineCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'\n'")
+	tester := newLexerTestUtil(t, "'\n'")
 	tester.assertCharacter(0, '\n')
 }
 
 func TestEmptyCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'\\0'")
+	tester := newLexerTestUtil(t, "'\\0'")
 	tester.assertCharacter(0, 0)
 }
 
 func TestCharacterWithInvalidEscape(t *testing.T) {
-	tester := newLexerTesterFromInput(t, `'\"'`)
+	tester := newLexerTestUtil(t, `'\"'`)
 	tester.assertError(0, "")
 }
 
 func TestInvalidCharacter(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "'cc'")
+	tester := newLexerTestUtil(t, "'cc'")
 	tester.assertError(0, "cc")
 }
 
@@ -195,7 +194,7 @@ func TestInvalidCharacter(t *testing.T) {
 // ----------------
 
 func TestReservedKeyword(t *testing.T) {
-	tester := newLexerTesterFromInput(t, "contract Contract if IF")
+	tester := newLexerTestUtil(t, "contract Contract if IF")
 
 	tester.assertTotal(4)
 	tester.assertFixToken(0, token.Contract)

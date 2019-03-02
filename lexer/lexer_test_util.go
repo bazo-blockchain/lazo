@@ -15,7 +15,7 @@ type lexerTestUtil struct {
 	tokens []token.Token
 }
 
-func newLexerTesterFromInput(t *testing.T, input string) *lexerTestUtil {
+func newLexerTestUtil(t *testing.T, input string) *lexerTestUtil {
 	tester := &lexerTestUtil{
 		t:   t,
 		lex: New(bufio.NewReader(strings.NewReader(input))),

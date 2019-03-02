@@ -277,7 +277,7 @@ func (lex *Lexer) readLexeme(pred predicate) string {
 	return string(buf)
 }
 
-func contains(s []rune, r rune) bool{
+func contains(s []rune, r rune) bool {
 	for _, c := range s {
 		if c == r {
 			return true
@@ -290,11 +290,11 @@ var allowedCharEscapedCodes = []rune{'0', 'n', '\'', '\\'}
 var allowedStringEscapedCodes = []rune{'n', '"', '\\'}
 
 var escapedChars = map[rune]rune{
-	'0': 0,
-	'n': '\n',
+	'0':  0,
+	'n':  '\n',
 	'\'': '\'',
 	'\\': '\\',
-	'"': '"',
+	'"':  '"',
 }
 
 func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string, error) {
