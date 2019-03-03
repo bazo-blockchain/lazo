@@ -31,7 +31,7 @@ type ExpressionNode interface {
 
 type ProgramNode struct {
 	AbstractNode
-	Contract ContractNode
+	Contract *ContractNode
 }
 
 func (n *ProgramNode) String() string {

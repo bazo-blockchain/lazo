@@ -1,4 +1,2 @@
 contract Test {
-    int x
-    bool b
 }

@@ -27,5 +27,5 @@ It will create an executable for the current operating system (e.g. `lazo.exe` i
 
 It will run all tests in the current directory and all of its subdirectories.
 
-To see the test coverage, `run ./scripts/test.sh` and then open the **coverage.html** file.  
+To see the test coverage, run `./scripts/test.sh` and then open the **coverage.html** file.  
 
