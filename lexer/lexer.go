@@ -14,6 +14,7 @@ type Lexer struct {
 	reader     *bufio.Reader
 	current    rune
 	currentPos token.Position
+	tokenPos   token.Position
 	IsEnd      bool
 }
 
@@ -28,6 +29,8 @@ func New(reader *bufio.Reader) *Lexer {
 
 func (lex *Lexer) NextToken() token.Token {
 	lex.skipWhiteSpace()
+
+	lex.tokenPos = lex.currentPos
 
 	if lex.IsEnd {
 		return &token.FixToken{
@@ -347,7 +350,7 @@ func (lex *Lexer) isChar(char rune) bool {
 
 func (lex *Lexer) newAbstractToken(lexeme string) token.AbstractToken {
 	return token.AbstractToken{
-		Position: lex.currentPos,
+		Position: lex.tokenPos,
 		Lexeme:   lexeme,
 	}
 }

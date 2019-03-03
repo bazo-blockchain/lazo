@@ -17,6 +17,7 @@ func TestStateWithoutCode(t *testing.T) {
 
 	tok := lex.NextToken()
 	token.AssertFixToken(t, tok, token.EOF)
+	assert.Equal(t, tok.Pos().String(), "1:0")
 
 	// it shouldn't have changed the initial lexer state
 	assertLexerState(t, lex, true, 0, "1:0")
@@ -30,10 +31,12 @@ func TestStateWithCode(t *testing.T) {
 
 	tok := lex.NextToken()
 	token.AssertIdentifier(t, tok, "test")
+	assert.Equal(t, tok.Pos().String(), "1:1")
 	assertLexerState(t, lex, true, 0, "1:4")
 
 	tok = lex.NextToken()
 	token.AssertFixToken(t, tok, token.EOF)
+	assert.Equal(t, tok.Pos().String(), "1:4")
 	assertLexerState(t, lex, true, 0, "1:4")
 }
 
