@@ -66,13 +66,12 @@ func (p *Parser) parseContract() *node.ContractNode {
 	return contract
 }
 
-func (p *Parser) parseExpression() *node.ExpressionNode {
+func (p *Parser) parseExpression() node.ExpressionNode {
 	// TODO implement
 	return nil
 }
 
-func (p *Parser) parseStatement() *node.StatementNode {
-	// TODO implement
+func (p *Parser) parseStatement() node.StatementNode {
 
 	if p.is(token.If) {
 		return p.parseIfStatement()
@@ -95,7 +94,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	return nil
 }
 
-func (p *Parser) parseStatementWithIdentifier(identifier string) *node.StatementNode{
+func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode{
 	return nil
 }
 
