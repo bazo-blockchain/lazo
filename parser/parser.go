@@ -44,11 +44,13 @@ func (p *Parser) parseContract() *node.ContractNode {
 	p.check(token.OpenBrace)
 
 	// parse variables (later: extract to parseContractBody method with other types of nodes)
-	contract.Variables = []node.VariableNode{}
+	contract.Variables = []*node.VariableNode{}
 	for !p.isEnd() && !p.is(token.CloseBrace) {
 		switch p.currentToken.(type) {
 		case *token.IdentifierToken:
 			// parse variable (or later other types of nodes)
+			contract.Variables = append(contract.Variables, p.parseVariable())
+
 		default:
 			// error
 		}
@@ -56,6 +58,25 @@ func (p *Parser) parseContract() *node.ContractNode {
 
 	p.check(token.CloseBrace)
 	return contract
+}
+
+func (p *Parser) parseVariable() *node.VariableNode {
+	variable := &node.VariableNode{
+		AbstractNode: p.newAbstractNode(),
+		Type: p.parseType(),
+		Identifier: p.readIdentifier(),
+	}
+	return variable
+}
+
+func (p * Parser) parseType() *node.TypeNode {
+	// Later we need to distinguish between an array and a simple type
+
+	typeNode := &node.TypeNode{
+		AbstractNode: p.newAbstractNode(),
+		Identifier: p.readIdentifier(),
+	}
+	return typeNode
 }
 
 func (p *Parser) nextToken() {

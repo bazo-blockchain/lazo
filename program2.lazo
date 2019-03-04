@@ -1,2 +1,4 @@
 contract Test {
+int test
+int test2
 }
