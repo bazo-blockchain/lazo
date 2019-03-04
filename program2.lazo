@@ -1,4 +1,6 @@
 contract Test {
 int test
 int test2
+
+function void test() {}
 }

@@ -77,7 +77,7 @@ func (p *Parser) parseStatement() *node.StatementNode {
 
 func (p *Parser) parseFunction() *node.FunctionNode{
 	// skip function keyword
-	p.nextToken()
+	p.check(token.Function)
 
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
