@@ -48,8 +48,20 @@ func (p *Parser) parseContract() *node.ContractNode {
 	for !p.isEnd() && !p.is(token.CloseBrace) {
 		switch p.currentToken.(type) {
 		case *token.IdentifierToken:
-			// parse variable (or later other types of nodes)
+			// TODO Implement Assignment
 			contract.Variables = append(contract.Variables, p.parseVariable())
+		case *token.FixToken:
+			// TODO Parse all types of fix tokens in a contract
+			if tok, ok := p.currentToken.(*token.FixToken); ok {
+				switch tok.Value {
+				case token.Function:
+					contract.Functions = append(contract.Functions, p.parseFunction())
+				default:
+					// error
+				}
+			} else {
+				// error
+			}
 
 		default:
 			// error
@@ -58,6 +70,21 @@ func (p *Parser) parseContract() *node.ContractNode {
 
 	p.check(token.CloseBrace)
 	return contract
+}
+
+func (p *Parser) parseExpression() *node.ExpressionNode {
+	// TODO implement
+	return nil
+}
+
+func (p *Parser) parseStatement() *node.StatementNode {
+	// TODO implement
+	return nil
+}
+
+func (p *Parser) parseFunction() *node.FunctionNode{
+	// TODO Implement
+	return nil
 }
 
 func (p *Parser) parseVariable() *node.VariableNode {

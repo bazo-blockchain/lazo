@@ -44,6 +44,7 @@ type ContractNode struct {
 	AbstractNode
 	Identifier string
 	Variables  []*VariableNode
+	Functions []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
@@ -72,6 +73,23 @@ type TypeNode struct {
 
 func (n *TypeNode) String() string {
 	return fmt.Sprintf("[%s] TYPE %s", n.Pos(), n.Identifier)
+}
+
+// --------------------------
+
+// --------------------------
+// Expression Nodes
+// --------------------------
+
+type FunctionNode struct {
+	AbstractNode
+	Identifier string
+	// TODO Add further members
+}
+
+func (n *FunctionNode) String() string {
+	// TODO Implement
+	return fmt.Sprintf("[%s] Function %s", n.Pos(), n.Identifier)
 }
 
 // --------------------------
