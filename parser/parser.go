@@ -43,30 +43,80 @@ func (p *Parser) parseContract() *node.ContractNode {
 	contract.Identifier = p.readIdentifier()
 	p.check(token.OpenBrace)
 
-	// parse variables (later: extract to parseContractBody method with other types of nodes)
-	contract.Variables = []*node.VariableNode{}
 	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
-		switch p.currentToken.(type) {
-		case *token.IdentifierToken:
-			// TODO Implement Assignment
-			contract.Variables = append(contract.Variables, p.parseVariable())
-		case *token.FixToken:
-			// TODO Parse all types of fix tokens in a contract
-			if p.isSymbol(token.Function) {
-				contract.Functions = append(contract.Functions, p.parseFunction())
-			}
-
-		default:
-			// error
-		}
+		p.parseContractBody(contract)
 	}
 
 	p.check(token.CloseBrace)
 	return contract
 }
 
+func (p *Parser) parseContractBody(contract *node.ContractNode) {
+	switch p.currentToken.(type) {
+	case *token.IdentifierToken:
+		// TODO Implement Assignment
+		contract.Variables = append(contract.Variables, p.parseVariable())
+	case *token.FixToken:
+		// TODO Parse all types of fix tokens in a contract
+		if p.isSymbol(token.Function) {
+			contract.Functions = append(contract.Functions, p.parseFunction())
+		}
+	default:
+		// error
+	}
+}
+
 func (p *Parser) parseExpression() node.ExpressionNode {
 	// TODO implement
+	return nil
+}
+
+func (p *Parser) parseFunction() *node.FunctionNode {
+	// skip function keyword
+	p.check(token.Function)
+
+	function := &node.FunctionNode{
+		AbstractNode: p.newAbstractNode(),
+		ReturnTypes:  []*node.TypeNode{},
+		Parameters:   []*node.VariableNode{},
+		Body:         []node.StatementNode{},
+	}
+
+	function.ReturnTypes = p.parseReturnTypes()
+
+	function.Identifier = p.readIdentifier()
+
+	function.Parameters = p.parseParameters()
+
+	function.Body = p.parseFunctionBody()
+
+	return function
+}
+
+// TODO Refactor: Move for loop in parseParameters and parseReturnTypes to own function
+func (p *Parser) parseParameters() []*node.VariableNode {
+	var parameters []*node.VariableNode
+
+	p.check(token.OpenParen)
+	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
+		parameters = append(parameters, p.parseVariable())
+		p.nextToken()
+		if p.isSymbol(token.Comma) {
+			p.nextToken()
+		} else if p.isSymbol(token.CloseParen) {
+			continue
+		} else {
+			// error
+		}
+	}
+	p.check(token.CloseParen)
+	return parameters
+}
+
+func (p *Parser) parseFunctionBody() []node.StatementNode {
+	p.check(token.OpenBrace)
+	// TODO Implement
+	p.check(token.CloseBrace)
 	return nil
 }
 
@@ -95,55 +145,6 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 
 func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode {
 	return nil
-}
-
-func (p *Parser) parseFunction() *node.FunctionNode {
-	// skip function keyword
-	p.check(token.Function)
-
-	function := &node.FunctionNode{
-		AbstractNode: p.newAbstractNode(),
-		ReturnTypes:  []*node.TypeNode{},
-		Parameters:   []*node.VariableNode{},
-		Body:         []*node.StatementNode{},
-	}
-
-	function.ReturnTypes = p.parseReturnTypes()
-
-	function.Identifier = p.readIdentifier()
-
-	function.Parameters = p.parseParameters()
-
-	function.Body = p.parseFunctionBody()
-
-	return function
-}
-
-func (p *Parser) parseFunctionBody() []*node.StatementNode {
-	p.check(token.OpenBrace)
-	// TODO Implement
-	p.check(token.CloseBrace)
-	return nil
-}
-
-// TODO Refactor: Move for loop in parseParameters and parseReturnTypes to own function
-func (p *Parser) parseParameters() []*node.VariableNode {
-	var parameters []*node.VariableNode
-
-	p.check(token.OpenParen)
-	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
-		parameters = append(parameters, p.parseVariable())
-		p.nextToken()
-		if p.isSymbol(token.Comma) {
-			p.nextToken()
-		} else if p.isSymbol(token.CloseParen) {
-			continue
-		} else {
-			// error
-		}
-	}
-	p.check(token.CloseParen)
-	return parameters
 }
 
 func (p *Parser) parseReturnTypes() []*node.TypeNode {

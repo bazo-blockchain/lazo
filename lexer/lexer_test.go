@@ -221,6 +221,12 @@ func TestIf(t *testing.T) {
 	tester.assertFixToken(0, token.If)
 }
 
+func TestElseIf(t *testing.T) {
+	tester := newLexerTestUtil(t, "else if")
+	tester.assertFixToken(0, token.Else)
+	tester.assertFixToken(1, token.If)
+}
+
 func TestElse(t *testing.T) {
 	tester := newLexerTestUtil(t, "else")
 	tester.assertFixToken(0, token.Else)

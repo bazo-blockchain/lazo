@@ -80,7 +80,7 @@ func (n *TypeNode) String() string {
 
 type IfStatementNode struct {
 	AbstractNode
-	Condition *ExpressionNode
+	Condition ExpressionNode
 	Then      *StatementBlockNode
 	Else      *StatementBlockNode
 }
@@ -93,7 +93,7 @@ func (n *IfStatementNode) String() string {
 
 type ReturnStatementNode struct {
 	AbstractNode
-	Expression *ExpressionNode
+	Expression ExpressionNode
 }
 
 func (n *ReturnStatementNode) String() string {
@@ -104,7 +104,7 @@ func (n *ReturnStatementNode) String() string {
 
 type StatementBlockNode struct {
 	AbstractNode
-	Statements []*StatementNode
+	Statements []StatementNode
 }
 
 func (n *StatementBlockNode) String() string {
@@ -120,7 +120,7 @@ type FunctionNode struct {
 	Identifier  string
 	ReturnTypes []*TypeNode
 	Parameters  []*VariableNode
-	Body        []*StatementNode
+	Body        []StatementNode
 }
 
 func (n *FunctionNode) String() string {
@@ -138,7 +138,7 @@ type IntegerLiteralNode struct {
 }
 
 func (n *IntegerLiteralNode) String() string {
-	return fmt.Sprintf("[%s] INT %s", n.Pos(), n.Value)
+	return fmt.Sprintf("[%s] INT %d", n.Pos(), n.Value)
 }
 
 // --------------------------
@@ -160,7 +160,7 @@ type CharacterLiteralNode struct {
 }
 
 func (n *CharacterLiteralNode) String() string {
-	return fmt.Sprintf("[%s] CHARACTER %s", n.Pos(), n.Value)
+	return fmt.Sprintf("[%s] CHARACTER %c", n.Pos(), n.Value)
 }
 
 // --------------------------
@@ -171,7 +171,7 @@ type BoolLiteralNode struct {
 }
 
 func (n *BoolLiteralNode) String() string {
-	return fmt.Sprintf("[%s] BOOL %s", n.Pos(), n.Value)
+	return fmt.Sprintf("[%s] BOOL %t", n.Pos(), n.Value)
 }
 
 // --------------------------
