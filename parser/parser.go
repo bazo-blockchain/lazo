@@ -52,15 +52,8 @@ func (p *Parser) parseContract() *node.ContractNode {
 			contract.Variables = append(contract.Variables, p.parseVariable())
 		case *token.FixToken:
 			// TODO Parse all types of fix tokens in a contract
-			if tok, ok := p.currentToken.(*token.FixToken); ok {
-				switch tok.Value {
-				case token.Function:
-					contract.Functions = append(contract.Functions, p.parseFunction())
-				default:
-					// error
-				}
-			} else {
-				// error
+			if p.is(token.Function) {
+				contract.Functions = append(contract.Functions, p.parseFunction())
 			}
 
 		default:
@@ -83,27 +76,80 @@ func (p *Parser) parseStatement() *node.StatementNode {
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode{
-	// TODO Implement
+	// skip function keyword
+	p.nextToken()
+
+	function := &node.FunctionNode{
+		AbstractNode: p.newAbstractNode(),
+		ReturnTypes: []*node.TypeNode{},
+		Parameters: []*node.VariableNode{},
+		Body: []*node.StatementNode{},
+	}
+
+	function.ReturnTypes = p.parseReturnTypes()
+
+	function.Identifier = p.readIdentifier()
+
+	function.Parameters = p.parseParameters()
+
+	function.Body = p.parseFunctionBody()
+
 	return nil
 }
 
+func (p *Parser) parseFunctionBody() []*node.StatementNode {
+	p.check(token.OpenBrace)
+	// TODO Implement
+	p.check(token.CloseBrace)
+	return nil
+}
+
+func (p *Parser) parseParameters() []*node.VariableNode {
+	p.check(token.OpenParen)
+	// TODO Implement
+	p.check(token.CloseParen)
+	return nil
+}
+
+func (p *Parser) parseReturnTypes() []*node.TypeNode {
+	var returnTypes []*node.TypeNode
+
+	if p.is(token.OpenParen){
+		p.nextToken()
+		for !p.isEnd() && !p.is(token.CloseParen) {
+			returnTypes = append(returnTypes, p.parseType())
+			p.nextToken()
+			if p.is(token.Comma) {
+				p.nextToken()
+			} else if p.is(token.CloseParen) {
+				continue
+			} else {
+				// error
+			}
+		}
+		p.check(token.CloseParen)
+	} else {
+		returnTypes = append(returnTypes, p.parseType())
+	}
+
+	return returnTypes
+}
+
 func (p *Parser) parseVariable() *node.VariableNode {
-	variable := &node.VariableNode{
+	return &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
 		Type: p.parseType(),
 		Identifier: p.readIdentifier(),
 	}
-	return variable
 }
 
 func (p * Parser) parseType() *node.TypeNode {
 	// Later we need to distinguish between an array and a simple type
 
-	typeNode := &node.TypeNode{
+	return &node.TypeNode{
 		AbstractNode: p.newAbstractNode(),
 		Identifier: p.readIdentifier(),
 	}
-	return typeNode
 }
 
 func (p *Parser) nextToken() {
