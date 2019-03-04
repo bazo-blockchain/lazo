@@ -48,7 +48,7 @@ type ContractNode struct {
 }
 
 func (n *ContractNode) String() string {
-	return fmt.Sprintf("[%s] CONTRACT %s %s", n.Pos(), n.Identifier, n.Variables)
+	return fmt.Sprintf("[%s] CONTRACT %s VARS: %s FUNCS: %s", n.Pos(), n.Identifier, n.Variables, n.Functions)
 }
 
 // --------------------------
@@ -90,7 +90,7 @@ type FunctionNode struct {
 }
 
 func (n *FunctionNode) String() string {
-	return fmt.Sprintf("[%s] Function %s, Params %s, ReturnTypes %s %s", n.Pos(), n.Identifier,
+	return fmt.Sprintf("\n [%s] FUNCTION %s, PARAM %s, RTYPES %s %s", n.Pos(), n.Identifier,
 		n.Parameters, n.ReturnTypes, n.Body)
 }
 

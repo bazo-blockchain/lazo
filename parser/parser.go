@@ -94,7 +94,7 @@ func (p *Parser) parseFunction() *node.FunctionNode{
 
 	function.Body = p.parseFunctionBody()
 
-	return nil
+	return function
 }
 
 func (p *Parser) parseFunctionBody() []*node.StatementNode {

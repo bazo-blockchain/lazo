@@ -355,3 +355,14 @@ func TestLessEqual(t *testing.T) {
 	tester := newLexerTestUtil(t,"<=")
 	tester.assertFixToken(0, token.LessEqual)
 }
+
+func TestFuncDeclaration(t *testing.T) {
+	tester := newLexerTestUtil(t, "function void test() {}")
+	tester.assertFixToken(0, token.Function)
+	tester.assertIdentifer(1, "void")
+	tester.assertIdentifer(2, "test")
+	tester.assertFixToken(3, token.OpenParen)
+	tester.assertFixToken(4, token.CloseParen)
+	tester.assertFixToken(5, token.OpenBrace)
+	tester.assertFixToken(6, token.CloseBrace)
+}
