@@ -4,7 +4,6 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"reflect"
 )
 
 type Parser struct {
@@ -28,7 +27,7 @@ func New(lex *lexer.Lexer) *Parser {
 func (p *Parser) ParseProgram() *node.ProgramNode {
 	program := &node.ProgramNode{}
 
-	if p.is(token.Contract) {
+	if p.isSymbol(token.Contract) {
 		program.Contract = p.parseContract()
 	}
 	// todo error handling
@@ -46,14 +45,14 @@ func (p *Parser) parseContract() *node.ContractNode {
 
 	// parse variables (later: extract to parseContractBody method with other types of nodes)
 	contract.Variables = []*node.VariableNode{}
-	for !p.isEnd() && !p.is(token.CloseBrace) {
+	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
 		switch p.currentToken.(type) {
 		case *token.IdentifierToken:
 			// TODO Implement Assignment
 			contract.Variables = append(contract.Variables, p.parseVariable())
 		case *token.FixToken:
 			// TODO Parse all types of fix tokens in a contract
-			if p.is(token.Function) {
+			if p.isSymbol(token.Function) {
 				contract.Functions = append(contract.Functions, p.parseFunction())
 			}
 
@@ -73,11 +72,11 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 
 func (p *Parser) parseStatement() node.StatementNode {
 
-	if p.is(token.If) {
+	if p.isSymbol(token.If) {
 		return p.parseIfStatement()
-	} else if p.is(token.Return) {
+	} else if p.isSymbol(token.Return) {
 		return p.parseReturnStatement()
-	} else if reflect.TypeOf(p.currentToken).Elem() == reflect.TypeOf(&token.IdentifierToken{}) {
+	} else if p.isType(token.IDENTIFER) {
 		identifier := p.readIdentifier()
 		return p.parseStatementWithIdentifier(identifier)
 	} else {
@@ -132,12 +131,12 @@ func (p *Parser) parseParameters() []*node.VariableNode {
 	var parameters []*node.VariableNode
 
 	p.check(token.OpenParen)
-	for !p.isEnd() && !p.is(token.CloseParen) {
+	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
 		parameters = append(parameters, p.parseVariable())
 		p.nextToken()
-		if p.is(token.Comma) {
+		if p.isSymbol(token.Comma) {
 			p.nextToken()
-		} else if p.is(token.CloseParen) {
+		} else if p.isSymbol(token.CloseParen) {
 			continue
 		} else {
 			// error
@@ -150,14 +149,14 @@ func (p *Parser) parseParameters() []*node.VariableNode {
 func (p *Parser) parseReturnTypes() []*node.TypeNode {
 	var returnTypes []*node.TypeNode
 
-	if p.is(token.OpenParen){
+	if p.isSymbol(token.OpenParen){
 		p.nextToken()
-		for !p.isEnd() && !p.is(token.CloseParen) {
+		for !p.isEnd() && !p.isSymbol(token.CloseParen) {
 			returnTypes = append(returnTypes, p.parseType())
 			p.nextToken()
-			if p.is(token.Comma) {
+			if p.isSymbol(token.Comma) {
 				p.nextToken()
-			} else if p.is(token.CloseParen) {
+			} else if p.isSymbol(token.CloseParen) {
 				continue
 			} else {
 				// error
@@ -196,13 +195,17 @@ func (p *Parser) nextToken() {
 // helpers
 // --------------
 
-func (p *Parser) is(symbol token.Symbol) bool {
+func (p *Parser) isType(expectedType token.TokenType) bool {
+	return p.currentToken.Type() == expectedType
+}
+
+func (p *Parser) isSymbol(symbol token.Symbol) bool {
 	tok, ok := p.currentToken.(*token.FixToken)
 	return ok && tok.Value == symbol
 }
 
 func (p *Parser) check(symbol token.Symbol) {
-	if !p.is(symbol) {
+	if !p.isSymbol(symbol) {
 		// todo add to errors
 	}
 	p.nextToken()
