@@ -104,11 +104,24 @@ func (p *Parser) parseFunctionBody() []*node.StatementNode {
 	return nil
 }
 
+// TODO Refactor: Move for loop in parseParameters and parseReturnTypes to own function
 func (p *Parser) parseParameters() []*node.VariableNode {
+	var parameters []*node.VariableNode
+
 	p.check(token.OpenParen)
-	// TODO Implement
+	for !p.isEnd() && !p.is(token.CloseParen) {
+		parameters = append(parameters, p.parseVariable())
+		p.nextToken()
+		if p.is(token.Comma) {
+			p.nextToken()
+		} else if p.is(token.CloseParen) {
+			continue
+		} else {
+			// error
+		}
+	}
 	p.check(token.CloseParen)
-	return nil
+	return parameters
 }
 
 func (p *Parser) parseReturnTypes() []*node.TypeNode {
