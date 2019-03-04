@@ -11,16 +11,16 @@ type Token interface {
 	String() string
 }
 
-type abstractToken struct {
+type AbstractToken struct {
 	Position
 	Lexeme string
 }
 
-func (t *abstractToken) Pos() Position {
+func (t *AbstractToken) Pos() Position {
 	return t.Position
 }
 
-func (t *abstractToken) Literal() string {
+func (t *AbstractToken) Literal() string {
 	return t.Lexeme
 }
 
@@ -28,7 +28,7 @@ func (t *abstractToken) Literal() string {
 // ----------------
 
 type IdentifierToken struct {
-	abstractToken
+	AbstractToken
 }
 
 func (t *IdentifierToken) String() string {
@@ -38,8 +38,9 @@ func (t *IdentifierToken) String() string {
 // --------------------------
 
 type IntegerToken struct {
-	abstractToken
-	Value big.Int
+	AbstractToken
+	Value *big.Int
+	IsHex bool
 }
 
 func (t *IntegerToken) String() string {
@@ -49,7 +50,7 @@ func (t *IntegerToken) String() string {
 // --------------------------
 
 type BooleanToken struct {
-	abstractToken
+	AbstractToken
 	Value bool
 }
 
@@ -60,7 +61,7 @@ func (t *BooleanToken) String() string {
 // --------------------------
 
 type StringToken struct {
-	abstractToken
+	AbstractToken
 }
 
 func (t *StringToken) String() string {
@@ -70,7 +71,7 @@ func (t *StringToken) String() string {
 // --------------------------
 
 type CharacterToken struct {
-	abstractToken
+	AbstractToken
 	Value rune
 }
 
@@ -81,10 +82,21 @@ func (t *CharacterToken) String() string {
 // --------------------------
 
 type FixToken struct {
-	abstractToken
+	AbstractToken
 	Value Symbol
 }
 
 func (t *FixToken) String() string {
 	return fmt.Sprintf("[%s] SYMBOL %s", t.Pos(), t.Literal())
+}
+
+// --------------------------
+
+type ErrorToken struct {
+	AbstractToken
+	Msg string
+}
+
+func (t *ErrorToken) String() string {
+	return fmt.Sprintf("[%s] Error %s - %s", t.Pos(), t.Msg, t.Literal())
 }

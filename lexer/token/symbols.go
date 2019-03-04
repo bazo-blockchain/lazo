@@ -3,8 +3,10 @@ package token
 type Symbol int
 
 const (
-	Plus Symbol = iota
-	Minus
+	EOF Symbol = iota
+
+	Addition
+	Subtraction
 	Division
 	Multiplication
 	Modulo
@@ -32,12 +34,59 @@ const (
 	And
 	Or
 
+	Assign
+
 	// Keywords
 
 	Contract
-	Assign
 	Return
 	If
+	Elif
 	Else
 	Function
 )
+
+var Keywords = map[string]Symbol{
+	"contract": Contract,
+	"return":   Return,
+	"if":       If,
+	"elif": Elif,
+	"else":     Else,
+	"function": Function,
+}
+
+var SingleCharOperations = map[string]Symbol{
+	":": Colon,
+	",": Comma,
+	".": Period,
+	"{": OpenBrace,
+	"}": CloseBrace,
+	"[": OpenBracket,
+	"]": CloseBracket,
+	"(": OpenParen,
+	")": CloseParen,
+	"+": Addition,
+	"-": Subtraction,
+	"/": Division,
+	"*": Multiplication,
+	"%": Modulo,
+}
+
+var PossibleMultiCharOperation = map[string]Symbol{
+	"=": Assign,
+	">": Greater,
+	"<": Less,
+	"!": Not,
+}
+
+var LogicalOperation = map[string]Symbol{
+	"&&": And,
+	"||": Or,
+}
+
+var MultiCharOperation = map[string]Symbol{
+	"==": Equal,
+	"!=": Unequal,
+	">=": GreaterEqual,
+	"<=": LessEqual,
+}
