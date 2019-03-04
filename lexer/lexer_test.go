@@ -207,147 +207,147 @@ func TestReservedKeyword(t *testing.T) {
 }
 
 func TestContract(t *testing.T) {
-	tester := newLexerTestUtil(t,"contract")
+	tester := newLexerTestUtil(t, "contract")
 	tester.assertFixToken(0, token.Contract)
 }
 
 func TestReturn(t *testing.T) {
-	tester := newLexerTestUtil(t,"return")
+	tester := newLexerTestUtil(t, "return")
 	tester.assertFixToken(0, token.Return)
 }
 
 func TestIf(t *testing.T) {
-	tester := newLexerTestUtil(t,"if")
+	tester := newLexerTestUtil(t, "if")
 	tester.assertFixToken(0, token.If)
 }
 
 func TestElse(t *testing.T) {
-	tester := newLexerTestUtil(t,"else")
+	tester := newLexerTestUtil(t, "else")
 	tester.assertFixToken(0, token.Else)
 }
 
 func TestFunction(t *testing.T) {
-	tester := newLexerTestUtil(t,"function")
+	tester := newLexerTestUtil(t, "function")
 	tester.assertFixToken(0, token.Function)
 }
 
 func TestColon(t *testing.T) {
-	tester := newLexerTestUtil(t,":")
+	tester := newLexerTestUtil(t, ":")
 	tester.assertFixToken(0, token.Colon)
 }
 
 func TestComma(t *testing.T) {
-	tester := newLexerTestUtil(t,",")
+	tester := newLexerTestUtil(t, ",")
 	tester.assertFixToken(0, token.Comma)
 }
 
 func TestPeriod(t *testing.T) {
-	tester := newLexerTestUtil(t,".")
+	tester := newLexerTestUtil(t, ".")
 	tester.assertFixToken(0, token.Period)
 }
 
 func TestOpenBrace(t *testing.T) {
-	tester := newLexerTestUtil(t,"{")
+	tester := newLexerTestUtil(t, "{")
 	tester.assertFixToken(0, token.OpenBrace)
 }
 
 func TestCloseBrace(t *testing.T) {
-	tester := newLexerTestUtil(t,"}")
+	tester := newLexerTestUtil(t, "}")
 	tester.assertFixToken(0, token.CloseBrace)
 }
 
 func TestOpenBracket(t *testing.T) {
-	tester := newLexerTestUtil(t,"[")
+	tester := newLexerTestUtil(t, "[")
 	tester.assertFixToken(0, token.OpenBracket)
 }
 
 func TestCloseBracket(t *testing.T) {
-	tester := newLexerTestUtil(t,"]")
+	tester := newLexerTestUtil(t, "]")
 	tester.assertFixToken(0, token.CloseBracket)
 }
 
 func TestOpenParen(t *testing.T) {
-	tester := newLexerTestUtil(t,"(")
+	tester := newLexerTestUtil(t, "(")
 	tester.assertFixToken(0, token.OpenParen)
 }
 
 func TestCloseParen(t *testing.T) {
-	tester := newLexerTestUtil(t,")")
+	tester := newLexerTestUtil(t, ")")
 	tester.assertFixToken(0, token.CloseParen)
 }
 
 func TestAddition(t *testing.T) {
-	tester := newLexerTestUtil(t,"+")
+	tester := newLexerTestUtil(t, "+")
 	tester.assertFixToken(0, token.Addition)
 }
 
 func TestSubtraction(t *testing.T) {
-	tester := newLexerTestUtil(t,"-")
+	tester := newLexerTestUtil(t, "-")
 	tester.assertFixToken(0, token.Subtraction)
 }
 
 func TestMultiplication(t *testing.T) {
-	tester := newLexerTestUtil(t,"*")
+	tester := newLexerTestUtil(t, "*")
 	tester.assertFixToken(0, token.Multiplication)
 }
 
 func TestDivision(t *testing.T) {
-	tester := newLexerTestUtil(t,"/")
+	tester := newLexerTestUtil(t, "/")
 	tester.assertFixToken(0, token.Division)
 }
 
 func TestModulo(t *testing.T) {
-	tester := newLexerTestUtil(t,"%")
+	tester := newLexerTestUtil(t, "%")
 	tester.assertFixToken(0, token.Modulo)
 }
 
 func TestAssign(t *testing.T) {
-	tester := newLexerTestUtil(t,"=")
+	tester := newLexerTestUtil(t, "=")
 	tester.assertFixToken(0, token.Assign)
 }
 
 func TestGreater(t *testing.T) {
-	tester := newLexerTestUtil(t,">")
+	tester := newLexerTestUtil(t, ">")
 	tester.assertFixToken(0, token.Greater)
 }
 
 func TestLess(t *testing.T) {
-	tester := newLexerTestUtil(t,"<")
+	tester := newLexerTestUtil(t, "<")
 	tester.assertFixToken(0, token.Less)
 }
 
 func TestNot(t *testing.T) {
-	tester := newLexerTestUtil(t,"!")
+	tester := newLexerTestUtil(t, "!")
 	tester.assertFixToken(0, token.Not)
 }
 
 func TestAnd(t *testing.T) {
-	tester := newLexerTestUtil(t,"&&")
+	tester := newLexerTestUtil(t, "&&")
 	tester.assertFixToken(0, token.And)
 }
 
 func TestOr(t *testing.T) {
-	tester := newLexerTestUtil(t,"||")
+	tester := newLexerTestUtil(t, "||")
 	tester.assertFixToken(0, token.Or)
 }
 
 func TestEqual(t *testing.T) {
-	tester := newLexerTestUtil(t,"==")
+	tester := newLexerTestUtil(t, "==")
 	tester.assertFixToken(0, token.Equal)
 }
 
 func TestUnequal(t *testing.T) {
-	tester := newLexerTestUtil(t,"!=")
+	tester := newLexerTestUtil(t, "!=")
 	tester.assertFixToken(0, token.Unequal)
 }
 
 func TestGreaterEqual(t *testing.T) {
-	tester := newLexerTestUtil(t,">=")
+	tester := newLexerTestUtil(t, ">=")
 	tester.assertFixToken(0, token.GreaterEqual)
 }
 
 func TestLessEqual(t *testing.T) {
-	tester := newLexerTestUtil(t,"<=")
+	tester := newLexerTestUtil(t, "<=")
 	tester.assertFixToken(0, token.LessEqual)
 }
 

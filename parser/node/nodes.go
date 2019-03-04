@@ -44,7 +44,7 @@ type ContractNode struct {
 	AbstractNode
 	Identifier string
 	Variables  []*VariableNode
-	Functions []*FunctionNode
+	Functions  []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
@@ -65,26 +65,31 @@ func (n *VariableNode) String() string {
 	return fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), n.Type, n.Identifier)
 }
 
+// --------------------------
+
 type TypeNode struct {
 	AbstractNode
 	Identifier string
-
 }
 
 func (n *TypeNode) String() string {
 	return fmt.Sprintf("[%s] TYPE %s", n.Pos(), n.Identifier)
 }
 
+// --------------------------
+
 type IfStatementNode struct {
 	AbstractNode
 	Condition *ExpressionNode
-	Then *StatementBlockNode
-	Else *StatementBlockNode
+	Then      *StatementBlockNode
+	Else      *StatementBlockNode
 }
 
 func (n *IfStatementNode) String() string {
 	return fmt.Sprintf("[%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
 }
+
+// --------------------------
 
 type ReturnStatementNode struct {
 	AbstractNode
@@ -94,6 +99,8 @@ type ReturnStatementNode struct {
 func (n *ReturnStatementNode) String() string {
 	return fmt.Sprintf("[%s] RETURNSTMT %s", n.Pos(), n.Expression)
 }
+
+// --------------------------
 
 type StatementBlockNode struct {
 	AbstractNode
@@ -105,17 +112,15 @@ func (n *StatementBlockNode) String() string {
 }
 
 // --------------------------
-
-// --------------------------
 // Expression Nodes
 // --------------------------
 
 type FunctionNode struct {
 	AbstractNode
-	Identifier string
+	Identifier  string
 	ReturnTypes []*TypeNode
-	Parameters []*VariableNode
-	Body []*StatementNode
+	Parameters  []*VariableNode
+	Body        []*StatementNode
 }
 
 func (n *FunctionNode) String() string {
@@ -136,6 +141,8 @@ func (n *IntegerLiteralNode) String() string {
 	return fmt.Sprintf("[%s] INT %s", n.Pos(), n.Value)
 }
 
+// --------------------------
+
 type StringLiteralNode struct {
 	AbstractNode
 	Value string
@@ -145,6 +152,8 @@ func (n *StringLiteralNode) String() string {
 	return fmt.Sprintf("[%s] STRING %s", n.Pos(), n.Value)
 }
 
+// --------------------------
+
 type CharacterLiteralNode struct {
 	AbstractNode
 	Value rune
@@ -153,6 +162,8 @@ type CharacterLiteralNode struct {
 func (n *CharacterLiteralNode) String() string {
 	return fmt.Sprintf("[%s] CHARACTER %s", n.Pos(), n.Value)
 }
+
+// --------------------------
 
 type BoolLiteralNode struct {
 	AbstractNode

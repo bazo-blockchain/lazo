@@ -93,19 +93,19 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	return nil
 }
 
-func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode{
+func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode {
 	return nil
 }
 
-func (p *Parser) parseFunction() *node.FunctionNode{
+func (p *Parser) parseFunction() *node.FunctionNode {
 	// skip function keyword
 	p.check(token.Function)
 
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
-		ReturnTypes: []*node.TypeNode{},
-		Parameters: []*node.VariableNode{},
-		Body: []*node.StatementNode{},
+		ReturnTypes:  []*node.TypeNode{},
+		Parameters:   []*node.VariableNode{},
+		Body:         []*node.StatementNode{},
 	}
 
 	function.ReturnTypes = p.parseReturnTypes()
@@ -149,7 +149,7 @@ func (p *Parser) parseParameters() []*node.VariableNode {
 func (p *Parser) parseReturnTypes() []*node.TypeNode {
 	var returnTypes []*node.TypeNode
 
-	if p.isSymbol(token.OpenParen){
+	if p.isSymbol(token.OpenParen) {
 		p.nextToken()
 		for !p.isEnd() && !p.isSymbol(token.CloseParen) {
 			returnTypes = append(returnTypes, p.parseType())
@@ -173,17 +173,17 @@ func (p *Parser) parseReturnTypes() []*node.TypeNode {
 func (p *Parser) parseVariable() *node.VariableNode {
 	return &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
-		Type: p.parseType(),
-		Identifier: p.readIdentifier(),
+		Type:         p.parseType(),
+		Identifier:   p.readIdentifier(),
 	}
 }
 
-func (p * Parser) parseType() *node.TypeNode {
+func (p *Parser) parseType() *node.TypeNode {
 	// Later we need to distinguish between an array and a simple type
 
 	return &node.TypeNode{
 		AbstractNode: p.newAbstractNode(),
-		Identifier: p.readIdentifier(),
+		Identifier:   p.readIdentifier(),
 	}
 }
 
@@ -225,7 +225,7 @@ func (p *Parser) readIdentifier() string {
 	return identifier
 }
 
-func (p *Parser) newAbstractNode() node.AbstractNode{
+func (p *Parser) newAbstractNode() node.AbstractNode {
 	return node.AbstractNode{
 		Position: p.currentToken.Pos(),
 	}

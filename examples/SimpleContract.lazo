@@ -1,0 +1,13 @@
+contract SimpleContract {
+    int x
+    int y = 1
+    bool b
+    string s = "test"
+
+    function bool calc(int a, int b) {
+        x = y
+        y = a + b
+
+        return a > b
+    }
+}
