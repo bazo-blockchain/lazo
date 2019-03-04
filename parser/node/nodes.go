@@ -84,12 +84,54 @@ func (n *TypeNode) String() string {
 type FunctionNode struct {
 	AbstractNode
 	Identifier string
-	// TODO Add further members
+	ReturnTypes []*TypeNode
+	Parameters []*VariableNode
+	Body []*StatementNode
 }
 
 func (n *FunctionNode) String() string {
-	// TODO Implement
-	return fmt.Sprintf("[%s] Function %s", n.Pos(), n.Identifier)
+	return fmt.Sprintf("[%s] Function %s, Params %s, ReturnTypes %s %s", n.Pos(), n.Identifier,
+		n.Parameters, n.ReturnTypes, n.Body)
+}
+
+// --------------------------
+// Literal Nodes
+// --------------------------
+
+type IntegerLiteralNode struct {
+	AbstractNode
+	Value int
+}
+
+func (n *IntegerLiteralNode) String() string {
+	return fmt.Sprintf("[%s] INT %s", n.Pos(), n.Value)
+}
+
+type StringLiteralNode struct {
+	AbstractNode
+	Value string
+}
+
+func (n *StringLiteralNode) String() string {
+	return fmt.Sprintf("[%s] STRING %s", n.Pos(), n.Value)
+}
+
+type CharacterLiteralNode struct {
+	AbstractNode
+	Value rune
+}
+
+func (n *CharacterLiteralNode) String() string {
+	return fmt.Sprintf("[%s] CHARACTER %s", n.Pos(), n.Value)
+}
+
+type BoolLiteralNode struct {
+	AbstractNode
+	Value bool
+}
+
+func (n *BoolLiteralNode) String() string {
+	return fmt.Sprintf("[%s] BOOL %s", n.Pos(), n.Value)
 }
 
 // --------------------------
