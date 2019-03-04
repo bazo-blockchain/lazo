@@ -75,6 +75,35 @@ func (n *TypeNode) String() string {
 	return fmt.Sprintf("[%s] TYPE %s", n.Pos(), n.Identifier)
 }
 
+type IfStatementNode struct {
+	AbstractNode
+	Condition *ExpressionNode
+	Then *StatementBlockNode
+	Else *StatementBlockNode
+}
+
+func (n *IfStatementNode) String() string {
+	return fmt.Sprintf("[%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
+}
+
+type ReturnStatementNode struct {
+	AbstractNode
+	Expression *ExpressionNode
+}
+
+func (n *ReturnStatementNode) String() string {
+	return fmt.Sprintf("[%s] RETURNSTMT %s", n.Pos(), n.Expression)
+}
+
+type StatementBlockNode struct {
+	AbstractNode
+	Statements []*StatementNode
+}
+
+func (n *StatementBlockNode) String() string {
+	return fmt.Sprintf("[%s] STMTBLOCK %s", n.Pos(), n.Statements)
+}
+
 // --------------------------
 
 // --------------------------

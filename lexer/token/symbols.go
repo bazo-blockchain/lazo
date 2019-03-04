@@ -41,7 +41,6 @@ const (
 	Contract
 	Return
 	If
-	Elif
 	Else
 	Function
 )
@@ -50,7 +49,6 @@ var Keywords = map[string]Symbol{
 	"contract": Contract,
 	"return":   Return,
 	"if":       If,
-	"elif": Elif,
 	"else":     Else,
 	"function": Function,
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"reflect"
 )
 
 type Parser struct {
@@ -72,6 +73,29 @@ func (p *Parser) parseExpression() *node.ExpressionNode {
 
 func (p *Parser) parseStatement() *node.StatementNode {
 	// TODO implement
+
+	if p.is(token.If) {
+		return p.parseIfStatement()
+	} else if p.is(token.Return) {
+		return p.parseReturnStatement()
+	} else if reflect.TypeOf(p.currentToken).Elem() == reflect.TypeOf(&token.IdentifierToken{}) {
+		identifier := p.readIdentifier()
+		return p.parseStatementWithIdentifier(identifier)
+	} else {
+		// error
+		return nil
+	}
+}
+
+func (p *Parser) parseIfStatement() *node.IfStatementNode {
+	return nil
+}
+
+func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
+	return nil
+}
+
+func (p *Parser) parseStatementWithIdentifier(identifier string) *node.StatementNode{
 	return nil
 }
 
