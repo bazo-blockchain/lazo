@@ -22,7 +22,7 @@ func New(lex *lexer.Lexer) *Parser {
 
 	// read two tokens at the beginning
 	p.nextToken()
-	p.nextToken()
+	p.nextTokenWhileNewLine()
 
 	return p
 }
@@ -33,7 +33,10 @@ func (p *Parser) ParseProgram() (*node.ProgramNode, []error) {
 	if p.isSymbol(token.Contract) {
 		program.Contract = p.parseContract()
 	}
-	// todo error handling
+
+	if !p.isEnd() {
+		p.addError("Invalid token outside contract: " + p.currentToken.String())
+	}
 	return program, p.errors
 }
 
@@ -45,6 +48,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 
 	contract.Identifier = p.readIdentifier()
 	p.check(token.OpenBrace)
+	p.checkAndSkipNewLines(token.NewLine)
 
 	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
 		p.parseContractBody(contract)
@@ -196,6 +200,13 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.lex.NextToken()
 }
 
+func (p *Parser) nextTokenWhileNewLine() {
+	p.nextToken()
+	for p.isSymbol(token.NewLine) {
+		p.nextToken()
+	}
+}
+
 // helpers
 // --------------
 
@@ -210,9 +221,16 @@ func (p *Parser) isSymbol(symbol token.Symbol) bool {
 
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
-		// todo add to errors
+		p.addError(fmt.Sprintf("Expected %s symbol, but got %s", symbol, p.currentToken.Literal()))
 	}
 	p.nextToken()
+}
+
+func (p *Parser) checkAndSkipNewLines(symbol token.Symbol) {
+	p.check(symbol)
+	for p.isSymbol(token.NewLine) {
+		p.nextToken()
+	}
 }
 
 func (p *Parser) readIdentifier() string {

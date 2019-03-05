@@ -1,4 +1,4 @@
 contract Test {
-    int x
-    function void test() {}
+    bool b
+    int x = 5
 }
