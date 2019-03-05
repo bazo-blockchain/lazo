@@ -1,15 +1,18 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"github.com/pkg/errors"
 )
 
 type Parser struct {
 	lex          *lexer.Lexer
 	currentToken token.Token
 	peekToken    token.Token
+	errors       []error
 }
 
 func New(lex *lexer.Lexer) *Parser {
@@ -24,14 +27,14 @@ func New(lex *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) ParseProgram() *node.ProgramNode {
+func (p *Parser) ParseProgram() (*node.ProgramNode, []error) {
 	program := &node.ProgramNode{}
 
 	if p.isSymbol(token.Contract) {
 		program.Contract = p.parseContract()
 	}
 	// todo error handling
-	return program
+	return program, p.errors
 }
 
 func (p *Parser) parseContract() *node.ContractNode {
@@ -234,4 +237,9 @@ func (p *Parser) newAbstractNode() node.AbstractNode {
 
 func (p *Parser) isEnd() bool {
 	return p.lex.IsEnd
+}
+
+func (p *Parser) addError(msg string) {
+	p.errors = append(p.errors,
+		errors.New(fmt.Sprintf("[%s] %s", p.currentToken.Pos().String(), msg)))
 }
