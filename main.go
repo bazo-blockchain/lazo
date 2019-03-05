@@ -29,7 +29,7 @@ func compile(sourceFile string) {
 	//}
 
 	parser := parser.New(lexer)
-	program := parser.ParseProgram()
+	program, _ := parser.ParseProgram()
 	fmt.Println(program)
 }
 

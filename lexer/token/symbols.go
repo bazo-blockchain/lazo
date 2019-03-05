@@ -4,6 +4,7 @@ type Symbol int
 
 const (
 	EOF Symbol = iota
+	NewLine
 
 	Addition
 	Subtraction
@@ -53,21 +54,21 @@ var Keywords = map[string]Symbol{
 	"function": Function,
 }
 
-var SingleCharOperations = map[string]Symbol{
-	":": Colon,
-	",": Comma,
-	".": Period,
-	"{": OpenBrace,
-	"}": CloseBrace,
-	"[": OpenBracket,
-	"]": CloseBracket,
-	"(": OpenParen,
-	")": CloseParen,
-	"+": Addition,
-	"-": Subtraction,
-	"/": Division,
-	"*": Multiplication,
-	"%": Modulo,
+var SingleCharOperations = map[rune]Symbol{
+	':': Colon,
+	',': Comma,
+	'.': Period,
+	'{': OpenBrace,
+	'}': CloseBrace,
+	'[': OpenBracket,
+	']': CloseBracket,
+	'(': OpenParen,
+	')': CloseParen,
+	'+': Addition,
+	'-': Subtraction,
+	'/': Division,
+	'*': Multiplication,
+	'%': Modulo,
 }
 
 var PossibleMultiCharOperation = map[string]Symbol{

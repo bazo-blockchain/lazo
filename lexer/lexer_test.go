@@ -245,6 +245,7 @@ func TestColon(t *testing.T) {
 func TestComma(t *testing.T) {
 	tester := newLexerTestUtil(t, ",")
 	tester.assertFixToken(0, token.Comma)
+	assert.Equal(t, tester.tokens[0].(*token.FixToken).Lexeme, ",")
 }
 
 func TestPeriod(t *testing.T) {
@@ -367,3 +368,38 @@ func TestFuncDeclaration(t *testing.T) {
 	tester.assertFixToken(5, token.OpenBrace)
 	tester.assertFixToken(6, token.CloseBrace)
 }
+
+func TestLinuxNewLine(t *testing.T) {
+	lex := New(bufio.NewReader(strings.NewReader("\n \n")))
+
+	tok := lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+	tok = lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+}
+
+func TestWindowsNewLine(t *testing.T) {
+	lex := New(bufio.NewReader(strings.NewReader("\r\n")))
+
+	tok := lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+	tok = lex.NextToken()
+	token.AssertFixToken(t, tok, token.EOF)
+}
+
+func TestSystemNewLine(t *testing.T) {
+	lex := New(bufio.NewReader(strings.NewReader(`
+		1
+		2
+	`)))
+
+	tok := lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+	tok = lex.NextToken() // skip 1
+	tok = lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+	tok = lex.NextToken() // skip 2
+	tok = lex.NextToken()
+	token.AssertFixToken(t, tok, token.NewLine)
+}
+
