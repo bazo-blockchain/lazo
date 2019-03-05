@@ -20,7 +20,6 @@ func TestVariable(t *testing.T) {
 
 // ------------------------------
 
-func newParserFromInput(input string) *Parser{
+func newParserFromInput(input string) *Parser {
 	return New(lexer.New(bufio.NewReader(strings.NewReader(input))))
 }
-

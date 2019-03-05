@@ -402,4 +402,3 @@ func TestSystemNewLine(t *testing.T) {
 	tok = lex.NextToken()
 	token.AssertFixToken(t, tok, token.NewLine)
 }
-

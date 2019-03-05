@@ -46,7 +46,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 	}
 	p.nextToken() // skip contract keyword
 
-	contract.Identifier = p.readIdentifier()
+	contract.Name = p.readIdentifier()
 	p.check(token.OpenBrace)
 	p.checkAndSkipNewLines(token.NewLine)
 
@@ -61,7 +61,6 @@ func (p *Parser) parseContract() *node.ContractNode {
 func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	switch p.currentToken.(type) {
 	case *token.IdentifierToken:
-		// TODO Implement Assignment
 		contract.Variables = append(contract.Variables, p.parseVariable())
 	case *token.FixToken:
 		// TODO Parse all types of fix tokens in a contract
@@ -69,7 +68,8 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 			contract.Functions = append(contract.Functions, p.parseFunction())
 		}
 	default:
-		// error
+		p.addError("Unsupported contract part starting with" + p.currentToken.Literal())
+		p.nextToken()
 	}
 }
 
@@ -179,16 +179,18 @@ func (p *Parser) parseReturnTypes() []*node.TypeNode {
 }
 
 func (p *Parser) parseVariable() *node.VariableNode {
-	return &node.VariableNode{
+	// TODO Implement Assignment
+	v := &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
 		Type:         p.parseType(),
 		Identifier:   p.readIdentifier(),
 	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return v
 }
 
 func (p *Parser) parseType() *node.TypeNode {
 	// Later we need to distinguish between an array and a simple type
-
 	return &node.TypeNode{
 		AbstractNode: p.newAbstractNode(),
 		Identifier:   p.readIdentifier(),
@@ -221,7 +223,7 @@ func (p *Parser) isSymbol(symbol token.Symbol) bool {
 
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
-		p.addError(fmt.Sprintf("Expected %s symbol, but got %s", symbol, p.currentToken.Literal()))
+		p.addError(fmt.Sprintf("FixToken symbol[%d] expected, but got %s", symbol, p.currentToken.Literal()))
 	}
 	p.nextToken()
 }
@@ -239,7 +241,7 @@ func (p *Parser) readIdentifier() string {
 	if tok, ok := p.currentToken.(*token.IdentifierToken); ok {
 		identifier = tok.Literal()
 	} else {
-		// todo add to errors
+		p.addError("Identifier expected")
 		identifier = "ERROR"
 	}
 
@@ -259,5 +261,5 @@ func (p *Parser) isEnd() bool {
 
 func (p *Parser) addError(msg string) {
 	p.errors = append(p.errors,
-		errors.New(fmt.Sprintf("[%s] %s", p.currentToken.Pos().String(), msg)))
+		errors.New(fmt.Sprintf("[%s] ERROR: %s", p.currentToken.Pos().String(), msg)))
 }

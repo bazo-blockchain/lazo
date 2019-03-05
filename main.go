@@ -29,7 +29,10 @@ func compile(sourceFile string) {
 	//}
 
 	parser := parser.New(lexer)
-	program, _ := parser.ParseProgram()
+	program, errors := parser.ParseProgram()
+	if len(errors) > 0 {
+		fmt.Fprintln(os.Stderr, errors)
+	}
 	fmt.Println(program)
 }
 

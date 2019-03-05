@@ -1,4 +1,4 @@
 contract Test {
     bool b
-    int x = 5
+    int x
 }

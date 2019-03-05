@@ -42,13 +42,13 @@ func (n *ProgramNode) String() string {
 
 type ContractNode struct {
 	AbstractNode
-	Identifier string
-	Variables  []*VariableNode
-	Functions  []*FunctionNode
+	Name      string
+	Variables []*VariableNode
+	Functions []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
-	return fmt.Sprintf("[%s] CONTRACT %s VARS: %s FUNCS: %s", n.Pos(), n.Identifier, n.Variables, n.Functions)
+	return fmt.Sprintf("[%s] CONTRACT %s \n VARS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Variables, n.Functions)
 }
 
 // --------------------------
@@ -62,7 +62,7 @@ type VariableNode struct {
 }
 
 func (n *VariableNode) String() string {
-	return fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), n.Type, n.Identifier)
+	return fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), n.Type.Identifier, n.Identifier)
 }
 
 // --------------------------
