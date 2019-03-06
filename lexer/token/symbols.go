@@ -48,6 +48,52 @@ const (
 	False
 )
 
+var SymbolLexeme = map[Symbol]string{
+	EOF: "EOF",
+	NewLine: `\n`,
+
+	Addition: "+",
+	Subtraction: "-",
+	Multiplication: "*",
+	Division: "/",
+	Modulo: "%",
+
+	Less: "<",
+	LessEqual: "<=",
+	GreaterEqual: ">=",
+	Greater: ">",
+
+	Equal: "==",
+	Unequal: "!=",
+
+	OpenBrace: "{",
+	CloseBrace: "}",
+	OpenBracket: "[",
+	CloseBracket: "]",
+	OpenParen: "(",
+	CloseParen: ")",
+
+	Colon: ":",
+	Comma: ",",
+	Period: ".",
+
+	Not: "!",
+	And: "&&",
+	Or: "||",
+
+	Assign: "=",
+
+	// Keywords
+
+	Contract: "contract",
+	Return: "return",
+	If: "if",
+	Else: "else",
+	Function: "function",
+	True: "true",
+	False: "false",
+}
+
 var Keywords = map[string]Symbol{
 	"contract": Contract,
 	"return":   Return,
@@ -85,6 +131,7 @@ var PossibleMultiCharOperation = map[string]Symbol{
 	">": Greater,
 	"<": Less,
 	"!": Not,
+
 }
 
 var LogicalOperation = map[string]Symbol{

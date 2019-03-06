@@ -134,6 +134,19 @@ func (n *StatementBlockNode) String() string {
 // Expression Nodes
 // --------------------------
 
+type BinaryExpressionNode struct {
+	AbstractNode
+	LeftExpr  ExpressionNode
+	Operator  token.Symbol
+	RightExpr ExpressionNode
+}
+
+func (n *BinaryExpressionNode) String() string {
+	return fmt.Sprintf("[%s] EXPR (%s %s %s)", n.Position, n.LeftExpr, token.SymbolLexeme[n.Operator], n.RightExpr)
+}
+
+// --------------------------
+
 type DesignatorNode struct {
 	AbstractNode
 	Value string

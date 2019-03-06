@@ -234,6 +234,22 @@ func (p *Parser) parseType() *node.TypeNode {
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
+	abstraceNode := p.newAbstractNode()
+	leftExpr := p.parseFactor()
+
+	for p.isAnySymbol(token.Addition, token.Subtraction) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstraceNode,
+			LeftExpr:leftExpr,
+			Operator: p.readSymbol(),
+			RightExpr: p.parseFactor(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseFactor() node.ExpressionNode {
 	return p.parseOperand()
 }
 
@@ -340,9 +356,20 @@ func (p *Parser) isSymbol(symbol token.Symbol) bool {
 	return ok && tok.Value == symbol
 }
 
+func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
+	if tok, ok := p.currentToken.(*token.FixToken); ok {
+		for _, s := range expectedSymbols {
+			if tok.Value == s {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
-		p.addError(fmt.Sprintf("FixToken symbol[%d] expected, but got %s", symbol, p.currentToken.Literal()))
+		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], p.currentToken.Literal()))
 	}
 	p.nextToken()
 }
@@ -370,6 +397,15 @@ func (p *Parser) readIdentifier() string {
 
 	p.nextToken()
 	return identifier
+}
+
+func (p *Parser) readSymbol() token.Symbol {
+	tok, ok := p.currentToken.(*token.FixToken)
+	if ok {
+		p.nextToken()
+		return tok.Value
+	}
+	panic("Invalid operation")
 }
 
 func (p *Parser) newAbstractNode() node.AbstractNode {
