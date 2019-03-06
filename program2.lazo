@@ -3,5 +3,6 @@ contract Test {
     int x
 
     function (int, int) add(int x) {
+        int x
     }
 }

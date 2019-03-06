@@ -149,8 +149,7 @@ func (p *Parser) parseStatementBlock() []node.StatementNode {
 func (p *Parser) parseStatement() node.StatementNode {
 	switch p.currentToken.Type() {
 	case token.IDENTIFER:
-		identifier := p.readIdentifier()
-		return p.parseStatementWithIdentifier(identifier)
+		return p.parseStatementWithIdentifier()
 	case token.SYMBOL:
 		return p.parseStatementWithFixToken()
 	default:
@@ -160,7 +159,29 @@ func (p *Parser) parseStatement() node.StatementNode {
 	}
 }
 
-func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode {
+func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
+	if p.peekToken.Type() == token.IDENTIFER {
+		return p.parseVariableStatement()
+	}
+
+	identifier := p.readIdentifier()
+	if p.isSymbol(token.Assign) {
+		return p.parseAssignmentStatement(identifier)
+	}
+
+	p.addError("%s not yet implemented" + p.currentToken.Literal())
+	p.nextToken()
+	return nil
+}
+
+func (p *Parser) parseVariableStatement() *node.VariableNode {
+	v := p.parseVariable()
+	p.checkAndSkipNewLines(token.NewLine)
+	return v
+}
+
+func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
+	// not yet supported
 	return nil
 }
 
@@ -179,18 +200,14 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 	}
 }
 
+
+
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	return nil
 }
 
 func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	return nil
-}
-
-func (p *Parser) parseVariableStatement() *node.VariableNode {
-	v := p.parseVariable()
-	p.checkAndSkipNewLines(token.NewLine)
-	return v
 }
 
 func (p *Parser) parseVariable() *node.VariableNode {
