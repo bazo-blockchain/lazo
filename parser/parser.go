@@ -251,8 +251,14 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 		return p.parseBoolean()
 	}
 
-	// error node
-	return nil
+	var error string
+	if tok, ok := p.currentToken.(*token.ErrorToken); ok {
+		error = tok.Msg
+	} else {
+		error = "Invalid operand: " + p.currentToken.Literal()
+	}
+
+	return p.newErrorNode(error)
 }
 
 func (p *Parser) parseDesignator() *node.DesignatorNode {
