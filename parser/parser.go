@@ -142,20 +142,39 @@ func (p *Parser) parseStatementBlock() []node.StatementNode {
 			statements = append(statements, stmt)
 		}
 	}
-	p.check(token.CloseBrace)
+	p.checkAndSkipNewLines(token.CloseBrace)
 	return statements
 }
 
 func (p *Parser) parseStatement() node.StatementNode {
-	if p.isSymbol(token.If) {
-		return p.parseIfStatement()
-	} else if p.isSymbol(token.Return) {
-		return p.parseReturnStatement()
-	} else if p.isType(token.IDENTIFER) {
+	switch p.currentToken.Type() {
+	case token.IDENTIFER:
 		identifier := p.readIdentifier()
 		return p.parseStatementWithIdentifier(identifier)
-	} else {
-		// error
+	case token.SYMBOL:
+		return p.parseStatementWithFixToken()
+	default:
+		p.addError("Unsupported statement starting with" + p.currentToken.Literal())
+		p.nextToken()
+		return nil
+	}
+}
+
+func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode {
+	return nil
+}
+
+func (p *Parser) parseStatementWithFixToken() node.StatementNode {
+	ftok, _ :=  p.currentToken.(*token.FixToken)
+
+	switch ftok.Value {
+	case token.If:
+		return p.parseIfStatement()
+	case token.Return:
+		return p.parseReturnStatement()
+	default:
+		p.addError("Unsupported statement starting with" + ftok.Literal())
+		p.nextToken()
 		return nil
 	}
 }
@@ -168,9 +187,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	return nil
 }
 
-func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementNode {
-	return nil
-}
+
 
 func (p *Parser) parseVariableStatement() *node.VariableNode {
 	v := p.parseVariable()

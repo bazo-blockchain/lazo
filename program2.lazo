@@ -3,10 +3,5 @@ contract Test {
     int x
 
     function (int, int) add(int x) {
-        return x
-    }
-
-    function void sub(int a, int b) {
-        x = a - b
     }
 }
