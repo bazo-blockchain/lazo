@@ -239,16 +239,27 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 
 func (p *Parser) parseOperand() node.ExpressionNode {
 	switch p.currentToken.Type() {
+	case token.IDENTIFER:
+		return p.parseDesignator()
 	case token.INTEGER:
 		return p.parseInteger()
 	case token.CHARACTER:
 		return p.parseCharacter()
 	case token.STRING:
 		return p.parseString()
+	case token.SYMBOL:
+		return p.parseBoolean()
 	}
 
 	// error node
 	return nil
+}
+
+func (p *Parser) parseDesignator() *node.DesignatorNode {
+	return &node.DesignatorNode{
+		AbstractNode: p.newAbstractNode(),
+		Value:        p.readIdentifier(),
+	}
 }
 
 func (p *Parser) parseInteger() *node.IntegerLiteralNode {
@@ -282,6 +293,21 @@ func (p *Parser) parseString() *node.StringLiteralNode {
 	}
 	p.nextToken()
 	return s
+}
+
+func (p *Parser) parseBoolean() node.ExpressionNode {
+	tok, _ := p.currentToken.(*token.FixToken)
+
+	if value, ok := token.BooleanConstants[tok.Value]; ok {
+		b := &node.BoolLiteralNode{
+			AbstractNode: p.newAbstractNode(),
+			Value:        value,
+		}
+		p.nextToken()
+		return b
+	}
+
+	return p.newErrorNode("Invalid boolean value " + tok.Literal())
 }
 
 // Helper functions
@@ -344,6 +370,17 @@ func (p *Parser) newAbstractNode() node.AbstractNode {
 	return node.AbstractNode{
 		Position: p.currentToken.Pos(),
 	}
+}
+
+func (p *Parser) newErrorNode(msg string) *node.ErrorNode {
+	p.addError(msg)
+	e := &node.ErrorNode{
+		AbstractNode: p.newAbstractNode(),
+		Message:      msg,
+	}
+
+	p.nextToken()
+	return e
 }
 
 func (p *Parser) isEnd() bool {

@@ -44,6 +44,8 @@ const (
 	If
 	Else
 	Function
+	True
+	False
 )
 
 var Keywords = map[string]Symbol{
@@ -52,6 +54,13 @@ var Keywords = map[string]Symbol{
 	"if":       If,
 	"else":     Else,
 	"function": Function,
+	"true":     True,
+	"false":    False,
+}
+
+var BooleanConstants = map[Symbol]bool{
+	True: true,
+	False: false,
 }
 
 var SingleCharOperations = map[rune]Symbol{

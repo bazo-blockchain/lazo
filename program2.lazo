@@ -6,5 +6,7 @@ contract Test {
         int x = 1
         char c = 'c'
         string s = "String"
+        bool b = true
+        int x = y
     }
 }

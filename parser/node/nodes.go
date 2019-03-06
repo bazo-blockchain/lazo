@@ -134,6 +134,15 @@ func (n *StatementBlockNode) String() string {
 // Expression Nodes
 // --------------------------
 
+type DesignatorNode struct {
+	AbstractNode
+	Value string
+}
+
+func (n *DesignatorNode) String() string {
+	return fmt.Sprintf("[%s] DESIGNATOR %s", n.Pos(), n.Value)
+}
+
 // --------------------------
 // Literal Nodes
 // --------------------------
@@ -181,3 +190,12 @@ func (n *BoolLiteralNode) String() string {
 }
 
 // --------------------------
+
+type ErrorNode struct {
+	AbstractNode
+	Message string
+}
+
+func (n *ErrorNode) String() string {
+	return fmt.Sprintf("[%s] ERROR: %s", n.Pos(), n.Message)
+}
