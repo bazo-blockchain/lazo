@@ -48,7 +48,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 
 	contract.Name = p.readIdentifier()
 	p.check(token.OpenBrace)
-	p.checkAndSkipNewLines(token.NewLine)
+	p.checkAndSkipNewLines(token.NewLine) // force new line for contract body
 
 	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
 		p.parseContractBody(contract)
@@ -85,22 +85,15 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode {
-	// skip function keyword
-	p.check(token.Function)
+	p.nextToken() // skip function keyword
 
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
-		ReturnTypes:  []*node.TypeNode{},
-		Parameters:   []*node.VariableNode{},
-		Body:         []node.StatementNode{},
 	}
 
 	function.ReturnTypes = p.parseReturnTypes()
-
-	function.Identifier = p.readIdentifier()
-
+	function.Name = p.readIdentifier()
 	function.Parameters = p.parseParameters()
-
 	function.Body = p.parseFunctionBody()
 
 	return function
@@ -165,16 +158,10 @@ func (p *Parser) parseReturnTypes() []*node.TypeNode {
 
 	if p.isSymbol(token.OpenParen) {
 		p.nextToken()
-		for !p.isEnd() && !p.isSymbol(token.CloseParen) {
+		returnTypes = append(returnTypes, p.parseType())
+		for !p.isEnd() && p.isSymbol(token.Comma) {
 			returnTypes = append(returnTypes, p.parseType())
 			p.nextToken()
-			if p.isSymbol(token.Comma) {
-				p.nextToken()
-			} else if p.isSymbol(token.CloseParen) {
-				continue
-			} else {
-				// error
-			}
 		}
 		p.check(token.CloseParen)
 	} else {

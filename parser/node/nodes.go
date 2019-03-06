@@ -52,6 +52,23 @@ func (n *ContractNode) String() string {
 }
 
 // --------------------------
+// Contract Body Parts
+// --------------------------
+
+type FunctionNode struct {
+	AbstractNode
+	Name        string
+	ReturnTypes []*TypeNode
+	Parameters  []*VariableNode
+	Body        []StatementNode
+}
+
+func (n *FunctionNode) String() string {
+	return fmt.Sprintf("\n [%s] FUNCTION %s, PARAMs %s, RTYPES %s %s",
+		n.Pos(), n.Name, n.Parameters, n.ReturnTypes, n.Body)
+}
+
+// --------------------------
 // Statement Nodes
 // --------------------------
 
@@ -114,19 +131,6 @@ func (n *StatementBlockNode) String() string {
 // --------------------------
 // Expression Nodes
 // --------------------------
-
-type FunctionNode struct {
-	AbstractNode
-	Identifier  string
-	ReturnTypes []*TypeNode
-	Parameters  []*VariableNode
-	Body        []StatementNode
-}
-
-func (n *FunctionNode) String() string {
-	return fmt.Sprintf("\n [%s] FUNCTION %s, PARAM %s, RTYPES %s %s", n.Pos(), n.Identifier,
-		n.Parameters, n.ReturnTypes, n.Body)
-}
 
 // --------------------------
 // Literal Nodes
