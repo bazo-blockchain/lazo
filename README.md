@@ -5,27 +5,38 @@
 
 Please refer to [lazo-specification](https://github.com/bazo-blockchain/lazo-specification) for the language features.
 
-## Dependency Management
+
+## Development
+###  Dependency Management
 
 Packages are managed by [dep](https://golang.github.io/dep/). Install dep and run `dep ensure` to install all the dependencies.
 
-## Run Compiler
+### Run Compiler from Source
 
-`go run main.go program.lazo`
+    go run main.go program.lazo
 
 It will compile the given source code file "*program.lazo*".
 
-## Build Compiler
+### Run Unit Tests
 
-`go build` 
-
-It will create an executable for the current operating system (e.g. `lazo.exe` in Windows).
-
-## Run Tests
-
-`go test ./...` 
+    go test ./... 
 
 It will run all tests in the current directory and all of its subdirectories.
 
-To see the test coverage, run `./scripts/test.sh` and then open the **coverage.html** file.  
+To see the test coverage, run `./scripts/test.sh` and then open the **coverage.html** file.
 
+### Run Lints
+
+TODO
+
+### Build Compiler
+
+    go build 
+
+It will create an executable for the current operating system (e.g. `lazo.exe` in Windows).
+
+## Usage
+
+    ./lazo help
+
+TODO
