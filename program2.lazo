@@ -2,7 +2,7 @@ contract Test {
     bool b
     int x
 
-    function int add(int x) {
+    function (int, int) add(int x) {
         return x
     }
 

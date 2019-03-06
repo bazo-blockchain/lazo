@@ -61,7 +61,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	switch p.currentToken.Type() {
 	case token.IDENTIFER:
-		contract.Variables = append(contract.Variables, p.parseVariable())
+		contract.Variables = append(contract.Variables, p.parseVariable(true))
 	case token.SYMBOL:
 		ftok, _ :=  p.currentToken.(*token.FixToken)
 
@@ -99,21 +99,35 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	return function
 }
 
-// TODO Refactor: Move for loop in parseParameters and parseReturnTypes to own function
+func (p *Parser) parseReturnTypes() []*node.TypeNode {
+	var returnTypes []*node.TypeNode
+
+	if p.isSymbol(token.OpenParen) {
+		p.nextToken()
+		returnTypes = append(returnTypes, p.parseType())
+		for !p.isEnd() && p.isSymbol(token.Comma) {
+			p.nextToken()
+			returnTypes = append(returnTypes, p.parseType())
+		}
+		p.check(token.CloseParen)
+	} else {
+		returnTypes = append(returnTypes, p.parseType())
+	}
+
+	return returnTypes
+}
+
 func (p *Parser) parseParameters() []*node.VariableNode {
 	var parameters []*node.VariableNode
 
 	p.check(token.OpenParen)
+	isFirstParam := true
 	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
-		parameters = append(parameters, p.parseVariable())
-		p.nextToken()
-		if p.isSymbol(token.Comma) {
-			p.nextToken()
-		} else if p.isSymbol(token.CloseParen) {
-			continue
-		} else {
-			// error
+		if !isFirstParam {
+			p.checkAndSkipNewLines(token.Comma)
 		}
+		parameters = append(parameters, p.parseVariable(false))
+		isFirstParam = false
 	}
 	p.check(token.CloseParen)
 	return parameters
@@ -153,32 +167,18 @@ func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementN
 	return nil
 }
 
-func (p *Parser) parseReturnTypes() []*node.TypeNode {
-	var returnTypes []*node.TypeNode
 
-	if p.isSymbol(token.OpenParen) {
-		p.nextToken()
-		returnTypes = append(returnTypes, p.parseType())
-		for !p.isEnd() && p.isSymbol(token.Comma) {
-			returnTypes = append(returnTypes, p.parseType())
-			p.nextToken()
-		}
-		p.check(token.CloseParen)
-	} else {
-		returnTypes = append(returnTypes, p.parseType())
-	}
 
-	return returnTypes
-}
-
-func (p *Parser) parseVariable() *node.VariableNode {
+func (p *Parser) parseVariable(withNewLine bool) *node.VariableNode {
 	// TODO Implement Assignment
 	v := &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
 		Type:         p.parseType(),
 		Identifier:   p.readIdentifier(),
 	}
-	p.checkAndSkipNewLines(token.NewLine)
+	if withNewLine {
+		p.checkAndSkipNewLines(token.NewLine)
+	}
 	return v
 }
 
