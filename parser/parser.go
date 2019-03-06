@@ -187,8 +187,6 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	return nil
 }
 
-
-
 func (p *Parser) parseVariableStatement() *node.VariableNode {
 	v := p.parseVariable()
 	p.checkAndSkipNewLines(token.NewLine)

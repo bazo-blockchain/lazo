@@ -11,7 +11,6 @@ type TokenType int
 const (
 	IDENTIFER TokenType = iota
 	INTEGER
-	BOOLEAN
 	STRING
 	CHARACTER
 	SYMBOL
@@ -67,21 +66,6 @@ func (t *IntegerToken) Type() TokenType {
 
 func (t *IntegerToken) String() string {
 	return fmt.Sprintf("[%s] INT %s", t.Pos(), t.Literal())
-}
-
-// --------------------------
-
-type BooleanToken struct {
-	AbstractToken
-	Value bool
-}
-
-func (t *BooleanToken) Type() TokenType {
-	return BOOLEAN
-}
-
-func (t *BooleanToken) String() string {
-	return fmt.Sprintf("[%s] BOOLEAN %s", t.Pos(), t.Literal())
 }
 
 // --------------------------
