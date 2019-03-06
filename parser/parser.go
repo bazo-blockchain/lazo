@@ -59,13 +59,19 @@ func (p *Parser) parseContract() *node.ContractNode {
 }
 
 func (p *Parser) parseContractBody(contract *node.ContractNode) {
-	switch p.currentToken.(type) {
-	case *token.IdentifierToken:
+	switch p.currentToken.Type() {
+	case token.IDENTIFER:
 		contract.Variables = append(contract.Variables, p.parseVariable())
-	case *token.FixToken:
-		// TODO Parse all types of fix tokens in a contract
-		if p.isSymbol(token.Function) {
+	case token.SYMBOL:
+		ftok, _ :=  p.currentToken.(*token.FixToken)
+
+		switch ftok.Value {
+		case token.Function:
 			contract.Functions = append(contract.Functions, p.parseFunction())
+		default:
+			// TODO Parse all types of fix tokens in a contract
+			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
+			p.nextToken()
 		}
 	default:
 		p.addError("Unsupported contract part starting with" + p.currentToken.Literal())

@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+func TestTokenTypes(t *testing.T) {
+	assert.Equal(t, (&IdentifierToken{}).Type(), IDENTIFER)
+	assert.Equal(t, (&IntegerToken{}).Type(), INTEGER)
+	assert.Equal(t, (&BooleanToken{}).Type(), BOOLEAN)
+	assert.Equal(t, (&StringToken{}).Type(), STRING)
+	assert.Equal(t, (&CharacterToken{}).Type(), CHARACTER)
+	assert.Equal(t, (&FixToken{}).Type(), SYMBOL)
+	assert.Equal(t, (&ErrorToken{}).Type(), ERROR)
+}
+
 func TestIdentifierToken(t *testing.T) {
 	i := IdentifierToken{
 		AbstractToken{

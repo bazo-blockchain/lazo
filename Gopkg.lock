@@ -39,6 +39,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["gotest.tools/assert"]
+  input-imports = [
+    "github.com/pkg/errors",
+    "gotest.tools/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
