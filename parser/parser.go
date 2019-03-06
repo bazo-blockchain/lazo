@@ -241,20 +241,47 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	switch p.currentToken.Type() {
 	case token.INTEGER:
 		return p.parseInteger()
+	case token.CHARACTER:
+		return p.parseCharacter()
+	case token.STRING:
+		return p.parseString()
 	}
 
+	// error node
 	return nil
 }
 
 func (p *Parser) parseInteger() *node.IntegerLiteralNode {
-	itok, _ := p.currentToken.(*token.IntegerToken)
+	tok, _ := p.currentToken.(*token.IntegerToken)
 
 	i := &node.IntegerLiteralNode{
 		AbstractNode: p.newAbstractNode(),
-		Value:        itok.Value,
+		Value:        tok.Value,
 	}
 	p.nextToken()
 	return i
+}
+
+func (p *Parser) parseCharacter() *node.CharacterLiteralNode {
+	tok, _ := p.currentToken.(*token.CharacterToken)
+
+	c := &node.CharacterLiteralNode{
+		AbstractNode: p.newAbstractNode(),
+		Value:        tok.Value,
+	}
+	p.nextToken()
+	return c
+}
+
+func (p *Parser) parseString() *node.StringLiteralNode {
+	tok, _ := p.currentToken.(*token.StringToken)
+
+	s := &node.StringLiteralNode{
+		AbstractNode: p.newAbstractNode(),
+		Value:        tok.Literal(),
+	}
+	p.nextToken()
+	return s
 }
 
 // Helper functions

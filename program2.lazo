@@ -4,5 +4,7 @@ contract Test {
 
     function (int, int) add(int x) {
         int x = 1
+        char c = 'c'
+        string s = "String"
     }
 }
