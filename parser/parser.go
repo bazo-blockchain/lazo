@@ -61,7 +61,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	switch p.currentToken.Type() {
 	case token.IDENTIFER:
-		contract.Variables = append(contract.Variables, p.parseVariable(true))
+		contract.Variables = append(contract.Variables, p.parseVariableStatement())
 	case token.SYMBOL:
 		ftok, _ :=  p.currentToken.(*token.FixToken)
 
@@ -79,11 +79,6 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	}
 }
 
-func (p *Parser) parseExpression() node.ExpressionNode {
-	// TODO implement
-	return nil
-}
-
 func (p *Parser) parseFunction() *node.FunctionNode {
 	p.nextToken() // skip function keyword
 
@@ -94,7 +89,7 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	function.ReturnTypes = p.parseReturnTypes()
 	function.Name = p.readIdentifier()
 	function.Parameters = p.parseParameters()
-	function.Body = p.parseFunctionBody()
+	function.Body = p.parseStatementBlock()
 
 	return function
 }
@@ -126,22 +121,32 @@ func (p *Parser) parseParameters() []*node.VariableNode {
 		if !isFirstParam {
 			p.checkAndSkipNewLines(token.Comma)
 		}
-		parameters = append(parameters, p.parseVariable(false))
+		parameters = append(parameters, p.parseVariable())
 		isFirstParam = false
 	}
 	p.check(token.CloseParen)
 	return parameters
 }
 
-func (p *Parser) parseFunctionBody() []node.StatementNode {
+// Statements
+// -------------------------
+
+func (p *Parser) parseStatementBlock() []node.StatementNode {
 	p.check(token.OpenBrace)
-	// TODO Implement
+	p.checkAndSkipNewLines(token.NewLine)
+
+	var statements []node.StatementNode
+	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			statements = append(statements, stmt)
+		}
+	}
 	p.check(token.CloseBrace)
-	return nil
+	return statements
 }
 
 func (p *Parser) parseStatement() node.StatementNode {
-
 	if p.isSymbol(token.If) {
 		return p.parseIfStatement()
 	} else if p.isSymbol(token.Return) {
@@ -167,19 +172,19 @@ func (p *Parser) parseStatementWithIdentifier(identifier string) node.StatementN
 	return nil
 }
 
+func (p *Parser) parseVariableStatement() *node.VariableNode {
+	v := p.parseVariable()
+	p.checkAndSkipNewLines(token.NewLine)
+	return v
+}
 
-
-func (p *Parser) parseVariable(withNewLine bool) *node.VariableNode {
+func (p *Parser) parseVariable() *node.VariableNode {
 	// TODO Implement Assignment
-	v := &node.VariableNode{
+	return &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
 		Type:         p.parseType(),
 		Identifier:   p.readIdentifier(),
 	}
-	if withNewLine {
-		p.checkAndSkipNewLines(token.NewLine)
-	}
-	return v
 }
 
 func (p *Parser) parseType() *node.TypeNode {
@@ -189,6 +194,17 @@ func (p *Parser) parseType() *node.TypeNode {
 		Identifier:   p.readIdentifier(),
 	}
 }
+
+// Expressions
+// -------------------------
+
+func (p *Parser) parseExpression() node.ExpressionNode {
+	// TODO implement
+	return nil
+}
+
+// Helper functions
+// -----------------
 
 func (p *Parser) nextToken() {
 	p.currentToken = p.peekToken
@@ -201,9 +217,6 @@ func (p *Parser) nextTokenWhileNewLine() {
 		p.nextToken()
 	}
 }
-
-// helpers
-// --------------
 
 func (p *Parser) isType(expectedType token.TokenType) bool {
 	return p.currentToken.Type() == expectedType
@@ -223,6 +236,10 @@ func (p *Parser) check(symbol token.Symbol) {
 
 func (p *Parser) checkAndSkipNewLines(symbol token.Symbol) {
 	p.check(symbol)
+	p.skipNewLines()
+}
+
+func (p *Parser) skipNewLines() {
 	for p.isSymbol(token.NewLine) {
 		p.nextToken()
 	}

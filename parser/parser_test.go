@@ -14,14 +14,14 @@ import (
 
 func TestVariable(t *testing.T) {
 	p := newParserFromInput("int x \n")
-	v := p.parseVariable()
+	v := p.parseVariableStatement()
 
 	node.AssertVariable(t, v, "int", "x")
 }
 
 func TestVariableWithoutNewLine(t *testing.T) {
 	p := newParserFromInput("int x")
-	_ = p.parseVariable()
+	_ = p.parseVariableStatement()
 	assertHasError(t, p)
 }
 
