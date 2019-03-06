@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
+	"math/big"
 )
 
 type Node interface {
@@ -76,10 +77,11 @@ type VariableNode struct {
 	AbstractNode
 	Type       *TypeNode
 	Identifier string
+	Expression ExpressionNode
 }
 
 func (n *VariableNode) String() string {
-	return fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), n.Type.Identifier, n.Identifier)
+	return fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), n.Type.Identifier, n.Identifier, n.Expression)
 }
 
 // --------------------------
@@ -138,7 +140,7 @@ func (n *StatementBlockNode) String() string {
 
 type IntegerLiteralNode struct {
 	AbstractNode
-	Value int
+	Value *big.Int
 }
 
 func (n *IntegerLiteralNode) String() string {

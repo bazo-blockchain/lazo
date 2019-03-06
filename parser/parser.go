@@ -63,7 +63,7 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	case token.IDENTIFER:
 		contract.Variables = append(contract.Variables, p.parseVariableStatement())
 	case token.SYMBOL:
-		ftok, _ :=  p.currentToken.(*token.FixToken)
+		ftok, _ := p.currentToken.(*token.FixToken)
 
 		switch ftok.Value {
 		case token.Function:
@@ -174,19 +174,8 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	return nil
 }
 
-func (p *Parser) parseVariableStatement() *node.VariableNode {
-	v := p.parseVariable()
-	p.checkAndSkipNewLines(token.NewLine)
-	return v
-}
-
-func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
-	// not yet supported
-	return nil
-}
-
 func (p *Parser) parseStatementWithFixToken() node.StatementNode {
-	ftok, _ :=  p.currentToken.(*token.FixToken)
+	ftok, _ := p.currentToken.(*token.FixToken)
 
 	switch ftok.Value {
 	case token.If:
@@ -200,7 +189,16 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 	}
 }
 
+func (p *Parser) parseVariableStatement() *node.VariableNode {
+	v := p.parseVariable()
+	p.checkAndSkipNewLines(token.NewLine)
+	return v
+}
 
+func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
+	// not yet supported
+	return nil
+}
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	return nil
@@ -211,12 +209,17 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 }
 
 func (p *Parser) parseVariable() *node.VariableNode {
-	// TODO Implement Assignment
-	return &node.VariableNode{
+	v := &node.VariableNode{
 		AbstractNode: p.newAbstractNode(),
 		Type:         p.parseType(),
 		Identifier:   p.readIdentifier(),
 	}
+	if p.isSymbol(token.Assign) {
+		p.nextToken()
+		v.Expression = p.parseExpression()
+	}
+
+	return v
 }
 
 func (p *Parser) parseType() *node.TypeNode {
@@ -231,8 +234,27 @@ func (p *Parser) parseType() *node.TypeNode {
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
-	// TODO implement
+	return p.parseOperand()
+}
+
+func (p *Parser) parseOperand() node.ExpressionNode {
+	switch p.currentToken.Type() {
+	case token.INTEGER:
+		return p.parseInteger()
+	}
+
 	return nil
+}
+
+func (p *Parser) parseInteger() *node.IntegerLiteralNode {
+	itok, _ := p.currentToken.(*token.IntegerToken)
+
+	i := &node.IntegerLiteralNode{
+		AbstractNode: p.newAbstractNode(),
+		Value:        itok.Value,
+	}
+	p.nextToken()
+	return i
 }
 
 // Helper functions
