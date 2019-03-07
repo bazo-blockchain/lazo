@@ -173,7 +173,7 @@ func (lex *Lexer) readCharacter() token.Token {
 
 func (lex *Lexer) readFixToken() token.Token {
 	// Check if the character could belong to a multi character operation
-	if symbol, ok := token.PossibleMultiCharOperation[string(lex.current)]; ok {
+	if symbol, ok := token.PossibleMultiCharOperation[lex.current]; ok {
 		buf := []rune{lex.current}
 
 		lex.nextChar()

@@ -9,5 +9,6 @@ contract Test {
         bool b = true
         int x = 1 + 2
         int y = 3 + 4 * 2
+        int z = 3 ** 4 ** 2
     }
 }

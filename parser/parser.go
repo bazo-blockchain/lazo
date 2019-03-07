@@ -234,15 +234,15 @@ func (p *Parser) parseType() *node.TypeNode {
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
-	abstraceNode := p.newAbstractNode()
+	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseFactor()
 
 	for p.isAnySymbol(token.Addition, token.Subtraction) {
 		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstraceNode,
-			LeftExpr:leftExpr,
-			Operator: p.readSymbol(),
-			RightExpr: p.parseFactor(),
+			AbstractNode: abstractNode,
+			LeftExpr:     leftExpr,
+			Operator:     p.readSymbol(),
+			RightExpr:    p.parseFactor(),
 		}
 		leftExpr = binExpr
 	}
@@ -250,15 +250,15 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 }
 
 func (p *Parser) parseFactor() node.ExpressionNode {
-	abstraceNode := p.newAbstractNode()
+	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseExponent()
 
 	for p.isAnySymbol(token.Multiplication, token.Division, token.Modulo) {
 		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstraceNode,
-			LeftExpr:leftExpr,
-			Operator: p.readSymbol(),
-			RightExpr: p.parseExponent(),
+			AbstractNode: abstractNode,
+			LeftExpr:     leftExpr,
+			Operator:     p.readSymbol(),
+			RightExpr:    p.parseExponent(),
 		}
 		leftExpr = binExpr
 	}
@@ -266,6 +266,22 @@ func (p *Parser) parseFactor() node.ExpressionNode {
 }
 
 func (p *Parser) parseExponent() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseExpressionRest()
+
+	for p.isSymbol(token.Exponent) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			LeftExpr:     leftExpr,
+			Operator:     p.readSymbol(),
+			RightExpr:    p.parseExponent(), // recursive because of right-to-left associativity
+		}
+		return binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseExpressionRest() node.ExpressionNode {
 	return p.parseOperand()
 }
 

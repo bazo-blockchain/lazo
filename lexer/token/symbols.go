@@ -11,6 +11,7 @@ const (
 	Division
 	Multiplication
 	Modulo
+	Exponent
 
 	Less
 	LessEqual
@@ -57,6 +58,7 @@ var SymbolLexeme = map[Symbol]string{
 	Multiplication: "*",
 	Division: "/",
 	Modulo: "%",
+	Exponent: "**",
 
 	Less: "<",
 	LessEqual: "<=",
@@ -122,16 +124,16 @@ var SingleCharOperations = map[rune]Symbol{
 	'+': Addition,
 	'-': Subtraction,
 	'/': Division,
-	'*': Multiplication,
 	'%': Modulo,
 }
 
-var PossibleMultiCharOperation = map[string]Symbol{
-	"=": Assign,
-	">": Greater,
-	"<": Less,
-	"!": Not,
+var PossibleMultiCharOperation = map[rune]Symbol{
+	'=': Assign,
+	'>': Greater,
+	'<': Less,
+	'!': Not,
 
+	'*': Multiplication,
 }
 
 var LogicalOperation = map[string]Symbol{
@@ -144,4 +146,6 @@ var MultiCharOperation = map[string]Symbol{
 	"!=": Unequal,
 	">=": GreaterEqual,
 	"<=": LessEqual,
+
+	"**": Exponent,
 }
