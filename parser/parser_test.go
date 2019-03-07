@@ -160,8 +160,8 @@ func TestFunctionMissingNewlineInBody(t *testing.T) {
 	assertHasError(t, p)
 }
 
-// StatementBlock Nodes
-// --------------------
+// Statement Nodes
+// ---------------
 
 func TestEmptyStatementBlock(t *testing.T) {
 	p := newParserFromInput("{\n}\n")
@@ -184,6 +184,36 @@ func TestMultipleStatementBlock(t *testing.T) {
 	v := p.parseStatementBlock()
 
 	node.AssertStatementBlock(t, v, 2)
+	assertNoErrors(t, p)
+}
+
+func TestReturnStatementMissingNewline(t *testing.T) {
+	p := newParserFromInput("return")
+	p.parseReturnStatement()
+	assertHasError(t, p)
+}
+
+func TestEmptyReturnStatement(t *testing.T) {
+	p := newParserFromInput("return \n")
+	v := p.parseReturnStatement()
+
+	node.AssertReturnStatement(t, v, 0)
+	assertNoErrors(t, p)
+}
+
+func TestSingleReturnStatement(t *testing.T) {
+	p := newParserFromInput("return 1\n")
+	v := p.parseReturnStatement()
+
+	node.AssertReturnStatement(t, v, 1)
+	assertNoErrors(t, p)
+}
+
+func TestMultipleReturnStatement(t *testing.T) {
+	p := newParserFromInput("return 1, 2\n")
+	v := p.parseReturnStatement()
+
+	node.AssertReturnStatement(t, v, 2)
 	assertNoErrors(t, p)
 }
 

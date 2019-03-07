@@ -36,19 +36,39 @@ func AssertStatementBlock(t *testing.T, node []StatementNode, totalStmt int) {
 	assert.Equal(t, len(node), totalStmt)
 }
 
-func AssertStatement(t *testing.T, node StatementNode) {}
+func AssertStatementWithIdentifier(t *testing.T, node StatementNode, stmt string) {
+	AssertStatement(t, node, stmt)
+}
 
-func AssertStatementWithIdentifier(t *testing.T, node StatementNode) {}
+func AssertStatementWithFixToken(t *testing.T, node StatementNode, stmt string) {
+	AssertStatement(t, node, stmt)
+}
 
-func AssertStatementWithFixToken(t *testing.T, node StatementNode) {}
+func AssertVariableStatement(t *testing.T, node *VariableNode, varType string, id string, expr string) {
+	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Identifier, id)
+	AssertExpression(t, node.Expression, expr)
+}
 
-func AssertVariableStatement(t *testing.T, node VariableNode) {}
+func AssertAssignmentStatement(t *testing.T, node *AssignmentStatementNode, designator string, expr string) {
+	assert.Equal(t, node.Left.Value, designator)
+	AssertExpression(t, node.Right, expr)
+}
 
-func AssertAssignmentStatement(t *testing.T, node AssignmentStatementNode) {}
+func AssertIfStatement(t *testing.T, node *IfStatementNode, cond string, totalThen int, totalElse int) {
+	AssertExpression(t, node.Condition, cond)
+	assert.Equal(t, len(node.Then), totalThen)
+	assert.Equal(t, len(node.Else), totalElse)
 
-func AssertIfStatement(t *testing.T, node IfStatementNode) {}
+}
 
-func AssertReturnStatement(t *testing.T, node ReturnStatementNode) {}
+func AssertReturnStatement(t *testing.T, node *ReturnStatementNode, totalExpr int) {
+	assert.Equal(t, len(node.Expression), totalExpr)
+}
+
+func AssertStatement(t *testing.T, node StatementNode, stmt string) {
+	assert.Equal(t, node.String(), stmt)
+}
 
 // ----------
 

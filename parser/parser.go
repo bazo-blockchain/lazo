@@ -252,11 +252,13 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 
 	p.nextToken() // skip 'return' keyword
 
-	returnValues = append(returnValues, p.parseExpression())
-
-	for !p.isEnd() && p.isSymbol(token.Comma){
-		p.nextToken() // skip ','
+	if !p.isSymbol(token.NewLine) {
 		returnValues = append(returnValues, p.parseExpression())
+
+		for !p.isSymbol(token.EOF) && p.isSymbol(token.Comma){
+			p.nextToken() // skip ','
+			returnValues = append(returnValues, p.parseExpression())
+		}
 	}
 
 	p.checkAndSkipNewLines(token.NewLine)
