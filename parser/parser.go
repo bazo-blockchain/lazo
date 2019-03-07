@@ -269,7 +269,7 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseExpressionRest()
 
-	for p.isSymbol(token.Exponent) {
+	if p.isSymbol(token.Exponent) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
