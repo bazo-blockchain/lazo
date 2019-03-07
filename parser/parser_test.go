@@ -329,6 +329,46 @@ func TestVariableStatementWONewline(t *testing.T){
 	assertHasError(t, p)
 }
 
+func TestStatementWithFixTokenReturn(t *testing.T){
+	p := newParserFromInput("return\n")
+	v := p.parseStatementWithFixToken()
+
+	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT []")
+	assertNoErrors(t, p)
+}
+
+func TestStatementWithFixTokenReturnValue(t *testing.T){
+	p := newParserFromInput("return 5\n")
+	v := p.parseStatementWithFixToken()
+
+	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT [5]")
+	assertNoErrors(t, p)
+}
+
+func TestStatementWithFixTokenMultipleReturnValue(t *testing.T){
+	p := newParserFromInput("return 5, 4\n")
+	v := p.parseStatementWithFixToken()
+
+	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT [5 4]")
+	assertNoErrors(t, p)
+}
+
+func TestStatementWithIdentifier(t *testing.T){
+	p := newParserFromInput("int a\n")
+	v := p.parseStatementWithIdentifier()
+
+	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = %!s(<nil>)")
+	assertNoErrors(t, p)
+}
+
+func TestStatementWithIdentifierAssignment(t *testing.T){
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseStatementWithIdentifier()
+
+	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
+	assertNoErrors(t, p)
+}
+
 // Designator Nodes
 // ----------------
 

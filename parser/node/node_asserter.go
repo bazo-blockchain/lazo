@@ -36,14 +36,6 @@ func AssertStatementBlock(t *testing.T, node []StatementNode, totalStmt int) {
 	assert.Equal(t, len(node), totalStmt)
 }
 
-func AssertStatementWithIdentifier(t *testing.T, node StatementNode, stmt string) {
-	AssertStatement(t, node, stmt)
-}
-
-func AssertStatementWithFixToken(t *testing.T, node StatementNode, stmt string) {
-	AssertStatement(t, node, stmt)
-}
-
 func AssertVariableStatement(t *testing.T, node *VariableNode, varType string, id string, expr string) {
 	assert.Equal(t, node.Type.Identifier, varType)
 	assert.Equal(t, node.Identifier, id)
