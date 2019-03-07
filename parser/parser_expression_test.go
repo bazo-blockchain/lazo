@@ -83,6 +83,11 @@ func TestRelationalComparisonAssociativity(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "(((1 < 2) <= 3) > 4)", "5", token.GreaterEqual)
 }
 
+func TestExpr(t *testing.T) {
+	e := parseExpressionFromInput(t, "1")
+	node.AssertExpression(t, e, "1")
+}
+
 // --------------
 
 func parseExpressionFromInput(t *testing.T, input string) node.ExpressionNode {
