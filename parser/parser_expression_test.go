@@ -83,9 +83,32 @@ func TestRelationalComparisonAssociativity(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "(((1 < 2) <= 3) > 4)", "5", token.GreaterEqual)
 }
 
-func TestExpr(t *testing.T) {
-	e := parseExpressionFromInput(t, "1")
-	node.AssertExpression(t, e, "1")
+// Term Expression
+// --------------------
+
+func TestAddition(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2")
+	node.AssertBinaryExpression(t, e, "1", "2", token.Addition)
+}
+
+func TestSubstraction(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 - 2")
+	node.AssertBinaryExpression(t, e, "1", "2", token.Subtraction)
+}
+
+func TestSummandAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 - 3")
+	node.AssertBinaryExpression(t, e, "(1 + 2)", "3", token.Subtraction)
+}
+
+func TestConcatenation(t *testing.T) {
+	e := parseExpressionFromInput(t, ` "hello" + "world" `)
+	node.AssertBinaryExpression(t, e, "hello", "world", token.Addition)
+}
+
+func TestAdditionPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 <= 3")
+	node.AssertBinaryExpression(t, e, "(1 + 2)", "3", token.LessEqual)
 }
 
 // --------------
