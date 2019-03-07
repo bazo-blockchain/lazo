@@ -50,50 +50,50 @@ const (
 )
 
 var SymbolLexeme = map[Symbol]string{
-	EOF: "EOF",
+	EOF:     "EOF",
 	NewLine: `\n`,
 
-	Addition: "+",
-	Subtraction: "-",
+	Addition:       "+",
+	Subtraction:    "-",
 	Multiplication: "*",
-	Division: "/",
-	Modulo: "%",
-	Exponent: "**",
+	Division:       "/",
+	Modulo:         "%",
+	Exponent:       "**",
 
-	Less: "<",
-	LessEqual: "<=",
+	Less:         "<",
+	LessEqual:    "<=",
 	GreaterEqual: ">=",
-	Greater: ">",
+	Greater:      ">",
 
-	Equal: "==",
+	Equal:   "==",
 	Unequal: "!=",
 
-	OpenBrace: "{",
-	CloseBrace: "}",
-	OpenBracket: "[",
+	OpenBrace:    "{",
+	CloseBrace:   "}",
+	OpenBracket:  "[",
 	CloseBracket: "]",
-	OpenParen: "(",
-	CloseParen: ")",
+	OpenParen:    "(",
+	CloseParen:   ")",
 
-	Colon: ":",
-	Comma: ",",
+	Colon:  ":",
+	Comma:  ",",
 	Period: ".",
 
 	Not: "!",
 	And: "&&",
-	Or: "||",
+	Or:  "||",
 
 	Assign: "=",
 
 	// Keywords
 
 	Contract: "contract",
-	Return: "return",
-	If: "if",
-	Else: "else",
+	Return:   "return",
+	If:       "if",
+	Else:     "else",
 	Function: "function",
-	True: "true",
-	False: "false",
+	True:     "true",
+	False:    "false",
 }
 
 var Keywords = map[string]Symbol{
@@ -107,7 +107,7 @@ var Keywords = map[string]Symbol{
 }
 
 var BooleanConstants = map[Symbol]bool{
-	True: true,
+	True:  true,
 	False: false,
 }
 

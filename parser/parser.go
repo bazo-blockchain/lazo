@@ -292,8 +292,8 @@ func (p *Parser) parseExpressionRest() node.ExpressionNode {
 func (p *Parser) parseUnaryExpression() *node.UnaryExpression {
 	return &node.UnaryExpression{
 		AbstractNode: p.newAbstractNode(),
-		Operator: p.readSymbol(),
-		Operand: p.parseFactor(),
+		Operator:     p.readSymbol(),
+		Operand:      p.parseFactor(),
 	}
 }
 
