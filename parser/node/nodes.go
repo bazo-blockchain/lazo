@@ -155,7 +155,7 @@ type BinaryExpressionNode struct {
 }
 
 func (n *BinaryExpressionNode) String() string {
-	return fmt.Sprintf("EXPR (%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
+	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
 }
 
 // --------------------------
@@ -178,7 +178,7 @@ type DesignatorNode struct {
 }
 
 func (n *DesignatorNode) String() string {
-	return fmt.Sprintf("DESIGNATOR %s", n.Value)
+	return fmt.Sprintf("%s", n.Value)
 }
 
 // --------------------------

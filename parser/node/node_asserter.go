@@ -1,6 +1,7 @@
 package node
 
 import (
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"gotest.tools/assert"
 	"math/big"
 	"testing"
@@ -55,4 +56,12 @@ func AssertError(t *testing.T, node *ErrorNode,  message string) {
 
 func AssertType(t *testing.T, typeNode *TypeNode, varType string) {
 	assert.Equal(t, typeNode.Identifier, varType)
+}
+
+func AssertBinaryExpression(t *testing.T, node ExpressionNode, left string, right string, op token.Symbol) {
+	binExpr := node.(*BinaryExpressionNode)
+
+	assert.Equal(t, binExpr.Left.String(), left)
+	assert.Equal(t, binExpr.Right.String(), right)
+	assert.Equal(t, binExpr.Operator, op)
 }
