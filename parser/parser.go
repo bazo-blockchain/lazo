@@ -227,19 +227,15 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	p.check(token.CloseParen)
 
 	// Then
-	then := &node.StatementBlockNode{
-		AbstractNode: p.newAbstractNode(),
-		Statements: p.parseStatementBlock(),
-	}
+	then := p.parseStatementBlock()
 
-	alternative := &node.StatementBlockNode{}
+	var alternative []node.StatementNode
 
 	if p.isSymbol(token.Else) {
 		p.nextToken() // skip 'else' keyword
 
 		// Else
-		alternative.AbstractNode = p.newAbstractNode()
-		alternative.Statements = p.parseStatementBlock()
+		alternative = p.parseStatementBlock()
 	}
 
 	return &node.IfStatementNode{
