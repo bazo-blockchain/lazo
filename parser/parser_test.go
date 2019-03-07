@@ -74,6 +74,64 @@ func TestVariableWithoutNewLine(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Function Nodes
+// --------------
+func TestEmptyFunction(t *testing.T) {
+	p := newParserFromInput(`function void test(){}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 1, 0, 0)
+}
+
+func TestFunctionWithParam(t *testing.T) {
+	p := newParserFromInput(`function void test(int a){}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 1, 1, 0)
+}
+
+func TestFunctionWithParams(t *testing.T) {
+	p := newParserFromInput(`function void test(int a, int b){}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 1, 2, 0)
+}
+
+func TestFunctionWithMultipleRTypes(t *testing.T) {
+	p := newParserFromInput(`function (int, int) test(){}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 2, 0, 0)
+}
+
+func TestFunctionWithParamsAndRTypes(t *testing.T) {
+	p := newParserFromInput(`function (int, int) test(int a, int b){}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 2, 2, 0)
+}
+
+func TestFunctionWithStatement(t *testing.T) {
+	p := newParserFromInput(`function void test(){
+		int a
+		}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 1, 0, 1)
+}
+
+func TestFunctionWithMultipleStatements(t *testing.T) {
+	p := newParserFromInput(`function void test(){
+		int a
+		int b
+		}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 1, 0, 2)
+}
+
+func TestFullFunction(t *testing.T) {
+	p := newParserFromInput(`function (int, int) test(int a, int b){
+		int a
+		int b
+		}`)
+	f := p.parseFunction()
+	node.AssertFunction(t, f, "test", 2, 2, 2)
+}
+
 // Helpers
 // ------------------------------
 
