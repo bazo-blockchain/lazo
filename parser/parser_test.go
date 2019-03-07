@@ -159,6 +159,36 @@ func TestFunctionMissingNewlineInBody(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Designator Nodes
+// ----------------
+
+func TestDesignator(t *testing.T) {
+	p := newParserFromInput("test")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "test")
+	assertNoErrors(t, p)
+}
+
+func TestDesignatorWithNumbers(t *testing.T) {
+	p := newParserFromInput("test123")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "test123")
+	assertNoErrors(t, p)
+}
+
+func TestDesignatorWithUnderscore(t *testing.T) {
+	p := newParserFromInput("_test")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "_test")
+	assertNoErrors(t, p)
+}
+
+func TestInvalidDesignator(t *testing.T) {
+	p := newParserFromInput("1ab")
+	p.parseDesignator()
+	assertHasError(t, p)
+}
+
 // Literal Nodes
 // -------------
 
