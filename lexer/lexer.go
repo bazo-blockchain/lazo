@@ -58,7 +58,7 @@ func (lex *Lexer) NextToken() token.Token {
 }
 
 func (lex *Lexer) skipWhiteSpace() {
-	for !lex.IsEnd && lex.current <= ' ' {
+	for !lex.IsEnd && lex.current <= ' ' && !lex.isChar('\n') {
 		lex.nextChar()
 	}
 }
@@ -100,7 +100,7 @@ func (lex *Lexer) readInteger() token.Token {
 
 func (lex *Lexer) readName() token.Token {
 	lexeme := lex.readLexeme(func() bool {
-		return !lex.isChar(' ') && !lex.isChar('\n')
+		return lex.isLetter() || lex.isChar('_') || lex.isDigit()
 	})
 	abstractToken := lex.newAbstractToken(lexeme)
 
@@ -172,9 +172,8 @@ func (lex *Lexer) readCharacter() token.Token {
 }
 
 func (lex *Lexer) readFixToken() token.Token {
-
 	// Check if the character could belong to a multi character operation
-	if symbol, ok := token.PossibleMultiCharOperation[string(lex.current)]; ok {
+	if symbol, ok := token.PossibleMultiCharOperation[lex.current]; ok {
 		buf := []rune{lex.current}
 
 		lex.nextChar()
@@ -192,21 +191,24 @@ func (lex *Lexer) readFixToken() token.Token {
 			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
-	}
-
-	// Check if the character is a single character operator
-	if symbol, ok := token.SingleCharOperations[string(lex.current)]; ok {
-
+	} else if symbol, ok := token.SingleCharOperations[lex.current]; ok { // Check if the character is a single character operator
+		abstractToken := lex.newAbstractToken(string(lex.current))
 		lex.nextChar()
 
 		return &token.FixToken{
-			AbstractToken: lex.newAbstractToken(string(lex.current)),
+			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
 	}
 
-	if lex.current == '&' || lex.current == '|' {
+	if lex.isChar('&') || lex.isChar('|') {
 		return lex.readLogicalFixToken()
+	} else if lex.isChar('\n') {
+		lex.nextChar()
+		return &token.FixToken{
+			AbstractToken: lex.newAbstractToken(`\n`),
+			Value:         token.NewLine,
+		}
 	}
 
 	lex.nextChar()

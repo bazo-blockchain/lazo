@@ -22,7 +22,10 @@ func newLexerTestUtil(t *testing.T, input string) *lexerTestUtil {
 	}
 
 	for !tester.lex.IsEnd {
-		tester.tokens = append(tester.tokens, tester.lex.NextToken())
+		tok := tester.lex.NextToken()
+		if ftok, ok := tok.(*token.FixToken); !ok || ftok.Value != token.NewLine {
+			tester.tokens = append(tester.tokens, tok)
+		}
 	}
 	return tester
 }

@@ -4,12 +4,14 @@ type Symbol int
 
 const (
 	EOF Symbol = iota
+	NewLine
 
 	Addition
 	Subtraction
 	Division
 	Multiplication
 	Modulo
+	Exponent
 
 	Less
 	LessEqual
@@ -41,42 +43,97 @@ const (
 	Contract
 	Return
 	If
-	Elif
 	Else
 	Function
+	True
+	False
 )
+
+var SymbolLexeme = map[Symbol]string{
+	EOF:     "EOF",
+	NewLine: `\n`,
+
+	Addition:       "+",
+	Subtraction:    "-",
+	Multiplication: "*",
+	Division:       "/",
+	Modulo:         "%",
+	Exponent:       "**",
+
+	Less:         "<",
+	LessEqual:    "<=",
+	GreaterEqual: ">=",
+	Greater:      ">",
+
+	Equal:   "==",
+	Unequal: "!=",
+
+	OpenBrace:    "{",
+	CloseBrace:   "}",
+	OpenBracket:  "[",
+	CloseBracket: "]",
+	OpenParen:    "(",
+	CloseParen:   ")",
+
+	Colon:  ":",
+	Comma:  ",",
+	Period: ".",
+
+	Not: "!",
+	And: "&&",
+	Or:  "||",
+
+	Assign: "=",
+
+	// Keywords
+
+	Contract: "contract",
+	Return:   "return",
+	If:       "if",
+	Else:     "else",
+	Function: "function",
+	True:     "true",
+	False:    "false",
+}
 
 var Keywords = map[string]Symbol{
 	"contract": Contract,
 	"return":   Return,
 	"if":       If,
-	"elif": Elif,
 	"else":     Else,
 	"function": Function,
+	"true":     True,
+	"false":    False,
 }
 
-var SingleCharOperations = map[string]Symbol{
-	":": Colon,
-	",": Comma,
-	".": Period,
-	"{": OpenBrace,
-	"}": CloseBrace,
-	"[": OpenBracket,
-	"]": CloseBracket,
-	"(": OpenParen,
-	")": CloseParen,
-	"+": Addition,
-	"-": Subtraction,
-	"/": Division,
-	"*": Multiplication,
-	"%": Modulo,
+var BooleanConstants = map[Symbol]bool{
+	True:  true,
+	False: false,
 }
 
-var PossibleMultiCharOperation = map[string]Symbol{
-	"=": Assign,
-	">": Greater,
-	"<": Less,
-	"!": Not,
+var SingleCharOperations = map[rune]Symbol{
+	':': Colon,
+	',': Comma,
+	'.': Period,
+	'{': OpenBrace,
+	'}': CloseBrace,
+	'[': OpenBracket,
+	']': CloseBracket,
+	'(': OpenParen,
+	')': CloseParen,
+	'+': Addition,
+	'-': Subtraction,
+	'/': Division,
+	'%': Modulo,
+}
+
+var PossibleMultiCharOperation = map[rune]Symbol{
+	'=': Assign,
+	'>': Greater,
+	'<': Less,
+	'!': Not,
+
+	'*': Multiplication,
 }
 
 var LogicalOperation = map[string]Symbol{
@@ -89,4 +146,6 @@ var MultiCharOperation = map[string]Symbol{
 	"!=": Unequal,
 	">=": GreaterEqual,
 	"<=": LessEqual,
+
+	"**": Exponent,
 }

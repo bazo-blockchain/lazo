@@ -1,0 +1,15 @@
+contract Test {
+    bool b
+    int x
+
+    function (int, int) add(int x) {
+        int x = 1
+        char c = 'c'
+        string s = "String"
+        bool b = true
+        int x = 1 + 2
+        int y = 3 + 4 * 2
+        int z = 3 ** 4 ** 2
+        int a = -4 * 3
+    }
+}
