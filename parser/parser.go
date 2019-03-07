@@ -240,9 +240,9 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 	for p.isAnySymbol(token.Addition, token.Subtraction) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
-			LeftExpr:     leftExpr,
+			Left:         leftExpr,
 			Operator:     p.readSymbol(),
-			RightExpr:    p.parseFactor(),
+			Right:        p.parseFactor(),
 		}
 		leftExpr = binExpr
 	}
@@ -256,9 +256,9 @@ func (p *Parser) parseFactor() node.ExpressionNode {
 	for p.isAnySymbol(token.Multiplication, token.Division, token.Modulo) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
-			LeftExpr:     leftExpr,
+			Left:         leftExpr,
 			Operator:     p.readSymbol(),
-			RightExpr:    p.parseExponent(),
+			Right:        p.parseExponent(),
 		}
 		leftExpr = binExpr
 	}
@@ -272,9 +272,9 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 	for p.isSymbol(token.Exponent) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
-			LeftExpr:     leftExpr,
+			Left:         leftExpr,
 			Operator:     p.readSymbol(),
-			RightExpr:    p.parseExponent(), // recursive because of right-to-left associativity
+			Right:        p.parseExponent(), // recursive because of right-to-left associativity
 		}
 		return binExpr
 	}
@@ -282,7 +282,19 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 }
 
 func (p *Parser) parseExpressionRest() node.ExpressionNode {
+	if p.isAnySymbol(token.Addition, token.Subtraction) {
+		return p.parseUnaryExpression()
+	}
+
 	return p.parseOperand()
+}
+
+func (p *Parser) parseUnaryExpression() *node.UnaryExpression {
+	return &node.UnaryExpression{
+		AbstractNode: p.newAbstractNode(),
+		Operator: p.readSymbol(),
+		Operand: p.parseFactor(),
+	}
 }
 
 func (p *Parser) parseOperand() node.ExpressionNode {

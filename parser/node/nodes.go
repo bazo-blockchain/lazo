@@ -136,13 +136,25 @@ func (n *StatementBlockNode) String() string {
 
 type BinaryExpressionNode struct {
 	AbstractNode
-	LeftExpr  ExpressionNode
-	Operator  token.Symbol
-	RightExpr ExpressionNode
+	Left     ExpressionNode
+	Operator token.Symbol
+	Right    ExpressionNode
 }
 
 func (n *BinaryExpressionNode) String() string {
-	return fmt.Sprintf("EXPR (%s %s %s)", n.LeftExpr, token.SymbolLexeme[n.Operator], n.RightExpr)
+	return fmt.Sprintf("EXPR (%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
+}
+
+// --------------------------
+
+type UnaryExpression struct {
+	AbstractNode
+	Operator token.Symbol
+	Operand  ExpressionNode
+}
+
+func (n *UnaryExpression) String() string {
+	return fmt.Sprintf("EXPR (%s %s)", token.SymbolLexeme[n.Operator], n.Operand)
 }
 
 // --------------------------

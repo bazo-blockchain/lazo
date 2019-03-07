@@ -10,5 +10,6 @@ contract Test {
         int x = 1 + 2
         int y = 3 + 4 * 2
         int z = 3 ** 4 ** 2
+        int a = -4 * 3
     }
 }
