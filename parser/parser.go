@@ -80,11 +80,11 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode {
-	p.nextToken() // skip function keyword
-
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
 	}
+
+	p.nextToken() // skip function keyword
 
 	function.ReturnTypes = p.parseReturnTypes()
 	function.Name = p.readIdentifier()
@@ -207,6 +207,8 @@ func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode 
 
 	expression := p.parseExpression()
 
+
+	p.checkAndSkipNewLines(token.NewLine)
 	return &node.AssignmentStatementNode{
 		AbstractNode:	abstractNode,
 		Left:			designator,
@@ -220,18 +222,15 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	p.nextToken() // skip 'if' keyword
 
 	// Condition
-	p.checkAndSkipNewLines(token.OpenParen)
+	p.check(token.OpenParen)
 	condition := p.parseExpression()
-	p.checkAndSkipNewLines(token.CloseParen)
+	p.check(token.CloseParen)
 
 	// Then
-	p.checkAndSkipNewLines(token.OpenBrace)
 	then := &node.StatementBlockNode{
 		AbstractNode: p.newAbstractNode(),
 		Statements: p.parseStatementBlock(),
 	}
-	p.checkAndSkipNewLines(token.CloseBrace)
-
 
 	alternative := &node.StatementBlockNode{}
 
@@ -239,10 +238,8 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 		p.nextToken() // skip 'else' keyword
 
 		// Else
-		p.checkAndSkipNewLines(token.OpenBrace)
 		alternative.AbstractNode = p.newAbstractNode()
 		alternative.Statements = p.parseStatementBlock()
-		p.checkAndSkipNewLines(token.CloseBrace)
 	}
 
 	return &node.IfStatementNode{
@@ -265,6 +262,8 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 		p.nextToken() // skip ','
 		returnValues = append(returnValues, p.parseExpression())
 	}
+
+	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.ReturnStatementNode{
 		AbstractNode: abstractNode,
@@ -298,6 +297,74 @@ func (p *Parser) parseType() *node.TypeNode {
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
+	return p.parseOr()
+}
+
+func (p *Parser) parseOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseAnd()
+
+	for p.isAnySymbol(token.Or) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseAnd(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseAnd() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseEquality()
+
+	for p.isAnySymbol(token.And) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseEquality(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseEquality() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseComparison()
+
+	for p.isAnySymbol(token.Equal, token.Unequal) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseComparison(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseComparison() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseTerm()
+
+	for p.isAnySymbol(token.Less, token.LessEqual, token.GreaterEqual, token.Greater) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseTerm(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseTerm() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseFactor()
 

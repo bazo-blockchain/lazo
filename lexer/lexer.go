@@ -211,8 +211,14 @@ func (lex *Lexer) readFixToken() token.Token {
 		}
 	}
 
+	lexeme := string(lex.current)
+
 	lex.nextChar()
-	return nil
+
+	return &token.ErrorToken{
+		AbstractToken: lex.newAbstractToken(lexeme),
+		Msg: fmt.Sprintf("Invalid charactr %s", lexeme),
+	}
 
 }
 
