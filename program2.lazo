@@ -27,4 +27,36 @@ contract Test {
     function (int, int) add3(int a, int b) {
         return a, b
     }
+
+    function bool equal(int a, int b) {
+        return a == b
+    }
+
+    function bool unequal(int a, int b) {
+        return a != b
+    }
+
+    function bool less(int a, int b) {
+        return a < b
+    }
+
+    function bool lessEqul(int a, int b) {
+        return a <= b
+    }
+
+    function bool greaterEqual(int a, int b) {
+        return a >= b
+    }
+
+    function bool greater(int a, int b) {
+        return a > b
+    }
+
+    function bool and(int a, int b) {
+        return a && b
+    }
+
+    function bool or(int a, int b) {
+        return a || b
+    }
 }
