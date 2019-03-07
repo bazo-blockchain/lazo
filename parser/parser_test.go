@@ -164,15 +164,22 @@ func TestFunctionMissingNewlineInBody(t *testing.T) {
 
 func TestIntegerLiteral(t *testing.T) {
 	p := newParserFromInput("1")
-	i :=p.parseInteger()
+	i := p.parseInteger()
+	node.AssertIntegerLiteral(t, i, big.NewInt(1))
+	assertNoErrors(t, p)
+}
+
+func TestInvalidIntegerLiteral(t *testing.T) {
+	p := newParserFromInput("0x1")
+	i := p.parseInteger()
 	node.AssertIntegerLiteral(t, i, big.NewInt(1))
 	assertNoErrors(t, p)
 }
 
 func TestStringLiteral(t *testing.T) {
 	p := newParserFromInput(`"test"`)
-	s :=p.parseString()
-	node.AssertStringLiteral(t, s, `"test"`)
+	s := p.parseString()
+	node.AssertStringLiteral(t, s, "test")
 	assertNoErrors(t, p)
 }
 
