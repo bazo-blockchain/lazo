@@ -15,19 +15,22 @@ import (
 func TestEmptyProgram(t *testing.T) {
 	p := newParserFromInput("")
 	program, _ := p.ParseProgram()
-	node.AssertProgram(t, program, false)
+
 	assertNoErrors(t, p)
+	node.AssertProgram(t, program, false)
 }
 
 func TestProgramWithNewlines(t *testing.T) {
 	p := newParserFromInput("\n \n  \n \n")
 	_, _ = p.ParseProgram()
+
 	assertNoErrors(t, p)
 }
 
 func TestInvalidProgram(t *testing.T) {
 	p := newParserFromInput("hello")
 	_, _ = p.ParseProgram()
+
 	assertHasError(t, p)
 }
 
@@ -38,8 +41,21 @@ func TestEmptyContract(t *testing.T) {
 	p := newParserFromInput("contract Test {\n \n}")
 	c := p.parseContract()
 
-	node.AssertContract(t, c, "Test", 0, 0)
 	assertNoErrors(t, p)
+	node.AssertContract(t, c, "Test", 0, 0)
+}
+
+func TestContractWithVariable(t *testing.T) {
+	p := newParserFromInput(`contract Test {
+		int x
+		int y
+	}`)
+	c := p.parseContract()
+
+	assertNoErrors(t, p)
+	node.AssertContract(t, c, "Test", 2, 0)
+	node.AssertVariable(t, c.Variables[0], "int", "x")
+	node.AssertVariable(t, c.Variables[1], "int", "y")
 }
 
 // Variable Nodes
