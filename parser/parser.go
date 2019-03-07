@@ -545,7 +545,6 @@ func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
 		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], p.currentToken.Literal()))
-		return
 	}
 	p.nextToken()
 }

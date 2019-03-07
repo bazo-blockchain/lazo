@@ -77,35 +77,35 @@ func TestVariableWithoutNewLine(t *testing.T) {
 // Function Nodes
 // --------------
 func TestEmptyFunction(t *testing.T) {
-	p := newParserFromInput(`function void test(){\n}\n`)
+	p := newParserFromInput("function void test(){\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 1, 0, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParam(t *testing.T) {
-	p := newParserFromInput(`function void test(int a){\n}\n`)
+	p := newParserFromInput("function void test(int a){\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 1, 1, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParams(t *testing.T) {
-	p := newParserFromInput(`function void test(int a, int b){\n}\n`)
+	p := newParserFromInput("function void test(int a, int b){\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 1, 2, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithMultipleRTypes(t *testing.T) {
-	p := newParserFromInput(`function (int, int) test(){\n}\n`)
+	p := newParserFromInput("function (int, int) test(){\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 2, 0, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParamsAndRTypes(t *testing.T) {
-	p := newParserFromInput(`function (int, int) test(int a, int b){\n}\n`)
+	p := newParserFromInput("function (int, int) test(int a, int b){\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 2, 2, 0)
 	assertNoErrors(t, p)
@@ -141,19 +141,19 @@ func TestFullFunction(t *testing.T) {
 }
 
 func TestFunctionWORType(t *testing.T) {
-	p := newParserFromInput(`function test(int a, int b){\n}\n`)
+	p := newParserFromInput("function test(int a, int b){\n}\n")
 	p.parseFunction()
 	assertHasError(t, p)
 }
 
 func TestFunctionMissingNewline(t *testing.T) {
-	p := newParserFromInput(`function test(int a, int b){\n}`)
+	p := newParserFromInput("function test(int a, int b){\n}")
 	p.parseFunction()
 	assertHasError(t, p)
 }
 
 func TestFunctionMissingNewlineInBody(t *testing.T) {
-	p := newParserFromInput(`function test(int a, int b){}\n`)
+	p := newParserFromInput("function test(int a, int b){}\n")
 	p.parseFunction()
 	assertHasError(t, p)
 }
