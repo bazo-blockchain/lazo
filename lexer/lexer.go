@@ -212,8 +212,11 @@ func (lex *Lexer) readFixToken() token.Token {
 	}
 
 	lex.nextChar()
-	// TODO error token
-	return nil
+
+	return &token.ErrorToken{
+		AbstractToken: lex.newAbstractToken(string(lex.current)),
+		Msg: "ERROR: Unknown character used",
+	}
 
 }
 

@@ -80,11 +80,11 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode {
-	p.nextToken() // skip function keyword
-
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
 	}
+
+	p.nextToken() // skip function keyword
 
 	function.ReturnTypes = p.parseReturnTypes()
 	function.Name = p.readIdentifier()
