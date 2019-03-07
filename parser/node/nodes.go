@@ -139,7 +139,7 @@ type AssignmentStatementNode struct {
 }
 
 func (n *AssignmentStatementNode) String() string {
-	return fmt.Sprintf("[%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
+	return fmt.Sprintf("\n [%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
 }
 
 // --------------------------

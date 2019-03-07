@@ -207,6 +207,8 @@ func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode 
 
 	expression := p.parseExpression()
 
+
+	p.checkAndSkipNewLines(token.NewLine)
 	return &node.AssignmentStatementNode{
 		AbstractNode:	abstractNode,
 		Left:			designator,
@@ -230,8 +232,7 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 		AbstractNode: p.newAbstractNode(),
 		Statements: p.parseStatementBlock(),
 	}
-	p.checkAndSkipNewLines(token.CloseBrace)
-
+	p.check(token.CloseBrace)
 
 	alternative := &node.StatementBlockNode{}
 
