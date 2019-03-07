@@ -179,7 +179,7 @@ type IntegerLiteralNode struct {
 }
 
 func (n *IntegerLiteralNode) String() string {
-	return fmt.Sprintf("INT %d", n.Value)
+	return fmt.Sprintf("%d", n.Value)
 }
 
 // --------------------------
@@ -190,7 +190,7 @@ type StringLiteralNode struct {
 }
 
 func (n *StringLiteralNode) String() string {
-	return fmt.Sprintf("STRING %s", n.Value)
+	return fmt.Sprintf("%s", n.Value)
 }
 
 // --------------------------
@@ -201,7 +201,7 @@ type CharacterLiteralNode struct {
 }
 
 func (n *CharacterLiteralNode) String() string {
-	return fmt.Sprintf("CHAR %c", n.Value)
+	return fmt.Sprintf("%c", n.Value)
 }
 
 // --------------------------
@@ -212,7 +212,7 @@ type BoolLiteralNode struct {
 }
 
 func (n *BoolLiteralNode) String() string {
-	return fmt.Sprintf("BOOL %t", n.Value)
+	return fmt.Sprintf("%t", n.Value)
 }
 
 // --------------------------
