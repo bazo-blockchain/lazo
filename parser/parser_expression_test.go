@@ -83,7 +83,7 @@ func TestRelationalComparisonAssociativity(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "(((1 < 2) <= 3) > 4)", "5", token.GreaterEqual)
 }
 
-// Term Expression
+// Term Expressions
 // --------------------
 
 func TestAddition(t *testing.T) {
@@ -91,24 +91,52 @@ func TestAddition(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "1", "2", token.Addition)
 }
 
-func TestSubstraction(t *testing.T) {
-	e := parseExpressionFromInput(t, "1 - 2")
-	node.AssertBinaryExpression(t, e, "1", "2", token.Subtraction)
-}
-
-func TestSummandAssociativity(t *testing.T) {
-	e := parseExpressionFromInput(t, "1 + 2 - 3")
-	node.AssertBinaryExpression(t, e, "(1 + 2)", "3", token.Subtraction)
-}
-
 func TestConcatenation(t *testing.T) {
 	e := parseExpressionFromInput(t, ` "hello" + "world" `)
 	node.AssertBinaryExpression(t, e, "hello", "world", token.Addition)
 }
 
-func TestAdditionPrecedence(t *testing.T) {
+func TestSubstraction(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 - 2")
+	node.AssertBinaryExpression(t, e, "1", "2", token.Subtraction)
+}
+
+func TestTermAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 - 3")
+	node.AssertBinaryExpression(t, e, "(1 + 2)", "3", token.Subtraction)
+}
+
+func TestTermPrecedence(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 + 2 <= 3")
 	node.AssertBinaryExpression(t, e, "(1 + 2)", "3", token.LessEqual)
+}
+
+// Factor Expressions
+// ------------------
+
+func TestMultiplication(t *testing.T) {
+	e := parseExpressionFromInput(t, "3 * 4")
+	node.AssertBinaryExpression(t, e, "3", "4", token.Multiplication)
+}
+
+func TestDivision(t *testing.T) {
+	e := parseExpressionFromInput(t, "3 / 4")
+	node.AssertBinaryExpression(t, e, "3", "4", token.Division)
+}
+
+func TestModulo(t *testing.T) {
+	e := parseExpressionFromInput(t, "4 % 3")
+	node.AssertBinaryExpression(t, e, "4", "3", token.Modulo)
+}
+
+func TestFactorAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "3 * 4 / 2 % 5")
+	node.AssertBinaryExpression(t, e, "((3 * 4) / 2)", "5", token.Modulo)
+}
+
+func TestFactorPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 * 3")
+	node.AssertBinaryExpression(t, e, "1", "(2 * 3)", token.Addition)
 }
 
 // --------------
