@@ -20,7 +20,6 @@ func AssertContract(t *testing.T, node *ContractNode, name string, totalVars int
 func AssertVariable(t *testing.T, node *VariableNode, varType string, id string) {
 	assert.Equal(t, node.Type.Identifier, varType)
 	assert.Equal(t, node.Identifier, id)
-	// TODO Assert Expressions
 }
 
 func AssertFunction(t *testing.T, node *FunctionNode, name string, totalRTypes int, totalPTypes int, totalStmts int) {
@@ -30,9 +29,28 @@ func AssertFunction(t *testing.T, node *FunctionNode, name string, totalRTypes i
 	assert.Equal(t, len(node.Body), totalStmts)
 }
 
+// Statements
+// ----------
+
 func AssertStatementBlock(t *testing.T, node []StatementNode, totalStmt int) {
 	assert.Equal(t, len(node), totalStmt)
 }
+
+func AssertStatement(t *testing.T, node StatementNode) {}
+
+func AssertStatementWithIdentifier(t *testing.T, node StatementNode) {}
+
+func AssertStatementWithFixToken(t *testing.T, node StatementNode) {}
+
+func AssertVariableStatement(t *testing.T, node VariableNode) {}
+
+func AssertAssignmentStatement(t *testing.T, node AssignmentStatementNode) {}
+
+func AssertIfStatement(t *testing.T, node IfStatementNode) {}
+
+func AssertReturnStatement(t *testing.T, node ReturnStatementNode) {}
+
+// ----------
 
 func AssertDesignator(t *testing.T, node *DesignatorNode, value string) {
 	assert.Equal(t, node.Value, value)
