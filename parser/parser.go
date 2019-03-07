@@ -196,8 +196,20 @@ func (p *Parser) parseVariableStatement() *node.VariableNode {
 }
 
 func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
-	// not yet supported
-	return nil
+	designator := &node.DesignatorNode{
+		AbstractNode: p.newAbstractNode(),
+		Value:     	  identifier,
+	}
+
+	p.nextToken() // skip '=' sign
+
+	expression := p.parseExpression()
+
+	return &node.AssignmentStatementNode{
+		AbstractNode:	p.newAbstractNode(),
+		Left:			designator,
+		Right:			expression,
+	}
 }
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {

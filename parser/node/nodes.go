@@ -112,7 +112,7 @@ func (n *IfStatementNode) String() string {
 
 type ReturnStatementNode struct {
 	AbstractNode
-	Expression ExpressionNode
+	Expression []ExpressionNode
 }
 
 func (n *ReturnStatementNode) String() string {
@@ -128,6 +128,18 @@ type StatementBlockNode struct {
 
 func (n *StatementBlockNode) String() string {
 	return fmt.Sprintf("[%s] STMTBLOCK %s", n.Pos(), n.Statements)
+}
+
+// --------------------------
+
+type AssignmentStatementNode struct {
+	AbstractNode
+	Left *DesignatorNode
+	Right ExpressionNode
+}
+
+func (n *AssignmentStatementNode) String() string {
+	return fmt.Sprintf("[%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
 }
 
 // --------------------------
