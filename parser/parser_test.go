@@ -9,6 +9,39 @@ import (
 	"testing"
 )
 
+// Program Nodes
+// --------------
+
+func TestEmptyProgram(t *testing.T) {
+	p := newParserFromInput("")
+	program, _ := p.ParseProgram()
+	node.AssertProgram(t, program, false)
+	assertNoErrors(t, p)
+}
+
+func TestProgramWithNewlines(t *testing.T) {
+	p := newParserFromInput("\n \n  \n \n")
+	_, _ = p.ParseProgram()
+	assertNoErrors(t, p)
+}
+
+func TestInvalidProgram(t *testing.T) {
+	p := newParserFromInput("hello")
+	_, _ = p.ParseProgram()
+	assertHasError(t, p)
+}
+
+// Contract Nodes
+// --------------
+
+func TestEmptyContract(t *testing.T) {
+	p := newParserFromInput("contract Test {\n \n}")
+	c := p.parseContract()
+
+	node.AssertContract(t, c, "Test", 0, 0)
+	assertNoErrors(t, p)
+}
+
 // Variable Nodes
 // --------------
 
@@ -25,6 +58,7 @@ func TestVariableWithoutNewLine(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Helpers
 // ------------------------------
 
 func newParserFromInput(input string) *Parser {
@@ -33,4 +67,8 @@ func newParserFromInput(input string) *Parser {
 
 func assertHasError(t *testing.T, p *Parser) {
 	assert.Equal(t, len(p.errors) > 0, true)
+}
+
+func assertNoErrors(t *testing.T, p *Parser) {
+	assert.Equal(t, len(p.errors), 0)
 }

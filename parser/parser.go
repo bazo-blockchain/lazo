@@ -34,7 +34,7 @@ func (p *Parser) ParseProgram() (*node.ProgramNode, []error) {
 		program.Contract = p.parseContract()
 	}
 
-	if !p.isEnd() {
+	if !p.isSymbol(token.EOF) {
 		p.addError("Invalid token outside contract: " + p.currentToken.String())
 	}
 	return program, p.errors
