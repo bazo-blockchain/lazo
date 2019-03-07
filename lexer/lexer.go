@@ -212,6 +212,7 @@ func (lex *Lexer) readFixToken() token.Token {
 	}
 
 	lex.nextChar()
+	// TODO error token
 	return nil
 
 }

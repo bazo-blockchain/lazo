@@ -121,6 +121,7 @@ func (n *ReturnStatementNode) String() string {
 
 // --------------------------
 
+// TODO and replace with []StatementNode
 type StatementBlockNode struct {
 	AbstractNode
 	Statements []StatementNode
