@@ -213,9 +213,10 @@ func (lex *Lexer) readFixToken() token.Token {
 
 	lex.nextChar()
 
+	lexeme := string(lex.current)
 	return &token.ErrorToken{
-		AbstractToken: lex.newAbstractToken(string(lex.current)),
-		Msg: "ERROR: Unknown character used",
+		AbstractToken: lex.newAbstractToken(lexeme),
+		Msg: fmt.Sprintf("Invalid charactr %s", lexeme),
 	}
 
 }
