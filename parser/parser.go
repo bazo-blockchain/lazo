@@ -196,8 +196,10 @@ func (p *Parser) parseVariableStatement() *node.VariableNode {
 }
 
 func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
+	abstractNode := p.newAbstractNode()
+
 	designator := &node.DesignatorNode{
-		AbstractNode: p.newAbstractNode(),
+		AbstractNode: abstractNode,
 		Value:     	  identifier,
 	}
 
@@ -206,14 +208,49 @@ func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode 
 	expression := p.parseExpression()
 
 	return &node.AssignmentStatementNode{
-		AbstractNode:	p.newAbstractNode(),
+		AbstractNode:	abstractNode,
 		Left:			designator,
 		Right:			expression,
 	}
 }
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
-	return nil
+	abstractNode := p.newAbstractNode()
+
+	p.nextToken() // skip 'if' keyword
+
+	// Condition
+	p.checkAndSkipNewLines(token.OpenParen)
+	condition := p.parseExpression()
+	p.checkAndSkipNewLines(token.CloseParen)
+
+	// Then
+	p.checkAndSkipNewLines(token.OpenBrace)
+	then := &node.StatementBlockNode{
+		AbstractNode: p.newAbstractNode(),
+		Statements: p.parseStatementBlock(),
+	}
+	p.checkAndSkipNewLines(token.CloseBrace)
+
+
+	alternative := &node.StatementBlockNode{}
+
+	if p.isSymbol(token.Else) {
+		p.nextToken() // skip 'else' keyword
+
+		// Else
+		p.checkAndSkipNewLines(token.OpenBrace)
+		alternative.AbstractNode = p.newAbstractNode()
+		alternative.Statements = p.parseStatementBlock()
+		p.checkAndSkipNewLines(token.CloseBrace)
+	}
+
+	return &node.IfStatementNode{
+		AbstractNode: abstractNode,
+		Condition: condition,
+		Then: then,
+		Else: alternative,
+	}
 }
 
 func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
