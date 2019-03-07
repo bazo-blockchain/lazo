@@ -8,5 +8,6 @@ contract Test {
         string s = "String"
         bool b = true
         int x = 1 + 2
+        int y = 3 + 4 * 2
     }
 }

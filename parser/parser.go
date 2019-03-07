@@ -250,6 +250,22 @@ func (p *Parser) parseExpression() node.ExpressionNode {
 }
 
 func (p *Parser) parseFactor() node.ExpressionNode {
+	abstraceNode := p.newAbstractNode()
+	leftExpr := p.parseExponent()
+
+	for p.isAnySymbol(token.Multiplication, token.Division, token.Modulo) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstraceNode,
+			LeftExpr:leftExpr,
+			Operator: p.readSymbol(),
+			RightExpr: p.parseExponent(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseExponent() node.ExpressionNode {
 	return p.parseOperand()
 }
 

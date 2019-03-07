@@ -92,7 +92,7 @@ type TypeNode struct {
 }
 
 func (n *TypeNode) String() string {
-	return fmt.Sprintf("[%s] TYPE %s", n.Pos(), n.Identifier)
+	return fmt.Sprintf("TYPE %s", n.Identifier)
 }
 
 // --------------------------
@@ -142,7 +142,7 @@ type BinaryExpressionNode struct {
 }
 
 func (n *BinaryExpressionNode) String() string {
-	return fmt.Sprintf("[%s] EXPR (%s %s %s)", n.Position, n.LeftExpr, token.SymbolLexeme[n.Operator], n.RightExpr)
+	return fmt.Sprintf("EXPR (%s %s %s)", n.LeftExpr, token.SymbolLexeme[n.Operator], n.RightExpr)
 }
 
 // --------------------------
@@ -153,7 +153,7 @@ type DesignatorNode struct {
 }
 
 func (n *DesignatorNode) String() string {
-	return fmt.Sprintf("[%s] DESIGNATOR %s", n.Pos(), n.Value)
+	return fmt.Sprintf("DESIGNATOR %s", n.Value)
 }
 
 // --------------------------
@@ -166,7 +166,7 @@ type IntegerLiteralNode struct {
 }
 
 func (n *IntegerLiteralNode) String() string {
-	return fmt.Sprintf("[%s] INT %d", n.Pos(), n.Value)
+	return fmt.Sprintf("INT %d", n.Value)
 }
 
 // --------------------------
@@ -177,7 +177,7 @@ type StringLiteralNode struct {
 }
 
 func (n *StringLiteralNode) String() string {
-	return fmt.Sprintf("[%s] STRING %s", n.Pos(), n.Value)
+	return fmt.Sprintf("STRING %s", n.Value)
 }
 
 // --------------------------
@@ -188,7 +188,7 @@ type CharacterLiteralNode struct {
 }
 
 func (n *CharacterLiteralNode) String() string {
-	return fmt.Sprintf("[%s] CHARACTER %c", n.Pos(), n.Value)
+	return fmt.Sprintf("CHAR %c", n.Value)
 }
 
 // --------------------------
@@ -199,7 +199,7 @@ type BoolLiteralNode struct {
 }
 
 func (n *BoolLiteralNode) String() string {
-	return fmt.Sprintf("[%s] BOOL %t", n.Pos(), n.Value)
+	return fmt.Sprintf("BOOL %t", n.Value)
 }
 
 // --------------------------
