@@ -330,21 +330,21 @@ func (p *Parser) parseAnd() node.ExpressionNode {
 
 func (p *Parser) parseEquality() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseComparison()
+	leftExpr := p.parseRelationalComparison()
 
 	for p.isAnySymbol(token.Equal, token.Unequal) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left: leftExpr,
 			Operator: p.readSymbol(),
-			Right: p.parseComparison(),
+			Right: p.parseRelationalComparison(),
 		}
 		leftExpr = binExpr
 	}
 	return leftExpr
 }
 
-func (p *Parser) parseComparison() node.ExpressionNode {
+func (p *Parser) parseRelationalComparison() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseTerm()
 
