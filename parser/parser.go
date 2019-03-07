@@ -198,7 +198,7 @@ func (p *Parser) parseVariableStatement() *node.VariableNode {
 	return v
 }
 
-func (p *Parser) parseAssignmentStatement(identifier string) node.StatementNode {
+func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentStatementNode {
 	abstractNode := p.newAbstractNode()
 
 	designator := &node.DesignatorNode{

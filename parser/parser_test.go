@@ -280,6 +280,32 @@ func TestIfStatementWOElseWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
+func TestAssignmentStatement(t *testing.T) {
+	p := newParserFromInput("a = 5\n")
+	i := p.readIdentifier()
+	v := p.parseAssignmentStatement(i)
+
+	node.AssertAssignmentStatement(t, v, "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestAssignmentStatementChar(t *testing.T) {
+	p := newParserFromInput("a = 'c'\n")
+	i := p.readIdentifier()
+	v := p.parseAssignmentStatement(i)
+
+	node.AssertAssignmentStatement(t, v, "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestAssignmentStatementWONewline(t *testing.T) {
+	p := newParserFromInput("a = 'c'")
+	i := p.readIdentifier()
+	p.parseAssignmentStatement(i)
+
+	assertHasError(t, p)
+}
+
 // Designator Nodes
 // ----------------
 
