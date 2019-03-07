@@ -306,6 +306,29 @@ func TestAssignmentStatementWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
+func TestVariableStatementChar(t *testing.T){
+	p := newParserFromInput("char a = 'c'\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "char", "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatement(t *testing.T){
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "int", "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatementWONewline(t *testing.T){
+	p := newParserFromInput("char a = 'c'")
+	p.parseVariableStatement()
+
+	assertHasError(t, p)
+}
+
 // Designator Nodes
 // ----------------
 
