@@ -30,6 +30,10 @@ func AssertFunction(t *testing.T, node *FunctionNode, name string, totalRTypes i
 	assert.Equal(t, len(node.Body), totalStmts)
 }
 
+func AssertStatementBlock(t *testing.T, node []StatementNode, totalStmt int) {
+	assert.Equal(t, len(node), totalStmt)
+}
+
 func AssertDesignator(t *testing.T, node *DesignatorNode, value string) {
 	assert.Equal(t, node.Value, value)
 }

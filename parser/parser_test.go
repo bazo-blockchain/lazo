@@ -67,6 +67,7 @@ func TestVariable(t *testing.T) {
 	v := p.parseVariableStatement()
 
 	node.AssertVariable(t, v, "int", "x")
+	assertNoErrors(t, p)
 }
 
 func TestVariableWithoutNewLine(t *testing.T) {
@@ -157,6 +158,33 @@ func TestFunctionMissingNewlineInBody(t *testing.T) {
 	p := newParserFromInput("function test(int a, int b){}\n")
 	p.parseFunction()
 	assertHasError(t, p)
+}
+
+// StatementBlock Nodes
+// --------------------
+
+func TestEmptyStatementBlock(t *testing.T) {
+	p := newParserFromInput("{\n}\n")
+	v := p.parseStatementBlock()
+
+	node.AssertStatementBlock(t, v, 0)
+	assertNoErrors(t, p)
+}
+
+func TestStatementBlock(t *testing.T) {
+	p := newParserFromInput("{\nint a = 5\n}\n")
+	v := p.parseStatementBlock()
+
+	node.AssertStatementBlock(t, v, 1)
+	assertNoErrors(t, p)
+}
+
+func TestMultipleStatementBlock(t *testing.T) {
+	p := newParserFromInput("{\nint a = 5\nint b = 4\n}\n")
+	v := p.parseStatementBlock()
+
+	node.AssertStatementBlock(t, v, 2)
+	assertNoErrors(t, p)
 }
 
 // Designator Nodes
