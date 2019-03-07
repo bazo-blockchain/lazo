@@ -35,7 +35,7 @@ func AssertDesignator(t *testing.T, node *DesignatorNode, value string) {
 }
 
 func AssertIntegerLiteral(t *testing.T, node *IntegerLiteralNode, value *big.Int) {
-	assert.Equal(t, node.Value, value)
+	assert.Equal(t, node.Value.Cmp(value), 0)
 }
 
 func AssertStringLiteral(t *testing.T, node *StringLiteralNode, value string) {
