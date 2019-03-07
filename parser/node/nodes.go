@@ -105,7 +105,7 @@ type IfStatementNode struct {
 }
 
 func (n *IfStatementNode) String() string {
-	return fmt.Sprintf("[%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
+	return fmt.Sprintf("\n [%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
 }
 
 // --------------------------
@@ -116,7 +116,7 @@ type ReturnStatementNode struct {
 }
 
 func (n *ReturnStatementNode) String() string {
-	return fmt.Sprintf("[%s] RETURNSTMT %s", n.Pos(), n.Expression)
+	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
 }
 
 // --------------------------

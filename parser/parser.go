@@ -222,17 +222,15 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	p.nextToken() // skip 'if' keyword
 
 	// Condition
-	p.checkAndSkipNewLines(token.OpenParen)
+	p.check(token.OpenParen)
 	condition := p.parseExpression()
-	p.checkAndSkipNewLines(token.CloseParen)
+	p.check(token.CloseParen)
 
 	// Then
-	p.checkAndSkipNewLines(token.OpenBrace)
 	then := &node.StatementBlockNode{
 		AbstractNode: p.newAbstractNode(),
 		Statements: p.parseStatementBlock(),
 	}
-	p.check(token.CloseBrace)
 
 	alternative := &node.StatementBlockNode{}
 
@@ -240,10 +238,8 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 		p.nextToken() // skip 'else' keyword
 
 		// Else
-		p.checkAndSkipNewLines(token.OpenBrace)
 		alternative.AbstractNode = p.newAbstractNode()
 		alternative.Statements = p.parseStatementBlock()
-		p.checkAndSkipNewLines(token.CloseBrace)
 	}
 
 	return &node.IfStatementNode{
@@ -266,6 +262,8 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 		p.nextToken() // skip ','
 		returnValues = append(returnValues, p.parseExpression())
 	}
+
+	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.ReturnStatementNode{
 		AbstractNode: abstractNode,
