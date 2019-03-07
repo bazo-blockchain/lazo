@@ -98,10 +98,10 @@ func (p *Parser) parseReturnTypes() []*node.TypeNode {
 	var returnTypes []*node.TypeNode
 
 	if p.isSymbol(token.OpenParen) {
-		p.nextToken()
+		p.nextToken() // skip '('
 		returnTypes = append(returnTypes, p.parseType())
 		for !p.isEnd() && p.isSymbol(token.Comma) {
-			p.nextToken()
+			p.nextToken() // skip ','
 			returnTypes = append(returnTypes, p.parseType())
 		}
 		p.check(token.CloseParen)
@@ -254,7 +254,22 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 }
 
 func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
-	return nil
+	var returnValues []node.ExpressionNode
+	abstractNode := p.newAbstractNode()
+
+	p.nextToken() // skip 'return' keyword
+
+	returnValues = append(returnValues, p.parseExpression())
+
+	for !p.isEnd() && p.isSymbol(token.Comma){
+		p.nextToken() // skip ','
+		returnValues = append(returnValues, p.parseExpression())
+	}
+
+	return &node.ReturnStatementNode{
+		AbstractNode: abstractNode,
+		Expression: returnValues,
+	}
 }
 
 func (p *Parser) parseVariable() *node.VariableNode {
