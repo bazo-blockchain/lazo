@@ -2,6 +2,7 @@ package node
 
 import (
 	"gotest.tools/assert"
+	"math/big"
 	"testing"
 )
 
@@ -26,6 +27,30 @@ func AssertFunction(t *testing.T, node *FunctionNode, name string, totalRTypes i
 	assert.Equal(t, len(node.ReturnTypes), totalRTypes)
 	assert.Equal(t, len(node.Parameters), totalPTypes)
 	assert.Equal(t, len(node.Body), totalStmts)
+}
+
+func AssertDesignator(t *testing.T, node *DesignatorNode, value string) {
+	assert.Equal(t, node.Value, value)
+}
+
+func AssertIntegerLiteral(t *testing.T, node *IntegerLiteralNode, value *big.Int) {
+	assert.Equal(t, node.Value, value)
+}
+
+func AssertStringLiteral(t *testing.T, node *StringLiteralNode, value string) {
+	assert.Equal(t, node.Value, value)
+}
+
+func AssertCharacterLiteral(t *testing.T, node *CharacterLiteralNode, value rune) {
+	assert.Equal(t, node.Value, value)
+}
+
+func AssertBoolLiteral(t *testing.T, node *BoolLiteralNode, value bool) {
+	assert.Equal(t, node.Value, value)
+}
+
+func AssertError(t *testing.T, node *ErrorNode,  message string) {
+	assert.Equal(t, node.Message, message)
 }
 
 func AssertType(t *testing.T, typeNode *TypeNode, varType string) {
