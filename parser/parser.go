@@ -297,6 +297,74 @@ func (p *Parser) parseType() *node.TypeNode {
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
+	return p.parseOr()
+}
+
+func (p *Parser) parseOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseAnd()
+
+	for p.isAnySymbol(token.Or) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseAnd(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseAnd() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseEquality()
+
+	for p.isAnySymbol(token.And) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseEquality(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseEquality() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseComparison()
+
+	for p.isAnySymbol(token.Equal, token.Unequal) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseComparison(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseComparison() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseTerm()
+
+	for p.isAnySymbol(token.Less, token.LessEqual, token.GreaterEqual, token.Greater) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left: leftExpr,
+			Operator: p.readSymbol(),
+			Right: p.parseTerm(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseTerm() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseFactor()
 
