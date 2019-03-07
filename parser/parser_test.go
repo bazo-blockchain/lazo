@@ -114,29 +114,21 @@ func TestFunctionWithParamsAndRTypes(t *testing.T) {
 }
 
 func TestFunctionWithStatement(t *testing.T) {
-	p := newParserFromInput(`function void test(){
-		int a
-		}\n`)
+	p := newParserFromInput("function void test(){\nint a\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 1, 0, 1)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithMultipleStatements(t *testing.T) {
-	p := newParserFromInput(`function void test(){
-		int a
-		int b
-		}\n`)
+	p := newParserFromInput("function void test(){\nint a\nint b\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 1, 0, 2)
 	assertNoErrors(t, p)
 }
 
 func TestFullFunction(t *testing.T) {
-	p := newParserFromInput(`function (int, int) test(int a, int b){
-		int a
-		int b
-		}\n`)
+	p := newParserFromInput("function (int, int) test(int a, int b){\nint a\nint b\n}\n")
 	f := p.parseFunction()
 	node.AssertFunction(t, f, "test", 2, 2, 2)
 	assertNoErrors(t, p)
@@ -215,6 +207,77 @@ func TestMultipleReturnStatement(t *testing.T) {
 
 	node.AssertReturnStatement(t, v, 2)
 	assertNoErrors(t, p)
+}
+
+func TestIfStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\n} else{\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 0, 0)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementSingleStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\nint a \n} else{\nint b\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 1, 1)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementSingleThenStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\nint a \n} else{\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 1, 0)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementSingleElseStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\n} else{\n int a \n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 0, 1)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementMultipleStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\nint a\n int b\n} else{\nint c\n int d\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 2, 2)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementMultipleThenStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\nint a\n int b\n} else{\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 2, 0)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementMultipleElseStatement(t *testing.T) {
+	p := newParserFromInput("if(true){\n} else{\nint c\n int d\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 0, 2)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementWOElse(t *testing.T) {
+	p := newParserFromInput("if(true){\n}\n")
+	v := p.parseIfStatement()
+
+	node.AssertIfStatement(t, v, "true", 0, 0)
+	assertNoErrors(t, p)
+}
+
+func TestIfStatementWOElseWONewline(t *testing.T) {
+	p := newParserFromInput("if(true){\n}")
+	p.parseIfStatement()
+
+	assertHasError(t, p)
 }
 
 // Designator Nodes

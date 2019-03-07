@@ -142,7 +142,10 @@ func (p *Parser) parseStatementBlock() []node.StatementNode {
 			statements = append(statements, stmt)
 		}
 	}
-	p.checkAndSkipNewLines(token.CloseBrace)
+	p.check(token.CloseBrace)
+	if !p.isSymbol(token.Else){
+		p.checkAndSkipNewLines(token.NewLine)
+	}
 	return statements
 }
 
