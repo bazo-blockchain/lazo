@@ -100,8 +100,8 @@ func (n *TypeNode) String() string {
 type IfStatementNode struct {
 	AbstractNode
 	Condition ExpressionNode
-	Then      *StatementBlockNode
-	Else      *StatementBlockNode
+	Then      []StatementNode
+	Else      []StatementNode
 }
 
 func (n *IfStatementNode) String() string {
@@ -117,18 +117,6 @@ type ReturnStatementNode struct {
 
 func (n *ReturnStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
-}
-
-// --------------------------
-
-// TODO and replace with []StatementNode
-type StatementBlockNode struct {
-	AbstractNode
-	Statements []StatementNode
-}
-
-func (n *StatementBlockNode) String() string {
-	return fmt.Sprintf("[%s] STMTBLOCK %s", n.Pos(), n.Statements)
 }
 
 // --------------------------
