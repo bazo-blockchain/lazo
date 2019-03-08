@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser"
 	"io"
@@ -29,11 +30,17 @@ func compile(sourceFile string) {
 	//}
 
 	parser := parser.New(lexer)
-	program, errors := parser.ParseProgram()
+	syntaxTree, errors := parser.ParseProgram()
 	if len(errors) > 0 {
 		fmt.Fprintln(os.Stderr, errors)
 	}
-	fmt.Println(program)
+
+	checker := checker.New(syntaxTree)
+	symbolTable, errors := checker.Run()
+	if len(errors) > 0 {
+		fmt.Fprintln(os.Stderr, errors)
+	}
+	fmt.Println(symbolTable)
 }
 
 func check(err error) {
