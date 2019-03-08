@@ -10,7 +10,7 @@ import (
 type Node interface {
 	Pos() token.Position
 	String() string
-	Accept()
+	Accept(v visitor.Visitor)
 }
 
 type AbstractNode struct {
@@ -41,8 +41,8 @@ func (n *ProgramNode) String() string {
 	return fmt.Sprintf("%s", n.Contract)
 }
 
-func (n *ProgramNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *ProgramNode) Accept(v visitor.Visitor) {
+	v.VisitProgramNode(n)
 }
 
 // --------------------------
@@ -58,8 +58,8 @@ func (n *ContractNode) String() string {
 	return fmt.Sprintf("[%s] CONTRACT %s \n VARS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Variables, n.Functions)
 }
 
-func (n *ContractNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *ContractNode) Accept(v visitor.Visitor) {
+	v.VisitContractNode(n)
 }
 
 // --------------------------
@@ -79,8 +79,8 @@ func (n *FunctionNode) String() string {
 		n.Pos(), n.Name, n.Parameters, n.ReturnTypes, n.Body)
 }
 
-func (n *FunctionNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *FunctionNode) Accept(v visitor.Visitor) {
+	v.VisitFunctionNode(n)
 }
 
 // --------------------------
@@ -98,8 +98,8 @@ func (n *VariableNode) String() string {
 	return fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), n.Type.Identifier, n.Identifier, n.Expression)
 }
 
-func (n *VariableNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *VariableNode) Accept(v visitor.Visitor) {
+	v.VisitVariableNode(n)
 }
 
 // --------------------------
@@ -113,8 +113,8 @@ func (n *TypeNode) String() string {
 	return fmt.Sprintf("TYPE %s", n.Identifier)
 }
 
-func (n *TypeNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *TypeNode) Accept(v visitor.Visitor) {
+	v.VisitTypeNode(n)
 }
 
 // --------------------------
@@ -130,8 +130,8 @@ func (n *IfStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
 }
 
-func (n *IfStatementNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *IfStatementNode) Accept(v visitor.Visitor) {
+	v.VisitIfStatementNode(n)
 }
 
 // --------------------------
@@ -145,8 +145,8 @@ func (n *ReturnStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
 }
 
-func (n *ReturnStatementNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *ReturnStatementNode) Accept(v visitor.Visitor) {
+	v.VisitAssignmentStatementNode(n)
 }
 
 // --------------------------
@@ -161,8 +161,8 @@ func (n *AssignmentStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
 }
 
-func (n *AssignmentStatementNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *AssignmentStatementNode) Accept(v visitor.Visitor) {
+	v.VisitAssignmentStatementNode(n)
 }
 
 // --------------------------
@@ -180,8 +180,8 @@ func (n *BinaryExpressionNode) String() string {
 	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
 }
 
-func (n *BinaryExpressionNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *BinaryExpressionNode) Accept(v visitor.Visitor) {
+	v.VisitBinaryExpressionNode(n)
 }
 
 // --------------------------
@@ -196,8 +196,8 @@ func (n *UnaryExpression) String() string {
 	return fmt.Sprintf("EXPR (%s %s)", token.SymbolLexeme[n.Operator], n.Operand)
 }
 
-func (n *UnaryExpression) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *UnaryExpression) Accept(v visitor.Visitor) {
+	v.VisitUnaryExpressionNode(n)
 }
 
 // --------------------------
@@ -211,8 +211,8 @@ func (n *DesignatorNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
 }
 
-func (n *DesignatorNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *DesignatorNode) Accept(v visitor.Visitor) {
+	v.VisitDesignatorNode(n)
 }
 
 // --------------------------
@@ -228,8 +228,8 @@ func (n *IntegerLiteralNode) String() string {
 	return fmt.Sprintf("%d", n.Value)
 }
 
-func (n *IntegerLiteralNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *IntegerLiteralNode) Accept(v visitor.Visitor) {
+	v.VisitIntegerLiteralNode(n)
 }
 
 // --------------------------
@@ -243,8 +243,8 @@ func (n *StringLiteralNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
 }
 
-func (n *StringLiteralNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *StringLiteralNode) Accept(v visitor.Visitor) {
+	v.VisitStringLiteralNode(n)
 }
 
 // --------------------------
@@ -258,8 +258,8 @@ func (n *CharacterLiteralNode) String() string {
 	return fmt.Sprintf("%c", n.Value)
 }
 
-func (n *CharacterLiteralNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *CharacterLiteralNode) Accept(v visitor.Visitor) {
+	v.VisitCharacterLiteralNode(n)
 }
 
 // --------------------------
@@ -273,8 +273,8 @@ func (n *BoolLiteralNode) String() string {
 	return fmt.Sprintf("%t", n.Value)
 }
 
-func (n *BoolLiteralNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *BoolLiteralNode) Accept(v visitor.Visitor) {
+	v.VisitBoolLiteralNode(n)
 }
 
 // --------------------------
@@ -288,6 +288,6 @@ func (n *ErrorNode) String() string {
 	return fmt.Sprintf("[%s] ERROR: %s", n.Pos(), n.Message)
 }
 
-func (n *ErrorNode) Accept(v *visitor.Visitor) {
-	// TODO Implement
+func (n *ErrorNode) Accept(v visitor.Visitor) {
+	v.VisitErrorNode(n)
 }
