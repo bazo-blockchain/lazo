@@ -100,8 +100,8 @@ func (n *TypeNode) String() string {
 type IfStatementNode struct {
 	AbstractNode
 	Condition ExpressionNode
-	Then      *StatementBlockNode
-	Else      *StatementBlockNode
+	Then      []StatementNode
+	Else      []StatementNode
 }
 
 func (n *IfStatementNode) String() string {
@@ -117,18 +117,6 @@ type ReturnStatementNode struct {
 
 func (n *ReturnStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
-}
-
-// --------------------------
-
-// TODO and replace with []StatementNode
-type StatementBlockNode struct {
-	AbstractNode
-	Statements []StatementNode
-}
-
-func (n *StatementBlockNode) String() string {
-	return fmt.Sprintf("[%s] STMTBLOCK %s", n.Pos(), n.Statements)
 }
 
 // --------------------------
@@ -155,7 +143,7 @@ type BinaryExpressionNode struct {
 }
 
 func (n *BinaryExpressionNode) String() string {
-	return fmt.Sprintf("EXPR (%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
+	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
 }
 
 // --------------------------
@@ -178,7 +166,7 @@ type DesignatorNode struct {
 }
 
 func (n *DesignatorNode) String() string {
-	return fmt.Sprintf("DESIGNATOR %s", n.Value)
+	return fmt.Sprintf("%s", n.Value)
 }
 
 // --------------------------
@@ -191,7 +179,7 @@ type IntegerLiteralNode struct {
 }
 
 func (n *IntegerLiteralNode) String() string {
-	return fmt.Sprintf("INT %d", n.Value)
+	return fmt.Sprintf("%d", n.Value)
 }
 
 // --------------------------
@@ -202,7 +190,7 @@ type StringLiteralNode struct {
 }
 
 func (n *StringLiteralNode) String() string {
-	return fmt.Sprintf("STRING %s", n.Value)
+	return fmt.Sprintf("%s", n.Value)
 }
 
 // --------------------------
@@ -213,7 +201,7 @@ type CharacterLiteralNode struct {
 }
 
 func (n *CharacterLiteralNode) String() string {
-	return fmt.Sprintf("CHAR %c", n.Value)
+	return fmt.Sprintf("%c", n.Value)
 }
 
 // --------------------------
@@ -224,7 +212,7 @@ type BoolLiteralNode struct {
 }
 
 func (n *BoolLiteralNode) String() string {
-	return fmt.Sprintf("BOOL %t", n.Value)
+	return fmt.Sprintf("%t", n.Value)
 }
 
 // --------------------------
