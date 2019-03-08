@@ -10,7 +10,6 @@ type Visitor interface {
 	VisitTypeNode(node *node.TypeNode)
 	VisitIfStatementNode(node *node.IfStatementNode)
 	VisitReturnStatementNode(node *node.ReturnStatementNode)
-	VisitStatementBlockNode(node *node.StatementBlockNode)
 	VisitAssignmentStatementNode(node *node.AssignmentStatementNode)
 	VisitBinaryExpressionNode(node *node.BinaryExpressionNode)
 	VisitUnaryExpressionNode(node *node.UnaryExpression)
