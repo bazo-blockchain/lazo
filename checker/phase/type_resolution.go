@@ -7,9 +7,10 @@ type TypeResolution struct {
 }
 
 func RunTypeResolution(symTable *symbol.Table) {
-	TypeResolution{
+	resolution :=TypeResolution{
 		symTable: symTable,
-	}.resolveTypesInSymbols()
+	}
+	resolution.resolveTypesInSymbols()
 }
 
 func (tr *TypeResolution) resolveTypesInSymbols() {}
