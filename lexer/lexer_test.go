@@ -318,6 +318,12 @@ func TestMultiplication(t *testing.T) {
 	tester.assertFixToken(0, token.Multiplication)
 }
 
+func TestExponentAndMultiplication(t *testing.T) {
+	tester := newLexerTestUtil(t, "***")
+	tester.assertFixToken(0, token.Exponent)
+	tester.assertFixToken(1, token.Multiplication)
+}
+
 func TestDivision(t *testing.T) {
 	tester := newLexerTestUtil(t, "/")
 	tester.assertFixToken(0, token.Division)
@@ -356,6 +362,16 @@ func TestAnd(t *testing.T) {
 func TestOr(t *testing.T) {
 	tester := newLexerTestUtil(t, "||")
 	tester.assertFixToken(0, token.Or)
+}
+
+func TestUnsupportedSymbol(t *testing.T) {
+	tester := newLexerTestUtil(t, "|") // Bitwise | is not supported yet, there it is an error
+	tester.assertError(0, "|")
+}
+
+func TestInvalidLogicalSymbol(t *testing.T) {
+	tester := newLexerTestUtil(t, "&|")
+	tester.assertError(0, "&|")
 }
 
 func TestEqual(t *testing.T) {

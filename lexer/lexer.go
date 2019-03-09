@@ -226,18 +226,20 @@ func (lex *Lexer) readFixToken() token.Token {
 func (lex *Lexer) readLogicalFixToken() token.Token {
 	buf := []rune{lex.current}
 	lex.nextChar()
-	buf = append(buf, lex.current)
-	abstractToken := lex.newAbstractToken(string(buf))
+	if !lex.isEnd {
+		buf = append(buf, lex.current)
+	}
+	lexeme := string(buf)
+	abstractToken := lex.newAbstractToken(lexeme)
 
-	if symbol, ok := token.LogicalOperation[string(buf)]; ok {
+	if symbol, ok := token.LogicalOperation[lexeme]; ok {
 		lex.nextChar()
-
 		return &token.FixToken{
 			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
 	} else {
-		panic(fmt.Sprintf("No logical symbol is found for %s", string(buf)))
+		return lex.newErrorToken(abstractToken, "Invalid Symbol")
 	}
 }
 
