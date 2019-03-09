@@ -183,6 +183,11 @@ func TestEmptyCharacter(t *testing.T) {
 	tester.assertCharacter(0, 0)
 }
 
+func TestInvalidEmptyCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "''")
+	tester.assertError(0, "")
+}
+
 func TestCharacterWithInvalidEscape(t *testing.T) {
 	tester := newLexerTestUtil(t, `'\"'`)
 	tester.assertError(0, "")

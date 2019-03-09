@@ -124,5 +124,5 @@ func (t *ErrorToken) Type() TokenType {
 }
 
 func (t *ErrorToken) String() string {
-	return fmt.Sprintf("[%s] Error %s - %s", t.Pos(), t.Msg, t.Literal())
+	return fmt.Sprintf("[%s] Error: %s - %s", t.Pos(), t.Msg, t.Literal())
 }

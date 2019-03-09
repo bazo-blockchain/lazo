@@ -162,6 +162,10 @@ func (lex *Lexer) readCharacter() token.Token {
 		// skip closing quote
 		lex.nextChar()
 
+		if len(lexeme) == 0 {
+			return lex.newErrorToken(abstractToken, `Empty character. Use '\0' instead.`)
+		}
+
 		return &token.CharacterToken{
 			AbstractToken: abstractToken,
 			Value:         []rune(lexeme)[0],
