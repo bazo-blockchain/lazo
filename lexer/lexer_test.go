@@ -63,6 +63,20 @@ func TestPeekCharAtEOF(t *testing.T) {
 	tester.assertInteger(0, big.NewInt(0)) // It should return Integer token without any error
 }
 
+func TestUInt256Max(t *testing.T) {
+	// uint256 = 2^256 - 1
+	tester := newLexerTestUtil(t, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+	tok, ok := tester.tokens[0].(*token.IntegerToken)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Value.String(), "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+}
+
+func TestNegativeInt(t *testing.T) {
+	tester := newLexerTestUtil(t, "-10")
+	tester.assertFixToken(0, token.Subtraction)
+	tester.assertInteger(1, big.NewInt(10))
+}
+
 func TestHexDigits(t *testing.T) {
 	tester := newLexerTestUtil(t, "0x123 0xaf 0x123af")
 
@@ -71,6 +85,19 @@ func TestHexDigits(t *testing.T) {
 	tester.assertInteger(0, big.NewInt(291))
 	tester.assertInteger(1, big.NewInt(175))
 	tester.assertInteger(2, big.NewInt(74671))
+}
+
+func TestHexMax(t *testing.T) {
+	maxHex := "ffff"
+	for i := 0; i < 15; i++ {
+		maxHex += "ffff"
+	}
+	maxHex = "0x" + maxHex // 64 f's == 32 bytes with full of f's == 2^256 - 1
+
+	tester := newLexerTestUtil(t, maxHex)
+	tok, ok := tester.tokens[0].(*token.IntegerToken)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Value.String(), "115792089237316195423570985008687907853269984665640564039457584007913129639935")
 }
 
 func TestInvalidHex(t *testing.T) {
