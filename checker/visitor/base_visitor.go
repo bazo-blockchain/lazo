@@ -2,8 +2,6 @@ package visitor
 
 import "github.com/bazo-blockchain/lazo/parser/node"
 
-
-
 type BaseVisitor struct {}
 
 func (v *BaseVisitor) VisitProgramNode(node *node.ProgramNode) {
