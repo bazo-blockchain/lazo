@@ -179,7 +179,6 @@ func (lex *Lexer) readFixToken() token.Token {
 	// Check if the character could belong to a multi character operation
 	if symbol, ok := token.PossibleMultiCharOperation[lex.current]; ok {
 		buf := []rune{lex.current}
-
 		lex.nextChar()
 
 		// Check if the concatenated characters really build a multi character operation
@@ -216,7 +215,6 @@ func (lex *Lexer) readFixToken() token.Token {
 	}
 
 	lexeme := string(lex.current)
-
 	lex.nextChar()
 
 	return &token.ErrorToken{
@@ -229,7 +227,6 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	buf := []rune{lex.current}
 	lex.nextChar()
 	buf = append(buf, lex.current)
-
 	abstractToken := lex.newAbstractToken(string(buf))
 
 	if symbol, ok := token.LogicalOperation[string(buf)]; ok {
@@ -240,7 +237,7 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 			Value:         symbol,
 		}
 	} else {
-		return lex.newErrorToken(abstractToken, "Unknown Symbol")
+		panic(fmt.Sprintf("No logical symbol is found for %s", string(buf)))
 	}
 }
 
