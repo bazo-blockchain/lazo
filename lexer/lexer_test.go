@@ -58,6 +58,11 @@ func TestDecimalDigits(t *testing.T) {
 	tester.assertInteger(2, big.NewInt(456))
 }
 
+func TestPeekCharAtEOF(t *testing.T) {
+	tester := newLexerTestUtil(t, "0")     // When 0, lexer peeks the next char, if it has x for hex digit
+	tester.assertInteger(0, big.NewInt(0)) // It should return Integer token without any error
+}
+
 func TestHexDigits(t *testing.T) {
 	tester := newLexerTestUtil(t, "0x123 0xaf 0x123af")
 
