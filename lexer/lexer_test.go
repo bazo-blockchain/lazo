@@ -41,7 +41,7 @@ func TestStateWithCode(t *testing.T) {
 }
 
 func assertLexerState(t *testing.T, lex *Lexer, isEnd bool, current rune, pos string) {
-	assert.Equal(t, lex.IsEnd, isEnd)
+	assert.Equal(t, lex.isEnd, isEnd)
 	assert.Equal(t, lex.current, current)
 	assert.Equal(t, lex.currentPos.String(), pos)
 }

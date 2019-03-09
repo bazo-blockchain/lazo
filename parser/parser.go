@@ -602,7 +602,7 @@ func (p *Parser) newErrorNode(msg string) *node.ErrorNode {
 }
 
 func (p *Parser) isEnd() bool {
-	return p.lex.IsEnd
+	return p.isSymbol(token.EOF)
 }
 
 func (p *Parser) addError(msg string) {

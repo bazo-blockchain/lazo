@@ -6,6 +6,7 @@ import (
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/lexer"
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"github.com/spf13/cobra"
@@ -53,9 +54,13 @@ func compile(sourceFile string) {
 func scan(file io.Reader) *lexer.Lexer {
 	lexer := lexer.New(bufio.NewReader(file))
 	if stage == "l" {
-		for !lexer.IsEnd {
-			tok := lexer.NextToken()
-			fmt.Printf("%s \n", tok)
+		tok := lexer.NextToken()
+		for {
+			if ftok, ok := tok.(*token.FixToken); ok && ftok.Value == token.EOF {
+				break
+			}
+			fmt.Println(tok)
+			tok = lexer.NextToken()
 		}
 		os.Exit(0)
 	}

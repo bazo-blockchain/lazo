@@ -15,7 +15,7 @@ type Lexer struct {
 	current    rune
 	currentPos token.Position
 	tokenPos   token.Position
-	IsEnd      bool
+	isEnd      bool
 }
 
 func New(reader *bufio.Reader) *Lexer {
@@ -32,7 +32,7 @@ func (lex *Lexer) NextToken() token.Token {
 
 	lex.tokenPos = lex.currentPos
 
-	if lex.IsEnd {
+	if lex.isEnd {
 		return &token.FixToken{
 			AbstractToken: lex.newAbstractToken(""),
 			Value:         token.EOF,
@@ -58,7 +58,7 @@ func (lex *Lexer) NextToken() token.Token {
 }
 
 func (lex *Lexer) skipWhiteSpace() {
-	for !lex.IsEnd && lex.current <= ' ' && !lex.isChar('\n') {
+	for !lex.isEnd && lex.current <= ' ' && !lex.isChar('\n') {
 		lex.nextChar()
 	}
 }
@@ -245,7 +245,7 @@ func (lex *Lexer) nextChar() {
 	if char, _, err := lex.reader.ReadRune(); err != nil {
 		lex.current = 0
 		if err == io.EOF {
-			lex.IsEnd = true
+			lex.isEnd = true
 		} else {
 			log.Fatal(err)
 		}
@@ -280,7 +280,7 @@ type predicate func() bool
 func (lex *Lexer) readLexeme(pred predicate) string {
 	var buf []rune
 
-	for !lex.IsEnd && pred() {
+	for !lex.isEnd && pred() {
 		buf = append(buf, lex.current)
 		lex.nextChar()
 	}
@@ -311,7 +311,7 @@ var escapedChars = map[rune]rune{
 func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string, error) {
 	var buf []rune
 
-	for !lex.IsEnd && pred() {
+	for !lex.isEnd && pred() {
 		// Escape codes
 		if lex.isChar('\\') {
 			lex.nextChar()
