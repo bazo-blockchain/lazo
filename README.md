@@ -28,6 +28,37 @@ Run `lazo` to see all the available commands and their usages.
     
     Use "lazo [command] --help" for more information about a command.
 
+Example:
+* `lazo compile program.lazo`: Compile the source file *program.lazo* through all stages into Bazo IL code.
+* `lazo compile program.lazo --stage=p`: Compile the source code only until the parser stage.
+
+
+
+                 Lazo Source Code
+                        |
+                        V               
+                +---------------+
+                |     Lexer     |
+                +---------------+
+                        |
+                        V
+                +---------------+
+                |     Parser    |
+                +---------------+
+                        |
+                        V
+                +---------------+
+                |    Checker    |
+                +---------------+
+                        |
+                        V
+                +---------------+
+                |   Generator   |
+                +---------------+                
+                        |
+                        V
+                   Bazo IL Code
+                
 ## Development
 ###  Dependency Management
 
