@@ -193,6 +193,16 @@ func TestInvalidCharacter(t *testing.T) {
 	tester.assertError(0, "cc")
 }
 
+func TestUnicodeCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "'£'")
+	tester.assertError(0, "£")
+}
+
+func TestNotClosedCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "'c")
+	tester.assertError(0, "c")
+}
+
 // Fix Tokens
 // ----------------
 
@@ -356,6 +366,11 @@ func TestGreaterEqual(t *testing.T) {
 func TestLessEqual(t *testing.T) {
 	tester := newLexerTestUtil(t, "<=")
 	tester.assertFixToken(0, token.LessEqual)
+}
+
+func TestInvalidFixToken(t *testing.T) {
+	tester := newLexerTestUtil(t, "$")
+	tester.assertError(0, "$")
 }
 
 func TestFuncDeclaration(t *testing.T) {

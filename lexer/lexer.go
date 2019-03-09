@@ -217,9 +217,8 @@ func (lex *Lexer) readFixToken() token.Token {
 
 	return &token.ErrorToken{
 		AbstractToken: lex.newAbstractToken(lexeme),
-		Msg: fmt.Sprintf("Invalid charactr %s", lexeme),
+		Msg: "Invalid character",
 	}
-
 }
 
 func (lex *Lexer) readLogicalFixToken() token.Token {
