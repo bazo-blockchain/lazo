@@ -6,33 +6,13 @@
 Lazo is a statically typed, imperative and non-turing complete programming language.
 Please refer to [lazo-specification](https://github.com/bazo-blockchain/lazo-specification) for the complete language features.
 
-## Usage
+## Background
 
-The Lazo tool works with the CLI commands.
-Run `lazo` to see all the available commands and their usages.
+The Bazo Blockchain is a research blockchain to test different mechanisms and algorithms. 
+In the current version, there is a virtual machine available to interpret and execute IL codes on the Bazo Blockchain.
 
-    $ lazo
-    Lazo is a tool for managing Lazo source code on the Bazo Blockchain
-    
-    Usage:
-      lazo [flags]
-      lazo [command]
-    
-    Available Commands:
-      compile     Compile the Lazo source code
-      help        Help about any command
-      version     Print the version number of Lazo
-    
-    Flags:
-      -h, --help   help for lazo
-    
-    Use "lazo [command] --help" for more information about a command.
-
-Example:
-* `lazo compile program.lazo`: Compile the source file *program.lazo* through all stages into Bazo IL code.
-* `lazo compile program.lazo --stage=p`: Compile the source code only until the parser stage.
-
-
+The goal of this bachelor thesis is to build a compiler, which compiles the smart contracts written in the Lazo language 
+into the [Bazo intermediate language](https://github.com/bazo-blockchain/bazo-smartcontract) for the Bazo Blochchain.
 
                  Lazo Source Code
                         |
@@ -58,6 +38,32 @@ Example:
                         |
                         V
                    Bazo IL Code
+
+## Usage
+
+The Lazo tool works with the CLI commands.
+Run `lazo` to see all the available commands and their usages.
+
+    $ lazo
+    Lazo is a tool for managing Lazo source code on the Bazo Blockchain
+    
+    Usage:
+      lazo [flags]
+      lazo [command]
+    
+    Available Commands:
+      compile     Compile the Lazo source code
+      help        Help about any command
+      version     Print the version number of Lazo
+    
+    Flags:
+      -h, --help   help for lazo
+    
+    Use "lazo [command] --help" for more information about a command.
+
+Example:
+* `lazo compile program.lazo`: Compile the source file *program.lazo* through all stages into Bazo IL code.
+* `lazo compile program.lazo --stage=p`: Compile the source code only until the parser stage.
                 
 ## Development
 ###  Dependency Management
