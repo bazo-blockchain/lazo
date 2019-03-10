@@ -5,7 +5,6 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
-	"math/big"
 	"strings"
 	"testing"
 )
@@ -367,91 +366,6 @@ func TestStatementWithIdentifierAssignment(t *testing.T){
 
 	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
 	assertNoErrors(t, p)
-}
-
-// Designator Nodes
-// ----------------
-
-func TestDesignator(t *testing.T) {
-	p := newParserFromInput("test")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "test")
-	assertNoErrors(t, p)
-}
-
-func TestDesignatorWithNumbers(t *testing.T) {
-	p := newParserFromInput("test123")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "test123")
-	assertNoErrors(t, p)
-}
-
-func TestDesignatorWithUnderscore(t *testing.T) {
-	p := newParserFromInput("_test")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "_test")
-	assertNoErrors(t, p)
-}
-
-func TestInvalidDesignator(t *testing.T) {
-	p := newParserFromInput("1ab")
-	p.parseDesignator()
-	assertHasError(t, p)
-}
-
-// Literal Nodes
-// -------------
-
-func TestIntegerLiteral(t *testing.T) {
-	p := newParserFromInput("1")
-	i := p.parseInteger()
-	node.AssertIntegerLiteral(t, i, big.NewInt(1))
-	assertNoErrors(t, p)
-}
-
-func TestInvalidIntegerLiteral(t *testing.T) {
-	p := newParserFromInput("0x1")
-	i := p.parseInteger()
-	node.AssertIntegerLiteral(t, i, big.NewInt(1))
-	assertNoErrors(t, p)
-}
-
-func TestStringLiteral(t *testing.T) {
-	p := newParserFromInput(`"test"`)
-	s := p.parseString()
-	node.AssertStringLiteral(t, s, "test")
-	assertNoErrors(t, p)
-}
-
-func TestCharacterLiteral(t *testing.T) {
-	p := newParserFromInput("'c'")
-	c := p.parseCharacter()
-	node.AssertCharacterLiteral(t, c, 'c')
-	assertNoErrors(t, p)
-}
-
-func TestBoolLiteralTrue(t *testing.T) {
-	p := newParserFromInput("true")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.BoolLiteralNode)
-	node.AssertBoolLiteral(t, tok, true)
-	assertNoErrors(t, p)
-}
-
-func TestBoolLiteralFalse(t *testing.T) {
-	p := newParserFromInput("false")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.BoolLiteralNode)
-	node.AssertBoolLiteral(t, tok, false)
-	assertNoErrors(t, p)
-}
-
-func TestInvalidBoolLiteral(t *testing.T) {
-	p := newParserFromInput("if")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.ErrorNode)
-	node.AssertError(t, tok, "Invalid boolean value if")
-	assertHasError(t, p)
 }
 
 // Type Nodes
