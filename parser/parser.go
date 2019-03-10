@@ -204,13 +204,11 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 		AbstractNode: abstractNode,
 		Value:     	  identifier,
 	}
-
 	p.nextToken() // skip '=' sign
 
 	expression := p.parseExpression()
-
-
 	p.checkAndSkipNewLines(token.NewLine)
+
 	return &node.AssignmentStatementNode{
 		AbstractNode:	abstractNode,
 		Left:			designator,
@@ -220,7 +218,6 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	abstractNode := p.newAbstractNode()
-
 	p.nextToken() // skip 'if' keyword
 
 	// Condition

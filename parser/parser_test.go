@@ -92,14 +92,38 @@ func TestVariable(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
-func TestVariableWithoutNewLine(t *testing.T) {
+func TestVariableDeclarationWithoutNewLine(t *testing.T) {
 	p := newParserFromInput("int x")
 	_ = p.parseVariableStatement()
 	assertHasError(t, p)
 }
 
+func TestCharVariableStatement(t *testing.T){
+	p := newParserFromInput("char a = 'c'\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "char", "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestIntVariableStatement(t *testing.T){
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "int", "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatementWONewline(t *testing.T){
+	p := newParserFromInput("char a = 'c'")
+	p.parseVariableStatement()
+
+	assertHasError(t, p)
+}
+
 // Function Nodes
 // --------------
+
 func TestEmptyFunction(t *testing.T) {
 	p := newParserFromInput("function void test(){\n}\n")
 	f := p.parseFunction()
@@ -207,6 +231,9 @@ func TestMultipleStatementBlock(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Return statements
+// ------------------
+
 func TestReturnStatementMissingNewline(t *testing.T) {
 	p := newParserFromInput("return")
 	p.parseReturnStatement()
@@ -236,6 +263,9 @@ func TestMultipleReturnStatement(t *testing.T) {
 	node.AssertReturnStatement(t, v, 2)
 	assertNoErrors(t, p)
 }
+
+// If Statement
+// ------------
 
 func TestIfStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\n}\n")
@@ -287,17 +317,17 @@ func TestIfStatementMultipleThenStatement(t *testing.T) {
 
 func TestIfStatementMultipleElseStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\nint c\n int d\n}\n")
-	v := p.parseIfStatement()
+	v := p.parseStatement()
 
-	node.AssertIfStatement(t, v, "true", 0, 2)
+	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 2)
 	assertNoErrors(t, p)
 }
 
 func TestIfStatementWOElse(t *testing.T) {
 	p := newParserFromInput("if(true){\n}\n")
-	v := p.parseIfStatement()
+	v := p.parseStatementWithFixToken()
 
-	node.AssertIfStatement(t, v, "true", 0, 0)
+	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 0)
 	assertNoErrors(t, p)
 }
 
@@ -307,6 +337,9 @@ func TestIfStatementWOElseWONewline(t *testing.T) {
 
 	assertHasError(t, p)
 }
+
+// Assignment
+// ----------
 
 func TestAssignmentStatement(t *testing.T) {
 	p := newParserFromInput("a = 5\n")
@@ -319,10 +352,9 @@ func TestAssignmentStatement(t *testing.T) {
 
 func TestAssignmentStatementChar(t *testing.T) {
 	p := newParserFromInput("a = 'c'\n")
-	i := p.readIdentifier()
-	v := p.parseAssignmentStatement(i)
+	s := p.parseStatementWithIdentifier()
 
-	node.AssertAssignmentStatement(t, v, "a", "c")
+	node.AssertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "a", "c")
 	assertNoErrors(t, p)
 }
 
@@ -334,28 +366,8 @@ func TestAssignmentStatementWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
-func TestVariableStatementChar(t *testing.T){
-	p := newParserFromInput("char a = 'c'\n")
-	v := p.parseVariableStatement()
-
-	node.AssertVariableStatement(t, v, "char", "a", "c")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatement(t *testing.T){
-	p := newParserFromInput("int a = 5\n")
-	v := p.parseVariableStatement()
-
-	node.AssertVariableStatement(t, v, "int", "a", "5")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatementWONewline(t *testing.T){
-	p := newParserFromInput("char a = 'c'")
-	p.parseVariableStatement()
-
-	assertHasError(t, p)
-}
+// Statement with Fix token
+// ------------------------
 
 func TestStatementWithFixTokenReturn(t *testing.T){
 	p := newParserFromInput("return\n")
@@ -380,6 +392,9 @@ func TestStatementWithFixTokenMultipleReturnValue(t *testing.T){
 	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT [5 4]")
 	assertNoErrors(t, p)
 }
+
+// Statement with Identifier
+// -------------------------
 
 func TestStatementWithIdentifier(t *testing.T){
 	p := newParserFromInput("int a\n")
