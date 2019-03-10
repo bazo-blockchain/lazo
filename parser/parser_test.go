@@ -68,6 +68,19 @@ func TestContractWithVariable(t *testing.T) {
 	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
 }
 
+func TestContractWithFunction(t *testing.T){
+	p := newParserFromInput(`contract Test {
+		function void test() {
+
+		}
+	}`)
+	c := p.parseContract()
+
+	assertNoErrors(t, p)
+	node.AssertContract(t, c, "Test", 0, 1)
+	node.AssertFunction(t, c.Functions[0], "test", 1, 0, 0)
+}
+
 // Variable Nodes
 // --------------
 
@@ -150,13 +163,19 @@ func TestFunctionWORType(t *testing.T) {
 }
 
 func TestFunctionMissingNewline(t *testing.T) {
-	p := newParserFromInput("function test(int a, int b){\n}")
+	p := newParserFromInput("function void test(int a, int b){\n}")
 	p.parseFunction()
 	assertHasError(t, p)
 }
 
 func TestFunctionMissingNewlineInBody(t *testing.T) {
-	p := newParserFromInput("function test(int a, int b){}\n")
+	p := newParserFromInput("function void test(int a, int b){}\n")
+	p.parseFunction()
+	assertHasError(t, p)
+}
+
+func TestFunctionMissingParamComma(t *testing.T) {
+	p := newParserFromInput("function void test(int a int b){}\n")
 	p.parseFunction()
 	assertHasError(t, p)
 }

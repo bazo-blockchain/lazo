@@ -74,7 +74,7 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 			p.nextToken()
 		}
 	default:
-		p.addError("Unsupported contract part starting with" + p.currentToken.Literal())
+		p.addError("Unsupported contract part: " + p.currentToken.Literal())
 		p.nextToken()
 	}
 }
@@ -83,7 +83,6 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
 	}
-
 	p.nextToken() // skip function keyword
 
 	function.ReturnTypes = p.parseReturnTypes()
