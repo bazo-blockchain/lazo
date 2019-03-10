@@ -38,7 +38,11 @@ func TestInvalidProgram(t *testing.T) {
 // --------------
 
 func TestEmptyContract(t *testing.T) {
-	p := newParserFromInput("contract Test {\n \n}")
+	p := newParserFromInput(`
+		contract Test {
+		
+		}
+	`)
 	program, _ := p.ParseProgram()
 
 	assertNoErrors(t, p)
@@ -57,6 +61,11 @@ func TestContractWithVariable(t *testing.T) {
 	node.AssertContract(t, c, "Test", 2, 0)
 	node.AssertVariable(t, c.Variables[0], "int", "x")
 	node.AssertVariable(t, c.Variables[1], "int", "y")
+
+	// Positions
+	assert.Equal(t, c.Pos().String(), "1:1")
+	assert.Equal(t, c.Variables[0].Pos().String(), "2:3")
+	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
 }
 
 // Variable Nodes

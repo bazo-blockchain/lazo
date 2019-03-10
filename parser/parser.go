@@ -54,7 +54,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 		p.parseContractBody(contract)
 	}
 
-	p.check(token.CloseBrace)
+	p.checkAndSkipNewLines(token.CloseBrace)
 	return contract
 }
 
@@ -331,7 +331,13 @@ func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
-		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], p.currentToken.Literal()))
+		var lexeme string
+		if ftok, ok := p.currentToken.(*token.FixToken); ok {
+			lexeme = token.SymbolLexeme[ftok.Value]
+		} else {
+			lexeme = p.currentToken.Literal()
+		}
+		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], lexeme))
 	}
 	p.nextToken()
 }
