@@ -157,6 +157,42 @@ func TestFactorWithExponent(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "2", "(3 ** 4)", token.Division)
 }
 
+// Unary Expressions
+// -----------------
+
+func TestUnaryPlus(t *testing.T) {
+	e := parseExpressionFromInput(t, "+x")
+	node.AssertUnaryExpression(t, e, "x", token.Addition)
+}
+
+func TestUnaryMinus(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 - -3")
+	node.AssertBinaryExpression(t, e, "2", "(-3)", token.Subtraction)
+
+	unExpr := e.(*node.BinaryExpressionNode).Right
+	node.AssertUnaryExpression(t, unExpr, "3", token.Subtraction)
+}
+
+func TestUnaryNot(t *testing.T) {
+	e := parseExpressionFromInput(t, "!true")
+	node.AssertUnaryExpression(t, e, "true", token.Not)
+}
+
+func TestUnaryPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "-4 + 2")
+	node.AssertBinaryExpression(t, e, "(-4)", "2", token.Addition)
+}
+
+func TestUnaryWithFactor(t *testing.T) {
+	e := parseExpressionFromInput(t, "-4 * 2")
+	node.AssertUnaryExpression(t, e, "(4 * 2)", token.Subtraction)
+}
+
+func TestUnaryAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "-+-+x")
+	node.AssertUnaryExpression(t, e, "(+(-(+x)))", token.Subtraction)
+}
+
 // --------------
 
 func parseExpressionFromInput(t *testing.T, input string) node.ExpressionNode {

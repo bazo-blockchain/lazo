@@ -187,12 +187,12 @@ func (n *BinaryExpressionNode) Accept(v Visitor) {
 
 type UnaryExpression struct {
 	AbstractNode
-	Operator token.Symbol
-	Operand  ExpressionNode
+	Operator   token.Symbol
+	Expression ExpressionNode
 }
 
 func (n *UnaryExpression) String() string {
-	return fmt.Sprintf("EXPR (%s %s)", token.SymbolLexeme[n.Operator], n.Operand)
+	return fmt.Sprintf("(%s%s)", token.SymbolLexeme[n.Operator], n.Expression)
 }
 
 func (n *UnaryExpression) Accept(v Visitor) {

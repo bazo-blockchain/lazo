@@ -125,7 +125,7 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 }
 
 func (p *Parser) parseExpressionRest() node.ExpressionNode {
-	if p.isAnySymbol(token.Addition, token.Subtraction) {
+	if p.isAnySymbol(token.Addition, token.Subtraction, token.Not) {
 		return p.parseUnaryExpression()
 	}
 
@@ -136,7 +136,7 @@ func (p *Parser) parseUnaryExpression() *node.UnaryExpression {
 	return &node.UnaryExpression{
 		AbstractNode: p.newAbstractNode(),
 		Operator:     p.readSymbol(),
-		Operand:      p.parseFactor(),
+		Expression:   p.parseFactor(),
 	}
 }
 
