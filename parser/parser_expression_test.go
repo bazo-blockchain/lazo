@@ -139,6 +139,24 @@ func TestFactorPrecedence(t *testing.T) {
 	node.AssertBinaryExpression(t, e, "1", "(2 * 3)", token.Addition)
 }
 
+// Exponent Expressions
+// --------------------
+
+func TestExponent(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 ** 3 ** 4")
+	node.AssertBinaryExpression(t, e, "2", "(3 ** 4)", token.Exponent)
+}
+
+func TestExponentWithFactor(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 ** 3 * 4")
+	node.AssertBinaryExpression(t, e, "(2 ** 3)", "4", token.Multiplication)
+}
+
+func TestFactorWithExponent(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 / 3 ** 4")
+	node.AssertBinaryExpression(t, e, "2", "(3 ** 4)", token.Division)
+}
+
 // --------------
 
 func parseExpressionFromInput(t *testing.T, input string) node.ExpressionNode {
