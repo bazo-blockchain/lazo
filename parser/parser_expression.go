@@ -158,7 +158,7 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	if tok, ok := p.currentToken.(*token.ErrorToken); ok {
 		error = tok.Msg
 	} else {
-		error = "Invalid operand: " + p.currentToken.Literal()
+		panic("Unsupported token type: " + p.currentToken.Literal())
 	}
 
 	return p.newErrorNode(error)

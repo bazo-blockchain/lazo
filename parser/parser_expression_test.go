@@ -241,6 +241,15 @@ func TestValidIntegerLiteral(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+func TestInvalidHexLiteral(t *testing.T) {
+	p := newParserFromInput("0x")
+	o := p.parseOperand()
+
+	assertHasError(t, p)
+	e := o.(*node.ErrorNode)
+	node.AssertError(t, e, "Error while parsing string to big int")
+}
+
 func TestStringLiteral(t *testing.T) {
 	p := newParserFromInput(`"test"`)
 	s := p.parseString()
@@ -274,9 +283,10 @@ func TestBoolLiteralFalse(t *testing.T) {
 func TestInvalidBoolLiteral(t *testing.T) {
 	p := newParserFromInput("if")
 	b := p.parseBoolean()
+
+	assertHasError(t, p)
 	tok, _ := b.(*node.ErrorNode)
 	node.AssertError(t, tok, "Invalid boolean value if")
-	assertHasError(t, p)
 }
 
 // --------------
