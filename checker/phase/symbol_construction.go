@@ -73,7 +73,10 @@ func (sc *SymbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 }
 
 func (sc *SymbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
-	// TODO Implement
+	sym := symbol.ParameterSymbol{}.NewSymbol(functionSymbol, node.Identifier)
+	parameterSymbol, _ := sym.(*symbol.ParameterSymbol)
+	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
+	sc.symTable.LinkDeclaration(node, parameterSymbol)
 }
 
 func (sc *SymbolConstruction) registerBuiltinTypes() {
