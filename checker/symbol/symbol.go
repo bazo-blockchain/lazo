@@ -2,6 +2,10 @@ package symbol
 
 import "github.com/bazo-blockchain/lazo/parser/node"
 
+
+// TODO Refactor:
+// Remove NewSymbol from the Interface, every Symbol Type can have a NewSymbol method with different params
+// as they are called primarly from the phases and in the phases we know what symbol it is... No dynamic calls required...
 type Symbol interface {
 	NewSymbol(scope Symbol, identifier string) Symbol
 	AllDeclarations() []Symbol
