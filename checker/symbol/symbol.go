@@ -6,6 +6,7 @@ type Symbol interface {
 	NewSymbol(scope Symbol, identifier string) Symbol
 	AllDeclarations() []Symbol
 	String() string
+	GetScope() Symbol
 }
 
 type BaseSymbol struct {
@@ -26,6 +27,10 @@ func (sym *BaseSymbol) AllDeclarations() []Symbol {
 
 func (sym *BaseSymbol) String() string {
 	return sym.Identifier
+}
+
+func (sym *BaseSymbol) GetScope() Symbol {
+	return sym.Scope
 }
 
 // Concrete Symbols
