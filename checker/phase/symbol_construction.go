@@ -73,7 +73,7 @@ func (sc *SymbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 }
 
 func (sc *SymbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
-
+	// TODO Implement
 }
 
 func (sc *SymbolConstruction) registerBuiltinTypes() {
