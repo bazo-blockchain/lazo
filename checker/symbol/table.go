@@ -5,6 +5,8 @@ import "github.com/bazo-blockchain/lazo/parser/node"
 type Table struct {
 	Compilation *CompilationUnit
 	symbolToNode map[Symbol]node.Node
+	targetFixup map[*node.DesignatorNode]Symbol
+	typeFixup map[node.ExpressionNode]*TypeSymbol
 }
 
 func (t *Table) FindTypeByIdentifier(identifier string) *TypeSymbol {
@@ -40,4 +42,20 @@ func (t *Table) LinkDeclaration(node node.Node, symbol Symbol) {
 
 func (t *Table) GetDeclaration(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
+}
+
+func (t *Table) FixTarget(designatorNode *node.DesignatorNode, symbol Symbol) {
+	t.targetFixup[designatorNode] = symbol
+}
+
+func (t *Table) GetTarget(designatorNode *node.DesignatorNode) Symbol{
+	return t.targetFixup[designatorNode]
+}
+
+func (t *Table) FixType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
+	t.typeFixup[expressionNode] = symbol
+}
+
+func (t *Table) FindTypeByExpressionNode(expressionNode node.ExpressionNode) *TypeSymbol {
+	return t.typeFixup[expressionNode]
 }
