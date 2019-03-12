@@ -93,7 +93,15 @@ func (sc *SymbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbo
 }
 
 func (sc *SymbolConstruction) registerBuiltinConstants() {
-	// TODO Implement
+	sc.globalScope.NullConstant = sc.registerBuiltinConstant()
+	sc.globalScope.FalseConstant = sc.registerBuiltinConstant()
+	sc.globalScope.TrueConstant = sc.registerBuiltinConstant()
+}
+
+func (sc *SymbolConstruction) registerBuiltinConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
+	constant := symbol.ConstantSymbol{}.NewConstantSymbol(sc.globalScope, name, typeSymbol)
+	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
+	return constant
 }
 
 func (sc *SymbolConstruction) checkValidIdentifiers() {
