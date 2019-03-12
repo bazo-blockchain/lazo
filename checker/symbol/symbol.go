@@ -64,10 +64,23 @@ func (cu *CompilationUnit) AllDeclarations() []Symbol {
 //----------------
 
 type ContractSymbol struct {
-	// TODO Implement
+	Symbol
+	Fields *[]FieldSymbol
+	Functions *[]FunctionSymbol
 }
 
 func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
+	return &ContractSymbol{
+		Symbol: TypeSymbol{}.NewSymbol(scope, identifier),
+	}
+}
+
+func (sym *ContractSymbol) AllDeclarations() []Symbol {
+	// TODO Implement
+	return nil
+}
+
+func (sym *ContractSymbol) AllFields() *[]FieldSymbol {
 	// TODO Implement
 	return nil
 }
