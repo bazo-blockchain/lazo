@@ -74,14 +74,14 @@ func (cu *CompilationUnit) AllDeclarations() []Symbol {
 //----------------
 
 type ContractSymbol struct {
-	Symbol
+	*TypeSymbol
 	Fields []*FieldSymbol
 	Functions []*FunctionSymbol
 }
 
 func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &ContractSymbol{
-		Symbol: TypeSymbol{}.NewSymbol(scope, identifier),
+		TypeSymbol: TypeSymbol{}.NewTypeSymbol(scope, identifier),
 		Fields: []*FieldSymbol{},
 		Functions: []*FunctionSymbol{},
 	}
