@@ -1,5 +1,7 @@
 package symbol
 
+import "github.com/bazo-blockchain/lazo/parser/node"
+
 type Symbol interface {
 	NewSymbol(scope Symbol, identifier string) Symbol
 	AllDeclarations() []Symbol
@@ -32,9 +34,9 @@ func (sym *BaseSymbol) String() string {
 type CompilationUnit struct {
 	Symbol
 	Contract *ContractSymbol
-	Types *[]TypeSymbol
-	Functions *[]FunctionSymbol
-	Constants *[]ConstantSymbol
+	Types []*TypeSymbol
+	Functions []*FunctionSymbol
+	Constants []*ConstantSymbol
 
 	NullType *TypeSymbol
 	BoolType *TypeSymbol
@@ -42,7 +44,7 @@ type CompilationUnit struct {
 	StringType *TypeSymbol
 	IntType *TypeSymbol
 
-	BuiltInTypes *[]TypeSymbol
+	BuiltInTypes []*TypeSymbol
 
 	TrueConstant *ConstantSymbol
 	FalseConstant *ConstantSymbol
@@ -52,6 +54,9 @@ type CompilationUnit struct {
 func (cu *CompilationUnit) NewCompilationUnit() Symbol{
 	return &CompilationUnit{
 		Symbol: BaseSymbol{}.NewSymbol(nil, ""),
+		Types: []*TypeSymbol{},
+		Functions: []*FunctionSymbol{},
+		Constants: []*ConstantSymbol{},
 		NullType: TypeSymbol{}.NewTypeSymbol(cu, "@NULL"),
 	}
 }
@@ -65,13 +70,15 @@ func (cu *CompilationUnit) AllDeclarations() []Symbol {
 
 type ContractSymbol struct {
 	Symbol
-	Fields *[]FieldSymbol
-	Functions *[]FunctionSymbol
+	Fields []*FieldSymbol
+	Functions []*FunctionSymbol
 }
 
 func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &ContractSymbol{
 		Symbol: TypeSymbol{}.NewSymbol(scope, identifier),
+		Fields: []*FieldSymbol{},
+		Functions: []*FunctionSymbol{},
 	}
 }
 
@@ -80,7 +87,7 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 	return nil
 }
 
-func (sym *ContractSymbol) AllFields() *[]FieldSymbol {
+func (sym *ContractSymbol) AllFields() []*FieldSymbol {
 	// TODO Implement
 	return nil
 }
@@ -88,45 +95,63 @@ func (sym *ContractSymbol) AllFields() *[]FieldSymbol {
 //----------------
 
 type FieldSymbol struct {
-	// TODO Implement
+	Symbol
 }
 
 func (sym *FieldSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	// TODO Implement
-	return nil
+	return &FieldSymbol{
+		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+	}
 }
 
 //----------------
 
 type FunctionSymbol struct {
-	// TODO Implement
+	Symbol
+	ReturnTypes []*TypeSymbol
+	Parameters []*ParameterSymbol
+	LocalVariables []*LocalVariableSymbol
+
 }
 
 func (sym *FunctionSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	// TODO Implement
+	if scope == nil {
+		// TODO Error
+	}
+	return &FunctionSymbol{
+		Symbol: BaseSymbol{}.NewSymbol(scope, identifier),
+	}
+}
+
+func (sym *FunctionSymbol) AllDeclarations() []Symbol {
+	// TODO implement
 	return nil
 }
 
 //----------------
 
 type ParameterSymbol struct {
-	// TODO Implement
+	Symbol
 }
 
 func (sym *ParameterSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	// TODO Implement
-	return nil
+	return &ParameterSymbol{
+		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+	}
 }
 
 //----------------
 
 type LocalVariableSymbol struct {
-	// TODO Implement
+	Symbol
+	VisibleIn map[node.StatementNode]struct{}
 }
 
 func (sym *LocalVariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	// TODO Implement
-	return nil
+	return &LocalVariableSymbol{
+		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+		VisibleIn: map[node.StatementNode]struct{}{},
+	}
 }
 
 //----------------
