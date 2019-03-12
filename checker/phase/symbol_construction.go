@@ -80,7 +80,16 @@ func (sc *SymbolConstruction) registerParameter(functionSymbol *symbol.FunctionS
 }
 
 func (sc *SymbolConstruction) registerBuiltinTypes() {
-	// TODO Implement
+	sc.globalScope.BoolType = sc.registerBuiltinType("bool")
+	sc.globalScope.CharType = sc.registerBuiltinType("char")
+	sc.globalScope.IntType = sc.registerBuiltinType("int")
+	sc.globalScope.StringType = sc.registerBuiltinType("string")
+}
+
+func (sc *SymbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
+	baseType := symbol.TypeSymbol{}.NewTypeSymbol(sc.globalScope, name)
+	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
+	return baseType
 }
 
 func (sc *SymbolConstruction) registerBuiltinConstants() {
