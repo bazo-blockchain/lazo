@@ -143,6 +143,10 @@ func NewVariableSymbol(scope Symbol, identifier string) *VariableSymbol {
 	}
 }
 
+func (sym *VariableSymbol) String() string {
+	return fmt.Sprintf("%s %s", sym.Type, sym.Identifier)
+}
+
 //----------------
 
 type ConstantSymbol struct {

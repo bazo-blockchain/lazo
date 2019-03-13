@@ -85,24 +85,20 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)
 	sc.symTable.MapSymbolToNode(functionSymbol, node)
 
-	//for _, parameter := range node.Parameters {
-	//	sc.registerParameter(functionSymbol, parameter)
-	//}
+	for _, parameter := range node.Parameters {
+		sc.registerParameter(functionSymbol, parameter)
+	}
+
 	//for _, statement := range node.Body {
 	//	// TODO Pass visitor
 	//	statement.Accept(nil)
 	//}
 }
 
-//func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
-//	sym := symbol.ParameterSymbol{}.NewSymbol(functionSymbol, node.Identifier)
-//	parameterSymbol, _ := sym.(*symbol.ParameterSymbol)
-//	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
-//	sc.symTable.MapSymbolToNode(node, parameterSymbol)
-//}
-
-func (sc *symbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
-	// TODO Implement
+func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
+	parameterSymbol := symbol.NewParameterSymbol(functionSymbol, node.Identifier)
+	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
+	sc.symTable.MapSymbolToNode(parameterSymbol, node)
 }
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
