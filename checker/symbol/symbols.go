@@ -152,27 +152,15 @@ type ConstantSymbol struct {
 	Type *TypeSymbol
 }
 
-func (sym *ConstantSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	if scope == nil {
-		// TODO Error
-	}
-	if identifier == "" {
-		// TODO Error
-	}
-
+func NewConstantSymbol(scope Symbol, identifier string, typeSymbol *TypeSymbol) *ConstantSymbol {
 	return &ConstantSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
+		Type: typeSymbol,
 	}
 }
 
-func (sym *ConstantSymbol) NewConstantSymbol(scope Symbol, identifier string, typeSymbol *TypeSymbol) *ConstantSymbol {
-	constantSymbol := sym.NewSymbol(scope, identifier)
-	if typeSymbol == nil {
-		// TODO Error
-	}
-	symbol, _ := constantSymbol.(*ConstantSymbol)
-	symbol.Type = typeSymbol
-	return symbol
+func (sym *ConstantSymbol) String() string {
+	return fmt.Sprintf("Constant %s", sym.Identifier)
 }
 
 //----------------
@@ -190,5 +178,3 @@ func NewTypeSymbol(scope Symbol, identifier string) *TypeSymbol {
 func (sym *TypeSymbol) String() string {
 	return fmt.Sprintf("Type %s", sym.Identifier)
 }
-
-//----------------

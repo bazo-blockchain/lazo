@@ -28,8 +28,34 @@ func (sc *symbolConstruction) registerDeclarations() {
 }
 
 func (sc *symbolConstruction) registerBuiltins() {
-	sc.registerBuiltinTypes()
+	sc.registerBuiltInTypes()
 	sc.registerBuiltinConstants()
+}
+
+func (sc *symbolConstruction) registerBuiltInTypes() {
+	sc.globalScope.BoolType = sc.registerBuiltinType("bool")
+	sc.globalScope.CharType = sc.registerBuiltinType("char")
+	sc.globalScope.IntType = sc.registerBuiltinType("int")
+	sc.globalScope.StringType = sc.registerBuiltinType("string")
+}
+
+func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
+	baseType := symbol.NewTypeSymbol(sc.globalScope, name)
+	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
+	sc.globalScope.BuiltInTypes = append(sc.globalScope.BuiltInTypes, baseType)
+	return baseType
+}
+
+func (sc *symbolConstruction) registerBuiltinConstants() {
+	sc.globalScope.NullConstant = sc.registerBuiltinConstant(sc.globalScope.NullType, "null")
+	sc.globalScope.FalseConstant = sc.registerBuiltinConstant(sc.globalScope.BoolType, "false")
+	sc.globalScope.TrueConstant = sc.registerBuiltinConstant(sc.globalScope.BoolType, "true")
+}
+
+func (sc *symbolConstruction) registerBuiltinConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
+	constant := symbol.NewConstantSymbol(sc.globalScope, name, typeSymbol)
+	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
+	return constant
 }
 
 //func (sc *symbolConstruction) registerContract(contractNode *node.ContractNode) {
@@ -79,34 +105,9 @@ func (sc *symbolConstruction) registerBuiltins() {
 //	sc.symTable.LinkDeclaration(node, parameterSymbol)
 //}
 
-func (sc *symbolConstruction) registerBuiltinTypes() {
-	sc.globalScope.BoolType = sc.registerBuiltinType("bool")
-	sc.globalScope.CharType = sc.registerBuiltinType("char")
-	sc.globalScope.IntType = sc.registerBuiltinType("int")
-	sc.globalScope.StringType = sc.registerBuiltinType("string")
-}
-
 func (sc *symbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
 	// TODO Implement
 }
-
-func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
-	baseType := symbol.NewTypeSymbol(sc.globalScope, name)
-	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
-	return baseType
-}
-
-func (sc *symbolConstruction) registerBuiltinConstants() {
-	//sc.globalScope.NullConstant = sc.registerBuiltinConstant()
-	//sc.globalScope.FalseConstant = sc.registerBuiltinConstant()
-	//sc.globalScope.TrueConstant = sc.registerBuiltinConstant()
-}
-
-//func (sc *symbolConstruction) registerBuiltinConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
-//	constant := symbol.ConstantSymbol{}.NewConstantSymbol(sc.globalScope, name, typeSymbol)
-//	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
-//	return constant
-//}
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
 	// TODO Implement
