@@ -86,6 +86,10 @@ func (sc *symbolConstruction) registerBuiltinTypes() {
 	//sc.globalScope.StringType = sc.registerBuiltinType("string")
 }
 
+func (sc *symbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
+	// TODO Implement
+}
+
 //func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
 //	baseType := symbol.TypeSymbol{}.NewTypeSymbol(sc.globalScope, name)
 //	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
@@ -109,5 +113,9 @@ func (sc *symbolConstruction) checkValidIdentifiers() {
 }
 
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
+	// TODO Implement
+}
+
+func (sc *symbolConstruction) checkUniqueIdentifiersByScope() {
 	// TODO Implement
 }
