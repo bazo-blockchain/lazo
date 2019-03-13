@@ -7,7 +7,7 @@ import (
 
 type Symbol interface {
 	GetScope() Symbol
-	GetName() string
+	GetIdentifier() string
 	AllDeclarations() []Symbol
 	String() string
 }
@@ -28,7 +28,7 @@ func (sym *AbstractSymbol) GetScope() Symbol {
 	return sym.Scope
 }
 
-func (sym *AbstractSymbol) GetName() string {
+func (sym *AbstractSymbol) GetIdentifier() string {
 	return sym.Identifier
 }
 
@@ -37,7 +37,7 @@ func (sym *AbstractSymbol) AllDeclarations() []Symbol {
 }
 
 func (sym *AbstractSymbol) String() string {
-	return fmt.Sprintf("Abstract Symbol: %s", sym.GetName())
+	return fmt.Sprintf("Abstract Symbol: %s", sym.Identifier)
 }
 
 // Concrete Symbols
@@ -60,20 +60,25 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 	return nil
 }
 
-func (sym *ContractSymbol) String() string{
-	return fmt.Sprintf("%s, %d Fields, %d Functions", sym.Identifier, len(sym.Fields), len(sym.Functions))
+func (sym *ContractSymbol) String() string {
+	return fmt.Sprintf("Contract: %s, Fields: %s, Functions %s", sym.Identifier, sym.Fields, sym.Functions)
 }
 
 //----------------
 
 type FieldSymbol struct {
-	Symbol
+	AbstractSymbol
+	Type *TypeSymbol
 }
 
-func (sym *FieldSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
+func NewFieldSymbol(scope Symbol, identifier string) *FieldSymbol {
 	return &FieldSymbol{
-		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
+}
+
+func (sym *FieldSymbol) String() string {
+	return fmt.Sprintf("%s %s", sym.Type, sym.Identifier)
 }
 
 //----------------

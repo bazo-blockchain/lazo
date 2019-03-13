@@ -65,22 +65,21 @@ func (sc *symbolConstruction) registerContract() {
 	sc.globalScope.Contract = contractSymbol
 
 	sc.symTable.MapSymbolToNode(contractSymbol, contractNode)
-	//for _, variableNode := range contractNode.Variables {
-	//	sc.registerField(contractSymbol, variableNode)
-	//}
-	//
+	for _, variableNode := range contractNode.Variables {
+		sc.registerField(contractSymbol, variableNode)
+	}
+
 	//for _, functionNode := range contractNode.Functions {
 	//	sc.registerFunction(contractSymbol, functionNode)
 	//}
 }
 
-//func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
-//	sym := symbol.FieldSymbol{}.NewSymbol(contractSymbol, node.Identifier)
-//	fieldSymbol, _ := sym.(*symbol.FieldSymbol)
-//	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
-//	sc.symTable.MapSymbolToNode(node, fieldSymbol)
-//}
-//
+func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
+	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
+	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
+	sc.symTable.MapSymbolToNode(fieldSymbol, node)
+}
+
 //func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
 //	sym := symbol.FunctionSymbol{}.NewSymbol(contractSymbol, node.Name)
 //	functionSymbol, _ := sym.(*symbol.FunctionSymbol)

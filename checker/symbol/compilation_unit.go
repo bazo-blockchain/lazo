@@ -36,5 +36,5 @@ func (cu *CompilationUnit) String() string {
 	return fmt.Sprintf("\n Types: %s"+
 		"\n Built-in Types: %s"+
 		"\n Constants: %s"+
-		"\n Contract: %s", cu.Types, cu.BuiltInTypes, cu.Constants, cu.Contract)
+		"\n %s", cu.Types, cu.BuiltInTypes, cu.Constants, cu.Contract)
 }
