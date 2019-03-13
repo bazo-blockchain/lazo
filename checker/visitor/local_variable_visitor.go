@@ -7,9 +7,9 @@ import (
 )
 
 type LocalVariableVisitor struct {
-	AbstractVisitor
-	symbolTable *symbol.SymbolTable
-	function    *symbol.FunctionSymbol
+	node.AbstractVisitor
+	symbolTable     *symbol.SymbolTable
+	function        *symbol.FunctionSymbol
 }
 
 func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.FunctionSymbol) *LocalVariableVisitor {
@@ -17,7 +17,7 @@ func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.F
 		symbolTable: symbolTable,
 		function:    function,
 	}
-	v.concreteVisitor = v
+	v.ConcreteVisitor = v
 	return v
 }
 
