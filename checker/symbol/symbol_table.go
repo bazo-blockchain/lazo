@@ -2,14 +2,14 @@ package symbol
 
 import "github.com/bazo-blockchain/lazo/parser/node"
 
-type Table struct {
+type SymbolTable struct {
 	Compilation *CompilationUnit
 	symbolToNode map[Symbol]node.Node
 	targetFixup map[*node.DesignatorNode]Symbol
 	typeFixup map[node.ExpressionNode]*TypeSymbol
 }
 
-func (t *Table) FindTypeByIdentifier(identifier string) *TypeSymbol {
+func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	for _, compilationType := range t.Compilation.Types {
 		if compilationType.String() == identifier {
 			return compilationType
@@ -19,11 +19,11 @@ func (t *Table) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	return nil
 }
 
-func (t *Table) FindTypeByNode(node *node.TypeNode) *TypeSymbol {
+func (t *SymbolTable) FindTypeByNode(node *node.TypeNode) *TypeSymbol {
 	return t.FindTypeByIdentifier(node.Identifier)
 }
 
-func (t *Table) Find(scope Symbol, identifier string) Symbol {
+func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 	if scope == nil {
 		return nil
 	}
@@ -36,26 +36,26 @@ func (t *Table) Find(scope Symbol, identifier string) Symbol {
 	return t.Find(scope.GetScope(), identifier)
 }
 
-func (t *Table) LinkDeclaration(node node.Node, symbol Symbol) {
+func (t *SymbolTable) LinkDeclaration(node node.Node, symbol Symbol) {
 	t.symbolToNode[symbol] = node
 }
 
-func (t *Table) GetDeclaration(symbol Symbol) node.Node {
+func (t *SymbolTable) GetDeclaration(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
 }
 
-func (t *Table) FixTarget(designatorNode *node.DesignatorNode, symbol Symbol) {
+func (t *SymbolTable) FixTarget(designatorNode *node.DesignatorNode, symbol Symbol) {
 	t.targetFixup[designatorNode] = symbol
 }
 
-func (t *Table) GetTarget(designatorNode *node.DesignatorNode) Symbol{
+func (t *SymbolTable) GetTarget(designatorNode *node.DesignatorNode) Symbol{
 	return t.targetFixup[designatorNode]
 }
 
-func (t *Table) FixType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
+func (t *SymbolTable) FixType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
 	t.typeFixup[expressionNode] = symbol
 }
 
-func (t *Table) FindTypeByExpressionNode(expressionNode node.ExpressionNode) *TypeSymbol {
+func (t *SymbolTable) FindTypeByExpressionNode(expressionNode node.ExpressionNode) *TypeSymbol {
 	return t.typeFixup[expressionNode]
 }

@@ -82,7 +82,7 @@ func parse(l *lexer.Lexer) *node.ProgramNode {
 	return syntaxTree
 }
 
-func check(syntaxTree *node.ProgramNode) *symbol.Table {
+func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 	checker := checker.New(syntaxTree)
 	symbolTable, errors := checker.Run()
 	if len(errors) > 0 {

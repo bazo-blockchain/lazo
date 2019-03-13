@@ -3,10 +3,10 @@ package phase
 import "github.com/bazo-blockchain/lazo/checker/symbol"
 
 type TypeResolution struct {
-	symTable *symbol.Table
+	symTable *symbol.SymbolTable
 }
 
-func RunTypeResolution(symTable *symbol.Table) {
+func RunTypeResolution(symTable *symbol.SymbolTable) {
 	resolution :=TypeResolution{
 		symTable: symTable,
 	}

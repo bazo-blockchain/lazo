@@ -2,12 +2,7 @@ package symbol
 
 import "github.com/bazo-blockchain/lazo/parser/node"
 
-
-// TODO Refactor:
-// Remove NewSymbol from the Interface, every Symbol Type can have a NewSymbol method with different params
-// as they are called primarly from the phases and in the phases we know what symbol it is... No dynamic calls required...
 type Symbol interface {
-	NewSymbol(scope Symbol, identifier string) Symbol
 	AllDeclarations() []Symbol
 	String() string
 	GetScope() Symbol
@@ -40,43 +35,6 @@ func (sym *BaseSymbol) GetScope() Symbol {
 // Concrete Symbols
 //----------------
 
-type CompilationUnit struct {
-	Symbol
-	Contract *ContractSymbol
-	Types []*TypeSymbol
-	Functions []*FunctionSymbol
-	Constants []*ConstantSymbol
-
-	NullType *TypeSymbol
-	BoolType *TypeSymbol
-	CharType *TypeSymbol
-	StringType *TypeSymbol
-	IntType *TypeSymbol
-
-	BuiltInTypes []*TypeSymbol
-
-	TrueConstant *ConstantSymbol
-	FalseConstant *ConstantSymbol
-	NullConstant *ConstantSymbol
-}
-
-func (cu *CompilationUnit) NewCompilationUnit() Symbol{
-	return &CompilationUnit{
-		Symbol: BaseSymbol{}.NewSymbol(nil, ""),
-		Types: []*TypeSymbol{},
-		Functions: []*FunctionSymbol{},
-		Constants: []*ConstantSymbol{},
-		NullType: TypeSymbol{}.NewTypeSymbol(cu, "@NULL"),
-	}
-}
-
-func (cu *CompilationUnit) AllDeclarations() []Symbol {
-	// TODO implement
-	return nil
-}
-
-//----------------
-
 type ContractSymbol struct {
 	*TypeSymbol
 	Fields []*FieldSymbol
@@ -85,7 +43,7 @@ type ContractSymbol struct {
 
 func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &ContractSymbol{
-		TypeSymbol: TypeSymbol{}.NewTypeSymbol(scope, identifier),
+		TypeSymbol: (&TypeSymbol{}).NewTypeSymbol(scope, identifier),
 		Fields: []*FieldSymbol{},
 		Functions: []*FunctionSymbol{},
 	}
@@ -109,7 +67,7 @@ type FieldSymbol struct {
 
 func (sym *FieldSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &FieldSymbol{
-		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
@@ -128,7 +86,7 @@ func (sym *FunctionSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 		// TODO Error
 	}
 	return &FunctionSymbol{
-		Symbol: BaseSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
@@ -145,7 +103,7 @@ type ParameterSymbol struct {
 
 func (sym *ParameterSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &ParameterSymbol{
-		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
@@ -158,7 +116,7 @@ type LocalVariableSymbol struct {
 
 func (sym *LocalVariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &LocalVariableSymbol{
-		Symbol: VariableSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
 		VisibleIn: map[node.StatementNode]struct{}{},
 	}
 }
@@ -175,7 +133,7 @@ func (sym *VariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 		// TODO Error
 	}
 	return &VariableSymbol{
-		Symbol: BaseSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
@@ -195,7 +153,7 @@ func (sym *ConstantSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	}
 
 	return &ConstantSymbol{
-		Symbol: BaseSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
@@ -223,7 +181,7 @@ func (sym *TypeSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 		// TODO Error
 	}
 	return &TypeSymbol{
-		Symbol: BaseSymbol{}.NewSymbol(scope, identifier),
+		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
 	}
 }
 
