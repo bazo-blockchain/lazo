@@ -15,13 +15,12 @@ type Checker struct {
 func New(syntaxTree *node.ProgramNode) *Checker {
 	p := &Checker{
 		syntaxTree:  syntaxTree,
-		symbolTable: symbol.NewSymbolTable(),
 	}
 	return p
 }
 
 func (c *Checker) Run() (*symbol.SymbolTable, []error) {
-	phase.RunSymbolConstruction(c.symbolTable, c.syntaxTree)
+	c.symbolTable = phase.RunSymbolConstruction(c.syntaxTree)
 	if c.hasErrors() {
 		return nil, c.errors
 	}

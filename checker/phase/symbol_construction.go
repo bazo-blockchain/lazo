@@ -11,20 +11,19 @@ type symbolConstruction struct {
 	globalScope *symbol.CompilationUnit
 }
 
-func RunSymbolConstruction(symTable *symbol.SymbolTable, programNode *node.ProgramNode) {
+func RunSymbolConstruction(programNode *node.ProgramNode) *symbol.SymbolTable {
+	symTable := symbol.NewSymbolTable()
 	construction := symbolConstruction{
 		symTable:    symTable,
 		programNode: programNode,
 		globalScope: symTable.GlobalScope,
 	}
+	construction.registerBuiltins()
 	construction.registerDeclarations()
 	construction.checkValidIdentifiers()
 	construction.checkUniqueIdentifiers()
-}
 
-func (sc *symbolConstruction) registerDeclarations() {
-	sc.registerBuiltins()
-	sc.registerContract()
+	return symTable
 }
 
 func (sc *symbolConstruction) registerBuiltins() {
@@ -56,6 +55,11 @@ func (sc *symbolConstruction) registerBuiltInConstant(typeSymbol *symbol.TypeSym
 	constant := symbol.NewConstantSymbol(sc.globalScope, name, typeSymbol)
 	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
 	return constant
+}
+
+func (sc *symbolConstruction) registerDeclarations() {
+	sc.registerContract()
+	// interfaces
 }
 
 func (sc *symbolConstruction) registerContract() {
