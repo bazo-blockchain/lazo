@@ -97,8 +97,14 @@ func NewFunctionSymbol(scope Symbol, identifier string) *FunctionSymbol {
 }
 
 func (sym *FunctionSymbol) AllDeclarations() []Symbol {
-	// TODO implement
-	return nil
+	var symbols []Symbol
+	for _, s := range sym.Parameters {
+		symbols = append(symbols, s)
+	}
+	for _, s := range sym.LocalVariables {
+		symbols = append(symbols, s)
+	}
+	return symbols
 }
 
 func (sym *FunctionSymbol) String() string {

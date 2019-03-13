@@ -114,6 +114,9 @@ func (sc *symbolConstruction) checkValidIdentifiers() {
 	}
 	for _, function := range sc.globalScope.Contract.Functions {
 		sc.checkValidIdentifier(function)
+		for _, decl := range function.AllDeclarations() {
+			sc.checkValidIdentifier(decl)
+		}
 	}
 }
 
