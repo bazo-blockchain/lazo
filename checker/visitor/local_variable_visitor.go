@@ -1,7 +1,6 @@
 package visitor
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
@@ -33,21 +32,22 @@ func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.function.LocalVariables = append(v.function.LocalVariables, sym)
 	v.symbolTable.MapSymbolToNode(sym, node)
 
-	fmt.Println("variable " + node.Identifier)
 	// append the local variable to the actual block scope
 	v.blockScopes[len(v.blockScopes)-1] = append(v.blockScopes[len(v.blockScopes)-1], sym)
 }
 
 func (v *LocalVariableVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
-	v.recordVisibleLocalVariables(node)
+	v.recordVisiblity(node)
 }
 
 func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
-	v.recordVisibleLocalVariables(node)
+	v.recordVisiblity(node)
 	v.AbstractVisitor.VisitIfStatementNode(node)
 }
 
-func (v *LocalVariableVisitor) recordVisibleLocalVariables(stmt node.StatementNode) {
+// TODO record visibility where necessary
+
+func (v *LocalVariableVisitor) recordVisiblity(stmt node.StatementNode) {
 	for _, scope := range v.blockScopes{
 		for _, localVariable := range scope {
 			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)

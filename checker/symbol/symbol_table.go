@@ -52,7 +52,7 @@ func (t *SymbolTable) MapSymbolToNode(symbol Symbol, node node.Node) {
 	t.symbolToNode[symbol] = node
 }
 
-func (t *SymbolTable) GetDeclaration(symbol Symbol) node.Node {
+func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
 }
 

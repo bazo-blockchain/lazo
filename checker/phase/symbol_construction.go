@@ -1,18 +1,21 @@
 package phase
 
 import (
+	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"github.com/pkg/errors"
 )
 
 type symbolConstruction struct {
 	programNode *node.ProgramNode
 	symbolTable *symbol.SymbolTable
 	globalScope *symbol.CompilationUnit
+	errors      []error
 }
 
-func RunSymbolConstruction(programNode *node.ProgramNode) *symbol.SymbolTable {
+func RunSymbolConstruction(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
 	symTable := symbol.NewSymbolTable()
 	construction := symbolConstruction{
 		symbolTable: symTable,
@@ -24,7 +27,7 @@ func RunSymbolConstruction(programNode *node.ProgramNode) *symbol.SymbolTable {
 	construction.checkValidIdentifiers()
 	construction.checkUniqueIdentifiers()
 
-	return symTable
+	return symTable, construction.errors
 }
 
 func (sc *symbolConstruction) registerBuiltins() {
@@ -105,13 +108,29 @@ func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionS
 }
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
-	// TODO Implement
+	sc.checkValidIdentifier(sc.globalScope.Contract)
+	for _, field := range sc.globalScope.Contract.Fields {
+		sc.checkValidIdentifier(field)
+	}
+	for _, function := range sc.globalScope.Contract.Functions {
+		sc.checkValidIdentifier(function)
+	}
+}
+
+var reservedKeywords = []string{"char", "int", "this", "null", "void"}
+
+func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
+	for _, keyword := range reservedKeywords {
+		if sym.GetIdentifier() == keyword {
+			sc.reportError(sym, fmt.Sprintf("Reserved keyword %s cannot be used as an identifier", keyword))
+		}
+	}
 }
 
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
 	// TODO Implement
 }
 
-func (sc *symbolConstruction) checkUniqueIdentifiersByScope() {
-	// TODO Implement
+func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {
+	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", sc.symbolTable.GetNodeBySymbol(sym).Pos(), msg)))
 }

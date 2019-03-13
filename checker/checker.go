@@ -20,15 +20,10 @@ func New(syntaxTree *node.ProgramNode) *Checker {
 }
 
 func (c *Checker) Run() (*symbol.SymbolTable, []error) {
-	c.symbolTable = phase.RunSymbolConstruction(c.syntaxTree)
-	if c.hasErrors() {
-		return nil, c.errors
+	c.symbolTable, c.errors = phase.RunSymbolConstruction(c.syntaxTree)
+	if !c.hasErrors() {
+		//phase.RunTypeResolution(c.symbolTable)
 	}
-	//phase.RunTypeResolution(c.symbolTable)
-	//if c.hasErrors() {
-	//	return nil, c.errors
-	//}
-
 	return c.symbolTable, c.errors
 }
 
