@@ -69,9 +69,9 @@ func (sc *symbolConstruction) registerContract() {
 		sc.registerField(contractSymbol, variableNode)
 	}
 
-	//for _, functionNode := range contractNode.Functions {
-	//	sc.registerFunction(contractSymbol, functionNode)
-	//}
+	for _, functionNode := range contractNode.Functions {
+		sc.registerFunction(contractSymbol, functionNode)
+	}
 }
 
 func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
@@ -80,20 +80,20 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 	sc.symTable.MapSymbolToNode(fieldSymbol, node)
 }
 
-//func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
-//	sym := symbol.FunctionSymbol{}.NewSymbol(contractSymbol, node.Name)
-//	functionSymbol, _ := sym.(*symbol.FunctionSymbol)
-//	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)
-//	sc.symTable.MapSymbolToNode(node, functionSymbol)
-//	for _, parameter := range node.Parameters {
-//		sc.registerParameter(functionSymbol, parameter)
-//	}
-//	for _, statement := range node.Body {
-//		// TODO Pass visitor
-//		statement.Accept(nil)
-//	}
-//}
-//
+func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
+	functionSymbol := symbol.NewFunctionSymbol(contractSymbol, node.Name)
+	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)
+	sc.symTable.MapSymbolToNode(functionSymbol, node)
+
+	//for _, parameter := range node.Parameters {
+	//	sc.registerParameter(functionSymbol, parameter)
+	//}
+	//for _, statement := range node.Body {
+	//	// TODO Pass visitor
+	//	statement.Accept(nil)
+	//}
+}
+
 //func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
 //	sym := symbol.ParameterSymbol{}.NewSymbol(functionSymbol, node.Identifier)
 //	parameterSymbol, _ := sym.(*symbol.ParameterSymbol)

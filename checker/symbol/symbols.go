@@ -90,10 +90,7 @@ type FunctionSymbol struct {
 	LocalVariables []*LocalVariableSymbol
 }
 
-func (sym *FunctionSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	if scope == nil {
-		// TODO Error
-	}
+func NewFunctionSymbol(scope Symbol, identifier string) *FunctionSymbol {
 	return &FunctionSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
@@ -104,29 +101,32 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 	return nil
 }
 
+func (sym *FunctionSymbol) String() string {
+	return fmt.Sprintf("%s %s(%s)", sym.ReturnTypes, sym.Identifier, sym.Parameters)
+}
+
 //----------------
 
 type ParameterSymbol struct {
-	Symbol
+	VariableSymbol
 }
 
-func (sym *ParameterSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
+func NewParameterSymbol(scope Symbol, identifier string) *ParameterSymbol {
 	return &ParameterSymbol{
-		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
+		VariableSymbol: *NewVariableSymbol(scope, identifier),
 	}
 }
 
 //----------------
 
 type LocalVariableSymbol struct {
-	Symbol
-	VisibleIn map[node.StatementNode]struct{}
+	VariableSymbol
+	VisibleIn []*node.StatementNode
 }
 
-func (sym *LocalVariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
+func NewLocalVariableSymbol(scope Symbol, identifier string) *LocalVariableSymbol {
 	return &LocalVariableSymbol{
-		Symbol:    (&VariableSymbol{}).NewSymbol(scope, identifier),
-		VisibleIn: map[node.StatementNode]struct{}{},
+		VariableSymbol: *NewVariableSymbol(scope, identifier),
 	}
 }
 
@@ -137,10 +137,7 @@ type VariableSymbol struct {
 	Type *TypeSymbol
 }
 
-func (sym *VariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	if scope == nil {
-		// TODO Error
-	}
+func NewVariableSymbol(scope Symbol, identifier string) *VariableSymbol {
 	return &VariableSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
