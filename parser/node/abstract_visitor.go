@@ -1,38 +1,53 @@
 package node
 
-import (
-	"fmt"
-)
-
 type AbstractVisitor struct {
 	ConcreteVisitor Visitor
 }
 
 func (v *AbstractVisitor) VisitProgramNode(node *ProgramNode) {
-	// TODO Implement
+	node.Contract.Accept(v.ConcreteVisitor)
 }
+
 func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
-	// TODO Implement
+	for _, variable := range node.Variables {
+		variable.Accept(v.ConcreteVisitor)
+	}
+	for _, function := range node.Functions {
+		function.Accept(v.ConcreteVisitor)
+	}
 }
+
 func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 	for _, statement := range node.Body {
-		fmt.Println("base " + node.Name)
 		statement.Accept(v.ConcreteVisitor)
 	}
 }
 
 func (v *AbstractVisitor) VisitVariableNode(node *VariableNode) {
-	// TODO Implement
+	node.Type.Accept(v.ConcreteVisitor)
+	if node.Expression != nil {
+		node.Expression.Accept(v.ConcreteVisitor)
+	}
 }
+
 func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
 	// TODO Implement
 }
+
 func (v *AbstractVisitor) VisitIfStatementNode(node *IfStatementNode) {
-	// TODO Implement
+	node.Condition.Accept(v.ConcreteVisitor)
+	for _, statement := range node.Then {
+		statement.Accept(v.ConcreteVisitor)
+	}
+	for _, statement := range node.Else {
+		statement.Accept(v.ConcreteVisitor)
+	}
 }
+
 func (v *AbstractVisitor) VisitReturnStatementNode(node *ReturnStatementNode) {
 	// TODO Implement
 }
+
 func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatementNode) {
 	// TODO Implement
 }

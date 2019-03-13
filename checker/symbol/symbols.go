@@ -102,7 +102,7 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 }
 
 func (sym *FunctionSymbol) String() string {
-	return fmt.Sprintf("%s %s(%s)", sym.ReturnTypes, sym.Identifier, sym.Parameters)
+	return fmt.Sprintf("%s %s(%s): %d vars", sym.ReturnTypes, sym.Identifier, sym.Parameters, len(sym.LocalVariables))
 }
 
 //----------------
