@@ -33,7 +33,8 @@ func (cu *CompilationUnit) AllDeclarations() []Symbol {
 }
 
 func (cu *CompilationUnit) String() string {
-	return fmt.Sprintf("\nTypes: %s"+
-		"\nBuilt-in Types: %s"+
-		"\nConstants: %s", cu.Types, cu.BuiltInTypes, cu.Constants)
+	return fmt.Sprintf("\n Types: %s"+
+		"\n Built-in Types: %s"+
+		"\n Constants: %s"+
+		"\n Contract: %s", cu.Types, cu.BuiltInTypes, cu.Constants, cu.Contract)
 }

@@ -48,7 +48,7 @@ func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 	return t.Find(scope.GetScope(), identifier)
 }
 
-func (t *SymbolTable) LinkDeclaration(node node.Node, symbol Symbol) {
+func (t *SymbolTable) MapSymbolToNode(symbol Symbol, node node.Node) {
 	t.symbolToNode[symbol] = node
 }
 

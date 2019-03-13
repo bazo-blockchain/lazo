@@ -13,13 +13,13 @@ type Symbol interface {
 }
 
 type AbstractSymbol struct {
-	Scope Symbol
+	Scope      Symbol
 	Identifier string
 }
 
 func NewAbstractSymbol(scope Symbol, identifier string) AbstractSymbol {
 	return AbstractSymbol{
-		Scope: scope,
+		Scope:      scope,
 		Identifier: identifier,
 	}
 }
@@ -41,19 +41,17 @@ func (sym *AbstractSymbol) String() string {
 }
 
 // Concrete Symbols
-//----------------
+//-----------------
 
 type ContractSymbol struct {
-	*TypeSymbol
-	Fields []*FieldSymbol
+	AbstractSymbol
+	Fields    []*FieldSymbol
 	Functions []*FunctionSymbol
 }
 
-func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
+func NewContractSymbol(scope Symbol, identifier string) *ContractSymbol {
 	return &ContractSymbol{
-		TypeSymbol: NewTypeSymbol(scope, identifier),
-		Fields: []*FieldSymbol{},
-		Functions: []*FunctionSymbol{},
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
@@ -62,9 +60,8 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 	return nil
 }
 
-func (sym *ContractSymbol) AllFields() []*FieldSymbol {
-	// TODO Implement
-	return nil
+func (sym *ContractSymbol) String() string{
+	return fmt.Sprintf("%s, %d Fields, %d Functions", sym.Identifier, len(sym.Fields), len(sym.Functions))
 }
 
 //----------------
@@ -83,10 +80,9 @@ func (sym *FieldSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 
 type FunctionSymbol struct {
 	AbstractSymbol
-	ReturnTypes []*TypeSymbol
-	Parameters []*ParameterSymbol
+	ReturnTypes    []*TypeSymbol
+	Parameters     []*ParameterSymbol
 	LocalVariables []*LocalVariableSymbol
-
 }
 
 func (sym *FunctionSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
@@ -124,7 +120,7 @@ type LocalVariableSymbol struct {
 
 func (sym *LocalVariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &LocalVariableSymbol{
-		Symbol: (&VariableSymbol{}).NewSymbol(scope, identifier),
+		Symbol:    (&VariableSymbol{}).NewSymbol(scope, identifier),
 		VisibleIn: map[node.StatementNode]struct{}{},
 	}
 }
@@ -155,7 +151,7 @@ type ConstantSymbol struct {
 func NewConstantSymbol(scope Symbol, identifier string, typeSymbol *TypeSymbol) *ConstantSymbol {
 	return &ConstantSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
-		Type: typeSymbol,
+		Type:           typeSymbol,
 	}
 }
 

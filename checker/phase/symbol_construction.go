@@ -24,71 +24,68 @@ func RunSymbolConstruction(symTable *symbol.SymbolTable, programNode *node.Progr
 
 func (sc *symbolConstruction) registerDeclarations() {
 	sc.registerBuiltins()
-	// sc.registerContract(sc.programNode.Contract)
+	sc.registerContract()
 }
 
 func (sc *symbolConstruction) registerBuiltins() {
 	sc.registerBuiltInTypes()
-	sc.registerBuiltinConstants()
+	sc.registerBuiltInConstants()
 }
 
 func (sc *symbolConstruction) registerBuiltInTypes() {
-	sc.globalScope.BoolType = sc.registerBuiltinType("bool")
-	sc.globalScope.CharType = sc.registerBuiltinType("char")
-	sc.globalScope.IntType = sc.registerBuiltinType("int")
-	sc.globalScope.StringType = sc.registerBuiltinType("string")
+	sc.globalScope.BoolType = sc.registerBuiltInType("bool")
+	sc.globalScope.CharType = sc.registerBuiltInType("char")
+	sc.globalScope.IntType = sc.registerBuiltInType("int")
+	sc.globalScope.StringType = sc.registerBuiltInType("string")
 }
 
-func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
+func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.TypeSymbol {
 	baseType := symbol.NewTypeSymbol(sc.globalScope, name)
 	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
 	sc.globalScope.BuiltInTypes = append(sc.globalScope.BuiltInTypes, baseType)
 	return baseType
 }
 
-func (sc *symbolConstruction) registerBuiltinConstants() {
-	sc.globalScope.NullConstant = sc.registerBuiltinConstant(sc.globalScope.NullType, "null")
-	sc.globalScope.FalseConstant = sc.registerBuiltinConstant(sc.globalScope.BoolType, "false")
-	sc.globalScope.TrueConstant = sc.registerBuiltinConstant(sc.globalScope.BoolType, "true")
+func (sc *symbolConstruction) registerBuiltInConstants() {
+	sc.globalScope.NullConstant = sc.registerBuiltInConstant(sc.globalScope.NullType, "null")
+	sc.globalScope.FalseConstant = sc.registerBuiltInConstant(sc.globalScope.BoolType, "false")
+	sc.globalScope.TrueConstant = sc.registerBuiltInConstant(sc.globalScope.BoolType, "true")
 }
 
-func (sc *symbolConstruction) registerBuiltinConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
+func (sc *symbolConstruction) registerBuiltInConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
 	constant := symbol.NewConstantSymbol(sc.globalScope, name, typeSymbol)
 	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
 	return constant
 }
 
-//func (sc *symbolConstruction) registerContract(contractNode *node.ContractNode) {
-//	sym := symbol.ContractSymbol{}.NewSymbol(sc.globalScope, contractNode.Name)
-//
-//	contractSymbol, _ := sym.(*symbol.ContractSymbol)
-//	sc.globalScope.Contract = contractSymbol
-//
-//	typeSymbol, _ := sym.(*symbol.TypeSymbol)
-//	sc.globalScope.Types = append(sc.globalScope.Types, typeSymbol)
-//
-//	sc.symTable.LinkDeclaration(contractNode, contractSymbol)
-//	for _, variableNode := range contractNode.Variables {
-//		sc.registerField(contractSymbol, variableNode)
-//	}
-//
-//	for _, functionNode := range contractNode.Functions {
-//		sc.registerFunction(contractSymbol, functionNode)
-//	}
-//}
+func (sc *symbolConstruction) registerContract() {
+	contractNode := sc.programNode.Contract
+
+	contractSymbol := symbol.NewContractSymbol(sc.globalScope, contractNode.Name)
+	sc.globalScope.Contract = contractSymbol
+
+	sc.symTable.MapSymbolToNode(contractSymbol, contractNode)
+	//for _, variableNode := range contractNode.Variables {
+	//	sc.registerField(contractSymbol, variableNode)
+	//}
+	//
+	//for _, functionNode := range contractNode.Functions {
+	//	sc.registerFunction(contractSymbol, functionNode)
+	//}
+}
 
 //func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
 //	sym := symbol.FieldSymbol{}.NewSymbol(contractSymbol, node.Identifier)
 //	fieldSymbol, _ := sym.(*symbol.FieldSymbol)
 //	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
-//	sc.symTable.LinkDeclaration(node, fieldSymbol)
+//	sc.symTable.MapSymbolToNode(node, fieldSymbol)
 //}
 //
 //func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
 //	sym := symbol.FunctionSymbol{}.NewSymbol(contractSymbol, node.Name)
 //	functionSymbol, _ := sym.(*symbol.FunctionSymbol)
 //	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)
-//	sc.symTable.LinkDeclaration(node, functionSymbol)
+//	sc.symTable.MapSymbolToNode(node, functionSymbol)
 //	for _, parameter := range node.Parameters {
 //		sc.registerParameter(functionSymbol, parameter)
 //	}
@@ -102,7 +99,7 @@ func (sc *symbolConstruction) registerBuiltinConstant(typeSymbol *symbol.TypeSym
 //	sym := symbol.ParameterSymbol{}.NewSymbol(functionSymbol, node.Identifier)
 //	parameterSymbol, _ := sym.(*symbol.ParameterSymbol)
 //	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
-//	sc.symTable.LinkDeclaration(node, parameterSymbol)
+//	sc.symTable.MapSymbolToNode(node, parameterSymbol)
 //}
 
 func (sc *symbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
