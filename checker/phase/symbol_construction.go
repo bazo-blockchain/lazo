@@ -58,6 +58,10 @@ func (sc *SymbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 	sc.symTable.LinkDeclaration(node, fieldSymbol)
 }
 
+func (sc *SymbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
+	// TODO Implement
+}
+
 func (sc *SymbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
 	sym := symbol.FunctionSymbol{}.NewSymbol(contractSymbol, node.Name)
 	functionSymbol, _ := sym.(*symbol.FunctionSymbol)
@@ -109,5 +113,9 @@ func (sc *SymbolConstruction) checkValidIdentifiers() {
 }
 
 func (sc *SymbolConstruction) checkUniqueIdentifiers() {
+	// TODO Implement
+}
+
+func (sc *SymbolConstruction) checkUniqueIdentifiersByScope() {
 	// TODO Implement
 }
