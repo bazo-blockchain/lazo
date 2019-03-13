@@ -85,9 +85,10 @@ func parse(l *lexer.Lexer) *node.ProgramNode {
 func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 	checker := checker.New(syntaxTree)
 	symbolTable, errors := checker.Run()
+	fmt.Println(symbolTable)
+
 	if len(errors) > 0 {
 		fmt.Fprintln(os.Stderr, errors)
-		fmt.Println(symbolTable)
 		os.Exit(1)
 	}
 	return symbolTable

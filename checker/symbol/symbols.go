@@ -1,35 +1,43 @@
 package symbol
 
-import "github.com/bazo-blockchain/lazo/parser/node"
+import (
+	"fmt"
+	"github.com/bazo-blockchain/lazo/parser/node"
+)
 
 type Symbol interface {
+	GetScope() Symbol
+	GetName() string
 	AllDeclarations() []Symbol
 	String() string
-	GetScope() Symbol
 }
 
-type BaseSymbol struct {
+type AbstractSymbol struct {
 	Scope Symbol
 	Identifier string
 }
 
-func (sym *BaseSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	return &BaseSymbol{
+func NewAbstractSymbol(scope Symbol, identifier string) AbstractSymbol {
+	return AbstractSymbol{
 		Scope: scope,
 		Identifier: identifier,
 	}
 }
 
-func (sym *BaseSymbol) AllDeclarations() []Symbol {
-	return []Symbol{}
+func (sym *AbstractSymbol) GetScope() Symbol {
+	return sym.Scope
 }
 
-func (sym *BaseSymbol) String() string {
+func (sym *AbstractSymbol) GetName() string {
 	return sym.Identifier
 }
 
-func (sym *BaseSymbol) GetScope() Symbol {
-	return sym.Scope
+func (sym *AbstractSymbol) AllDeclarations() []Symbol {
+	return []Symbol{}
+}
+
+func (sym *AbstractSymbol) String() string {
+	return fmt.Sprintf("Abstract Symbol: %s", sym.GetName())
 }
 
 // Concrete Symbols
@@ -43,7 +51,7 @@ type ContractSymbol struct {
 
 func (sym *ContractSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	return &ContractSymbol{
-		TypeSymbol: (&TypeSymbol{}).NewTypeSymbol(scope, identifier),
+		TypeSymbol: NewTypeSymbol(scope, identifier),
 		Fields: []*FieldSymbol{},
 		Functions: []*FunctionSymbol{},
 	}
@@ -74,7 +82,7 @@ func (sym *FieldSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 //----------------
 
 type FunctionSymbol struct {
-	Symbol
+	AbstractSymbol
 	ReturnTypes []*TypeSymbol
 	Parameters []*ParameterSymbol
 	LocalVariables []*LocalVariableSymbol
@@ -86,7 +94,7 @@ func (sym *FunctionSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 		// TODO Error
 	}
 	return &FunctionSymbol{
-		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
@@ -124,7 +132,7 @@ func (sym *LocalVariableSymbol) NewSymbol(scope Symbol, identifier string) Symbo
 //----------------
 
 type VariableSymbol struct {
-	Symbol
+	AbstractSymbol
 	Type *TypeSymbol
 }
 
@@ -133,14 +141,14 @@ func (sym *VariableSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 		// TODO Error
 	}
 	return &VariableSymbol{
-		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
 //----------------
 
 type ConstantSymbol struct {
-	Symbol
+	AbstractSymbol
 	Type *TypeSymbol
 }
 
@@ -153,7 +161,7 @@ func (sym *ConstantSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
 	}
 
 	return &ConstantSymbol{
-		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
@@ -170,25 +178,17 @@ func (sym *ConstantSymbol) NewConstantSymbol(scope Symbol, identifier string, ty
 //----------------
 
 type TypeSymbol struct {
-	Symbol
+	AbstractSymbol
 }
 
-func (sym *TypeSymbol) NewSymbol(scope Symbol, identifier string) Symbol {
-	if scope == nil {
-		// TODO Error
-	}
-	if identifier == "" {
-		// TODO Error
-	}
+func NewTypeSymbol(scope Symbol, identifier string) *TypeSymbol {
 	return &TypeSymbol{
-		Symbol: (&BaseSymbol{}).NewSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
-func (sym *TypeSymbol) NewTypeSymbol(scope Symbol, identifier string) *TypeSymbol {
-	baseSymbol := sym.NewSymbol(scope, identifier)
-	symbol, _ := baseSymbol.(*TypeSymbol)
-	return symbol
+func (sym *TypeSymbol) String() string {
+	return fmt.Sprintf("Type %s", sym.Identifier)
 }
 
 //----------------

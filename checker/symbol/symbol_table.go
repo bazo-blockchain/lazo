@@ -1,16 +1,28 @@
 package symbol
 
-import "github.com/bazo-blockchain/lazo/parser/node"
+import (
+	"fmt"
+	"github.com/bazo-blockchain/lazo/parser/node"
+)
 
 type SymbolTable struct {
-	Compilation *CompilationUnit
-	symbolToNode map[Symbol]node.Node
-	targetFixup map[*node.DesignatorNode]Symbol
-	typeFixup map[node.ExpressionNode]*TypeSymbol
+	GlobalScope       *CompilationUnit
+	symbolToNode      map[Symbol]node.Node
+	designatorSymbols map[*node.DesignatorNode]Symbol
+	exprTypes         map[node.ExpressionNode]*TypeSymbol
+}
+
+func NewSymbolTable() *SymbolTable {
+	return &SymbolTable{
+		GlobalScope:       &CompilationUnit{},
+		symbolToNode:      make(map[Symbol]node.Node),
+		designatorSymbols: make(map[*node.DesignatorNode]Symbol),
+		exprTypes:         make(map[node.ExpressionNode]*TypeSymbol),
+	}
 }
 
 func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
-	for _, compilationType := range t.Compilation.Types {
+	for _, compilationType := range t.GlobalScope.Types {
 		if compilationType.String() == identifier {
 			return compilationType
 		}
@@ -45,17 +57,21 @@ func (t *SymbolTable) GetDeclaration(symbol Symbol) node.Node {
 }
 
 func (t *SymbolTable) FixTarget(designatorNode *node.DesignatorNode, symbol Symbol) {
-	t.targetFixup[designatorNode] = symbol
+	t.designatorSymbols[designatorNode] = symbol
 }
 
-func (t *SymbolTable) GetTarget(designatorNode *node.DesignatorNode) Symbol{
-	return t.targetFixup[designatorNode]
+func (t *SymbolTable) GetTarget(designatorNode *node.DesignatorNode) Symbol {
+	return t.designatorSymbols[designatorNode]
 }
 
 func (t *SymbolTable) FixType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
-	t.typeFixup[expressionNode] = symbol
+	t.exprTypes[expressionNode] = symbol
 }
 
 func (t *SymbolTable) FindTypeByExpressionNode(expressionNode node.ExpressionNode) *TypeSymbol {
-	return t.typeFixup[expressionNode]
+	return t.exprTypes[expressionNode]
+}
+
+func (t *SymbolTable) String() string{
+	return fmt.Sprintf("Global Scope: %s", t.GlobalScope)
 }

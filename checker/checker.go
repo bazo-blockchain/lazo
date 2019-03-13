@@ -14,7 +14,8 @@ type Checker struct {
 
 func New(syntaxTree *node.ProgramNode) *Checker {
 	p := &Checker{
-		syntaxTree: syntaxTree,
+		syntaxTree:  syntaxTree,
+		symbolTable: symbol.NewSymbolTable(),
 	}
 	return p
 }

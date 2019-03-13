@@ -7,15 +7,15 @@ import (
 
 type symbolConstruction struct {
 	programNode *node.ProgramNode
-	symTable *symbol.SymbolTable
+	symTable    *symbol.SymbolTable
 	globalScope *symbol.CompilationUnit
 }
 
 func RunSymbolConstruction(symTable *symbol.SymbolTable, programNode *node.ProgramNode) {
 	construction := symbolConstruction{
-		symTable: symTable,
+		symTable:    symTable,
 		programNode: programNode,
-		//globalScope: symTable.Compilation,
+		globalScope: symTable.GlobalScope,
 	}
 	construction.registerDeclarations()
 	construction.checkValidIdentifiers()
@@ -80,21 +80,21 @@ func (sc *symbolConstruction) registerBuiltins() {
 //}
 
 func (sc *symbolConstruction) registerBuiltinTypes() {
-	//sc.globalScope.BoolType = sc.registerBuiltinType("bool")
-	//sc.globalScope.CharType = sc.registerBuiltinType("char")
-	//sc.globalScope.IntType = sc.registerBuiltinType("int")
-	//sc.globalScope.StringType = sc.registerBuiltinType("string")
+	sc.globalScope.BoolType = sc.registerBuiltinType("bool")
+	sc.globalScope.CharType = sc.registerBuiltinType("char")
+	sc.globalScope.IntType = sc.registerBuiltinType("int")
+	sc.globalScope.StringType = sc.registerBuiltinType("string")
 }
 
 func (sc *symbolConstruction) registerBuiltinFunctions(returnType *symbol.TypeSymbol, identifier string, paramType *symbol.TypeSymbol) {
 	// TODO Implement
 }
 
-//func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
-//	baseType := symbol.TypeSymbol{}.NewTypeSymbol(sc.globalScope, name)
-//	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
-//	return baseType
-//}
+func (sc *symbolConstruction) registerBuiltinType(name string) *symbol.TypeSymbol {
+	baseType := symbol.NewTypeSymbol(sc.globalScope, name)
+	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
+	return baseType
+}
 
 func (sc *symbolConstruction) registerBuiltinConstants() {
 	//sc.globalScope.NullConstant = sc.registerBuiltinConstant()

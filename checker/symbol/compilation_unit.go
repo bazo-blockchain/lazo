@@ -1,35 +1,41 @@
 package symbol
 
+import "fmt"
+
 type CompilationUnit struct {
 	Symbol
-	Contract *ContractSymbol
-	Types []*TypeSymbol
+	Contract  *ContractSymbol
+	Types     []*TypeSymbol
 	Functions []*FunctionSymbol
 	Constants []*ConstantSymbol
 
-	NullType *TypeSymbol
-	BoolType *TypeSymbol
-	CharType *TypeSymbol
+	NullType   *TypeSymbol
+	BoolType   *TypeSymbol
+	CharType   *TypeSymbol
 	StringType *TypeSymbol
-	IntType *TypeSymbol
+	IntType    *TypeSymbol
 
 	BuiltInTypes []*TypeSymbol
 
-	TrueConstant *ConstantSymbol
+	TrueConstant  *ConstantSymbol
 	FalseConstant *ConstantSymbol
-	NullConstant *ConstantSymbol
+	NullConstant  *ConstantSymbol
 }
 
-func (cu *CompilationUnit) NewCompilationUnit() Symbol{
+func (cu *CompilationUnit) NewCompilationUnit() Symbol {
 	return &CompilationUnit{
-		Types: []*TypeSymbol{},
+		Types:     []*TypeSymbol{},
 		Functions: []*FunctionSymbol{},
 		Constants: []*ConstantSymbol{},
-		NullType: (&TypeSymbol{}).NewTypeSymbol(cu, "@NULL"),
+		NullType:  NewTypeSymbol(cu, "@NULL"),
 	}
 }
 
 func (cu *CompilationUnit) AllDeclarations() []Symbol {
 	// TODO implement
 	return nil
+}
+
+func (cu *CompilationUnit) String() string {
+	return fmt.Sprintf("Types: %s", cu.Types)
 }
