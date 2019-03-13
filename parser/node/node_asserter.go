@@ -55,7 +55,7 @@ func AssertIfStatement(t *testing.T, node *IfStatementNode, cond string, totalTh
 }
 
 func AssertReturnStatement(t *testing.T, node *ReturnStatementNode, totalExpr int) {
-	assert.Equal(t, len(node.Expression), totalExpr)
+	assert.Equal(t, len(node.Expressions), totalExpr)
 }
 
 func AssertStatement(t *testing.T, node StatementNode, stmt string) {

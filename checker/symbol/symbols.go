@@ -121,7 +121,7 @@ func NewParameterSymbol(scope Symbol, identifier string) *ParameterSymbol {
 
 type LocalVariableSymbol struct {
 	VariableSymbol
-	VisibleIn []*node.StatementNode
+	VisibleIn []node.StatementNode
 }
 
 func NewLocalVariableSymbol(scope Symbol, identifier string) *LocalVariableSymbol {

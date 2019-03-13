@@ -95,7 +95,7 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 	}
 
 	v := visitor.NewLocalVariableVisitor(sc.symbolTable, functionSymbol)
-	node.Accept(v)
+	v.VisitStatementBlock(node.Body)
 }
 
 func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {

@@ -8,8 +8,9 @@ import (
 
 type LocalVariableVisitor struct {
 	node.AbstractVisitor
-	symbolTable     *symbol.SymbolTable
-	function        *symbol.FunctionSymbol
+	symbolTable *symbol.SymbolTable
+	function    *symbol.FunctionSymbol
+	blockScopes [][]*symbol.LocalVariableSymbol
 }
 
 func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.FunctionSymbol) *LocalVariableVisitor {
@@ -21,12 +22,10 @@ func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.F
 	return v
 }
 
-func (v *LocalVariableVisitor) VisitFunctionNode(node *node.FunctionNode) {
-	// create stack
-	for _, statement := range node.Body {
-		statement.Accept(v.ConcreteVisitor)
-	}
-	// stack pop
+func (v *LocalVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
+	v.blockScopes = append(v.blockScopes, []*symbol.LocalVariableSymbol{}) // add new block scope
+	v.AbstractVisitor.VisitStatementBlock(stmts)
+	v.blockScopes = v.blockScopes[:len(v.blockScopes)-1] // remove last block scope
 }
 
 func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
@@ -35,12 +34,23 @@ func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.symbolTable.MapSymbolToNode(sym, node)
 
 	fmt.Println("variable " + node.Identifier)
-	// add symbol to the stack
+	// append the local variable to the actual block scope
+	v.blockScopes[len(v.blockScopes)-1] = append(v.blockScopes[len(v.blockScopes)-1], sym)
+}
+
+func (v *LocalVariableVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+	v.recordVisibleLocalVariables(node)
 }
 
 func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
-	// Record
+	v.recordVisibleLocalVariables(node)
 	v.AbstractVisitor.VisitIfStatementNode(node)
 }
 
-
+func (v *LocalVariableVisitor) recordVisibleLocalVariables(stmt node.StatementNode) {
+	for _, scope := range v.blockScopes{
+		for _, localVariable := range scope {
+			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)
+		}
+	}
+}

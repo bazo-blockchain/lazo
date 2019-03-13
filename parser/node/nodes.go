@@ -137,11 +137,11 @@ func (n *IfStatementNode) Accept(v Visitor) {
 
 type ReturnStatementNode struct {
 	AbstractNode
-	Expression []ExpressionNode
+	Expressions []ExpressionNode
 }
 
 func (n *ReturnStatementNode) String() string {
-	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
+	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expressions)
 }
 
 func (n *ReturnStatementNode) Accept(v Visitor) {

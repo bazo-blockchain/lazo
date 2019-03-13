@@ -264,7 +264,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 
 	return &node.ReturnStatementNode{
 		AbstractNode: abstractNode,
-		Expression: returnValues,
+		Expressions:  returnValues,
 	}
 }
 

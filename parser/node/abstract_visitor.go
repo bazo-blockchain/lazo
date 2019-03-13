@@ -18,7 +18,17 @@ func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
 }
 
 func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
-	for _, statement := range node.Body {
+	for _, returnType := range node.ReturnTypes {
+		returnType.Accept(v.ConcreteVisitor)
+	}
+	for _, paramType := range node.Parameters {
+		paramType.Accept(v.ConcreteVisitor)
+	}
+	v.ConcreteVisitor.VisitStatementBlock(node.Body)
+}
+
+func (v *AbstractVisitor) VisitStatementBlock(stmts []StatementNode){
+	for _, statement := range stmts {
 		statement.Accept(v.ConcreteVisitor)
 	}
 }
@@ -36,20 +46,19 @@ func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
 
 func (v *AbstractVisitor) VisitIfStatementNode(node *IfStatementNode) {
 	node.Condition.Accept(v.ConcreteVisitor)
-	for _, statement := range node.Then {
-		statement.Accept(v.ConcreteVisitor)
-	}
-	for _, statement := range node.Else {
-		statement.Accept(v.ConcreteVisitor)
-	}
+	v.ConcreteVisitor.VisitStatementBlock(node.Then)
+	v.ConcreteVisitor.VisitStatementBlock(node.Else)
 }
 
 func (v *AbstractVisitor) VisitReturnStatementNode(node *ReturnStatementNode) {
-	// TODO Implement
+	for _, expr := range node.Expressions {
+		expr.Accept(v.ConcreteVisitor)
+	}
 }
 
 func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatementNode) {
-	// TODO Implement
+	node.Left.Accept(v.ConcreteVisitor)
+	node.Right.Accept(v.ConcreteVisitor)
 }
 func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) {
 	// TODO Implement
