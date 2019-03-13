@@ -2,19 +2,20 @@ package phase
 
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
 type symbolConstruction struct {
 	programNode *node.ProgramNode
-	symTable    *symbol.SymbolTable
+	symbolTable *symbol.SymbolTable
 	globalScope *symbol.CompilationUnit
 }
 
 func RunSymbolConstruction(programNode *node.ProgramNode) *symbol.SymbolTable {
 	symTable := symbol.NewSymbolTable()
 	construction := symbolConstruction{
-		symTable:    symTable,
+		symbolTable: symTable,
 		programNode: programNode,
 		globalScope: symTable.GlobalScope,
 	}
@@ -68,7 +69,7 @@ func (sc *symbolConstruction) registerContract() {
 	contractSymbol := symbol.NewContractSymbol(sc.globalScope, contractNode.Name)
 	sc.globalScope.Contract = contractSymbol
 
-	sc.symTable.MapSymbolToNode(contractSymbol, contractNode)
+	sc.symbolTable.MapSymbolToNode(contractSymbol, contractNode)
 	for _, variableNode := range contractNode.Variables {
 		sc.registerField(contractSymbol, variableNode)
 	}
@@ -81,28 +82,26 @@ func (sc *symbolConstruction) registerContract() {
 func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
 	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
 	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
-	sc.symTable.MapSymbolToNode(fieldSymbol, node)
+	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)
 }
 
 func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
 	functionSymbol := symbol.NewFunctionSymbol(contractSymbol, node.Name)
 	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)
-	sc.symTable.MapSymbolToNode(functionSymbol, node)
+	sc.symbolTable.MapSymbolToNode(functionSymbol, node)
 
 	for _, parameter := range node.Parameters {
 		sc.registerParameter(functionSymbol, parameter)
 	}
 
-	//for _, statement := range node.Body {
-	//	// TODO Pass visitor
-	//	statement.Accept(nil)
-	//}
+	v := visitor.NewLocalVariableVisitor(sc.symbolTable, functionSymbol)
+	node.Accept(v)
 }
 
 func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
 	parameterSymbol := symbol.NewParameterSymbol(functionSymbol, node.Identifier)
 	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
-	sc.symTable.MapSymbolToNode(parameterSymbol, node)
+	sc.symbolTable.MapSymbolToNode(parameterSymbol, node)
 }
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
