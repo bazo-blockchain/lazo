@@ -11,7 +11,7 @@ import (
 )
 
 type CheckerTestUtil struct {
-	t *testing.T
+	t           *testing.T
 	symbolTable *symbol.SymbolTable
 	errors      []error
 }
