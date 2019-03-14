@@ -23,7 +23,7 @@ func NewSymbolTable() *SymbolTable {
 
 func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	for _, compilationType := range t.GlobalScope.Types {
-		if compilationType.String() == identifier {
+		if compilationType.GetIdentifier() == identifier {
 			return compilationType
 		}
 	}
@@ -64,7 +64,7 @@ func (t *SymbolTable) GetTarget(designatorNode *node.DesignatorNode) Symbol {
 	return t.designatorSymbols[designatorNode]
 }
 
-func (t *SymbolTable) FixType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
+func (t *SymbolTable) MapExpressionToType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
 	t.exprTypes[expressionNode] = symbol
 }
 
