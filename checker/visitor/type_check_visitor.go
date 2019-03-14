@@ -3,6 +3,7 @@ package visitor
 import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
@@ -60,6 +61,62 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 	}
 }
 
+func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+	v.AbstractVisitor.VisitAssignmentStatementNode(node)
+
+	if _, ok := v.symbolTable.GetTarget(node.Left).(*symbol.FunctionSymbol); ok {
+		fmt.Print("Error: Assignment to function is not allowed.")
+	} else {
+		leftType := v.symbolTable.FindTypeByExpressionNode(node.Left)
+		rightType := v.symbolTable.FindTypeByExpressionNode(node.Right)
+
+		if leftType != rightType {
+			fmt.Printf("[%s] Error: %s of assignment is not compatible with target %s\n", node.Pos(), rightType, leftType)
+		}
+
+	}
+}
+
+func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+	v.AbstractVisitor.VisitIfStatementNode(node)
+	if !v.IsBool(v.symbolTable.FindTypeByExpressionNode(node.Condition)) {
+		fmt.Printf("Error condition must return boolean.\n")
+	}
+}
+
+//func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
+//	v.AbstractVisitor.VisitBinaryExpressionNode(node)
+//	left := node.Left
+//	right := node.Right
+//	leftType := v.symbolTable.FindTypeByExpressionNode(left)
+//	rightType := v.symbolTable.FindTypeByExpressionNode(right)
+//	switch node.Operator {
+//
+//	}
+//}
+
+func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
+	v.AbstractVisitor.VisitUnaryExpressionNode(node)
+	operand := node.Expression
+	operandType := v.symbolTable.FindTypeByExpressionNode(operand)
+	switch node.Operator {
+	case token.Addition, token.Subtraction:
+		if !v.IsInt(operandType) {
+			fmt.Print("+ and - unary operators can only be applied to expressions of type int.\n")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		break
+	case token.Not:
+		if !v.IsBool(operandType) {
+			fmt.Print("! unary operators can only be applied to expressions of type bool.\n")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+		break
+	default:
+		fmt.Print("Illegal unary operator found.")
+	}
+}
+
 func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
 }
@@ -87,4 +144,12 @@ func (v *TypeCheckVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) 
 
 func (v *TypeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.CharType)
+}
+
+func (v *TypeCheckVisitor) IsInt(symbol *symbol.TypeSymbol) bool {
+	return symbol == v.symbolTable.GlobalScope.IntType
+}
+
+func (v *TypeCheckVisitor) IsBool(symbol *symbol.TypeSymbol) bool {
+	return symbol == v.symbolTable.GlobalScope.BoolType
 }
