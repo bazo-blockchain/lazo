@@ -82,6 +82,15 @@ func (n *FunctionNode) Accept(v Visitor) {
 	v.VisitFunctionNode(n)
 }
 
+func (n *FunctionNode) HasReturnTypes() bool {
+	for _, rtype := range n.ReturnTypes {
+		if rtype.Identifier != "void" {
+			return true
+		}
+	}
+	return false
+}
+
 // --------------------------
 // Statement Nodes
 // --------------------------

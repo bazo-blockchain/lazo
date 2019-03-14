@@ -34,8 +34,25 @@ func (tr *TypeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
 	symbol.Type = tr.resolveType(fieldNode.Type)
 }
 
-func (tr *TypeResolution) resolveTypeInFunctionSymbol(symbol *symbol.FunctionSymbol) {
+func (tr *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
+	functionNode := tr.symTable.GetNodeBySymbol(sym).(*node.FunctionNode)
 
+	if functionNode.HasReturnTypes() {
+		sym.ReturnTypes = make([]*symbol.TypeSymbol, len(functionNode.ReturnTypes))
+		for i, rtype := range functionNode.ReturnTypes {
+			sym.ReturnTypes[i] = tr.resolveType(rtype)
+		}
+	}
+
+	for _, param := range sym.Parameters {
+		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.VariableNode)
+		param.Type = tr.resolveType(paramNode.Type)
+	}
+
+	for _, locVar := range sym.LocalVariables {
+		locVarNode := tr.symTable.GetNodeBySymbol(locVar).(*node.VariableNode)
+		locVar.Type = tr.resolveType(locVarNode.Type)
+	}
 }
 
 func (tr *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
