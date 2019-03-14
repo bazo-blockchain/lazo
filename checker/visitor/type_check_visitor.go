@@ -109,7 +109,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 	default:
-
+		fmt.Print("Illegal binary operator found.\n")
 	}
 }
 
