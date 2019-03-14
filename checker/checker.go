@@ -24,6 +24,9 @@ func (c *Checker) Run() (*symbol.SymbolTable, []error) {
 	if !c.hasErrors() {
 		phase.RunTypeResolution(c.symbolTable)
 	}
+	if !c.hasErrors() {
+		phase.RunTypeChecker(c.symbolTable)
+	}
 	return c.symbolTable, c.errors
 }
 

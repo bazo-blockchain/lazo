@@ -1,9 +1,9 @@
 contract Test {
-    bool b
-    int x
+    bool b = true
+    int x = 5
 
     function (int, int) add(int x1) {
-        int x = 1
+        int x = "a"
         char c = 'c'
         string s = "String"
         bool b = true
