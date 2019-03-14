@@ -36,8 +36,28 @@ func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 	}
 }
 
-func (v *TypeCheckVisitor) VisitFunctionNode(node *node.FunctionNode) {
+func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+	v.AbstractVisitor.VisitReturnStatementNode(node)
+	returnNodes := node.Expressions
+	returnSymbols := v.currentFunction.ReturnTypes
 
+	if len(returnSymbols) > 0 {
+		if len(returnSymbols)!= len(returnNodes) {
+			fmt.Printf("Error: Expected %d return values, given %d\n", len(returnSymbols), len(returnNodes))
+		} else {
+			// Check types
+			for i, rtype := range returnSymbols {
+				nodeType := v.symbolTable.FindTypeByExpressionNode(returnNodes[i])
+				if nodeType != rtype {
+					fmt.Printf("Error: Return Types mismatch expected: %s given: %s\n", rtype.Identifier, nodeType.Identifier)
+				}
+			}
+		}
+	} else {
+		if len(returnNodes) > 0 {
+			fmt.Printf("Error: void method should not return expression\n")
+		}
+	}
 }
 
 func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
