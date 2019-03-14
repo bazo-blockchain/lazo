@@ -146,36 +146,14 @@ func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
 		count := 0
 		for _, variable := range allDecl {
 			if decl.GetIdentifier() == variable.GetIdentifier() {
-				if sc.haveSameVisibility(decl, variable) {
-					count++
-				}
+				count++
+
 				if count > 1 {
 					sc.reportError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
 				}
 			}
 		}
 	}
-}
-
-func (sc *symbolConstruction) haveSameVisibility(firstSym symbol.Symbol, secondSym symbol.Symbol) bool {
-	if firstVar, ok := firstSym.(*symbol.LocalVariableSymbol); ok {
-		if secondVar, ok := secondSym.(*symbol.LocalVariableSymbol); ok {
-			return sc.haveSameLocalVisibility(firstVar, secondVar)
-		}
-	}
-	return false
-}
-
-func (sc *symbolConstruction) haveSameLocalVisibility(firstVar *symbol.LocalVariableSymbol, secondVar *symbol.LocalVariableSymbol) bool {
-	// TODO optimize algorithm (avoid n^2 iterations)
-	for _, firstVarStatement := range firstVar.VisibleIn {
-		for _, secondVarStatement := range secondVar.VisibleIn {
-			if firstVarStatement == secondVarStatement {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {

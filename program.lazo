@@ -2,14 +2,11 @@ contract Test {
     bool b
     int x
 
-    function (int, int) add(int x) {
+    function (int, int) add(int x1) {
         int x = 1
         char c = 'c'
         string s = "String"
         bool b = true
-        if (true) {
-            int x = 2
-        }
         int y = 3 + 4 * 2
         int z = 3 ** 4 ** 2
         int a = -4 * 3
