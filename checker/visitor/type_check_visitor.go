@@ -84,16 +84,34 @@ func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	}
 }
 
-//func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
-//	v.AbstractVisitor.VisitBinaryExpressionNode(node)
-//	left := node.Left
-//	right := node.Right
-//	leftType := v.symbolTable.FindTypeByExpressionNode(left)
-//	rightType := v.symbolTable.FindTypeByExpressionNode(right)
-//	switch node.Operator {
-//
-//	}
-//}
+func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
+	v.AbstractVisitor.VisitBinaryExpressionNode(node)
+	left := node.Left
+	right := node.Right
+	leftType := v.symbolTable.FindTypeByExpressionNode(left)
+	rightType := v.symbolTable.FindTypeByExpressionNode(right)
+	switch node.Operator {
+	case token.And, token.Or:
+		if !v.IsBool(leftType) || !v.IsBool(rightType) {
+			fmt.Print("&& and || can only be applied to expressions of type bool.\n")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+		break
+	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo:
+		if !v.IsInt(leftType) || !v.IsInt(rightType) {
+			fmt.Print("Arithmetic operators can only be applied to expressions of type int.\n")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		break
+	case token.Less, token.LessEqual, token.Equal, token.Unequal, token.GreaterEqual, token.Greater:
+		if leftType != rightType{
+			fmt.Print("Both sides of a compare operation need to have compatible types.\n")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	default:
+
+	}
+}
 
 func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
@@ -113,7 +131,7 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 		break
 	default:
-		fmt.Print("Illegal unary operator found.")
+		fmt.Print("Illegal unary operator found.\n")
 	}
 }
 

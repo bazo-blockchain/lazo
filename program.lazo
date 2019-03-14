@@ -4,6 +4,6 @@ contract Test {
 
     function void hello () {
     int x = 0
-    int y = 3
+    bool y = 2 > 1
     }
 }
