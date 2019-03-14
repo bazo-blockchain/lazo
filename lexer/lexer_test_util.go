@@ -21,7 +21,7 @@ func newLexerTestUtil(t *testing.T, input string) *lexerTestUtil {
 		lex: New(bufio.NewReader(strings.NewReader(input))),
 	}
 
-	for !tester.lex.IsEnd {
+	for !tester.lex.isEnd {
 		tok := tester.lex.NextToken()
 		if ftok, ok := tok.(*token.FixToken); !ok || ftok.Value != token.NewLine {
 			tester.tokens = append(tester.tokens, tok)

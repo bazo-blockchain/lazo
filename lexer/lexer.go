@@ -15,7 +15,7 @@ type Lexer struct {
 	current    rune
 	currentPos token.Position
 	tokenPos   token.Position
-	IsEnd      bool
+	isEnd      bool
 }
 
 func New(reader *bufio.Reader) *Lexer {
@@ -32,7 +32,7 @@ func (lex *Lexer) NextToken() token.Token {
 
 	lex.tokenPos = lex.currentPos
 
-	if lex.IsEnd {
+	if lex.isEnd {
 		return &token.FixToken{
 			AbstractToken: lex.newAbstractToken(""),
 			Value:         token.EOF,
@@ -58,7 +58,7 @@ func (lex *Lexer) NextToken() token.Token {
 }
 
 func (lex *Lexer) skipWhiteSpace() {
-	for !lex.IsEnd && lex.current <= ' ' && !lex.isChar('\n') {
+	for !lex.isEnd && lex.current <= ' ' && !lex.isChar('\n') {
 		lex.nextChar()
 	}
 }
@@ -162,6 +162,10 @@ func (lex *Lexer) readCharacter() token.Token {
 		// skip closing quote
 		lex.nextChar()
 
+		if len(lexeme) == 0 {
+			return lex.newErrorToken(abstractToken, `Empty character. Use '\0' instead.`)
+		}
+
 		return &token.CharacterToken{
 			AbstractToken: abstractToken,
 			Value:         []rune(lexeme)[0],
@@ -175,7 +179,6 @@ func (lex *Lexer) readFixToken() token.Token {
 	// Check if the character could belong to a multi character operation
 	if symbol, ok := token.PossibleMultiCharOperation[lex.current]; ok {
 		buf := []rune{lex.current}
-
 		lex.nextChar()
 
 		// Check if the concatenated characters really build a multi character operation
@@ -212,32 +215,31 @@ func (lex *Lexer) readFixToken() token.Token {
 	}
 
 	lexeme := string(lex.current)
-
 	lex.nextChar()
 
 	return &token.ErrorToken{
 		AbstractToken: lex.newAbstractToken(lexeme),
-		Msg: fmt.Sprintf("Invalid charactr %s", lexeme),
+		Msg: "Invalid character",
 	}
-
 }
 
 func (lex *Lexer) readLogicalFixToken() token.Token {
 	buf := []rune{lex.current}
 	lex.nextChar()
-	buf = append(buf, lex.current)
+	if !lex.isEnd {
+		buf = append(buf, lex.current)
+	}
+	lexeme := string(buf)
+	abstractToken := lex.newAbstractToken(lexeme)
 
-	abstractToken := lex.newAbstractToken(string(buf))
-
-	if symbol, ok := token.LogicalOperation[string(buf)]; ok {
+	if symbol, ok := token.LogicalOperation[lexeme]; ok {
 		lex.nextChar()
-
 		return &token.FixToken{
 			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
 	} else {
-		return lex.newErrorToken(abstractToken, "Unknown Symbol")
+		return lex.newErrorToken(abstractToken, "Invalid Symbol")
 	}
 }
 
@@ -245,7 +247,7 @@ func (lex *Lexer) nextChar() {
 	if char, _, err := lex.reader.ReadRune(); err != nil {
 		lex.current = 0
 		if err == io.EOF {
-			lex.IsEnd = true
+			lex.isEnd = true
 		} else {
 			log.Fatal(err)
 		}
@@ -280,7 +282,7 @@ type predicate func() bool
 func (lex *Lexer) readLexeme(pred predicate) string {
 	var buf []rune
 
-	for !lex.IsEnd && pred() {
+	for !lex.isEnd && pred() {
 		buf = append(buf, lex.current)
 		lex.nextChar()
 	}
@@ -311,7 +313,7 @@ var escapedChars = map[rune]rune{
 func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string, error) {
 	var buf []rune
 
-	for !lex.IsEnd && pred() {
+	for !lex.isEnd && pred() {
 		// Escape codes
 		if lex.isChar('\\') {
 			lex.nextChar()

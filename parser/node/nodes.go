@@ -9,6 +9,7 @@ import (
 type Node interface {
 	Pos() token.Position
 	String() string
+	Accept(v Visitor)
 }
 
 type AbstractNode struct {
@@ -39,6 +40,10 @@ func (n *ProgramNode) String() string {
 	return fmt.Sprintf("%s", n.Contract)
 }
 
+func (n *ProgramNode) Accept(v Visitor) {
+	v.VisitProgramNode(n)
+}
+
 // --------------------------
 
 type ContractNode struct {
@@ -50,6 +55,10 @@ type ContractNode struct {
 
 func (n *ContractNode) String() string {
 	return fmt.Sprintf("[%s] CONTRACT %s \n VARS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Variables, n.Functions)
+}
+
+func (n *ContractNode) Accept(v Visitor) {
+	v.VisitContractNode(n)
 }
 
 // --------------------------
@@ -69,6 +78,10 @@ func (n *FunctionNode) String() string {
 		n.Pos(), n.Name, n.Parameters, n.ReturnTypes, n.Body)
 }
 
+func (n *FunctionNode) Accept(v Visitor) {
+	v.VisitFunctionNode(n)
+}
+
 // --------------------------
 // Statement Nodes
 // --------------------------
@@ -84,6 +97,10 @@ func (n *VariableNode) String() string {
 	return fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), n.Type.Identifier, n.Identifier, n.Expression)
 }
 
+func (n *VariableNode) Accept(v Visitor) {
+	v.VisitVariableNode(n)
+}
+
 // --------------------------
 
 type TypeNode struct {
@@ -93,6 +110,10 @@ type TypeNode struct {
 
 func (n *TypeNode) String() string {
 	return fmt.Sprintf("TYPE %s", n.Identifier)
+}
+
+func (n *TypeNode) Accept(v Visitor) {
+	v.VisitTypeNode(n)
 }
 
 // --------------------------
@@ -108,15 +129,23 @@ func (n *IfStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
 }
 
+func (n *IfStatementNode) Accept(v Visitor) {
+	v.VisitIfStatementNode(n)
+}
+
 // --------------------------
 
 type ReturnStatementNode struct {
 	AbstractNode
-	Expression []ExpressionNode
+	Expressions []ExpressionNode
 }
 
 func (n *ReturnStatementNode) String() string {
-	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expression)
+	return fmt.Sprintf("\n [%s] RETURNSTMT %s", n.Pos(), n.Expressions)
+}
+
+func (n *ReturnStatementNode) Accept(v Visitor) {
+	v.VisitReturnStatementNode(n)
 }
 
 // --------------------------
@@ -129,6 +158,10 @@ type AssignmentStatementNode struct {
 
 func (n *AssignmentStatementNode) String() string {
 	return fmt.Sprintf("\n [%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
+}
+
+func (n *AssignmentStatementNode) Accept(v Visitor) {
+	v.VisitAssignmentStatementNode(n)
 }
 
 // --------------------------
@@ -146,16 +179,24 @@ func (n *BinaryExpressionNode) String() string {
 	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
 }
 
+func (n *BinaryExpressionNode) Accept(v Visitor) {
+	v.VisitBinaryExpressionNode(n)
+}
+
 // --------------------------
 
 type UnaryExpression struct {
 	AbstractNode
-	Operator token.Symbol
-	Operand  ExpressionNode
+	Operator   token.Symbol
+	Expression ExpressionNode
 }
 
 func (n *UnaryExpression) String() string {
-	return fmt.Sprintf("EXPR (%s %s)", token.SymbolLexeme[n.Operator], n.Operand)
+	return fmt.Sprintf("(%s%s)", token.SymbolLexeme[n.Operator], n.Expression)
+}
+
+func (n *UnaryExpression) Accept(v Visitor) {
+	v.VisitUnaryExpressionNode(n)
 }
 
 // --------------------------
@@ -167,6 +208,10 @@ type DesignatorNode struct {
 
 func (n *DesignatorNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
+}
+
+func (n *DesignatorNode) Accept(v Visitor) {
+	v.VisitDesignatorNode(n)
 }
 
 // --------------------------
@@ -182,6 +227,10 @@ func (n *IntegerLiteralNode) String() string {
 	return fmt.Sprintf("%d", n.Value)
 }
 
+func (n *IntegerLiteralNode) Accept(v Visitor) {
+	v.VisitIntegerLiteralNode(n)
+}
+
 // --------------------------
 
 type StringLiteralNode struct {
@@ -191,6 +240,10 @@ type StringLiteralNode struct {
 
 func (n *StringLiteralNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
+}
+
+func (n *StringLiteralNode) Accept(v Visitor) {
+	v.VisitStringLiteralNode(n)
 }
 
 // --------------------------
@@ -204,6 +257,10 @@ func (n *CharacterLiteralNode) String() string {
 	return fmt.Sprintf("%c", n.Value)
 }
 
+func (n *CharacterLiteralNode) Accept(v Visitor) {
+	v.VisitCharacterLiteralNode(n)
+}
+
 // --------------------------
 
 type BoolLiteralNode struct {
@@ -215,6 +272,10 @@ func (n *BoolLiteralNode) String() string {
 	return fmt.Sprintf("%t", n.Value)
 }
 
+func (n *BoolLiteralNode) Accept(v Visitor) {
+	v.VisitBoolLiteralNode(n)
+}
+
 // --------------------------
 
 type ErrorNode struct {
@@ -224,4 +285,8 @@ type ErrorNode struct {
 
 func (n *ErrorNode) String() string {
 	return fmt.Sprintf("[%s] ERROR: %s", n.Pos(), n.Message)
+}
+
+func (n *ErrorNode) Accept(v Visitor) {
+	v.VisitErrorNode(n)
 }

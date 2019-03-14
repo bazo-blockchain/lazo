@@ -41,7 +41,7 @@ func TestStateWithCode(t *testing.T) {
 }
 
 func assertLexerState(t *testing.T, lex *Lexer, isEnd bool, current rune, pos string) {
-	assert.Equal(t, lex.IsEnd, isEnd)
+	assert.Equal(t, lex.isEnd, isEnd)
 	assert.Equal(t, lex.current, current)
 	assert.Equal(t, lex.currentPos.String(), pos)
 }
@@ -58,6 +58,25 @@ func TestDecimalDigits(t *testing.T) {
 	tester.assertInteger(2, big.NewInt(456))
 }
 
+func TestPeekCharAtEOF(t *testing.T) {
+	tester := newLexerTestUtil(t, "0")     // When 0, lexer peeks the next char, if it has x for hex digit
+	tester.assertInteger(0, big.NewInt(0)) // It should return Integer token without any error
+}
+
+func TestUInt256Max(t *testing.T) {
+	// uint256 = 2^256 - 1
+	tester := newLexerTestUtil(t, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+	tok, ok := tester.tokens[0].(*token.IntegerToken)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Value.String(), "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+}
+
+func TestNegativeInt(t *testing.T) {
+	tester := newLexerTestUtil(t, "-10")
+	tester.assertFixToken(0, token.Subtraction)
+	tester.assertInteger(1, big.NewInt(10))
+}
+
 func TestHexDigits(t *testing.T) {
 	tester := newLexerTestUtil(t, "0x123 0xaf 0x123af")
 
@@ -66,6 +85,19 @@ func TestHexDigits(t *testing.T) {
 	tester.assertInteger(0, big.NewInt(291))
 	tester.assertInteger(1, big.NewInt(175))
 	tester.assertInteger(2, big.NewInt(74671))
+}
+
+func TestHexMax(t *testing.T) {
+	maxHex := "ffff"
+	for i := 0; i < 15; i++ {
+		maxHex += "ffff"
+	}
+	maxHex = "0x" + maxHex // 64 f's == 32 bytes with full of f's == 2^256 - 1
+
+	tester := newLexerTestUtil(t, maxHex)
+	tok, ok := tester.tokens[0].(*token.IntegerToken)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Value.String(), "115792089237316195423570985008687907853269984665640564039457584007913129639935")
 }
 
 func TestInvalidHex(t *testing.T) {
@@ -183,6 +215,11 @@ func TestEmptyCharacter(t *testing.T) {
 	tester.assertCharacter(0, 0)
 }
 
+func TestInvalidEmptyCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "''")
+	tester.assertError(0, "")
+}
+
 func TestCharacterWithInvalidEscape(t *testing.T) {
 	tester := newLexerTestUtil(t, `'\"'`)
 	tester.assertError(0, "")
@@ -191,6 +228,16 @@ func TestCharacterWithInvalidEscape(t *testing.T) {
 func TestInvalidCharacter(t *testing.T) {
 	tester := newLexerTestUtil(t, "'cc'")
 	tester.assertError(0, "cc")
+}
+
+func TestUnicodeCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "'£'")
+	tester.assertError(0, "£")
+}
+
+func TestNotClosedCharacter(t *testing.T) {
+	tester := newLexerTestUtil(t, "'c")
+	tester.assertError(0, "c")
 }
 
 // Fix Tokens
@@ -298,6 +345,12 @@ func TestMultiplication(t *testing.T) {
 	tester.assertFixToken(0, token.Multiplication)
 }
 
+func TestExponentAndMultiplication(t *testing.T) {
+	tester := newLexerTestUtil(t, "***")
+	tester.assertFixToken(0, token.Exponent)
+	tester.assertFixToken(1, token.Multiplication)
+}
+
 func TestDivision(t *testing.T) {
 	tester := newLexerTestUtil(t, "/")
 	tester.assertFixToken(0, token.Division)
@@ -338,6 +391,16 @@ func TestOr(t *testing.T) {
 	tester.assertFixToken(0, token.Or)
 }
 
+func TestUnsupportedSymbol(t *testing.T) {
+	tester := newLexerTestUtil(t, "|") // Bitwise | is not supported yet, there it is an error
+	tester.assertError(0, "|")
+}
+
+func TestInvalidLogicalSymbol(t *testing.T) {
+	tester := newLexerTestUtil(t, "&|")
+	tester.assertError(0, "&|")
+}
+
 func TestEqual(t *testing.T) {
 	tester := newLexerTestUtil(t, "==")
 	tester.assertFixToken(0, token.Equal)
@@ -356,6 +419,11 @@ func TestGreaterEqual(t *testing.T) {
 func TestLessEqual(t *testing.T) {
 	tester := newLexerTestUtil(t, "<=")
 	tester.assertFixToken(0, token.LessEqual)
+}
+
+func TestInvalidFixToken(t *testing.T) {
+	tester := newLexerTestUtil(t, "$")
+	tester.assertError(0, "$")
 }
 
 func TestFuncDeclaration(t *testing.T) {

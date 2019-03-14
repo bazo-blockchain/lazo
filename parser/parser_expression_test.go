@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"math/big"
 	"testing"
 )
 
@@ -137,6 +138,155 @@ func TestFactorAssociativity(t *testing.T) {
 func TestFactorPrecedence(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 + 2 * 3")
 	node.AssertBinaryExpression(t, e, "1", "(2 * 3)", token.Addition)
+}
+
+// Exponent Expressions
+// --------------------
+
+func TestExponent(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 ** 3 ** 4")
+	node.AssertBinaryExpression(t, e, "2", "(3 ** 4)", token.Exponent)
+}
+
+func TestExponentWithFactor(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 ** 3 * 4")
+	node.AssertBinaryExpression(t, e, "(2 ** 3)", "4", token.Multiplication)
+}
+
+func TestFactorWithExponent(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 / 3 ** 4")
+	node.AssertBinaryExpression(t, e, "2", "(3 ** 4)", token.Division)
+}
+
+// Unary Expressions
+// -----------------
+
+func TestUnaryPlus(t *testing.T) {
+	e := parseExpressionFromInput(t, "+x")
+	node.AssertUnaryExpression(t, e, "x", token.Addition)
+}
+
+func TestUnaryMinus(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 - -3")
+	node.AssertBinaryExpression(t, e, "2", "(-3)", token.Subtraction)
+
+	unExpr := e.(*node.BinaryExpressionNode).Right
+	node.AssertUnaryExpression(t, unExpr, "3", token.Subtraction)
+}
+
+func TestUnaryNot(t *testing.T) {
+	e := parseExpressionFromInput(t, "!true")
+	node.AssertUnaryExpression(t, e, "true", token.Not)
+}
+
+func TestUnaryPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "-4 + 2")
+	node.AssertBinaryExpression(t, e, "(-4)", "2", token.Addition)
+}
+
+func TestUnaryWithFactor(t *testing.T) {
+	e := parseExpressionFromInput(t, "-4 * 2")
+	node.AssertUnaryExpression(t, e, "(4 * 2)", token.Subtraction)
+}
+
+func TestUnaryAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "-+-+x")
+	node.AssertUnaryExpression(t, e, "(+(-(+x)))", token.Subtraction)
+}
+
+// Designator Expressions
+// ----------------------
+
+func TestDesignator(t *testing.T) {
+	p := newParserFromInput("test")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "test")
+	assertNoErrors(t, p)
+}
+
+func TestDesignatorWithNumbers(t *testing.T) {
+	p := newParserFromInput("test123")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "test123")
+	assertNoErrors(t, p)
+}
+
+func TestDesignatorWithUnderscore(t *testing.T) {
+	p := newParserFromInput("_test")
+	v := p.parseDesignator()
+	node.AssertDesignator(t, v, "_test")
+	assertNoErrors(t, p)
+}
+
+func TestInvalidDesignator(t *testing.T) {
+	p := newParserFromInput("1ab")
+	p.parseDesignator()
+	assertHasError(t, p)
+}
+
+// Literal Expressions
+// -------------------
+
+func TestIntegerLiteral(t *testing.T) {
+	p := newParserFromInput("1")
+	i := p.parseInteger()
+	node.AssertIntegerLiteral(t, i, big.NewInt(1))
+	assertNoErrors(t, p)
+}
+
+func TestValidIntegerLiteral(t *testing.T) {
+	p := newParserFromInput("0x1")
+	i := p.parseInteger()
+	node.AssertIntegerLiteral(t, i, big.NewInt(1))
+	assertNoErrors(t, p)
+}
+
+func TestInvalidHexLiteral(t *testing.T) {
+	p := newParserFromInput("0x")
+	o := p.parseOperand()
+
+	assertHasError(t, p)
+	e := o.(*node.ErrorNode)
+	node.AssertError(t, e, "Error while parsing string to big int")
+}
+
+func TestStringLiteral(t *testing.T) {
+	p := newParserFromInput(`"test"`)
+	s := p.parseString()
+	node.AssertStringLiteral(t, s, "test")
+	assertNoErrors(t, p)
+}
+
+func TestCharacterLiteral(t *testing.T) {
+	p := newParserFromInput("'c'")
+	c := p.parseCharacter()
+	node.AssertCharacterLiteral(t, c, 'c')
+	assertNoErrors(t, p)
+}
+
+func TestBoolLiteralTrue(t *testing.T) {
+	p := newParserFromInput("true")
+	b := p.parseBoolean()
+	tok, _ := b.(*node.BoolLiteralNode)
+	node.AssertBoolLiteral(t, tok, true)
+	assertNoErrors(t, p)
+}
+
+func TestBoolLiteralFalse(t *testing.T) {
+	p := newParserFromInput("false")
+	b := p.parseBoolean()
+	tok, _ := b.(*node.BoolLiteralNode)
+	node.AssertBoolLiteral(t, tok, false)
+	assertNoErrors(t, p)
+}
+
+func TestInvalidBoolLiteral(t *testing.T) {
+	p := newParserFromInput("if")
+	b := p.parseBoolean()
+
+	assertHasError(t, p)
+	tok, _ := b.(*node.ErrorNode)
+	node.AssertError(t, tok, "Invalid boolean value if")
 }
 
 // --------------

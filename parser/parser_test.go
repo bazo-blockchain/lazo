@@ -5,7 +5,6 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
-	"math/big"
 	"strings"
 	"testing"
 )
@@ -39,11 +38,16 @@ func TestInvalidProgram(t *testing.T) {
 // --------------
 
 func TestEmptyContract(t *testing.T) {
-	p := newParserFromInput("contract Test {\n \n}")
-	c := p.parseContract()
+	p := newParserFromInput(`
+		contract Test {
+		
+		}
+	`)
+	program, _ := p.ParseProgram()
 
 	assertNoErrors(t, p)
-	node.AssertContract(t, c, "Test", 0, 0)
+	node.AssertProgram(t, program, true)
+	node.AssertContract(t, program.Contract, "Test", 0, 0)
 }
 
 func TestContractWithVariable(t *testing.T) {
@@ -57,6 +61,24 @@ func TestContractWithVariable(t *testing.T) {
 	node.AssertContract(t, c, "Test", 2, 0)
 	node.AssertVariable(t, c.Variables[0], "int", "x")
 	node.AssertVariable(t, c.Variables[1], "int", "y")
+
+	// Positions
+	assert.Equal(t, c.Pos().String(), "1:1")
+	assert.Equal(t, c.Variables[0].Pos().String(), "2:3")
+	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
+}
+
+func TestContractWithFunction(t *testing.T){
+	p := newParserFromInput(`contract Test {
+		function void test() {
+
+		}
+	}`)
+	c := p.parseContract()
+
+	assertNoErrors(t, p)
+	node.AssertContract(t, c, "Test", 0, 1)
+	node.AssertFunction(t, c.Functions[0], "test", 1, 0, 0)
 }
 
 // Variable Nodes
@@ -70,14 +92,38 @@ func TestVariable(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
-func TestVariableWithoutNewLine(t *testing.T) {
+func TestVariableDeclarationWithoutNewLine(t *testing.T) {
 	p := newParserFromInput("int x")
 	_ = p.parseVariableStatement()
 	assertHasError(t, p)
 }
 
+func TestCharVariableStatement(t *testing.T){
+	p := newParserFromInput("char a = 'c'\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "char", "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestIntVariableStatement(t *testing.T){
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseVariableStatement()
+
+	node.AssertVariableStatement(t, v, "int", "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatementWONewline(t *testing.T){
+	p := newParserFromInput("char a = 'c'")
+	p.parseVariableStatement()
+
+	assertHasError(t, p)
+}
+
 // Function Nodes
 // --------------
+
 func TestEmptyFunction(t *testing.T) {
 	p := newParserFromInput("function void test(){\n}\n")
 	f := p.parseFunction()
@@ -141,13 +187,19 @@ func TestFunctionWORType(t *testing.T) {
 }
 
 func TestFunctionMissingNewline(t *testing.T) {
-	p := newParserFromInput("function test(int a, int b){\n}")
+	p := newParserFromInput("function void test(int a, int b){\n}")
 	p.parseFunction()
 	assertHasError(t, p)
 }
 
 func TestFunctionMissingNewlineInBody(t *testing.T) {
-	p := newParserFromInput("function test(int a, int b){}\n")
+	p := newParserFromInput("function void test(int a, int b){}\n")
+	p.parseFunction()
+	assertHasError(t, p)
+}
+
+func TestFunctionMissingParamComma(t *testing.T) {
+	p := newParserFromInput("function void test(int a int b){}\n")
 	p.parseFunction()
 	assertHasError(t, p)
 }
@@ -179,6 +231,9 @@ func TestMultipleStatementBlock(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Return statements
+// ------------------
+
 func TestReturnStatementMissingNewline(t *testing.T) {
 	p := newParserFromInput("return")
 	p.parseReturnStatement()
@@ -208,6 +263,9 @@ func TestMultipleReturnStatement(t *testing.T) {
 	node.AssertReturnStatement(t, v, 2)
 	assertNoErrors(t, p)
 }
+
+// If Statement
+// ------------
 
 func TestIfStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\n}\n")
@@ -259,17 +317,17 @@ func TestIfStatementMultipleThenStatement(t *testing.T) {
 
 func TestIfStatementMultipleElseStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\nint c\n int d\n}\n")
-	v := p.parseIfStatement()
+	v := p.parseStatement()
 
-	node.AssertIfStatement(t, v, "true", 0, 2)
+	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 2)
 	assertNoErrors(t, p)
 }
 
 func TestIfStatementWOElse(t *testing.T) {
 	p := newParserFromInput("if(true){\n}\n")
-	v := p.parseIfStatement()
+	v := p.parseStatementWithFixToken()
 
-	node.AssertIfStatement(t, v, "true", 0, 0)
+	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 0)
 	assertNoErrors(t, p)
 }
 
@@ -279,6 +337,9 @@ func TestIfStatementWOElseWONewline(t *testing.T) {
 
 	assertHasError(t, p)
 }
+
+// Assignment
+// ----------
 
 func TestAssignmentStatement(t *testing.T) {
 	p := newParserFromInput("a = 5\n")
@@ -291,10 +352,9 @@ func TestAssignmentStatement(t *testing.T) {
 
 func TestAssignmentStatementChar(t *testing.T) {
 	p := newParserFromInput("a = 'c'\n")
-	i := p.readIdentifier()
-	v := p.parseAssignmentStatement(i)
+	s := p.parseStatementWithIdentifier()
 
-	node.AssertAssignmentStatement(t, v, "a", "c")
+	node.AssertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "a", "c")
 	assertNoErrors(t, p)
 }
 
@@ -306,28 +366,8 @@ func TestAssignmentStatementWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
-func TestVariableStatementChar(t *testing.T){
-	p := newParserFromInput("char a = 'c'\n")
-	v := p.parseVariableStatement()
-
-	node.AssertVariableStatement(t, v, "char", "a", "c")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatement(t *testing.T){
-	p := newParserFromInput("int a = 5\n")
-	v := p.parseVariableStatement()
-
-	node.AssertVariableStatement(t, v, "int", "a", "5")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatementWONewline(t *testing.T){
-	p := newParserFromInput("char a = 'c'")
-	p.parseVariableStatement()
-
-	assertHasError(t, p)
-}
+// Statement with Fix token
+// ------------------------
 
 func TestStatementWithFixTokenReturn(t *testing.T){
 	p := newParserFromInput("return\n")
@@ -353,6 +393,9 @@ func TestStatementWithFixTokenMultipleReturnValue(t *testing.T){
 	assertNoErrors(t, p)
 }
 
+// Statement with Identifier
+// -------------------------
+
 func TestStatementWithIdentifier(t *testing.T){
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
@@ -367,91 +410,6 @@ func TestStatementWithIdentifierAssignment(t *testing.T){
 
 	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
 	assertNoErrors(t, p)
-}
-
-// Designator Nodes
-// ----------------
-
-func TestDesignator(t *testing.T) {
-	p := newParserFromInput("test")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "test")
-	assertNoErrors(t, p)
-}
-
-func TestDesignatorWithNumbers(t *testing.T) {
-	p := newParserFromInput("test123")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "test123")
-	assertNoErrors(t, p)
-}
-
-func TestDesignatorWithUnderscore(t *testing.T) {
-	p := newParserFromInput("_test")
-	v := p.parseDesignator()
-	node.AssertDesignator(t, v, "_test")
-	assertNoErrors(t, p)
-}
-
-func TestInvalidDesignator(t *testing.T) {
-	p := newParserFromInput("1ab")
-	p.parseDesignator()
-	assertHasError(t, p)
-}
-
-// Literal Nodes
-// -------------
-
-func TestIntegerLiteral(t *testing.T) {
-	p := newParserFromInput("1")
-	i := p.parseInteger()
-	node.AssertIntegerLiteral(t, i, big.NewInt(1))
-	assertNoErrors(t, p)
-}
-
-func TestInvalidIntegerLiteral(t *testing.T) {
-	p := newParserFromInput("0x1")
-	i := p.parseInteger()
-	node.AssertIntegerLiteral(t, i, big.NewInt(1))
-	assertNoErrors(t, p)
-}
-
-func TestStringLiteral(t *testing.T) {
-	p := newParserFromInput(`"test"`)
-	s := p.parseString()
-	node.AssertStringLiteral(t, s, "test")
-	assertNoErrors(t, p)
-}
-
-func TestCharacterLiteral(t *testing.T) {
-	p := newParserFromInput("'c'")
-	c := p.parseCharacter()
-	node.AssertCharacterLiteral(t, c, 'c')
-	assertNoErrors(t, p)
-}
-
-func TestBoolLiteralTrue(t *testing.T) {
-	p := newParserFromInput("true")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.BoolLiteralNode)
-	node.AssertBoolLiteral(t, tok, true)
-	assertNoErrors(t, p)
-}
-
-func TestBoolLiteralFalse(t *testing.T) {
-	p := newParserFromInput("false")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.BoolLiteralNode)
-	node.AssertBoolLiteral(t, tok, false)
-	assertNoErrors(t, p)
-}
-
-func TestInvalidBoolLiteral(t *testing.T) {
-	p := newParserFromInput("if")
-	b := p.parseBoolean()
-	tok, _ := b.(*node.ErrorNode)
-	node.AssertError(t, tok, "Invalid boolean value if")
-	assertHasError(t, p)
 }
 
 // Type Nodes

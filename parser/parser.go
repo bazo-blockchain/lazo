@@ -34,7 +34,7 @@ func (p *Parser) ParseProgram() (*node.ProgramNode, []error) {
 		program.Contract = p.parseContract()
 	}
 
-	if !p.isSymbol(token.EOF) {
+	if !p.isEnd() {
 		p.addError("Invalid token outside contract: " + p.currentToken.String())
 	}
 	return program, p.errors
@@ -54,7 +54,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 		p.parseContractBody(contract)
 	}
 
-	p.check(token.CloseBrace)
+	p.checkAndSkipNewLines(token.CloseBrace)
 	return contract
 }
 
@@ -74,7 +74,7 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 			p.nextToken()
 		}
 	default:
-		p.addError("Unsupported contract part starting with" + p.currentToken.Literal())
+		p.addError("Unsupported contract part: " + p.currentToken.Literal())
 		p.nextToken()
 	}
 }
@@ -83,7 +83,6 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	function := &node.FunctionNode{
 		AbstractNode: p.newAbstractNode(),
 	}
-
 	p.nextToken() // skip function keyword
 
 	function.ReturnTypes = p.parseReturnTypes()
@@ -205,13 +204,11 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 		AbstractNode: abstractNode,
 		Value:     	  identifier,
 	}
-
 	p.nextToken() // skip '=' sign
 
 	expression := p.parseExpression()
-
-
 	p.checkAndSkipNewLines(token.NewLine)
+
 	return &node.AssignmentStatementNode{
 		AbstractNode:	abstractNode,
 		Left:			designator,
@@ -221,7 +218,6 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
 	abstractNode := p.newAbstractNode()
-
 	p.nextToken() // skip 'if' keyword
 
 	// Condition
@@ -258,7 +254,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	if !p.isSymbol(token.NewLine) {
 		returnValues = append(returnValues, p.parseExpression())
 
-		for !p.isSymbol(token.EOF) && p.isSymbol(token.Comma){
+		for !p.isEnd() && p.isSymbol(token.Comma){
 			p.nextToken() // skip ','
 			returnValues = append(returnValues, p.parseExpression())
 		}
@@ -268,7 +264,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 
 	return &node.ReturnStatementNode{
 		AbstractNode: abstractNode,
-		Expression: returnValues,
+		Expressions:  returnValues,
 	}
 }
 
@@ -292,220 +288,6 @@ func (p *Parser) parseType() *node.TypeNode {
 		AbstractNode: p.newAbstractNode(),
 		Identifier:   p.readIdentifier(),
 	}
-}
-
-// Expressions
-// -------------------------
-
-func (p *Parser) parseExpression() node.ExpressionNode {
-	return p.parseOr()
-}
-
-func (p *Parser) parseOr() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseAnd()
-
-	for p.isAnySymbol(token.Or) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left: leftExpr,
-			Operator: p.readSymbol(),
-			Right: p.parseAnd(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseAnd() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseEquality()
-
-	for p.isAnySymbol(token.And) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left: leftExpr,
-			Operator: p.readSymbol(),
-			Right: p.parseEquality(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseEquality() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseRelationalComparison()
-
-	for p.isAnySymbol(token.Equal, token.Unequal) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left: leftExpr,
-			Operator: p.readSymbol(),
-			Right: p.parseRelationalComparison(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseRelationalComparison() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseTerm()
-
-	for p.isAnySymbol(token.Less, token.LessEqual, token.GreaterEqual, token.Greater) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left: leftExpr,
-			Operator: p.readSymbol(),
-			Right: p.parseTerm(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseTerm() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseFactor()
-
-	for p.isAnySymbol(token.Addition, token.Subtraction) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left:         leftExpr,
-			Operator:     p.readSymbol(),
-			Right:        p.parseFactor(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseFactor() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseExponent()
-
-	for p.isAnySymbol(token.Multiplication, token.Division, token.Modulo) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left:         leftExpr,
-			Operator:     p.readSymbol(),
-			Right:        p.parseExponent(),
-		}
-		leftExpr = binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseExponent() node.ExpressionNode {
-	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseExpressionRest()
-
-	if p.isSymbol(token.Exponent) {
-		binExpr := &node.BinaryExpressionNode{
-			AbstractNode: abstractNode,
-			Left:         leftExpr,
-			Operator:     p.readSymbol(),
-			Right:        p.parseExponent(), // recursive because of right-to-left associativity
-		}
-		return binExpr
-	}
-	return leftExpr
-}
-
-func (p *Parser) parseExpressionRest() node.ExpressionNode {
-	if p.isAnySymbol(token.Addition, token.Subtraction) {
-		return p.parseUnaryExpression()
-	}
-
-	return p.parseOperand()
-}
-
-func (p *Parser) parseUnaryExpression() *node.UnaryExpression {
-	return &node.UnaryExpression{
-		AbstractNode: p.newAbstractNode(),
-		Operator:     p.readSymbol(),
-		Operand:      p.parseFactor(),
-	}
-}
-
-func (p *Parser) parseOperand() node.ExpressionNode {
-	switch p.currentToken.Type() {
-	case token.IDENTIFER:
-		return p.parseDesignator()
-	case token.INTEGER:
-		return p.parseInteger()
-	case token.CHARACTER:
-		return p.parseCharacter()
-	case token.STRING:
-		return p.parseString()
-	case token.SYMBOL:
-		return p.parseBoolean()
-	}
-
-	var error string
-	if tok, ok := p.currentToken.(*token.ErrorToken); ok {
-		error = tok.Msg
-	} else {
-		error = "Invalid operand: " + p.currentToken.Literal()
-	}
-
-	return p.newErrorNode(error)
-}
-
-func (p *Parser) parseDesignator() *node.DesignatorNode {
-	return &node.DesignatorNode{
-		AbstractNode: p.newAbstractNode(),
-		Value:        p.readIdentifier(),
-	}
-}
-
-func (p *Parser) parseInteger() *node.IntegerLiteralNode {
-	tok, _ := p.currentToken.(*token.IntegerToken)
-
-	i := &node.IntegerLiteralNode{
-		AbstractNode: p.newAbstractNode(),
-		Value:        tok.Value,
-	}
-	p.nextToken()
-	return i
-}
-
-func (p *Parser) parseCharacter() *node.CharacterLiteralNode {
-	tok, _ := p.currentToken.(*token.CharacterToken)
-
-	c := &node.CharacterLiteralNode{
-		AbstractNode: p.newAbstractNode(),
-		Value:        tok.Value,
-	}
-	p.nextToken()
-	return c
-}
-
-func (p *Parser) parseString() *node.StringLiteralNode {
-	tok, _ := p.currentToken.(*token.StringToken)
-
-	s := &node.StringLiteralNode{
-		AbstractNode: p.newAbstractNode(),
-		Value:        tok.Literal(),
-	}
-	p.nextToken()
-	return s
-}
-
-func (p *Parser) parseBoolean() node.ExpressionNode {
-	tok, _ := p.currentToken.(*token.FixToken)
-
-	if value, ok := token.BooleanConstants[tok.Value]; ok {
-		b := &node.BoolLiteralNode{
-			AbstractNode: p.newAbstractNode(),
-			Value:        value,
-		}
-		p.nextToken()
-		return b
-	}
-
-	return p.newErrorNode("Invalid boolean value " + tok.Literal())
 }
 
 // Helper functions
@@ -545,7 +327,13 @@ func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 
 func (p *Parser) check(symbol token.Symbol) {
 	if !p.isSymbol(symbol) {
-		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], p.currentToken.Literal()))
+		var lexeme string
+		if ftok, ok := p.currentToken.(*token.FixToken); ok {
+			lexeme = token.SymbolLexeme[ftok.Value]
+		} else {
+			lexeme = p.currentToken.Literal()
+		}
+		p.addError(fmt.Sprintf("Symbol %s expected, but got %s", token.SymbolLexeme[symbol], lexeme))
 	}
 	p.nextToken()
 }
@@ -602,7 +390,7 @@ func (p *Parser) newErrorNode(msg string) *node.ErrorNode {
 }
 
 func (p *Parser) isEnd() bool {
-	return p.lex.IsEnd
+	return p.isSymbol(token.EOF)
 }
 
 func (p *Parser) addError(msg string) {
