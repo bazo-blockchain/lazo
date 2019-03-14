@@ -56,7 +56,7 @@ func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
 }
 
-func (t *SymbolTable) FixTarget(designatorNode *node.DesignatorNode, symbol Symbol) {
+func (t *SymbolTable) MapDesignatorToType(designatorNode *node.DesignatorNode, symbol Symbol) {
 	t.designatorSymbols[designatorNode] = symbol
 }
 

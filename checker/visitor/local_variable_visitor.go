@@ -46,7 +46,7 @@ func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) 
 }
 
 func (v *LocalVariableVisitor) recordVisiblity(stmt node.StatementNode) {
-	for _, scope := range v.blockScopes{
+	for _, scope := range v.blockScopes {
 		for _, localVariable := range scope {
 			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)
 		}
