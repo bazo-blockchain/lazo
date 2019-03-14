@@ -41,7 +41,7 @@ func (v *AbstractVisitor) VisitVariableNode(node *VariableNode) {
 }
 
 func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 
 func (v *AbstractVisitor) VisitIfStatementNode(node *IfStatementNode) {
@@ -61,28 +61,29 @@ func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatement
 	node.Right.Accept(v.ConcreteVisitor)
 }
 func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) {
-	// TODO Implement
+	node.Left.Accept(v.ConcreteVisitor)
+	node.Right.Accept(v.ConcreteVisitor)
 }
 func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpression) {
-	// TODO Implement
+	node.Expression.Accept(v.ConcreteVisitor)
 }
 func (v *AbstractVisitor) VisitDesignatorNode(node *DesignatorNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 func (v *AbstractVisitor) VisitIntegerLiteralNode(node *IntegerLiteralNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 func (v *AbstractVisitor) VisitStringLiteralNode(node *StringLiteralNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 func (v *AbstractVisitor) VisitCharacterLiteralNode(node *CharacterLiteralNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 func (v *AbstractVisitor) VisitBoolLiteralNode(node *BoolLiteralNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 func (v *AbstractVisitor) VisitErrorNode(node *ErrorNode) {
-	// TODO Implement
+	// Nothing to do here
 }
 
 
