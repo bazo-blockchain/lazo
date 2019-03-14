@@ -7,7 +7,9 @@ contract Test {
         char c = 'c'
         string s = "String"
         bool b = true
-        int x = 1 + 2
+        if (true) {
+            int x = 2
+        }
         int y = 3 + 4 * 2
         int z = 3 ** 4 ** 2
         int a = -4 * 3
