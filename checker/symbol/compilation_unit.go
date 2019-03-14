@@ -28,8 +28,17 @@ func (cu *CompilationUnit) NewCompilationUnit() Symbol {
 }
 
 func (cu *CompilationUnit) AllDeclarations() []Symbol {
-	// TODO implement
-	return nil
+	var symbols []Symbol
+	for _, s := range cu.Types {
+		symbols = append(symbols, s)
+	}
+	for _, s := range cu.BuiltInFunctions {
+		symbols = append(symbols, s)
+	}
+	for _, s := range cu.Constants {
+		symbols = append(symbols, s)
+	}
+	return symbols
 }
 
 func (cu *CompilationUnit) String() string {

@@ -56,8 +56,14 @@ func NewContractSymbol(scope Symbol, identifier string) *ContractSymbol {
 }
 
 func (sym *ContractSymbol) AllDeclarations() []Symbol {
-	// TODO Implement
-	return nil
+	var symbols []Symbol
+	for _, s := range sym.Fields {
+		symbols = append(symbols, s)
+	}
+	for _, s := range sym.Functions {
+		symbols = append(symbols, s)
+	}
+	return symbols
 }
 
 func (sym *ContractSymbol) String() string {

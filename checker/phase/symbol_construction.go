@@ -131,7 +131,28 @@ func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 }
 
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
-	// TODO Implement
+	sc.checkUniqueIdentifier(sc.globalScope)
+	sc.checkUniqueIdentifier(sc.globalScope.Contract)
+	for _, function := range sc.globalScope.Contract.Functions {
+		sc.checkUniqueIdentifier(function)
+	}
+}
+
+func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
+	// TODO optimize algorithm (avoid n^2 iterations)
+	// TODO: Fix function local variables (allow shadowing)
+	allDecl := sym.AllDeclarations()
+	for _, decl := range allDecl {
+		count := 0
+		for _, variable := range allDecl {
+			if decl.GetIdentifier() == variable.GetIdentifier() {
+				count++
+				if count > 1 {
+					sc.reportError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
+				}
+			}
+		}
+	}
 }
 
 func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {
