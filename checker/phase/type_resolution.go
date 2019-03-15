@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"github.com/pkg/errors"
 )
 
 type TypeResolution struct {
@@ -60,7 +61,7 @@ func (tc *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 func (tc *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
 	result := tc.symTable.FindTypeByNode(node)
 	if result == nil {
-		fmt.Printf("Error: Could not find type for node %s", node.Identifier)
+		tc.errors = append(tc.errors, errors.New(fmt.Sprintf("Error: Could not find type for node %s", node.Identifier)))
 	}
 	return result
 }
