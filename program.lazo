@@ -1,7 +1,7 @@
 contract Test {
     function int hello () {
     int x
-    x = 5
+    x = true
     return x
     }
 }
