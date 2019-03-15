@@ -1,8 +1,38 @@
 package checker
 
 import (
+	"gotest.tools/assert"
 	"testing"
 )
+
+// Global Scope
+// ------------
+
+func TestGlobalScope(t *testing.T) {
+	tester := NewCheckerTestUtil(t, `
+		contract Test {
+		}
+	`, true)
+
+	gs := tester.symbolTable.GlobalScope
+	assert.Check(t, gs.Contract != nil)
+	assert.Equal(t, len(gs.Types), 4)
+	assert.Equal(t, len(gs.BuiltInTypes), 4)
+	assert.Equal(t, len(gs.BuiltInFunctions), 0)
+	assert.Equal(t, len(gs.Constants), 3)
+
+	// Built-in types
+	assert.Equal(t, gs.NullType.GetIdentifier(), "@NULL")
+	assert.Equal(t, gs.BoolType.GetIdentifier(), "bool")
+	assert.Equal(t, gs.CharType.GetIdentifier(), "char")
+	assert.Equal(t, gs.StringType.GetIdentifier(), "string")
+	assert.Equal(t, gs.IntType.GetIdentifier(), "int")
+
+	// Constants
+	assert.Equal(t, gs.TrueConstant.GetIdentifier(), "true")
+	assert.Equal(t, gs.FalseConstant.GetIdentifier(), "false")
+	assert.Equal(t, gs.NullConstant.GetIdentifier(), "null")
+}
 
 func TestValidProgram(t *testing.T) {
 	_ = NewCheckerTestUtil(t, `

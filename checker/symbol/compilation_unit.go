@@ -21,10 +21,10 @@ type CompilationUnit struct {
 	NullConstant  *ConstantSymbol
 }
 
-func (cu *CompilationUnit) NewCompilationUnit() Symbol {
-	return &CompilationUnit{
-		NullType: NewTypeSymbol(cu, "@NULL"),
-	}
+func newCompilationUnit() *CompilationUnit {
+	cu := &CompilationUnit{}
+	cu.NullType = NewTypeSymbol(cu, "@NULL")
+	return cu
 }
 
 func (cu *CompilationUnit) AllDeclarations() []Symbol {

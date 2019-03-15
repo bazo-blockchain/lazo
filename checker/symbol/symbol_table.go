@@ -14,7 +14,7 @@ type SymbolTable struct {
 
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
-		GlobalScope:       &CompilationUnit{},
+		GlobalScope:       newCompilationUnit(),
 		symbolToNode:      make(map[Symbol]node.Node),
 		designatorSymbols: make(map[*node.DesignatorNode]Symbol),
 		exprTypes:         make(map[node.ExpressionNode]*TypeSymbol),
