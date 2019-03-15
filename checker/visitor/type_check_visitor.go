@@ -64,13 +64,13 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
-	if _, ok := v.symbolTable.GetTarget(node.Left).(*symbol.FunctionSymbol); ok {
+	if _, ok := v.symbolTable.FindTypeByDesignatorNode(node.Left).(*symbol.FunctionSymbol); ok {
 		fmt.Print("Error: Assignment to function is not allowed.")
 	} else {
 		leftType := v.symbolTable.FindTypeByExpressionNode(node.Left)
 		rightType := v.symbolTable.FindTypeByExpressionNode(node.Right)
 
-		if leftType != rightType {
+		if leftType.GetIdentifier() != rightType.GetIdentifier() {
 			fmt.Printf("[%s] Error: %s of assignment is not compatible with target %s\n", node.Pos(), rightType, leftType)
 		}
 

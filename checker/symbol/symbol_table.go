@@ -40,11 +40,10 @@ func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 		return nil
 	}
 	for _, declaration := range scope.AllDeclarations() {
-		if declaration.String() == identifier {
+		if declaration.GetIdentifier() == identifier {
 			return declaration
 		}
 	}
-
 	return t.Find(scope.GetScope(), identifier)
 }
 
@@ -60,7 +59,7 @@ func (t *SymbolTable) MapDesignatorToType(designatorNode *node.DesignatorNode, s
 	t.designatorSymbols[designatorNode] = symbol
 }
 
-func (t *SymbolTable) GetTarget(designatorNode *node.DesignatorNode) Symbol {
+func (t *SymbolTable) FindTypeByDesignatorNode(designatorNode *node.DesignatorNode) Symbol {
 	return t.designatorSymbols[designatorNode]
 }
 

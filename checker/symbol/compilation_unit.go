@@ -3,7 +3,7 @@ package symbol
 import "fmt"
 
 type CompilationUnit struct {
-	Symbol
+	AbstractSymbol
 	Contract         *ContractSymbol
 	Types            []*TypeSymbol
 	BuiltInTypes     []*TypeSymbol
