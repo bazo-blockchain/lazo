@@ -45,6 +45,13 @@ func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) 
 	v.AbstractVisitor.VisitIfStatementNode(node)
 }
 
+func (v *LocalVariableVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+	v.recordVisiblity(node)
+	v.AbstractVisitor.VisitReturnStatementNode(node)
+}
+
+// TODO call recordVisibility where necessary
+
 func (v *LocalVariableVisitor) recordVisiblity(stmt node.StatementNode) {
 	for _, scope := range v.blockScopes {
 		for _, localVariable := range scope {
