@@ -1,11 +1,9 @@
 package phase
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type TypeChecker struct {
@@ -27,8 +25,4 @@ func (tc *TypeChecker) checkTypes() {
 	v := visitor.NewTypeCheckVisitor(tc.symTable, contractSymbol)
 	contractNode := tc.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 	contractNode.Accept(v)
-}
-
-func (tc *TypeResolution) reportTypeCheckerError(sym symbol.Symbol, msg string) {
-	tc.errors = append(tc.errors, errors.New(fmt.Sprintf("[%s] %s", tc.symTable.GetNodeBySymbol(sym).Pos(), msg)))
 }

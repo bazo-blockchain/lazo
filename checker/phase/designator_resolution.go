@@ -1,11 +1,9 @@
 package phase
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type designatorResolution struct {
@@ -27,8 +25,4 @@ func (dr *designatorResolution) resolveDesignators() {
 	v := visitor.NewDesignatorResolutionVisitor(dr.symTable, contractSymbol)
 	contractNode := dr.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 	contractNode.Accept(v)
-}
-
-func (tr *TypeResolution) reportDesignatorResolutionError(sym symbol.Symbol, msg string) {
-	tr.errors = append(tr.errors, errors.New(fmt.Sprintf("[%s] %s", tr.symTable.GetNodeBySymbol(sym).Pos(), msg)))
 }
