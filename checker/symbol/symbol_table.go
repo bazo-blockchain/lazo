@@ -6,7 +6,7 @@ import (
 )
 
 type SymbolTable struct {
-	GlobalScope       *CompilationUnit
+	GlobalScope       *GlobalScope
 	symbolToNode      map[Symbol]node.Node
 	designatorSymbols map[*node.DesignatorNode]Symbol
 	exprTypes         map[node.ExpressionNode]*TypeSymbol
@@ -14,7 +14,7 @@ type SymbolTable struct {
 
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
-		GlobalScope:       newCompilationUnit(),
+		GlobalScope:       newGlobalScope(),
 		symbolToNode:      make(map[Symbol]node.Node),
 		designatorSymbols: make(map[*node.DesignatorNode]Symbol),
 		exprTypes:         make(map[node.ExpressionNode]*TypeSymbol),

@@ -11,7 +11,7 @@ import (
 type symbolConstruction struct {
 	programNode *node.ProgramNode
 	symbolTable *symbol.SymbolTable
-	globalScope *symbol.CompilationUnit
+	globalScope *symbol.GlobalScope
 	errors      []error
 }
 
