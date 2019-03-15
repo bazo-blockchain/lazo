@@ -8,13 +8,15 @@ import (
 
 type TypeResolution struct {
 	symTable *symbol.SymbolTable
+	errors []error
 }
 
-func RunTypeResolution(symTable *symbol.SymbolTable) {
+func RunTypeResolution(symTable *symbol.SymbolTable) []error {
 	resolution :=TypeResolution{
 		symTable: symTable,
 	}
 	resolution.resolveTypesInContractSymbol()
+	return resolution.errors
 }
 
 func (tr *TypeResolution) resolveTypesInContractSymbol() {

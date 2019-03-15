@@ -8,14 +8,16 @@ import (
 
 type designatorResolution struct {
 	symTable *symbol.SymbolTable
+	errors []error
 }
 
 
-func RunDesignatorResolution(symTable *symbol.SymbolTable) {
+func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
 	resolution :=designatorResolution{
 		symTable: symTable,
 	}
 	resolution.resolveDesignators()
+	return resolution.errors
 }
 
 func (dr *designatorResolution) resolveDesignators() {

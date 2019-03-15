@@ -8,14 +8,16 @@ import (
 
 type TypeChecker struct {
 	symTable *symbol.SymbolTable
+	errors []error
 }
 
 
-func RunTypeChecker(symTable *symbol.SymbolTable) {
+func RunTypeChecker(symTable *symbol.SymbolTable) []error {
 	check :=TypeChecker{
 		symTable: symTable,
 	}
 	check.checkTypes()
+	return check.errors
 }
 
 func (tc *TypeChecker) checkTypes() {
