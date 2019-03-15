@@ -1,6 +1,7 @@
 contract Test {
-    function void hello () {
+    function int hello () {
     int x
     x = 5
+    return x
     }
 }

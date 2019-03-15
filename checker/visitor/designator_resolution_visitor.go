@@ -43,7 +43,7 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 		fmt.Printf("Designator %s is not defined.", node.Value)
 	} else if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		if !ContainsStatement(local.VisibleIn, v.currentStatement) {
-			fmt.Printf("Local Variable %s is not visible.", node.Value)
+			fmt.Printf("Local Variable %s is not visible.\n", node.Value)
 		}
 
 	}
