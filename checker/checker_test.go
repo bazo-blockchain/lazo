@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// Phase: Symbol Construction
+// ==========================
+
 // Global Scope
 // ------------
 
@@ -34,8 +37,11 @@ func TestGlobalScope(t *testing.T) {
 	assert.Equal(t, gs.NullConstant.GetIdentifier(), "null")
 }
 
-func TestValidProgram(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+// Contract Symbol
+// ---------------
+
+func TestValidContract(t *testing.T) {
+	tester := NewCheckerTestUtil(t, `
 		contract Test {
 			int x
 			bool b = true
@@ -47,6 +53,8 @@ func TestValidProgram(t *testing.T) {
 			}
 		}
 	`, true)
+
+	tester.assertContract(4, 1)
 }
 
 func TestInvalidProgram(t *testing.T) {

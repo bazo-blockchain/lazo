@@ -5,6 +5,7 @@ import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser"
+	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
 	"strings"
 	"testing"
@@ -30,4 +31,14 @@ func NewCheckerTestUtil(t *testing.T, code string, isValidCode bool) *CheckerTes
 	return tester
 }
 
+func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {
+	contractSymbol := ct.symbolTable.GlobalScope.Contract
+	assert.Equal(ct.t, contractSymbol.GetScope(), ct.symbolTable.GlobalScope)
+	assert.Equal(ct.t, len(contractSymbol.Fields), totalVars)
+	assert.Equal(ct.t, len(contractSymbol.Functions), totalFunctions)
+	assert.Equal(ct.t, len(contractSymbol.AllDeclarations()), totalVars+totalFunctions)
 
+	contractNode, ok := ct.symbolTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
+	assert.Assert(ct.t, ok)
+	assert.Equal(ct.t, contractSymbol.GetIdentifier(), contractNode.Name)
+}
