@@ -22,14 +22,13 @@ func New(syntaxTree *node.ProgramNode) *Checker {
 func (c *Checker) Run() (*symbol.SymbolTable, []error) {
 	c.symbolTable, c.errors = phase.RunSymbolConstruction(c.syntaxTree)
 	if !c.hasErrors() {
-		c.errors = append(c.errors, phase.RunTypeResolution(c.symbolTable)...)
-	}
-
-	if !c.hasErrors() {
-		c.errors = append(c.errors, phase.RunDesignatorResolution(c.symbolTable)...)
+		c.errors = phase.RunTypeResolution(c.symbolTable)
 	}
 	if !c.hasErrors() {
-		c.errors = append(c.errors, phase.RunTypeChecker(c.symbolTable)...)
+		c.errors = phase.RunDesignatorResolution(c.symbolTable)
+	}
+	if !c.hasErrors() {
+		c.errors = phase.RunTypeChecker(c.symbolTable)
 	}
 	return c.symbolTable, c.errors
 }
