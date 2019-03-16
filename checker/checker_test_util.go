@@ -64,7 +64,7 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 }
 
 func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, totalParams int, totalVars int) {
-	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[0]
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[index]
 	assert.Equal(ct.t, functionSymbol.GetScope(), ct.symbolTable.GlobalScope.Contract)
 	assert.Equal(ct.t, len(functionSymbol.ReturnTypes), totalReturnTypes)
 	assert.Equal(ct.t, len(functionSymbol.Parameters), totalParams)
@@ -74,4 +74,17 @@ func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, total
 	functionNode, ok := ct.symbolTable.GetNodeBySymbol(functionSymbol).(*node.FunctionNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, functionSymbol.GetIdentifier(), functionNode.Name)
+}
+
+func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expectedType *symbol.TypeSymbol) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	paramSymbol := functionSymbol.Parameters[paramIndex]
+	assert.Equal(ct.t, paramSymbol.GetScope(), functionSymbol)
+	assert.Equal(ct.t, paramSymbol.Type, expectedType)
+	assert.Equal(ct.t, len(paramSymbol.AllDeclarations()), 0)
+
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.VariableNode)
+	assert.Assert(ct.t, ok)
+	assert.Equal(ct.t, paramSymbol.GetIdentifier(), varNode.Identifier)
 }

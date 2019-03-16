@@ -128,17 +128,18 @@ func TestFunctionSingleParam(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 1, 0)
+	tester.assertFuncParam(0, 0, tester.symbolTable.GlobalScope.IntType)
 }
 
 func TestFunctionMultipleParams(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function void test(int x, int y) {
+		function void test(int x, bool y) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 2, 0)
+	tester.assertFuncParam(0, 0, tester.symbolTable.GlobalScope.IntType)
+	tester.assertFuncParam(0, 1, tester.symbolTable.GlobalScope.BoolType)
 }
-
-// TODO Param type tests
 
 func TestFunctionWithLocalVars(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -199,8 +200,6 @@ func TestFunctionReturnBoolConstant(t *testing.T) {
 		}
 		`, true)
 }
-
-
 
 // TODO: fix
 //func TestFunctionReturnBoolFail(t *testing.T) {
