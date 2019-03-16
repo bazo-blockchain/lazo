@@ -52,7 +52,7 @@ func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {
 	assert.Equal(ct.t, contractSymbol.GetIdentifier(), contractNode.Name)
 }
 
-func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbol){
+func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbol) {
 	fieldSymbol := ct.symbolTable.GlobalScope.Contract.Fields[index]
 	assert.Equal(ct.t, fieldSymbol.GetScope(), ct.symbolTable.GlobalScope.Contract)
 	assert.Equal(ct.t, fieldSymbol.Type, expectedType)
@@ -69,7 +69,7 @@ func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, total
 	assert.Equal(ct.t, len(functionSymbol.ReturnTypes), totalReturnTypes)
 	assert.Equal(ct.t, len(functionSymbol.Parameters), totalParams)
 	assert.Equal(ct.t, len(functionSymbol.LocalVariables), totalVars)
-	assert.Equal(ct.t, len(functionSymbol.AllDeclarations()), totalParams + totalVars)
+	assert.Equal(ct.t, len(functionSymbol.AllDeclarations()), totalParams+totalVars)
 
 	functionNode, ok := ct.symbolTable.GetNodeBySymbol(functionSymbol).(*node.FunctionNode)
 	assert.Assert(ct.t, ok)
@@ -87,4 +87,19 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, paramSymbol.GetIdentifier(), varNode.Identifier)
+}
+
+func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
+	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	varSymbol := functionSymbol.LocalVariables[varIndex]
+	assert.Equal(ct.t, varSymbol.GetScope(), functionSymbol)
+	assert.Equal(ct.t, varSymbol.Type, expectedType)
+	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
+	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)
+
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.VariableNode)
+	assert.Assert(ct.t, ok)
+	assert.Equal(ct.t, varSymbol.GetIdentifier(), varNode.Identifier)
 }

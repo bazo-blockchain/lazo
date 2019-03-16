@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
 	"testing"
 )
@@ -145,10 +146,12 @@ func TestFunctionWithLocalVars(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
 			int x
-			int y
+			char y
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 2)
+	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 0)
+	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.CharType, 0)
 }
 
 func TestFunctionWithAssignment(t *testing.T) {
@@ -156,11 +159,19 @@ func TestFunctionWithAssignment(t *testing.T) {
 		function void test() {
 			int x
 			bool b
-			char c
+			string s
 			x = 2
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 3)
+	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 1)
+	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.BoolType, 1)
+	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.StringType, 1)
+
+	varX := tester.symbolTable.GlobalScope.Contract.Functions[0].LocalVariables[0]
+	assignX, ok := varX.VisibleIn[0].(*node.AssignmentStatementNode)
+	assert.Assert(t, ok)
+	assert.Equal(t, assignX.Left.Value, "x")
 }
 
 func TestFunctionWithIf(t *testing.T) {
@@ -176,20 +187,42 @@ func TestFunctionWithIf(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 0, 0, 3)
+	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 1)
+	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.BoolType, 0)
+	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.IntType, 0)
+
+	varX := tester.symbolTable.GlobalScope.Contract.Functions[0].LocalVariables[0]
+	_, ok := varX.VisibleIn[0].(*node.IfStatementNode)
+	assert.Assert(t, ok)
 }
 
-func TestFunctionWithReturn(t *testing.T) {
+func TestFunctionWithIfElse(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function int test() {
 			int x
+			x = 3
+			int y = 4
+			
+			if (true) {
+				char c
+				c = 'c'
+			} else {
+				bool a
+				a = true
+			}
+			
+			string s
 			return x
 		}
 	`, true)
 
-	tester.assertFunction(0, 1, 0, 1)
+	tester.assertFunction(0, 1, 0, 5)
+	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 5)
+	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.IntType, 4)
+	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.CharType, 1)
+	tester.assertLocalVariable(0, 3, tester.symbolTable.GlobalScope.BoolType, 1)
+	tester.assertLocalVariable(0, 4, tester.symbolTable.GlobalScope.StringType, 1)
 }
-
-// Test local variable symbol precisely (incl. visibility)
 
 func TestFunctionReturnBoolConstant(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, `
