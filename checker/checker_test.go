@@ -91,8 +91,8 @@ func TestContractFields(t *testing.T) {
 	tester.assertField(3, gs.StringType)
 }
 
-// Function Symbol
-//----------------
+// Function Symbol with parameter and local variable symbols
+//----------------------------------------------------------
 
 func TestFunctionVoid(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -224,60 +224,48 @@ func TestFunctionWithIfElse(t *testing.T) {
 	tester.assertLocalVariable(0, 4, tester.symbolTable.GlobalScope.StringType, 1)
 }
 
-func TestFunctionReturnBoolConstant(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function bool test() {
-				return true
-			}
-		}
-		`, true)
+// Identifier Checks
+// -----------------
+
+func TestInvalidFieldName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool void
+		int int
+		char this
+		string null
+	`,false)
+	assert.Equal(t, len(tester.errors), 4)
 }
 
-// TODO: fix
-//func TestFunctionReturnBoolFail(t *testing.T) {
-//	_ = newCheckerTestUtilWithRawInput(t, `
-//		contract Test {
-//			function bool test() {
-//				bool b = 5
-//				return b
-//			}
-//		}
-//		`, false)
-//}
-
-func TestFunctionReturnInt(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function int test() {
-				int i = 5
-				return 5
-			}
+func TestInvalidFunctionName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void int() {
 		}
-		`, true)
+	`,false)
+	assert.Equal(t, len(tester.errors), 1)
 }
 
-func TestFunctionReturnString(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function string test() {
-				string s = "test"
-				return s
-			}
+func TestInvalidParamName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(int int) {
 		}
-		`, true)
+	`,false)
+	assert.Equal(t, len(tester.errors), 1)
 }
 
-func TestFunctionReturnChar(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function char test() {
-				char c = 'c'
-				return c
+func TestInvalidLocalVarNames(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			bool bool
+			
+			if(true) {
+				char char
+			} else {
+				string string
 			}
 		}
-		`, true)
+	`, false)
+	assert.Equal(t, len(tester.errors), 3)
 }
-
 
 

@@ -126,12 +126,12 @@ func (sc *symbolConstruction) checkValidIdentifiers() {
 	}
 }
 
-var reservedKeywords = []string{"char", "int", "this", "null", "void"}
+var reservedKeywords = []string{"char", "int", "bool", "string", "this", "null", "void"}
 
 func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 	for _, keyword := range reservedKeywords {
 		if sym.GetIdentifier() == keyword {
-			sc.reportError(sym, fmt.Sprintf("Reserved keyword %s cannot be used as an identifier", keyword))
+			sc.reportError(sym, fmt.Sprintf("Reserved keyword '%s' cannot be used as an identifier", keyword))
 		}
 	}
 }
