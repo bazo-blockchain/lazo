@@ -1,6 +1,16 @@
 package checker
 
-import "testing"
+import (
+	"gotest.tools/assert"
+	"testing"
+)
+
+func TestUnknownType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Integer l
+	`, false)
+	assert.Equal(t, len(tester.errors), 1)
+}
 
 func TestFunctionReturnBoolConstant(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, `

@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"github.com/pkg/errors"
 )
 
 type TypeResolution struct {
 	symTable *symbol.SymbolTable
-	errors []error
+	errors   []error
 }
 
 func RunTypeResolution(symTable *symbol.SymbolTable) []error {
-	resolution :=TypeResolution{
+	resolution := TypeResolution{
 		symTable: symTable,
 	}
 	resolution.resolveTypesInContractSymbol()
@@ -32,7 +33,6 @@ func (tc *TypeResolution) resolveTypesInContractSymbol() {
 
 func (tc *TypeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
 	fieldNode := tc.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
-
 	symbol.Type = tc.resolveType(fieldNode.Type)
 }
 
@@ -60,7 +60,12 @@ func (tc *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 func (tc *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
 	result := tc.symTable.FindTypeByNode(node)
 	if result == nil {
-		fmt.Printf("Error: Could not find type for node %s", node.Identifier)
+		tc.reportError(node, fmt.Sprintf("Invalid type '%s'", node.Identifier))
 	}
 	return result
+}
+
+func (tc *TypeResolution) reportError(node node.Node, msg string) {
+	tc.errors = append(tc.errors, errors.New(
+		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }
