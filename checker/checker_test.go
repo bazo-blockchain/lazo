@@ -9,14 +9,14 @@ import (
 // ==========================
 
 func TestEmptyProgram(t *testing.T) {
-	_ = NewCheckerTestUtil(t, ``, false)
+	_ = newCheckerTestUtilWithRawInput(t, ``, false)
 }
 
 // Global Scope
 // ------------
 
 func TestGlobalScope(t *testing.T) {
-	tester := NewCheckerTestUtil(t, `
+	tester := newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 		}
 	`, true)
@@ -45,7 +45,7 @@ func TestGlobalScope(t *testing.T) {
 // ---------------
 
 func TestValidContract(t *testing.T) {
-	tester := NewCheckerTestUtil(t, `
+	tester := newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			int x
 			bool b = true
@@ -66,17 +66,43 @@ func TestValidContract(t *testing.T) {
 }
 
 func TestInvalidContractName(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract int {
 		}
 	`, false)
 }
 
-// Functions
-//----------
+// Field Symbol
+// ------------
+
+func TestContractFields(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b
+		int x = 2
+		char c
+		string s
+	`,true)
+
+	gs := tester.symbolTable.GlobalScope
+	tester.assertField(0, gs.BoolType)
+	tester.assertField(1, gs.IntType)
+	tester.assertField(2, gs.CharType)
+	tester.assertField(3, gs.StringType)
+}
+
+// Function Symbol
+//----------------
+
+func TestVoidFunction(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function void test() {
+		}
+	`, true)
+
+}
 
 func TestFunctionReturnBoolConstant(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			function bool test() {
 				return true
@@ -86,7 +112,7 @@ func TestFunctionReturnBoolConstant(t *testing.T) {
 }
 
 func TestFunctionReturnBool(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			function bool test() {
 				bool b = true
@@ -98,7 +124,7 @@ func TestFunctionReturnBool(t *testing.T) {
 
 // TODO: fix
 //func TestFunctionReturnBoolFail(t *testing.T) {
-//	_ = NewCheckerTestUtil(t, `
+//	_ = newCheckerTestUtilWithRawInput(t, `
 //		contract Test {
 //			function bool test() {
 //				bool b = 5
@@ -109,7 +135,7 @@ func TestFunctionReturnBool(t *testing.T) {
 //}
 
 func TestFunctionReturnInt(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			function int test() {
 				int i = 5
@@ -120,7 +146,7 @@ func TestFunctionReturnInt(t *testing.T) {
 }
 
 func TestFunctionReturnString(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			function string test() {
 				string s = "test"
@@ -131,7 +157,7 @@ func TestFunctionReturnString(t *testing.T) {
 }
 
 func TestFunctionReturnChar(t *testing.T) {
-	_ = NewCheckerTestUtil(t, `
+	_ = newCheckerTestUtilWithRawInput(t, `
 		contract Test {
 			function char test() {
 				char c = 'c'
@@ -140,4 +166,6 @@ func TestFunctionReturnChar(t *testing.T) {
 		}
 		`, true)
 }
+
+
 
