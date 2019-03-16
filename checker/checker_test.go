@@ -268,4 +268,69 @@ func TestInvalidLocalVarNames(t *testing.T) {
 	assert.Equal(t, len(tester.errors), 3)
 }
 
+func TestDuplicateFieldNames(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i
+		bool i
+	`,false)
+	assert.Equal(t, len(tester.errors), 1)
+}
 
+func TestFieldVarShadowing(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		int i
+		
+		function void test(int i) {
+		}
+
+		function void test2() {
+			int i
+		}
+	`,true)
+}
+
+func TestDuplicateLocalParamNames(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(int i) {
+			int i
+		}
+	`, false)
+	assert.Equal(t, len(tester.errors), 1)
+}
+
+func TestDuplicateLocalVars(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int i
+			bool i
+			char i
+		}
+	`, false)
+	assert.Equal(t, len(tester.errors), 2)
+}
+
+func TestLocalVarShadowing(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int i
+			
+			if(true) {
+				bool i
+			}
+		}
+	`, false)
+	assert.Equal(t, len(tester.errors), 1)
+}
+
+func TestUniqueLocalVar(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {			
+			if(true) {
+				bool i
+			} else {
+				string i
+			}
+		}
+	`, false)
+	assert.Equal(t, len(tester.errors), 1)
+}

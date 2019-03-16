@@ -145,18 +145,13 @@ func (sc *symbolConstruction) checkUniqueIdentifiers() {
 }
 
 func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
-	// TODO optimize algorithm (avoid n^2 iterations)
-	// TODO: Fix function local variables (allow shadowing)
 	allDecl := sym.AllDeclarations()
-	for _, decl := range allDecl {
-		count := 0
-		for _, variable := range allDecl {
-			if decl.GetIdentifier() == variable.GetIdentifier() {
-				count++
-
-				if count > 1 {
-					sc.reportError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
-				}
+	for r, decl := range allDecl {
+		for c, otherDecl := range allDecl {
+			if c > r && decl.GetIdentifier() == otherDecl.GetIdentifier() {
+				sc.reportError(otherDecl,
+					fmt.Sprintf("Identifier '%s' is already declared", otherDecl.GetIdentifier()))
+				break
 			}
 		}
 	}
