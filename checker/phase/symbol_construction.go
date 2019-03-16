@@ -22,6 +22,12 @@ func RunSymbolConstruction(programNode *node.ProgramNode) (*symbol.SymbolTable, 
 		programNode: programNode,
 		globalScope: symTable.GlobalScope,
 	}
+
+	if programNode.Contract == nil {
+		construction.reportError(nil, "Program has no contract")
+		return symTable, construction.errors
+	}
+
 	construction.registerBuiltins()
 	construction.registerDeclarations()
 	construction.checkValidIdentifiers()
@@ -71,8 +77,8 @@ func (sc *symbolConstruction) registerContract() {
 
 	contractSymbol := symbol.NewContractSymbol(sc.globalScope, contractNode.Name)
 	sc.globalScope.Contract = contractSymbol
-
 	sc.symbolTable.MapSymbolToNode(contractSymbol, contractNode)
+
 	for _, variableNode := range contractNode.Variables {
 		sc.registerField(contractSymbol, variableNode)
 	}
@@ -125,7 +131,7 @@ var reservedKeywords = []string{"char", "int", "this", "null", "void"}
 func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 	for _, keyword := range reservedKeywords {
 		if sym.GetIdentifier() == keyword {
-			sc.reportSymbolConstructionError(sym, fmt.Sprintf("Reserved keyword %s cannot be used as an identifier", keyword))
+			sc.reportError(sym, fmt.Sprintf("Reserved keyword %s cannot be used as an identifier", keyword))
 		}
 	}
 }
@@ -149,13 +155,17 @@ func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
 				count++
 
 				if count > 1 {
-					sc.reportSymbolConstructionError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
+					sc.reportError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
 				}
 			}
 		}
 	}
 }
 
-func (sc *symbolConstruction) reportSymbolConstructionError(sym symbol.Symbol, msg string) {
-	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", sc.symbolTable.GetNodeBySymbol(sym).Pos(), msg)))
+func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {
+	var pos string
+	if sym != nil {
+		pos = sc.symbolTable.GetNodeBySymbol(sym).Pos().String()
+	}
+	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", pos, msg)))
 }
