@@ -93,13 +93,102 @@ func TestContractFields(t *testing.T) {
 // Function Symbol
 //----------------
 
-func TestVoidFunction(t *testing.T) {
-	_ = newCheckerTestUtil(t, `
+func TestFunctionVoid(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
 		function void test() {
 		}
 	`, true)
 
+	tester.assertFunction(0, 0, 0, 0)
 }
+
+func TestFunctionSingleReturnBool(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function bool test() {
+			bool b = true
+			return b
+		}`, true)
+	tester.assertFunction(0, 1, 0, 1)
+}
+
+func TestFunctionMultipleReturn(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, bool) test() {
+			return 1, false
+		}
+	`, true)
+	tester.assertFunction(0, 2, 0, 0)
+}
+
+// TODO Return type tests
+
+func TestFunctionSingleParam(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(int x) {
+		}
+	`, true)
+	tester.assertFunction(0, 0, 1, 0)
+}
+
+func TestFunctionMultipleParams(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(int x, int y) {
+		}
+	`, true)
+	tester.assertFunction(0, 0, 2, 0)
+}
+
+// TODO Param type tests
+
+func TestFunctionWithLocalVars(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int x
+			int y
+		}
+	`, true)
+	tester.assertFunction(0, 0, 0, 2)
+}
+
+func TestFunctionWithAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int x
+			bool b
+			char c
+			x = 2
+		}
+	`, true)
+	tester.assertFunction(0, 0, 0, 3)
+}
+
+func TestFunctionWithIf(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int x
+			
+			if (true) {
+				bool b
+				int y
+			}	
+		}
+	`, true)
+
+	tester.assertFunction(0, 0, 0, 3)
+}
+
+func TestFunctionWithReturn(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function int test() {
+			int x
+			return x
+		}
+	`, true)
+
+	tester.assertFunction(0, 1, 0, 1)
+}
+
+// Test local variable symbol precisely (incl. visibility)
 
 func TestFunctionReturnBoolConstant(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, `
@@ -111,16 +200,7 @@ func TestFunctionReturnBoolConstant(t *testing.T) {
 		`, true)
 }
 
-func TestFunctionReturnBool(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function bool test() {
-				bool b = true
-				return b
-			}
-		}
-		`, true)
-}
+
 
 // TODO: fix
 //func TestFunctionReturnBoolFail(t *testing.T) {
