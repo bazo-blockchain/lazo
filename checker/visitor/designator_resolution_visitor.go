@@ -38,6 +38,14 @@ func (v *DesignatorResolutionVisitor) VisitContractNode(node *node.ContractNode)
 	}
 }
 
+func (v *DesignatorResolutionVisitor) VisitStatementBlock(stmts []node.StatementNode){
+	for _, statement := range stmts {
+		v.currentStatement = statement
+		statement.Accept(v.ConcreteVisitor)
+		v.currentStatement = nil
+	}
+}
+
 func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
 	var scope symbol.Symbol
 	if v.currentFunctionSymbol == nil {
@@ -57,26 +65,6 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	}
 	v.symbolTable.MapDesignatorToDecl(node, sym)
 	v.symbolTable.MapExpressionToType(node, getType(sym))
-}
-
-func (v *DesignatorResolutionVisitor) VisitVariableNode(node *node.VariableNode){
-	v.currentStatement = node
-	v.AbstractVisitor.VisitVariableNode(node)
-}
-
-func (v *DesignatorResolutionVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
-	v.currentStatement = node
-	v.AbstractVisitor.VisitAssignmentStatementNode(node)
-}
-
-func (v *DesignatorResolutionVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
-	v.currentStatement = node
-	v.AbstractVisitor.VisitIfStatementNode(node)
-}
-
-func (v *DesignatorResolutionVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
-	v.currentStatement = node
-	v.AbstractVisitor.VisitReturnStatementNode(node)
 }
 
 func (v *DesignatorResolutionVisitor) reportError(node node.Node, msg string) {
@@ -100,9 +88,6 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 		return param.Type
 	} else if localVariable, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		return localVariable.Type
-	} else if constant, ok := sym.(*symbol.ConstantSymbol); ok { // TODO Remove: not needed
-		return constant.Type
-	} else {
-		return nil
 	}
+	return nil
 }

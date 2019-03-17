@@ -121,3 +121,108 @@ func TestLocalVarDesignator(t *testing.T) {
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
 }
+
+func TestUndefinedLocalVarDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			int y = x
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestDesignatorWithAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			int x
+			x = 3
+		}
+	`, true)
+
+	tester.assertDesignator(
+		tester.getFuncStatementNode(0,1).(*node.AssignmentStatementNode).Left,
+		tester.getLocalVariableSymbol(0, 0),
+		tester.globalScope.IntType)
+}
+
+func TestUndefinedLocalVarAssignemnt(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			x = 3
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestLocalVarAccessFromSubScope(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			bool b
+			int x
+
+			if (b) {
+				x = 4
+			}
+		}
+	`, true)
+
+	ifStmt := tester.getFuncStatementNode(0,2).(*node.IfStatementNode)
+	tester.assertDesignator(
+		ifStmt.Condition,
+		tester.getLocalVariableSymbol(0, 0),
+		tester.globalScope.BoolType)
+
+	tester.assertDesignator(
+		ifStmt.Then[0].(*node.AssignmentStatementNode).Left,
+		tester.getLocalVariableSymbol(0, 1),
+		tester.globalScope.IntType)
+}
+
+func TestLocalVarAccessOutOfScope(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			if (true) {
+				int x
+			}
+			x = 4
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestLocalVarAccessIfElse(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			if (true) {
+				int x
+			} else {
+				x = 4
+			}
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestLocalVarWithReturn(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function int test(){
+			int x
+			return x
+		}
+	`, true)
+
+	returnStmt := tester.getFuncStatementNode(0,1).(*node.ReturnStatementNode)
+	tester.assertDesignator(
+		returnStmt.Expressions[0],
+		tester.getLocalVariableSymbol(0, 0),
+		tester.globalScope.IntType)
+}
+
+func TestUndefinedLocalVarReturn(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function int test(){
+			return x
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
