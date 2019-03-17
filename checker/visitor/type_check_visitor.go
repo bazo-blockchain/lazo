@@ -26,9 +26,8 @@ func NewTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol
 }
 
 func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
-	for _, field := range v.contractSymbol.Fields {
-		fieldNode := v.symbolTable.GetNodeBySymbol(field)
-		fieldNode.Accept(v)
+	for _, variable := range node.Variables {
+		variable.Accept(v.ConcreteVisitor)
 	}
 
 	for _, function := range v.contractSymbol.Functions {
@@ -36,6 +35,19 @@ func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 		functionNode := v.symbolTable.GetNodeBySymbol(function)
 		functionNode.Accept(v)
 		v.currentFunction = nil
+	}
+}
+
+// Statements
+// ----------
+
+func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
+	v.AbstractVisitor.VisitVariableNode(node)
+	targetType := v.symbolTable.FindTypeByNode(node.Type)
+	expType := v.symbolTable.GetTypeByExpression(node.Expression)
+
+	if expType != nil && targetType != expType {
+		v.reportError(node, fmt.Sprintf("Type mismatch: expected %s, given %s", targetType, expType))
 	}
 }
 
@@ -83,10 +95,13 @@ func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 
 func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
-	if !v.IsBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
+	if !v.isBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
 		v.reportError(node, "condition must return boolean")
 	}
 }
+
+// Expressions
+// -----------
 
 func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
 	v.AbstractVisitor.VisitBinaryExpressionNode(node)
@@ -96,13 +111,13 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	rightType := v.symbolTable.GetTypeByExpression(right)
 	switch node.Operator {
 	case token.And, token.Or:
-		if !v.IsBool(leftType) || !v.IsBool(rightType) {
+		if !v.isBool(leftType) || !v.isBool(rightType) {
 			v.reportError(node, "&& and || can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 		break
 	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo:
-		if !v.IsInt(leftType) || !v.IsInt(rightType) {
+		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to expressions of type int")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
@@ -123,13 +138,13 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 	operandType := v.symbolTable.GetTypeByExpression(operand)
 	switch node.Operator {
 	case token.Addition, token.Subtraction:
-		if !v.IsInt(operandType) {
+		if !v.isInt(operandType) {
 			v.reportError(node, "+ and - unary operators can only be applied to expressions of type int")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 		break
 	case token.Not:
-		if !v.IsBool(operandType) {
+		if !v.isBool(operandType) {
 			v.reportError(node, "! unary operators can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
@@ -141,15 +156,6 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 
 func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
-}
-
-func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
-	v.AbstractVisitor.VisitVariableNode(node)
-	targetType := v.symbolTable.FindTypeByNode(node.Type)
-	expType := v.symbolTable.GetTypeByExpression(node.Expression)
-	if expType != nil && targetType != expType {
-		v.reportError(node, "Type mismatch")
-	}
 }
 
 func (v *TypeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
@@ -168,11 +174,11 @@ func (v *TypeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteral
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.CharType)
 }
 
-func (v *TypeCheckVisitor) IsInt(symbol *symbol.TypeSymbol) bool {
+func (v *TypeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.IntType
 }
 
-func (v *TypeCheckVisitor) IsBool(symbol *symbol.TypeSymbol) bool {
+func (v *TypeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.BoolType
 }
 

@@ -72,6 +72,10 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, fieldSymbol.GetIdentifier(), fieldNode.Identifier)
+
+	if fieldNode.Expression != nil {
+		ct.assertExpressionType(fieldNode.Expression, expectedType)
+	}
 }
 
 func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, totalParams int, totalVars int) {

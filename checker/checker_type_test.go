@@ -4,56 +4,84 @@ import (
 	"testing"
 )
 
-func TestFunctionReturnBoolConstant(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function bool test() {
-				return true
-			}
+// Phase 4: Type Checker
+// =====================
+
+// Field Types
+// -----------
+
+func TestFieldBuiltInType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = true
+		int x = 2
+		char c = 'c'
+		string s = "test"
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.BoolType)
+	tester.assertField(1, gs.IntType)
+	tester.assertField(2, gs.CharType)
+	tester.assertField(3, gs.StringType)
+}
+
+func TestFieldTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = 2
+		int x = 'c'
+		char c = "test"
+		string s = true
+	`, false)
+	tester.assertTotalErrors(4)
+}
+
+// Return Types
+// ------------
+
+func TestFunctionReturnVoid(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function void test() {
+			return
 		}
-		`, true)
+	`, true)
+}
+
+func TestFunctionReturnBoolConstant(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function bool test() {
+			return true
+		}
+	`, true)
 }
 
 func TestFunctionReturnBoolFail(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function bool test() {
-				bool b = 5
-				return b
-			}
+	_ = newCheckerTestUtil(t, `
+		function bool test() {
+			return 5
 		}
-		`, false)
+	`, false)
 }
 
 func TestFunctionReturnInt(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function int test() {
-				int i = 5
-				return 5
-			}
-		}
-		`, true)
+	_ = newCheckerTestUtil(t, `
+		function int test() {
+			int i = 5
+			return 5
+		}`, true)
 }
 
 func TestFunctionReturnString(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function string test() {
-				string s = "test"
-				return s
-			}
-		}
-		`, true)
+	_ = newCheckerTestUtil(t, `
+		function string test() {
+			string s = "test"
+			return s
+		}`, true)
 }
 
 func TestFunctionReturnChar(t *testing.T) {
-	_ = newCheckerTestUtilWithRawInput(t, `
-		contract Test {
-			function char test() {
-				char c = 'c'
-				return c
-			}
-		}
-		`, true)
+	_ = newCheckerTestUtil(t, `
+		function char test() {
+			char c = 'c'
+			return c
+		}`, true)
 }
