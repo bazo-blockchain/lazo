@@ -28,6 +28,8 @@ func (v *LocalVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 }
 
 func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
+	v.recordVisiblity(node)
+
 	sym := symbol.NewLocalVariableSymbol(v.function, node.Identifier)
 	v.function.LocalVariables = append(v.function.LocalVariables, sym)
 	v.symbolTable.MapSymbolToNode(sym, node)

@@ -53,6 +53,21 @@ func TestUndefinedFieldDesignator(t *testing.T) {
 	tester.assertTotalErrors(1)
 }
 
+func TestFieldDesignatorInFunction(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		string s
+
+		function void test() {
+			string t = s
+		}
+	`, true)
+
+	tester.assertDesignator(
+		tester.getFuncStatementNode(0, 0).(*node.VariableNode).Expression,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.StringType)
+}
+
 // Function Parameter Designators
 // ------------------------------
 
@@ -64,7 +79,7 @@ func TestFuncParamDesignator(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.getFuncStatement(0,0).(*node.VariableNode).Expression,
+		tester.getFuncStatementNode(0,0).(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
 		tester.globalScope.BoolType)
 }
@@ -78,7 +93,7 @@ func TestFuncParamInsideIf(t *testing.T) {
 		}
 	`, true)
 
-	ifStmt := tester.getFuncStatement(0,0).(*node.IfStatementNode)
+	ifStmt := tester.getFuncStatementNode(0,0).(*node.IfStatementNode)
 	tester.assertDesignator(
 		ifStmt.Condition,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
@@ -88,4 +103,21 @@ func TestFuncParamInsideIf(t *testing.T) {
 		ifStmt.Then[0].(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Functions[0].Parameters[1],
 		tester.globalScope.CharType)
+}
+
+// Function Local Variable Designators
+// -----------------------------------
+
+func TestLocalVarDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			int x
+			int y = x
+		}
+	`, true)
+
+	tester.assertDesignator(
+		tester.getFuncStatementNode(0,1).(*node.VariableNode).Expression,
+		tester.getLocalVariableSymbol(0, 0),
+		tester.globalScope.IntType)
 }

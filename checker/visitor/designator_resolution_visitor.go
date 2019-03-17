@@ -59,6 +59,11 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	v.symbolTable.MapExpressionToType(node, getType(sym))
 }
 
+func (v *DesignatorResolutionVisitor) VisitVariableNode(node *node.VariableNode){
+	v.currentStatement = node
+	v.AbstractVisitor.VisitVariableNode(node)
+}
+
 func (v *DesignatorResolutionVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.currentStatement = node
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)

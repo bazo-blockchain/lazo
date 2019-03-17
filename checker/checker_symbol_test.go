@@ -199,7 +199,7 @@ func TestFunctionWithLocalVars(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 2)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 0)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
 	tester.assertLocalVariable(0, 1, tester.globalScope.CharType, 0)
 }
 
@@ -213,12 +213,12 @@ func TestFunctionWithAssignment(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
-	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 1)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 3)
+	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 2)
 	tester.assertLocalVariable(0, 2, tester.globalScope.StringType, 1)
 
 	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
-	assignX, ok := varX.VisibleIn[0].(*node.AssignmentStatementNode)
+	assignX, ok := varX.VisibleIn[2].(*node.AssignmentStatementNode)
 	assert.Assert(t, ok)
 	assert.Equal(t, assignX.Left.Value, "x")
 }
@@ -236,8 +236,8 @@ func TestFunctionWithIf(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
-	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 0)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 3)
+	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 1)
 	tester.assertLocalVariable(0, 2, tester.globalScope.IntType, 0)
 
 	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
@@ -266,8 +266,8 @@ func TestFunctionWithIfElse(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 1, 0, 5)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 5)
-	tester.assertLocalVariable(0, 1, tester.globalScope.IntType, 4)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 9)
+	tester.assertLocalVariable(0, 1, tester.globalScope.IntType, 7)
 	tester.assertLocalVariable(0, 2, tester.globalScope.CharType, 1)
 	tester.assertLocalVariable(0, 3, tester.globalScope.BoolType, 1)
 	tester.assertLocalVariable(0, 4, tester.globalScope.StringType, 1)
