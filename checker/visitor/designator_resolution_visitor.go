@@ -47,10 +47,12 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	}
 	sym := v.symbolTable.Find(scope, node.Value)
 	if sym == nil {
-		v.reportError(node, fmt.Sprintf("Designator %s is not defined", node.Value))
+		v.reportError(node, fmt.Sprintf("Designator %s is undefined", node.Value))
+		return
 	} else if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		if !containsStatement(local.VisibleIn, v.currentStatement) {
 			v.reportError(node, fmt.Sprintf("Local Variable %s is not visible", node.Value))
+			return
 		}
 	}
 	v.symbolTable.MapDesignatorToDecl(node, sym)

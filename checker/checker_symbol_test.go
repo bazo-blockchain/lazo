@@ -22,7 +22,7 @@ func TestGlobalScope(t *testing.T) {
 		}
 	`, true)
 
-	gs := tester.symbolTable.GlobalScope
+	gs := tester.globalScope
 	assert.Check(t, gs.Contract != nil)
 	assert.Equal(t, len(gs.Types), 4)
 	assert.Equal(t, len(gs.BuiltInTypes), 4)
@@ -84,7 +84,7 @@ func TestContractFields(t *testing.T) {
 		string s
 	`,true)
 
-	gs := tester.symbolTable.GlobalScope
+	gs := tester.globalScope
 	tester.assertField(0, gs.BoolType)
 	tester.assertField(1, gs.IntType)
 	tester.assertField(2, gs.CharType)
@@ -147,7 +147,7 @@ func TestFunctionSingleReturnBool(t *testing.T) {
 			return b
 		}`, true)
 	tester.assertFunction(0, 1, 0, 1)
-	tester.assertReturnType(0, 0, tester.symbolTable.GlobalScope.BoolType)
+	tester.assertReturnType(0, 0, tester.globalScope.BoolType)
 }
 
 func TestFunctionMultipleReturn(t *testing.T) {
@@ -157,9 +157,9 @@ func TestFunctionMultipleReturn(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 3, 0, 0)
-	tester.assertReturnType(0, 0, tester.symbolTable.GlobalScope.IntType)
-	tester.assertReturnType(0, 1, tester.symbolTable.GlobalScope.CharType)
-	tester.assertReturnType(0, 2, tester.symbolTable.GlobalScope.BoolType)
+	tester.assertReturnType(0, 0, tester.globalScope.IntType)
+	tester.assertReturnType(0, 1, tester.globalScope.CharType)
+	tester.assertReturnType(0, 2, tester.globalScope.BoolType)
 }
 
 func TestFunctionMaximumReturnTypes(t *testing.T) {
@@ -178,7 +178,7 @@ func TestFunctionSingleParam(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 1, 0)
-	tester.assertFuncParam(0, 0, tester.symbolTable.GlobalScope.IntType)
+	tester.assertFuncParam(0, 0, tester.globalScope.IntType)
 }
 
 func TestFunctionMultipleParams(t *testing.T) {
@@ -187,8 +187,8 @@ func TestFunctionMultipleParams(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 2, 0)
-	tester.assertFuncParam(0, 0, tester.symbolTable.GlobalScope.IntType)
-	tester.assertFuncParam(0, 1, tester.symbolTable.GlobalScope.BoolType)
+	tester.assertFuncParam(0, 0, tester.globalScope.IntType)
+	tester.assertFuncParam(0, 1, tester.globalScope.BoolType)
 }
 
 func TestFunctionWithLocalVars(t *testing.T) {
@@ -199,8 +199,8 @@ func TestFunctionWithLocalVars(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 2)
-	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 0)
-	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.CharType, 0)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 0)
+	tester.assertLocalVariable(0, 1, tester.globalScope.CharType, 0)
 }
 
 func TestFunctionWithAssignment(t *testing.T) {
@@ -213,11 +213,11 @@ func TestFunctionWithAssignment(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 1)
-	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.BoolType, 1)
-	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.StringType, 1)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
+	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 1)
+	tester.assertLocalVariable(0, 2, tester.globalScope.StringType, 1)
 
-	varX := tester.symbolTable.GlobalScope.Contract.Functions[0].LocalVariables[0]
+	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
 	assignX, ok := varX.VisibleIn[0].(*node.AssignmentStatementNode)
 	assert.Assert(t, ok)
 	assert.Equal(t, assignX.Left.Value, "x")
@@ -236,11 +236,11 @@ func TestFunctionWithIf(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 1)
-	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.BoolType, 0)
-	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.IntType, 0)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
+	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 0)
+	tester.assertLocalVariable(0, 2, tester.globalScope.IntType, 0)
 
-	varX := tester.symbolTable.GlobalScope.Contract.Functions[0].LocalVariables[0]
+	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
 	_, ok := varX.VisibleIn[0].(*node.IfStatementNode)
 	assert.Assert(t, ok)
 }
@@ -266,11 +266,11 @@ func TestFunctionWithIfElse(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 1, 0, 5)
-	tester.assertLocalVariable(0, 0, tester.symbolTable.GlobalScope.IntType, 5)
-	tester.assertLocalVariable(0, 1, tester.symbolTable.GlobalScope.IntType, 4)
-	tester.assertLocalVariable(0, 2, tester.symbolTable.GlobalScope.CharType, 1)
-	tester.assertLocalVariable(0, 3, tester.symbolTable.GlobalScope.BoolType, 1)
-	tester.assertLocalVariable(0, 4, tester.symbolTable.GlobalScope.StringType, 1)
+	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 5)
+	tester.assertLocalVariable(0, 1, tester.globalScope.IntType, 4)
+	tester.assertLocalVariable(0, 2, tester.globalScope.CharType, 1)
+	tester.assertLocalVariable(0, 3, tester.globalScope.BoolType, 1)
+	tester.assertLocalVariable(0, 4, tester.globalScope.StringType, 1)
 }
 
 // Identifier Checks

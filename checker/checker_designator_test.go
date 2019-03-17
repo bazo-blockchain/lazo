@@ -1,11 +1,14 @@
 package checker
 
-import "testing"
+import (
+	"github.com/bazo-blockchain/lazo/parser/node"
+	"testing"
+)
 
 // Phase 3: Designator Resolution
 // =============================
 
-func TestNotDefinedDesignator(t *testing.T) {
+func TestUndefinedDesignator(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
 			x = 4
@@ -16,6 +19,7 @@ func TestNotDefinedDesignator(t *testing.T) {
 }
 
 // Field Designators
+// -----------------
 
 func TestFieldDesignator(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -28,3 +32,25 @@ func TestFieldDesignator(t *testing.T) {
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.IntType)
 }
+
+func TestMixedDesignatorExpression(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = 4
+		int y = 2 * x
+	`, true)
+
+	binExpr := tester.syntaxTree.Contract.Variables[1].Expression.(*node.BinaryExpressionNode)
+	tester.assertDesignator(
+		binExpr.Right,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.IntType)
+}
+
+func TestUndefinedFieldDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = x
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+
