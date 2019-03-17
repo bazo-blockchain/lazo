@@ -54,7 +54,7 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 		scope = v.currentFunctionSymbol
 	}
 	sym := v.symbolTable.Find(scope, node.Value)
-	if sym == nil {
+	if sym == nil || !isAllowedTarget(sym) {
 		v.reportError(node, fmt.Sprintf("Designator %s is undefined", node.Value))
 		return
 	} else if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
@@ -91,5 +91,14 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 		return sym.(*symbol.LocalVariableSymbol).Type
 	default:
 		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.GetIdentifier()))
+	}
+}
+
+func isAllowedTarget(sym symbol.Symbol) bool {
+	switch sym.(type) {
+	case *symbol.ContractSymbol, *symbol.FunctionSymbol:
+		return false
+	default:
+		return true
 	}
 }

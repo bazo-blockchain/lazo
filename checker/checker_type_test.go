@@ -131,7 +131,7 @@ func TestFunctionMultipleReturnTypes(t *testing.T) {
 			return 1, 'c', true
 		}`, true)
 
-	returnStmt := tester.getFuncStatementNode(0,0).(*node.ReturnStatementNode)
+	returnStmt := tester.getFuncStatementNode(0, 0).(*node.ReturnStatementNode)
 	tester.assertExpressionType(returnStmt.Expressions[0], tester.globalScope.IntType)
 	tester.assertExpressionType(returnStmt.Expressions[1], tester.globalScope.CharType)
 	tester.assertExpressionType(returnStmt.Expressions[2], tester.globalScope.BoolType)
@@ -159,4 +159,55 @@ func TestFunctionTooManyReturnValues(t *testing.T) {
 			return 1, true
 		}`, false)
 	tester.assertTotalErrors(1)
+}
+
+// Assignment Types
+// ----------------
+
+func TestFieldAssignmentType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+		
+		function void test() {
+			x = 3
+		}
+	`, true)
+
+	assignStmt := tester.getFuncStatementNode(0, 0).(*node.AssignmentStatementNode)
+	tester.assertAssignment(assignStmt, tester.globalScope.IntType)
+}
+
+func TestFieldAssignmentTypeMismatch(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		bool b
+		
+		function void test() {
+			b = 3
+		}
+	`, false)
+}
+
+// If Statement Types
+// ------------------
+
+func TestIfConditionBoolType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			if (true) {
+			}
+		}
+	`, true)
+
+	tester.assertExpressionType(
+		tester.getFuncStatementNode(0, 0).(*node.IfStatementNode).Condition,
+		tester.globalScope.BoolType)
+}
+
+func TestIfConditionIntType(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function void test() {
+			if (1) {
+			}
+		}
+	`, false)
 }

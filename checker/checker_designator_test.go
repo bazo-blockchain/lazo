@@ -122,6 +122,20 @@ func TestLocalVarDesignator(t *testing.T) {
 		tester.globalScope.IntType)
 }
 
+func TestFuncNameAsLocalVarName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			int test
+			int y = test
+		}
+	`, true)
+
+	tester.assertDesignator(
+		tester.getFuncStatementNode(0,1).(*node.VariableNode).Expression,
+		tester.getLocalVariableSymbol(0, 0),
+		tester.globalScope.IntType)
+}
+
 func TestUndefinedLocalVarDesignator(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test(){
@@ -159,6 +173,26 @@ func TestUndefinedDesignatorAssignment(t *testing.T) {
 		function void test(){
 			int x
 			x = y
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestFuncNameAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			test = 3
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
+func TestContractNameAssignment(t *testing.T) {
+	tester := newCheckerTestUtilWithRawInput(t, `
+		contract Hello {
+			function void test(){
+				Hello = 3
+			}
 		}
 	`, false)
 	tester.assertTotalErrors(1)

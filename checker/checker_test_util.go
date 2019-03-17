@@ -91,6 +91,13 @@ func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, total
 	assert.Equal(ct.t, functionSymbol.GetIdentifier(), functionNode.Name)
 }
 
+func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, expectedType *symbol.TypeSymbol) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	returnTypeSymbol := functionSymbol.ReturnTypes[returnTypeIndex]
+	assert.Equal(ct.t, returnTypeSymbol, expectedType)
+}
+
 func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expectedType *symbol.TypeSymbol) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
@@ -123,11 +130,9 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	}
 }
 
-func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, expectedType *symbol.TypeSymbol) {
-	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
-
-	returnTypeSymbol := functionSymbol.ReturnTypes[returnTypeIndex]
-	assert.Equal(ct.t, returnTypeSymbol, expectedType)
+func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatementNode, expectedType *symbol.TypeSymbol) {
+	ct.assertExpressionType(assignStmt.Left, expectedType)
+	ct.assertExpressionType(assignStmt.Right, expectedType)
 }
 
 func (ct *CheckerTestUtil) assertDesignator(expr node.ExpressionNode, decl symbol.Symbol, expectedType *symbol.TypeSymbol) {

@@ -77,16 +77,12 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
-	if _, ok := v.symbolTable.GetDeclByDesignator(node.Left).(*symbol.FunctionSymbol); ok {
-		v.reportError(node, "Assignment to function is not allowed")
-	} else {
-		leftType := v.symbolTable.GetTypeByExpression(node.Left)
-		rightType := v.symbolTable.GetTypeByExpression(node.Right)
+	leftType := v.symbolTable.GetTypeByExpression(node.Left)
+	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
-		if leftType.GetIdentifier() != rightType.GetIdentifier() {
-			v.reportError(node,
-				fmt.Sprintf("%s of assignment is not compatible with target %s", rightType, leftType))
-		}
+	if leftType != rightType {
+		v.reportError(node,
+			fmt.Sprintf("assignment of %s is not compatible with target %s", rightType, leftType))
 	}
 }
 
