@@ -61,19 +61,16 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 			v.reportError(node,
 				fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
 		} else {
-			// Check types
 			for i, rtype := range returnSymbols {
 				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 				if nodeType != rtype {
-					v.reportError(node, fmt.Sprintf("Return Types mismatch expected: %s given: %s",
+					v.reportError(node, fmt.Sprintf("Return Type mismatch: expected %s, given %s",
 						rtype.Identifier, nodeType.Identifier))
 				}
 			}
 		}
-	} else {
-		if len(returnNodes) > 0 {
-			v.reportError(node, "void method should not return expression")
-		}
+	} else if len(returnNodes) > 0 {
+		v.reportError(node, "void method should not return expression")
 	}
 }
 

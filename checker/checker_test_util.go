@@ -117,6 +117,10 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, varSymbol.GetIdentifier(), varNode.Identifier)
+
+	if varNode.Expression != nil {
+		ct.assertExpressionType(varNode.Expression, expectedType)
+	}
 }
 
 func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, expectedType *symbol.TypeSymbol) {
