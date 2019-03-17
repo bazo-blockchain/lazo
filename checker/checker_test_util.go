@@ -40,6 +40,10 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 	return tester
 }
 
+func (ct *CheckerTestUtil) assertTotalErrors(total int){
+	assert.Equal(ct.t, len(ct.errors), total)
+}
+
 func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {
 	contractSymbol := ct.symbolTable.GlobalScope.Contract
 	assert.Equal(ct.t, contractSymbol.GetScope(), ct.symbolTable.GlobalScope)
@@ -102,4 +106,11 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, varSymbol.GetIdentifier(), varNode.Identifier)
+}
+
+func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, expectedType *symbol.TypeSymbol) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	returnTypeSymbol := functionSymbol.ReturnTypes[returnTypeIndex]
+	assert.Equal(ct.t, returnTypeSymbol, expectedType)
 }

@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-// Phase: Symbol Construction
-// ==========================
+// Phases: Symbol Construction & Type Resolution
+// =============================================
 
 func TestEmptyProgram(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, ``, false)
@@ -91,6 +91,13 @@ func TestContractFields(t *testing.T) {
 	tester.assertField(3, gs.StringType)
 }
 
+func TestUnknownFieldType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Integer l
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
 // Function Symbol with parameter and local variable symbols
 //----------------------------------------------------------
 
@@ -103,6 +110,36 @@ func TestFunctionVoid(t *testing.T) {
 	tester.assertFunction(0, 0, 0, 0)
 }
 
+func TestFunctionMultipleVoids(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (void, void) test() {
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertFunction(0, 0, 0, 0)
+}
+
+func TestFunctionVoidInt(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (void, int) test() {
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertFunction(0, 1, 0, 0)
+}
+
+func TestFunctionIntVoid(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, void) test() {
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertFunction(0, 1, 0, 0)
+}
+
 func TestFunctionSingleReturnBool(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function bool test() {
@@ -110,18 +147,30 @@ func TestFunctionSingleReturnBool(t *testing.T) {
 			return b
 		}`, true)
 	tester.assertFunction(0, 1, 0, 1)
+	tester.assertReturnType(0, 0, tester.symbolTable.GlobalScope.BoolType)
 }
 
 func TestFunctionMultipleReturn(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function (int, bool) test() {
-			return 1, false
+		function (int, char, bool) test() {
+			return 1, 'c', true
 		}
 	`, true)
-	tester.assertFunction(0, 2, 0, 0)
+	tester.assertFunction(0, 3, 0, 0)
+	tester.assertReturnType(0, 0, tester.symbolTable.GlobalScope.IntType)
+	tester.assertReturnType(0, 1, tester.symbolTable.GlobalScope.CharType)
+	tester.assertReturnType(0, 2, tester.symbolTable.GlobalScope.BoolType)
 }
 
-// TODO Return type tests
+func TestFunctionMaximumReturnTypes(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, char, bool, string) test() {
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertFunction(0, 4, 0, 0)
+}
 
 func TestFunctionSingleParam(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -234,7 +283,7 @@ func TestInvalidFieldName(t *testing.T) {
 		char this
 		string null
 	`,false)
-	assert.Equal(t, len(tester.errors), 4)
+	tester.assertTotalErrors(4)
 }
 
 func TestInvalidFunctionName(t *testing.T) {
@@ -242,7 +291,7 @@ func TestInvalidFunctionName(t *testing.T) {
 		function void int() {
 		}
 	`,false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
 
 func TestInvalidParamName(t *testing.T) {
@@ -250,7 +299,7 @@ func TestInvalidParamName(t *testing.T) {
 		function void test(int int) {
 		}
 	`,false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
 
 func TestInvalidLocalVarNames(t *testing.T) {
@@ -265,7 +314,7 @@ func TestInvalidLocalVarNames(t *testing.T) {
 			}
 		}
 	`, false)
-	assert.Equal(t, len(tester.errors), 3)
+	tester.assertTotalErrors(3)
 }
 
 func TestDuplicateFieldNames(t *testing.T) {
@@ -273,7 +322,7 @@ func TestDuplicateFieldNames(t *testing.T) {
 		int i
 		bool i
 	`,false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
 
 func TestFieldVarShadowing(t *testing.T) {
@@ -295,7 +344,7 @@ func TestDuplicateLocalParamNames(t *testing.T) {
 			int i
 		}
 	`, false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
 
 func TestDuplicateLocalVars(t *testing.T) {
@@ -306,7 +355,7 @@ func TestDuplicateLocalVars(t *testing.T) {
 			char i
 		}
 	`, false)
-	assert.Equal(t, len(tester.errors), 2)
+	tester.assertTotalErrors(2)
 }
 
 func TestLocalVarShadowing(t *testing.T) {
@@ -319,7 +368,7 @@ func TestLocalVarShadowing(t *testing.T) {
 			}
 		}
 	`, false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
 
 func TestUniqueLocalVar(t *testing.T) {
@@ -332,5 +381,5 @@ func TestUniqueLocalVar(t *testing.T) {
 			}
 		}
 	`, false)
-	assert.Equal(t, len(tester.errors), 1)
+	tester.assertTotalErrors(1)
 }
