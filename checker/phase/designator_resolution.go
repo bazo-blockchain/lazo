@@ -25,5 +25,5 @@ func (dr *designatorResolution) resolveDesignators() {
 	contractNode := dr.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 
 	contractNode.Accept(v)
-	dr.errors = append(v.Errors)
+	dr.errors = v.Errors
 }

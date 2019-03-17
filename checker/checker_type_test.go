@@ -14,17 +14,16 @@ func TestFunctionReturnBoolConstant(t *testing.T) {
 		`, true)
 }
 
-// TODO: fix
-//func TestFunctionReturnBoolFail(t *testing.T) {
-//	_ = newCheckerTestUtilWithRawInput(t, `
-//		contract Test {
-//			function bool test() {
-//				bool b = 5
-//				return b
-//			}
-//		}
-//		`, false)
-//}
+func TestFunctionReturnBoolFail(t *testing.T) {
+	_ = newCheckerTestUtilWithRawInput(t, `
+		contract Test {
+			function bool test() {
+				bool b = 5
+				return b
+			}
+		}
+		`, false)
+}
 
 func TestFunctionReturnInt(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, `

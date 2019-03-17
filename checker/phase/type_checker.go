@@ -24,5 +24,7 @@ func (tc *TypeChecker) checkTypes() {
 	contractSymbol := tc.symTable.GlobalScope.Contract
 	v := visitor.NewTypeCheckVisitor(tc.symTable, contractSymbol)
 	contractNode := tc.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
+
 	contractNode.Accept(v)
+	tc.errors = v.Errors
 }
