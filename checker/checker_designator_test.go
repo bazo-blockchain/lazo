@@ -53,4 +53,39 @@ func TestUndefinedFieldDesignator(t *testing.T) {
 	tester.assertTotalErrors(1)
 }
 
+// Function Parameter Designators
+// ------------------------------
 
+func TestFuncParamDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(bool a){
+			bool b = a
+		}
+	`, true)
+
+	tester.assertDesignator(
+		tester.getFuncStatement(0,0).(*node.VariableNode).Expression,
+		tester.globalScope.Contract.Functions[0].Parameters[0],
+		tester.globalScope.BoolType)
+}
+
+func TestFuncParamInsideIf(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(bool a, char c){
+			if (a) {
+				char d = c
+			}
+		}
+	`, true)
+
+	ifStmt := tester.getFuncStatement(0,0).(*node.IfStatementNode)
+	tester.assertDesignator(
+		ifStmt.Condition,
+		tester.globalScope.Contract.Functions[0].Parameters[0],
+		tester.globalScope.BoolType)
+
+	tester.assertDesignator(
+		ifStmt.Then[0].(*node.VariableNode).Expression,
+		tester.globalScope.Contract.Functions[0].Parameters[1],
+		tester.globalScope.CharType)
+}

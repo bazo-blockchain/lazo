@@ -44,6 +44,9 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 	return tester
 }
 
+// Assert Functions
+// ----------------
+
 func (ct *CheckerTestUtil) assertTotalErrors(total int) {
 	assert.Equal(ct.t, len(ct.errors), total)
 }
@@ -130,3 +133,12 @@ func (ct *CheckerTestUtil) assertDesignator(expr node.ExpressionNode, decl symbo
 func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expectedType *symbol.TypeSymbol) {
 	assert.Equal(ct.t, ct.symbolTable.GetTypeByExpression(expr), expectedType)
 }
+
+// Helper Functions
+// ----------------
+
+func (ct *CheckerTestUtil) getFuncStatement(funcIndex int, stmtIndex int) node.StatementNode{
+	return ct.syntaxTree.Contract.Functions[funcIndex].Body[stmtIndex]
+}
+
+

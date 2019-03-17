@@ -91,8 +91,8 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 	if field, ok := sym.(*symbol.FieldSymbol); ok {
 		return field.Type
-	} else if variable, ok := sym.(*symbol.VariableSymbol); ok {
-		return variable.Type
+	} else if param, ok := sym.(*symbol.ParameterSymbol); ok {
+		return param.Type
 	} else if localVariable, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		return localVariable.Type
 	} else if constant, ok := sym.(*symbol.ConstantSymbol); ok { // TODO Remove: not needed
