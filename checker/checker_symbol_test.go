@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-// Phases: Symbol Construction & Type Resolution
-// =============================================
+// Phases 1 & 2: Symbol Construction & Type Resolution
+// ===================================================
 
 func TestEmptyProgram(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, ``, false)
