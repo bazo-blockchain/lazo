@@ -86,7 +86,7 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 	case *symbol.FieldSymbol:
 		return sym.(*symbol.FieldSymbol).Type
 	case *symbol.ParameterSymbol:
-		return sym.(*symbol.FieldSymbol).Type
+		return sym.(*symbol.ParameterSymbol).Type
 	case *symbol.LocalVariableSymbol:
 		return sym.(*symbol.LocalVariableSymbol).Type
 	default:

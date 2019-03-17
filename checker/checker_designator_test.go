@@ -154,6 +154,16 @@ func TestUndefinedLocalVarAssignemnt(t *testing.T) {
 	tester.assertTotalErrors(1)
 }
 
+func TestUndefinedDesignatorAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			int x
+			x = y
+		}
+	`, false)
+	tester.assertTotalErrors(1)
+}
+
 func TestLocalVarAccessFromSubScope(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test(){
