@@ -82,12 +82,14 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 }
 
 func getType(sym symbol.Symbol) *symbol.TypeSymbol {
-	if field, ok := sym.(*symbol.FieldSymbol); ok {
-		return field.Type
-	} else if param, ok := sym.(*symbol.ParameterSymbol); ok {
-		return param.Type
-	} else if localVariable, ok := sym.(*symbol.LocalVariableSymbol); ok {
-		return localVariable.Type
+	switch sym.(type){
+	case *symbol.FieldSymbol:
+		return sym.(*symbol.FieldSymbol).Type
+	case *symbol.ParameterSymbol:
+		return sym.(*symbol.FieldSymbol).Type
+	case *symbol.LocalVariableSymbol:
+		return sym.(*symbol.LocalVariableSymbol).Type
+	default:
+		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.GetIdentifier()))
 	}
-	return nil
 }
