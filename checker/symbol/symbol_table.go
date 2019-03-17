@@ -6,18 +6,18 @@ import (
 )
 
 type SymbolTable struct {
-	GlobalScope       *GlobalScope
-	symbolToNode      map[Symbol]node.Node
-	designatorSymbols map[*node.DesignatorNode]Symbol
-	exprTypes         map[node.ExpressionNode]*TypeSymbol
+	GlobalScope            *GlobalScope
+	symbolToNode           map[Symbol]node.Node
+	designatorDeclarations map[*node.DesignatorNode]Symbol
+	expressionTypes        map[node.ExpressionNode]*TypeSymbol
 }
 
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
-		GlobalScope:       newGlobalScope(),
-		symbolToNode:      make(map[Symbol]node.Node),
-		designatorSymbols: make(map[*node.DesignatorNode]Symbol),
-		exprTypes:         make(map[node.ExpressionNode]*TypeSymbol),
+		GlobalScope:            newGlobalScope(),
+		symbolToNode:           make(map[Symbol]node.Node),
+		designatorDeclarations: make(map[*node.DesignatorNode]Symbol),
+		expressionTypes:        make(map[node.ExpressionNode]*TypeSymbol),
 	}
 }
 
@@ -55,20 +55,20 @@ func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
 }
 
-func (t *SymbolTable) MapDesignatorToType(designatorNode *node.DesignatorNode, symbol Symbol) {
-	t.designatorSymbols[designatorNode] = symbol
+func (t *SymbolTable) MapDesignatorToDecl(designatorNode *node.DesignatorNode, symbol Symbol) {
+	t.designatorDeclarations[designatorNode] = symbol
 }
 
-func (t *SymbolTable) FindTypeByDesignatorNode(designatorNode *node.DesignatorNode) Symbol {
-	return t.designatorSymbols[designatorNode]
+func (t *SymbolTable) GetDeclByDesignator(designatorNode *node.DesignatorNode) Symbol {
+	return t.designatorDeclarations[designatorNode]
 }
 
 func (t *SymbolTable) MapExpressionToType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
-	t.exprTypes[expressionNode] = symbol
+	t.expressionTypes[expressionNode] = symbol
 }
 
-func (t *SymbolTable) FindTypeByExpressionNode(expressionNode node.ExpressionNode) *TypeSymbol {
-	return t.exprTypes[expressionNode]
+func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *TypeSymbol {
+	return t.expressionTypes[expressionNode]
 }
 
 func (t *SymbolTable) String() string{

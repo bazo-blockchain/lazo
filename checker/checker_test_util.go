@@ -15,6 +15,8 @@ import (
 type CheckerTestUtil struct {
 	t           *testing.T
 	symbolTable *symbol.SymbolTable
+	syntaxTree  *node.ProgramNode
+	globalScope *symbol.GlobalScope
 	errors      []error
 }
 
@@ -32,15 +34,17 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 	assert.Equal(t, len(err), 0, "Program has syntax errors", err)
 
 	tester := &CheckerTestUtil{
-		t: t,
+		t:          t,
+		syntaxTree: program,
 	}
 	tester.symbolTable, tester.errors = New(program).Run()
+	tester.globalScope = tester.symbolTable.GlobalScope
 	assert.Equal(t, len(tester.errors) == 0, isValidCode)
 
 	return tester
 }
 
-func (ct *CheckerTestUtil) assertTotalErrors(total int){
+func (ct *CheckerTestUtil) assertTotalErrors(total int) {
 	assert.Equal(ct.t, len(ct.errors), total)
 }
 
@@ -113,4 +117,16 @@ func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, 
 
 	returnTypeSymbol := functionSymbol.ReturnTypes[returnTypeIndex]
 	assert.Equal(ct.t, returnTypeSymbol, expectedType)
+}
+
+func (ct *CheckerTestUtil) assertDesignator(expr node.ExpressionNode, decl symbol.Symbol, expectedType *symbol.TypeSymbol) {
+	designator, ok := expr.(*node.DesignatorNode)
+	assert.Assert(ct.t, ok)
+
+	assert.Equal(ct.t, ct.symbolTable.GetDeclByDesignator(designator), decl)
+	ct.assertExpressionType(expr, expectedType)
+}
+
+func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expectedType *symbol.TypeSymbol) {
+	assert.Equal(ct.t, ct.symbolTable.GetTypeByExpression(expr), expectedType)
 }

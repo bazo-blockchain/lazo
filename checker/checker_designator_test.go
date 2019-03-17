@@ -5,7 +5,7 @@ import "testing"
 // Phase 3: Designator Resolution
 // =============================
 
-func TestNotDefinedDesignator(t *testing.T){
+func TestNotDefinedDesignator(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
 			x = 4
@@ -15,4 +15,16 @@ func TestNotDefinedDesignator(t *testing.T){
 	tester.assertTotalErrors(1)
 }
 
-// TODO add more tests
+// Field Designators
+
+func TestFieldDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = 4
+		int y = x
+	`, true)
+
+	tester.assertDesignator(
+		tester.syntaxTree.Contract.Variables[1].Expression,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.IntType)
+}

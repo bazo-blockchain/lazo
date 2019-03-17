@@ -48,7 +48,7 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 		} else {
 			// Check types
 			for i, rtype := range returnSymbols {
-				nodeType := v.symbolTable.FindTypeByExpressionNode(returnNodes[i])
+				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 				if nodeType != rtype {
 					fmt.Printf("Error: Return Types mismatch expected: %s given: %s\n", rtype.Identifier, nodeType.Identifier)
 				}
@@ -64,11 +64,11 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
-	if _, ok := v.symbolTable.FindTypeByDesignatorNode(node.Left).(*symbol.FunctionSymbol); ok {
+	if _, ok := v.symbolTable.GetDeclByDesignator(node.Left).(*symbol.FunctionSymbol); ok {
 		fmt.Print("Error: Assignment to function is not allowed.")
 	} else {
-		leftType := v.symbolTable.FindTypeByExpressionNode(node.Left)
-		rightType := v.symbolTable.FindTypeByExpressionNode(node.Right)
+		leftType := v.symbolTable.GetTypeByExpression(node.Left)
+		rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
 		if leftType.GetIdentifier() != rightType.GetIdentifier() {
 			fmt.Printf("[%s] Error: %s of assignment is not compatible with target %s\n", node.Pos(), rightType, leftType)
@@ -79,7 +79,7 @@ func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 
 func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
-	if !v.IsBool(v.symbolTable.FindTypeByExpressionNode(node.Condition)) {
+	if !v.IsBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
 		fmt.Printf("Error condition must return boolean.\n")
 	}
 }
@@ -88,8 +88,8 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	v.AbstractVisitor.VisitBinaryExpressionNode(node)
 	left := node.Left
 	right := node.Right
-	leftType := v.symbolTable.FindTypeByExpressionNode(left)
-	rightType := v.symbolTable.FindTypeByExpressionNode(right)
+	leftType := v.symbolTable.GetTypeByExpression(left)
+	rightType := v.symbolTable.GetTypeByExpression(right)
 	switch node.Operator {
 	case token.And, token.Or:
 		if !v.IsBool(leftType) || !v.IsBool(rightType) {
@@ -116,7 +116,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
-	operandType := v.symbolTable.FindTypeByExpressionNode(operand)
+	operandType := v.symbolTable.GetTypeByExpression(operand)
 	switch node.Operator {
 	case token.Addition, token.Subtraction:
 		if !v.IsInt(operandType) {
@@ -142,7 +142,7 @@ func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
-	expType := v.symbolTable.FindTypeByExpressionNode(node.Expression)
+	expType := v.symbolTable.GetTypeByExpression(node.Expression)
 	if expType != nil && targetType != expType {
 		fmt.Printf("[%s]Error Type mismatch\n", node.Pos())
 	}

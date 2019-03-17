@@ -9,11 +9,11 @@ import (
 
 type DesignatorResolutionVisitor struct {
 	node.AbstractVisitor
-	symbolTable      *symbol.SymbolTable
-	contractSymbol   *symbol.ContractSymbol
-	currentFunction  *symbol.FunctionSymbol
-	currentStatement node.StatementNode
-	Errors           []error
+	symbolTable           *symbol.SymbolTable
+	contractSymbol        *symbol.ContractSymbol
+	currentFunctionSymbol *symbol.FunctionSymbol
+	currentStatement      node.StatementNode
+	Errors                []error
 }
 
 func NewDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *DesignatorResolutionVisitor {
@@ -26,29 +26,34 @@ func NewDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSym
 }
 
 func (v *DesignatorResolutionVisitor) VisitContractNode(node *node.ContractNode) {
-	for _, field := range v.contractSymbol.Fields {
-		fieldNode := v.symbolTable.GetNodeBySymbol(field)
-		fieldNode.Accept(v)
+	for _, variable := range node.Variables {
+		variable.Accept(v.ConcreteVisitor)
 	}
 
 	for _, function := range v.contractSymbol.Functions {
-		v.currentFunction = function
+		v.currentFunctionSymbol = function
 		functionNode := v.symbolTable.GetNodeBySymbol(function)
 		functionNode.Accept(v)
-		v.currentFunction = nil
+		v.currentFunctionSymbol = nil
 	}
 }
 
 func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
-	sym := v.symbolTable.Find(v.currentFunction, node.Value)
+	var scope symbol.Symbol
+	if v.currentFunctionSymbol == nil {
+		scope = v.contractSymbol
+	} else {
+		scope = v.currentFunctionSymbol
+	}
+	sym := v.symbolTable.Find(scope, node.Value)
 	if sym == nil {
 		v.reportError(node, fmt.Sprintf("Designator %s is not defined", node.Value))
 	} else if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		if !containsStatement(local.VisibleIn, v.currentStatement) {
-			v.reportError(node, fmt.Sprintf("Local Variable %s is not visible.\n", node.Value))
+			v.reportError(node, fmt.Sprintf("Local Variable %s is not visible", node.Value))
 		}
 	}
-	v.symbolTable.MapDesignatorToType(node, sym)
+	v.symbolTable.MapDesignatorToDecl(node, sym)
 	v.symbolTable.MapExpressionToType(node, getType(sym))
 }
 
@@ -82,11 +87,13 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 }
 
 func getType(sym symbol.Symbol) *symbol.TypeSymbol {
-	if variable, ok := sym.(*symbol.VariableSymbol); ok {
+	if field, ok := sym.(*symbol.FieldSymbol); ok {
+		return field.Type
+	} else if variable, ok := sym.(*symbol.VariableSymbol); ok {
 		return variable.Type
 	} else if localVariable, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		return localVariable.Type
-	} else if constant, ok := sym.(*symbol.ConstantSymbol); ok {
+	} else if constant, ok := sym.(*symbol.ConstantSymbol); ok { // TODO Remove: not needed
 		return constant.Type
 	} else {
 		return nil
