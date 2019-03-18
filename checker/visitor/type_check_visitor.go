@@ -102,6 +102,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	right := node.Right
 	leftType := v.symbolTable.GetTypeByExpression(left)
 	rightType := v.symbolTable.GetTypeByExpression(right)
+
 	switch node.Operator {
 	case token.And, token.Or:
 		if !v.isBool(leftType) || !v.isBool(rightType) {
@@ -137,6 +138,7 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
 	operandType := v.symbolTable.GetTypeByExpression(operand)
+
 	switch node.Operator {
 	case token.Addition, token.Subtraction:
 		if !v.isInt(operandType) {
@@ -151,7 +153,7 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 		break
 	default:
-		v.reportError(node, "Illegal unary operator found")
+		panic(fmt.Sprintf("Illegal unary operator %s", token.SymbolLexeme[node.Operator]))
 	}
 }
 

@@ -322,3 +322,62 @@ func TestStringRelationalComparison(t *testing.T) {
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
 }
+
+// Unary Expression Types
+// -----------------------
+
+func TestUnaryPlusType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = +4
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestUnaryMinusType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = -15
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestUnaryTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = -true
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestUnaryNotType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = !true
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestUnaryNotTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = !4
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestMixedExpressionType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = 1 > -2 == !false 
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestMixedExpressionTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = 1 > -2 < 4 
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
