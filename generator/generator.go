@@ -27,6 +27,7 @@ func (g *Generator) Run() []error {
 	for _, function := range g.symbolTable.GlobalScope.Contract.Functions {
 		g.generateIL(function)
 	}
+	// TODO Check how Metadata.Functions.Code is set
 	g.ilBuilder.Complete()
 	return g.errors
 }
