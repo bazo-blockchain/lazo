@@ -8,5 +8,5 @@ const (
 
 type Instruction struct {
 	OpCode OpCode
-	Operand struct{}
+	Operand interface{}
 }

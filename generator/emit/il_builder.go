@@ -32,6 +32,22 @@ func (b *ILBuilder) GenerateMetaData() {
 	b.fixContract(contract)
 }
 
+func (b *ILBuilder) Complete() {
+	for _, function := range b.MetaData.Contract.Functions {
+		b.fixOperands(function.Code)
+	}
+}
+
+func (b *ILBuilder) fixOperands(code []*il.Instruction) {
+	for _, instruction := range code {
+		if typeSymbol, ok := instruction.Operand.(*symbol.TypeSymbol); ok {
+			instruction.Operand = b.getTypeRef(typeSymbol)
+		} else if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
+			instruction.Operand = b.getFunctionRef(functionSymbol)
+		}
+	}
+}
+
 func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 	b.MetaData.Contract = &il.ContractData{
 		Identifier: contract.GetIdentifier(),

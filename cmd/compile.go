@@ -24,7 +24,7 @@ func init() {
 		&stage,
 		"stage",
 		"s",
-		"c",
+		"g",
 		"Compilation stage. \nAvailable stages: l=lexer, p=parser, c=checker, g=generator")
 }
 
@@ -114,9 +114,5 @@ func generate(symbolTable *symbol.SymbolTable) {
 	}
 
 	metadata := generator.Metadata
-	if stage == "g" {
-		fmt.Println(metadata)
-		os.Exit(1)
-	}
 	metadata.Save("metadata.txt")
 }

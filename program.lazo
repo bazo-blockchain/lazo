@@ -1,7 +1,7 @@
 contract Test {
     function int test2(bool a) {
         int i = 0
-        if (a) {
+        if (a){
             i = 3
         } else {
             i = 6

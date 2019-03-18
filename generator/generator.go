@@ -27,6 +27,7 @@ func (g *Generator) Run() []error {
 	for _, function := range g.symbolTable.GlobalScope.Contract.Functions {
 		g.generateIL(function)
 	}
+	g.ilBuilder.Complete()
 	return g.errors
 }
 
