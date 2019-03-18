@@ -2,8 +2,59 @@ package il
 
 type OpCode int
 
+// Opcodes have been adopted from the VM
 const (
-	TEST OpCode = iota
+	PUSH OpCode = iota
+	DUP
+	ROLL
+	POP
+	ADD
+	SUB
+	MULT
+	DIV
+	MOD
+	NEG
+	EQ
+	NEQ
+	LT
+	GT
+	LTE
+	GTE
+	SHIFTL
+	SHIFTR
+	NOP
+	JMP
+	JMPIF
+	CALL
+	CALLIF
+	CALLEXT
+	RET
+	SIZE
+	STORE
+	SSTORE
+	LOAD
+	SLOAD
+	ADDRESS
+	ISSUER
+	BALANCE
+	CALLER
+	CALLVAL
+	CALLDATA
+	NEWMAP
+	MAPHASKEY
+	MAPPUSH
+	MAPGETVAL
+	MAPSETVAL
+	MAPPREMOVE
+	NEWARR
+	ARRAPPEND
+	ARRINSERT
+	ARRREMOVE
+	ARRAT
+	SHA3
+	CHECKSIG
+	ERRHALT
+	HALT
 )
 
 type Instruction struct {
