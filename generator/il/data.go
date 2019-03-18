@@ -21,5 +21,5 @@ type FunctionData struct {
 type ContractData struct {
 	Identifier string `json:"ID"`
 	Fields []TypeData `json:"Fields"`
-	Functions []TypeData `json:"Functions"`
+	Functions []*FunctionData `json:"Functions"`
 }

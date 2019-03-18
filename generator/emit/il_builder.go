@@ -12,6 +12,7 @@ import (
 type ILBuilder struct {
 	symbolTable *symbol.SymbolTable
 	MetaData *il.MetaData
+	functionRefs map[*symbol.FunctionSymbol]int
 	Errors []error
 }
 
@@ -19,6 +20,7 @@ func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
 		symbolTable: symbolTable,
 		MetaData: &il.MetaData{},
+		functionRefs: map[*symbol.FunctionSymbol]int{},
 	}
 	builder.GenerateMetaData()
 	return builder
@@ -28,7 +30,6 @@ func (b *ILBuilder) GenerateMetaData() {
 	contract := b.symbolTable.GlobalScope.Contract
 	b.registerContract(contract)
 	b.fixContract(contract)
-	return
 }
 
 func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
@@ -41,9 +42,11 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 }
 
 func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
-	_ = &il.FunctionData{
+	functionData := &il.FunctionData{
 		Identifier: function.GetIdentifier(),
 	}
+	b.MetaData.Contract.Functions = append(b.MetaData.Contract.Functions, functionData)
+	b.functionRefs[function] = len(b.MetaData.Contract.Functions) - 1
 }
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
@@ -53,10 +56,32 @@ func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
 		contractData.Fields = append(contractData.Fields, b.getTypeRef(field.Type))
 	}
 
-	for _ = range contract.Functions {
-
+	for _, function := range contract.Functions {
+		b.fixFunction(function)
 	}
 
+}
+
+func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
+	functionData := b.MetaData.Contract.Functions[b.getFunctionRef(function)]
+
+	for _, rtype := range function.ReturnTypes {
+		functionData.ReturnTypes = append(functionData.ReturnTypes, b.getTypeRef(rtype))
+	}
+
+	for _, param := range function.Parameters {
+		functionData.ParamTypes = append(functionData.ParamTypes, b.getTypeRef(param.Type))
+	}
+
+	for _, local := range function.LocalVariables {
+		functionData.LocalTypes = append(functionData.LocalTypes, b.getTypeRef(local.Type))
+	}
+
+
+}
+
+func (b *ILBuilder) getFunctionRef(symbol *symbol.FunctionSymbol) int {
+	return b.functionRefs[symbol]
 }
 
 func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {

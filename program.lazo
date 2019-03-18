@@ -1,4 +1,11 @@
 contract Test {
-    int i = 1
-    bool b
+    function int test2(bool a) {
+        int i = 0
+        if (a) {
+            i = 3
+        } else {
+            i = 6
+        }
+        return i
+    }
 }

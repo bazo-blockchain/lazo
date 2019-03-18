@@ -1,8 +1,19 @@
 {
  "ID": "Test",
- "Field": [
-  -2,
-  -1
- ],
- "Function": null
+ "Fields": null,
+ "Functions": [
+  {
+   "ID": "test2",
+   "ReturnType": [
+    -2
+   ],
+   "ParamType": [
+    -1
+   ],
+   "LocalType": [
+    -2
+   ],
+   "Instruction": null
+  }
+ ]
 }
