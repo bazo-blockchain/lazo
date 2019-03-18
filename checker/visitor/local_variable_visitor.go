@@ -28,6 +28,8 @@ func (v *LocalVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 }
 
 func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
+	v.recordVisiblity(node)
+
 	sym := symbol.NewLocalVariableSymbol(v.function, node.Identifier)
 	v.function.LocalVariables = append(v.function.LocalVariables, sym)
 	v.symbolTable.MapSymbolToNode(sym, node)
@@ -45,10 +47,12 @@ func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) 
 	v.AbstractVisitor.VisitIfStatementNode(node)
 }
 
-// TODO record visibility where necessary
+func (v *LocalVariableVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+	v.recordVisiblity(node)
+}
 
 func (v *LocalVariableVisitor) recordVisiblity(stmt node.StatementNode) {
-	for _, scope := range v.blockScopes{
+	for _, scope := range v.blockScopes {
 		for _, localVariable := range scope {
 			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)
 		}

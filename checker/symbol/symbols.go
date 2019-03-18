@@ -67,7 +67,7 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 }
 
 func (sym *ContractSymbol) String() string {
-	return fmt.Sprintf("Contract: %s, Fields: %s, Functions %s", sym.Identifier, sym.Fields, sym.Functions)
+	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.Identifier, sym.Fields, sym.Functions)
 }
 
 //----------------
@@ -114,7 +114,7 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 }
 
 func (sym *FunctionSymbol) String() string {
-	return fmt.Sprintf("%s %s(%s): %d vars", sym.ReturnTypes, sym.Identifier, sym.Parameters, len(sym.LocalVariables))
+	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.Identifier, sym.Parameters, sym.LocalVariables)
 }
 
 //----------------

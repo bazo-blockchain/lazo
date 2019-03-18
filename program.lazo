@@ -1,61 +1,7 @@
 contract Test {
-    bool b
+    function int hello () {
     int x
-
-    function (int, int) add(int x1) {
-        int x = 1
-        char c = 'c'
-        string s = "String"
-        bool b = true
-        int y = 3 + 4 * 2
-        int z = 3 ** 4 ** 2
-        int a = -4 * 3
-        a = x
-    }
-
-    function int add2(int a) {
-        int b = 0
-        if(true) {
-            b = a * 2
-        } else {
-            b = a + 1
-        }
-        return b
-    }
-
-    function (int, int) add3(int a, int b) {
-        return a, b
-    }
-
-    function bool equal(int a, int b) {
-        return a == b
-    }
-
-    function bool unequal(int a, int b) {
-        return a != b
-    }
-
-    function bool less(int a, int b) {
-        return a < b
-    }
-
-    function bool lessEqul(int a, int b) {
-        return a <= b
-    }
-
-    function bool greaterEqual(int a, int b) {
-        return a >= b
-    }
-
-    function bool greater(int a, int b) {
-        return a > b
-    }
-
-    function bool and(int a, int b) {
-        return a && b
-    }
-
-    function bool or(int a, int b) {
-        return a || b
+    x = true
+    return x
     }
 }
