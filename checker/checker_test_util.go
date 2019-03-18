@@ -150,6 +150,10 @@ func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expect
 // Helper Functions
 // ----------------
 
+func (ct *CheckerTestUtil) getFieldNode(index int) *node.VariableNode {
+	return ct.syntaxTree.Contract.Variables[index]
+}
+
 func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode{
 	return ct.syntaxTree.Contract.Functions[funcIndex].Body[stmtIndex]
 }

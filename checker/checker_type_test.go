@@ -211,3 +211,114 @@ func TestIfConditionIntType(t *testing.T) {
 		}
 	`, false)
 }
+
+// Binary Expression Types
+// -----------------------
+
+func TestLogicAndType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = true && true
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestLogicOrTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool b = true || 1
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestAdditionType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int a
+		int b = 3 + a
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.IntType)
+}
+
+func TestSubtractionTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int a = true - 1
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestMixedArithmeticExpr(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int a = 4 * 5 + 8 / 2 % 6
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestEqualityComparisonType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = true == false
+		bool b = 4 != 5
+		bool c = 'c' == 'a'
+		bool d = "hello" != "world"
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, tester.globalScope.BoolType)
+}
+
+func TestEqualityComparisonTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = true == 4
+		bool b = 4 != false
+		bool c = 'c' == "world"
+		bool d = "hello" != 5
+	`, false)
+	tester.assertTotalErrors(4)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, tester.globalScope.BoolType)
+}
+
+func TestRelationalComparisonType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = 1 < 3
+		bool b = 4 <= 4
+		bool c = 'c' > 'a'
+		bool d = 'c' >= 'a'
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, tester.globalScope.BoolType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, tester.globalScope.BoolType)
+}
+
+func TestRelationalComparisonTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = 1 < false
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestBoolRelationalComparison(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = true > false
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestStringRelationalComparison(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool a = "hello" >= "world"
+	`, false)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}

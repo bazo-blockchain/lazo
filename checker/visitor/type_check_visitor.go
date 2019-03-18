@@ -108,20 +108,28 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			v.reportError(node, "&& and || can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
-		break
 	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to expressions of type int")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
-		break
-	case token.Less, token.LessEqual, token.Equal, token.Unequal, token.GreaterEqual, token.Greater:
+	case token.Equal, token.Unequal:
 		if leftType != rightType {
-			v.reportError(node, "Both sides of a compare operation need to have compatible types")
+			v.reportError(node, fmt.Sprintf("Equality comparison should have the same type, given %s and %s",
+				leftType, rightType))
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.Less, token.LessEqual, token.GreaterEqual, token.Greater:
+		if leftType != rightType {
+			v.reportError(node,
+				fmt.Sprintf("Both sides of a compare operation need to have the same type, given %s and %s",
+					leftType, rightType))
+		} else if !(v.isInt(leftType) || v.isChar(leftType)) {
+			v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 	default:
-		v.reportError(node, "Illegal binary operator found")
+		panic(fmt.Sprintf("Illegal binary operator %s", token.SymbolLexeme[node.Operator]))
 	}
 }
 
@@ -173,6 +181,10 @@ func (v *TypeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
 
 func (v *TypeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.BoolType
+}
+
+func (v *TypeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
+	return symbol == v.symbolTable.GlobalScope.CharType
 }
 
 func (v *TypeCheckVisitor) reportError(node node.Node, msg string) {
