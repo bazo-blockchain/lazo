@@ -1,7 +1,5 @@
 package il
 
-import "encoding/xml"
-
 type TypeData int
 
 const (
@@ -12,13 +10,16 @@ const (
 	StringType
 )
 
-//type FieldData struct {
-//	XMLName xml.Name `xml:"Field"`
-//	Type int `xml: "Type"`
-//}
+type FunctionData struct {
+	Identifier string `json:"ID"`
+	ReturnTypes []TypeData `json:"ReturnType"`
+	ParamTypes []TypeData `json:"ParamType"`
+	LocalTypes []TypeData `json:"LocalType"`
+	Code []*Instruction `json:"Instruction"`
+}
 
 type ContractData struct {
-	XMLName xml.Name `xml:"Contract"`
-	Identifier string `xml:"id, attr"`
-	Fields []TypeData `xml:"Field"`
+	Identifier string `json:"ID"`
+	Fields []TypeData `json:"Fields"`
+	Functions []TypeData `json:"Functions"`
 }

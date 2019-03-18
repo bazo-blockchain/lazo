@@ -25,8 +25,6 @@ func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 }
 
 func (b *ILBuilder) GenerateMetaData() {
-	// Register Interfaces
-	// Register Contract
 	contract := b.symbolTable.GlobalScope.Contract
 	b.registerContract(contract)
 	b.fixContract(contract)
@@ -37,17 +35,28 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 	b.MetaData.Contract = &il.ContractData{
 		Identifier: contract.GetIdentifier(),
 	}
+	for _, function := range contract.Functions {
+		b.registerFunction(function)
+	}
+}
+
+func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
+	_ = &il.FunctionData{
+		Identifier: function.GetIdentifier(),
+	}
 }
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
-	// Register all Fields
 	contractData := b.MetaData.Contract
 
 	for _, field := range contract.Fields {
 		contractData.Fields = append(contractData.Fields, b.getTypeRef(field.Type))
 	}
-	// Register own Types
-	// Register all Functions
+
+	for _ = range contract.Functions {
+
+	}
+
 }
 
 func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {

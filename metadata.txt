@@ -1,5 +1,8 @@
-<Contract>
- <attr xmlns="id,">Test</attr>
- <Field>-2</Field>
- <Field>-1</Field>
-</Contract>
+{
+ "ID": "Test",
+ "Field": [
+  -2,
+  -1
+ ],
+ "Function": null
+}

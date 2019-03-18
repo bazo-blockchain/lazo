@@ -1,7 +1,7 @@
 package il
 
 import (
-	"encoding/xml"
+	"encoding/json"
 	"io/ioutil"
 )
 
@@ -12,7 +12,7 @@ type MetaData struct {
 
 func (d *MetaData) Save(destinationFile string) {
 	// TODO Error Handling
-	contract, err :=xml.MarshalIndent(d.Contract, "", " ")
+	contract, err :=json.MarshalIndent(d.Contract, "", " ")
 	if err != nil {
 		panic(err)
 	}
