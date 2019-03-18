@@ -11,7 +11,6 @@ import (
  */
 type ILBuilder struct {
 	symbolTable *symbol.SymbolTable
-	typeRefs map[string]int
 	MetaData *il.MetaData
 	Errors []error
 }
