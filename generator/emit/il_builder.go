@@ -63,7 +63,7 @@ func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
 }
 
 func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
-	functionData := b.MetaData.Contract.Functions[b.getFunctionRef(function)]
+	functionData := b.getFunctionData(function)
 
 	for _, rtype := range function.ReturnTypes {
 		functionData.ReturnTypes = append(functionData.ReturnTypes, b.getTypeRef(rtype))
@@ -97,4 +97,8 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
 	} else {
 		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.GetIdentifier()))
 	}
+}
+
+func (b *ILBuilder) getFunctionData(symbol *symbol.FunctionSymbol) *il.FunctionData {
+	return b.MetaData.Contract.Functions[b.getFunctionRef(symbol)]
 }
