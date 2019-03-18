@@ -2,7 +2,7 @@ package symbol
 
 import "fmt"
 
-type CompilationUnit struct {
+type GlobalScope struct {
 	AbstractSymbol
 	Contract         *ContractSymbol
 	Types            []*TypeSymbol
@@ -21,29 +21,29 @@ type CompilationUnit struct {
 	NullConstant  *ConstantSymbol
 }
 
-func (cu *CompilationUnit) NewCompilationUnit() Symbol {
-	return &CompilationUnit{
-		NullType: NewTypeSymbol(cu, "@NULL"),
-	}
+func newGlobalScope() *GlobalScope {
+	gs := &GlobalScope{}
+	gs.NullType = NewTypeSymbol(gs, "@NULL")
+	return gs
 }
 
-func (cu *CompilationUnit) AllDeclarations() []Symbol {
+func (gs *GlobalScope) AllDeclarations() []Symbol {
 	var symbols []Symbol
-	for _, s := range cu.Types {
+	for _, s := range gs.Types {
 		symbols = append(symbols, s)
 	}
-	for _, s := range cu.BuiltInFunctions {
+	for _, s := range gs.BuiltInFunctions {
 		symbols = append(symbols, s)
 	}
-	for _, s := range cu.Constants {
+	for _, s := range gs.Constants {
 		symbols = append(symbols, s)
 	}
 	return symbols
 }
 
-func (cu *CompilationUnit) String() string {
+func (gs *GlobalScope) String() string {
 	return fmt.Sprintf("\n Types: %s"+
 		"\n Built-in Types: %s"+
 		"\n Constants: %s"+
-		"\n %s", cu.Types, cu.BuiltInTypes, cu.Constants, cu.Contract)
+		"\n %s", gs.Types, gs.BuiltInTypes, gs.Constants, gs.Contract)
 }

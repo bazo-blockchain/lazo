@@ -8,12 +8,11 @@ import (
 
 type designatorResolution struct {
 	symTable *symbol.SymbolTable
-	errors []error
+	errors   []error
 }
 
-
 func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
-	resolution :=designatorResolution{
+	resolution := designatorResolution{
 		symTable: symTable,
 	}
 	resolution.resolveDesignators()
@@ -24,5 +23,7 @@ func (dr *designatorResolution) resolveDesignators() {
 	contractSymbol := dr.symTable.GlobalScope.Contract
 	v := visitor.NewDesignatorResolutionVisitor(dr.symTable, contractSymbol)
 	contractNode := dr.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
+
 	contractNode.Accept(v)
+	dr.errors = v.Errors
 }

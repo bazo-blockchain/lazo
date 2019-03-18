@@ -9,59 +9,75 @@ import (
 
 type TypeResolution struct {
 	symTable *symbol.SymbolTable
-	errors []error
+	errors   []error
 }
 
 func RunTypeResolution(symTable *symbol.SymbolTable) []error {
-	resolution :=TypeResolution{
+	resolution := TypeResolution{
 		symTable: symTable,
 	}
 	resolution.resolveTypesInContractSymbol()
 	return resolution.errors
 }
 
-func (tc *TypeResolution) resolveTypesInContractSymbol() {
-	contractSymbol := tc.symTable.GlobalScope.Contract
+func (tr *TypeResolution) resolveTypesInContractSymbol() {
+	contractSymbol := tr.symTable.GlobalScope.Contract
 	for _, field := range contractSymbol.Fields {
-		tc.resolveTypeInFieldSymbol(field)
+		tr.resolveTypeInFieldSymbol(field)
 	}
 
 	for _, function := range contractSymbol.Functions {
-		tc.resolveTypeInFunctionSymbol(function)
+		tr.resolveTypeInFunctionSymbol(function)
 	}
 }
 
-func (tc *TypeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
-	fieldNode := tc.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
-
-	symbol.Type = tc.resolveType(fieldNode.Type)
+func (tr *TypeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
+	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
+	symbol.Type = tr.resolveType(fieldNode.Type)
 }
 
-func (tc *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
-	functionNode := tc.symTable.GetNodeBySymbol(sym).(*node.FunctionNode)
+func (tr *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
+	functionNode := tr.symTable.GetNodeBySymbol(sym).(*node.FunctionNode)
 
-	if functionNode.HasReturnTypes() {
-		sym.ReturnTypes = make([]*symbol.TypeSymbol, len(functionNode.ReturnTypes))
-		for i, rtype := range functionNode.ReturnTypes {
-			sym.ReturnTypes[i] = tc.resolveType(rtype)
-		}
-	}
+	tr.resolveReturnTypes(sym, functionNode)
 
 	for _, param := range sym.Parameters {
-		paramNode := tc.symTable.GetNodeBySymbol(param).(*node.VariableNode)
-		param.Type = tc.resolveType(paramNode.Type)
+		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.VariableNode)
+		param.Type = tr.resolveType(paramNode.Type)
 	}
 
 	for _, locVar := range sym.LocalVariables {
-		locVarNode := tc.symTable.GetNodeBySymbol(locVar).(*node.VariableNode)
-		locVar.Type = tc.resolveType(locVarNode.Type)
+		locVarNode := tr.symTable.GetNodeBySymbol(locVar).(*node.VariableNode)
+		locVar.Type = tr.resolveType(locVarNode.Type)
 	}
 }
 
-func (tc *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
-	result := tc.symTable.FindTypeByNode(node)
+func (tr *TypeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functionNode *node.FunctionNode) {
+	total := len(functionNode.ReturnTypes)
+	if  total > 3 {
+		tr.reportError(functionNode, "More than 3 return types are not allowed")
+	}
+
+	for _, rtype := range functionNode.ReturnTypes {
+		if rtype.Identifier == "void" {
+			if total > 1 {
+				tr.reportError(rtype, "'void' is invalid with multiple return types")
+			}
+		} else {
+			sym.ReturnTypes = append(sym.ReturnTypes, tr.resolveType(rtype))
+		}
+	}
+}
+
+func (tr *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
+	result := tr.symTable.FindTypeByNode(node)
 	if result == nil {
-		tc.errors = append(tc.errors, errors.New(fmt.Sprintf("Error: Could not find type for node %s", node.Identifier)))
+		tr.reportError(node, fmt.Sprintf("Invalid type '%s'", node.Identifier))
 	}
 	return result
+}
+
+func (tr *TypeResolution) reportError(node node.Node, msg string) {
+	tr.errors = append(tr.errors, errors.New(
+		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }

@@ -11,7 +11,7 @@ import (
 type symbolConstruction struct {
 	programNode *node.ProgramNode
 	symbolTable *symbol.SymbolTable
-	globalScope *symbol.CompilationUnit
+	globalScope *symbol.GlobalScope
 	errors      []error
 }
 
@@ -22,6 +22,12 @@ func RunSymbolConstruction(programNode *node.ProgramNode) (*symbol.SymbolTable, 
 		programNode: programNode,
 		globalScope: symTable.GlobalScope,
 	}
+
+	if programNode.Contract == nil {
+		construction.reportError(nil, "Program has no contract")
+		return symTable, construction.errors
+	}
+
 	construction.registerBuiltins()
 	construction.registerDeclarations()
 	construction.checkValidIdentifiers()
@@ -71,8 +77,8 @@ func (sc *symbolConstruction) registerContract() {
 
 	contractSymbol := symbol.NewContractSymbol(sc.globalScope, contractNode.Name)
 	sc.globalScope.Contract = contractSymbol
-
 	sc.symbolTable.MapSymbolToNode(contractSymbol, contractNode)
+
 	for _, variableNode := range contractNode.Variables {
 		sc.registerField(contractSymbol, variableNode)
 	}
@@ -120,12 +126,12 @@ func (sc *symbolConstruction) checkValidIdentifiers() {
 	}
 }
 
-var reservedKeywords = []string{"char", "int", "this", "null", "void"}
+var reservedKeywords = []string{"char", "int", "bool", "string", "this", "null", "void"}
 
 func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 	for _, keyword := range reservedKeywords {
 		if sym.GetIdentifier() == keyword {
-			sc.reportSymbolConstructionError(sym, fmt.Sprintf("Reserved keyword %s cannot be used as an identifier", keyword))
+			sc.reportError(sym, fmt.Sprintf("Reserved keyword '%s' cannot be used as an identifier", keyword))
 		}
 	}
 }
@@ -139,23 +145,22 @@ func (sc *symbolConstruction) checkUniqueIdentifiers() {
 }
 
 func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
-	// TODO optimize algorithm (avoid n^2 iterations)
-	// TODO: Fix function local variables (allow shadowing)
 	allDecl := sym.AllDeclarations()
-	for _, decl := range allDecl {
-		count := 0
-		for _, variable := range allDecl {
-			if decl.GetIdentifier() == variable.GetIdentifier() {
-				count++
-
-				if count > 1 {
-					sc.reportSymbolConstructionError(variable, fmt.Sprintf("Identifier %s is already declared", variable.GetIdentifier()))
-				}
+	for r, decl := range allDecl {
+		for c, otherDecl := range allDecl {
+			if c > r && decl.GetIdentifier() == otherDecl.GetIdentifier() {
+				sc.reportError(otherDecl,
+					fmt.Sprintf("Identifier '%s' is already declared", otherDecl.GetIdentifier()))
+				break
 			}
 		}
 	}
 }
 
-func (sc *symbolConstruction) reportSymbolConstructionError(sym symbol.Symbol, msg string) {
-	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", sc.symbolTable.GetNodeBySymbol(sym).Pos(), msg)))
+func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {
+	var pos string
+	if sym != nil {
+		pos = sc.symbolTable.GetNodeBySymbol(sym).Pos().String()
+	}
+	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", pos, msg)))
 }
