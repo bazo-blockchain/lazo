@@ -90,7 +90,6 @@ func parse(l *lexer.Lexer) *node.ProgramNode {
 func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 	checker := checker.New(syntaxTree)
 	symbolTable, errors := checker.Run()
-	fmt.Println(symbolTable)
 
 	if len(errors) > 0 {
 		fmt.Fprintln(os.Stderr, errors)
@@ -99,6 +98,7 @@ func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 
 	if stage == "c" {
 		fmt.Println(symbolTable)
+		os.Exit(0)
 	}
 
 	return symbolTable
@@ -112,6 +112,11 @@ func generate(symbolTable *symbol.SymbolTable) {
 		fmt.Fprintln(os.Stderr, errors)
 		os.Exit(1)
 	}
+
 	metadata := generator.Metadata
+	if stage == "g" {
+		fmt.Println(metadata)
+		os.Exit(1)
+	}
 	metadata.Save("metadata.txt")
 }
