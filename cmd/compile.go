@@ -112,4 +112,6 @@ func generate(symbolTable *symbol.SymbolTable) {
 		fmt.Fprintln(os.Stderr, errors)
 		os.Exit(1)
 	}
+	metadata := generator.Metadata
+	metadata.Save("metadata.txt")
 }

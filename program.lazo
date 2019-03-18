@@ -1,7 +1,4 @@
 contract Test {
-    function int hello () {
-    int x
-    x = 1
-    return x
-    }
+    int i = 1
+    bool b
 }
