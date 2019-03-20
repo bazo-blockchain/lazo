@@ -10,26 +10,26 @@ import (
 type Generator struct {
 	symbolTable *symbol.SymbolTable
 	ilBuilder   *emit.ILBuilder
-	Metadata    *il.MetaData
+	metaData    *il.MetaData
 	errors      []error
 }
 
 func New(symbolTable *symbol.SymbolTable) *Generator {
-	p := &Generator{
+	g := &Generator{
 		symbolTable: symbolTable,
 		ilBuilder:   emit.NewILBuilder(symbolTable),
 	}
-	p.Metadata = p.ilBuilder.MetaData
-	return p
+	g.metaData = g.ilBuilder.MetaData
+	return g
 }
 
-func (g *Generator) Run() []error {
+func (g *Generator) Run() (*il.MetaData, []error) {
 	for _, function := range g.symbolTable.GlobalScope.Contract.Functions {
 		g.generateIL(function)
 	}
 	// TODO Check how Metadata.Functions.Code is set
 	g.ilBuilder.Complete()
-	return g.errors
+	return g.metaData, g.errors
 }
 
 func (g *Generator) generateIL(function *symbol.FunctionSymbol) {

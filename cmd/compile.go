@@ -106,13 +106,12 @@ func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 
 func generate(symbolTable *symbol.SymbolTable) {
 	generator := generator.New(symbolTable)
-	errors := generator.Run()
+	metadata, errors := generator.Run()
 
 	if len(errors) > 0 {
 		fmt.Fprintln(os.Stderr, errors)
 		os.Exit(1)
 	}
 
-	metadata := generator.Metadata
-	metadata.Save("metadata.txt")
+	metadata.Save("metadata.json")
 }
