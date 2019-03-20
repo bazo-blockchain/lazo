@@ -4,6 +4,7 @@ import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/emit"
 	"github.com/bazo-blockchain/lazo/generator/il"
+	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
 type Generator struct {
@@ -33,9 +34,10 @@ func (g *Generator) Run() (*il.Metadata, []error) {
 
 func (g *Generator) generateIL(function *symbol.FunctionSymbol) {
 	funcData := g.ilBuilder.GetFunctionData(function)
-	_ = g.symbolTable.GetNodeBySymbol(function)
+	funcNode := g.symbolTable.GetNodeBySymbol(function).(*node.FunctionNode)
 
 	assembler := emit.NewILAssembler(funcData)
-	// visit function body
+	v := emit.NewCodeGenerationVisitor(g.symbolTable, function, assembler)
+	v.VisitStatementBlock(funcNode.Body)
 	assembler.Complete()
 }
