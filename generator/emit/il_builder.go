@@ -11,7 +11,7 @@ import (
  */
 type ILBuilder struct {
 	symbolTable  *symbol.SymbolTable
-	MetaData     *il.MetaData
+	Metadata     *il.Metadata
 	functionRefs map[*symbol.FunctionSymbol]int
 	Errors       []error
 }
@@ -19,23 +19,27 @@ type ILBuilder struct {
 func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
 		symbolTable:  symbolTable,
-		MetaData:     &il.MetaData{},
+		Metadata:     &il.Metadata{},
 		functionRefs: map[*symbol.FunctionSymbol]int{},
 	}
-	builder.GenerateMetaData()
+	builder.generateMetadata()
 	return builder
 }
 
-func (b *ILBuilder) GenerateMetaData() {
+func (b *ILBuilder) generateMetadata() {
 	contract := b.symbolTable.GlobalScope.Contract
 	b.registerContract(contract)
 	b.fixContract(contract)
 }
 
 func (b *ILBuilder) Complete() {
-	for _, function := range b.MetaData.Contract.Functions {
-		b.fixOperands(function.Code)
+	for _, function := range b.Metadata.Contract.Functions {
+		b.fixOperands(function.Instructions)
 	}
+}
+
+func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *il.FunctionData {
+	return b.Metadata.Contract.Functions[b.getFunctionRef(function)]
 }
 
 func (b *ILBuilder) fixOperands(code []*il.Instruction) {
@@ -49,7 +53,7 @@ func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 }
 
 func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
-	b.MetaData.Contract = &il.ContractData{
+	b.Metadata.Contract = &il.ContractData{
 		Identifier: contract.GetIdentifier(),
 	}
 	for _, function := range contract.Functions {
@@ -61,12 +65,12 @@ func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 	functionData := &il.FunctionData{
 		Identifier: function.GetIdentifier(),
 	}
-	b.MetaData.Contract.Functions = append(b.MetaData.Contract.Functions, functionData)
-	b.functionRefs[function] = len(b.MetaData.Contract.Functions) - 1
+	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
+	b.functionRefs[function] = len(b.Metadata.Contract.Functions) - 1
 }
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
-	contractData := b.MetaData.Contract
+	contractData := b.Metadata.Contract
 
 	for _, field := range contract.Fields {
 		contractData.Fields = append(contractData.Fields, b.getTypeRef(field.Type))
@@ -92,7 +96,6 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 	for _, local := range function.LocalVariables {
 		functionData.LocalTypes = append(functionData.LocalTypes, b.getTypeRef(local.Type))
 	}
-
 }
 
 func (b *ILBuilder) getFunctionRef(symbol *symbol.FunctionSymbol) int {
@@ -115,5 +118,5 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
 }
 
 func (b *ILBuilder) getFunctionData(symbol *symbol.FunctionSymbol) *il.FunctionData {
-	return b.MetaData.Contract.Functions[b.getFunctionRef(symbol)]
+	return b.Metadata.Contract.Functions[b.getFunctionRef(symbol)]
 }

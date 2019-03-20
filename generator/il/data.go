@@ -11,11 +11,11 @@ const (
 )
 
 type FunctionData struct {
-	Identifier  string         `json:"ID"`
-	ReturnTypes []TypeData     `json:"ReturnType"`
-	ParamTypes  []TypeData     `json:"ParamType"`
-	LocalTypes  []TypeData     `json:"LocalType"`
-	Code        []*Instruction `json:"Instruction"`
+	Identifier   string         `json:"ID"`
+	ReturnTypes  []TypeData     `json:"ReturnTypes"`
+	ParamTypes   []TypeData     `json:"ParamTypes"`
+	LocalTypes   []TypeData     `json:"LocalTypes"`
+	Instructions []*Instruction `json:"Instructions"`
 }
 
 type ContractData struct {

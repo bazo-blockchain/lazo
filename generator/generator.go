@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/emit"
 	"github.com/bazo-blockchain/lazo/generator/il"
@@ -10,7 +9,7 @@ import (
 type Generator struct {
 	symbolTable *symbol.SymbolTable
 	ilBuilder   *emit.ILBuilder
-	metaData    *il.MetaData
+	metaData    *il.Metadata
 	errors      []error
 }
 
@@ -19,11 +18,11 @@ func New(symbolTable *symbol.SymbolTable) *Generator {
 		symbolTable: symbolTable,
 		ilBuilder:   emit.NewILBuilder(symbolTable),
 	}
-	g.metaData = g.ilBuilder.MetaData
+	g.metaData = g.ilBuilder.Metadata
 	return g
 }
 
-func (g *Generator) Run() (*il.MetaData, []error) {
+func (g *Generator) Run() (*il.Metadata, []error) {
 	for _, function := range g.symbolTable.GlobalScope.Contract.Functions {
 		g.generateIL(function)
 	}
@@ -33,5 +32,10 @@ func (g *Generator) Run() (*il.MetaData, []error) {
 }
 
 func (g *Generator) generateIL(function *symbol.FunctionSymbol) {
-	fmt.Println("Generating IL Code")
+	funcData := g.ilBuilder.GetFunctionData(function)
+	_ = g.symbolTable.GetNodeBySymbol(function)
+
+	assembler := emit.NewILAssembler(funcData)
+	// visit function body
+	assembler.Complete()
 }

@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 )
 
-type MetaData struct {
+type Metadata struct {
 	Contract *ContractData
 }
 
-func (d *MetaData) Save(destinationFile string) {
+func (d *Metadata) Save(destinationFile string) {
 	// TODO Error Handling
 	contract, err := json.MarshalIndent(d.Contract, "", " ")
 	if err != nil {
