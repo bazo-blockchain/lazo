@@ -58,6 +58,6 @@ const (
 )
 
 type Instruction struct {
-	OpCode OpCode
+	OpCode  OpCode
 	Operand interface{}
 }

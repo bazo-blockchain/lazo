@@ -82,7 +82,7 @@ func TestContractFields(t *testing.T) {
 		int x = 2
 		char c
 		string s
-	`,true)
+	`, true)
 
 	gs := tester.globalScope
 	tester.assertField(0, gs.BoolType)
@@ -282,7 +282,7 @@ func TestInvalidFieldName(t *testing.T) {
 		int int
 		char this
 		string null
-	`,false)
+	`, false)
 	tester.assertTotalErrors(4)
 }
 
@@ -290,7 +290,7 @@ func TestInvalidFunctionName(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void int() {
 		}
-	`,false)
+	`, false)
 	tester.assertTotalErrors(1)
 }
 
@@ -298,7 +298,7 @@ func TestInvalidParamName(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test(int int) {
 		}
-	`,false)
+	`, false)
 	tester.assertTotalErrors(1)
 }
 
@@ -321,7 +321,7 @@ func TestDuplicateFieldNames(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int i
 		bool i
-	`,false)
+	`, false)
 	tester.assertTotalErrors(1)
 }
 
@@ -335,7 +335,7 @@ func TestFieldVarShadowing(t *testing.T) {
 		function void test2() {
 			int i
 		}
-	`,true)
+	`, true)
 }
 
 func TestDuplicateLocalParamNames(t *testing.T) {

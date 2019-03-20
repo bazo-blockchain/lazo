@@ -154,12 +154,10 @@ func (ct *CheckerTestUtil) getFieldNode(index int) *node.VariableNode {
 	return ct.syntaxTree.Contract.Variables[index]
 }
 
-func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode{
+func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode {
 	return ct.syntaxTree.Contract.Functions[funcIndex].Body[stmtIndex]
 }
 
 func (ct *CheckerTestUtil) getLocalVariableSymbol(funcIndex int, varIndex int) *symbol.LocalVariableSymbol {
 	return ct.globalScope.Contract.Functions[funcIndex].LocalVariables[varIndex]
 }
-
-

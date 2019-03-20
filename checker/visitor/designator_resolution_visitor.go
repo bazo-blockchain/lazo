@@ -38,7 +38,7 @@ func (v *DesignatorResolutionVisitor) VisitContractNode(node *node.ContractNode)
 	}
 }
 
-func (v *DesignatorResolutionVisitor) VisitStatementBlock(stmts []node.StatementNode){
+func (v *DesignatorResolutionVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 	for _, statement := range stmts {
 		v.currentStatement = statement
 		statement.Accept(v.ConcreteVisitor)
@@ -82,7 +82,7 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 }
 
 func getType(sym symbol.Symbol) *symbol.TypeSymbol {
-	switch sym.(type){
+	switch sym.(type) {
 	case *symbol.FieldSymbol:
 		return sym.(*symbol.FieldSymbol).Type
 	case *symbol.ParameterSymbol:

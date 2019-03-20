@@ -71,6 +71,6 @@ func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *T
 	return t.expressionTypes[expressionNode]
 }
 
-func (t *SymbolTable) String() string{
+func (t *SymbolTable) String() string {
 	return fmt.Sprintf("Global Scope: %s", t.GlobalScope)
 }

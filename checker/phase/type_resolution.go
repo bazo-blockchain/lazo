@@ -54,7 +54,7 @@ func (tr *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 
 func (tr *TypeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functionNode *node.FunctionNode) {
 	total := len(functionNode.ReturnTypes)
-	if  total > 3 {
+	if total > 3 {
 		tr.reportError(functionNode, "More than 3 return types are not allowed")
 	}
 

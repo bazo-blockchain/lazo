@@ -79,7 +79,7 @@ func TestFuncParamDesignator(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.getFuncStatementNode(0,0).(*node.VariableNode).Expression,
+		tester.getFuncStatementNode(0, 0).(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
 		tester.globalScope.BoolType)
 }
@@ -93,7 +93,7 @@ func TestFuncParamInsideIf(t *testing.T) {
 		}
 	`, true)
 
-	ifStmt := tester.getFuncStatementNode(0,0).(*node.IfStatementNode)
+	ifStmt := tester.getFuncStatementNode(0, 0).(*node.IfStatementNode)
 	tester.assertDesignator(
 		ifStmt.Condition,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
@@ -117,7 +117,7 @@ func TestLocalVarDesignator(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.getFuncStatementNode(0,1).(*node.VariableNode).Expression,
+		tester.getFuncStatementNode(0, 1).(*node.VariableNode).Expression,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
 }
@@ -131,7 +131,7 @@ func TestFuncNameAsLocalVarName(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.getFuncStatementNode(0,1).(*node.VariableNode).Expression,
+		tester.getFuncStatementNode(0, 1).(*node.VariableNode).Expression,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
 }
@@ -154,7 +154,7 @@ func TestDesignatorWithAssignment(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.getFuncStatementNode(0,1).(*node.AssignmentStatementNode).Left,
+		tester.getFuncStatementNode(0, 1).(*node.AssignmentStatementNode).Left,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
 }
@@ -210,7 +210,7 @@ func TestLocalVarAccessFromSubScope(t *testing.T) {
 		}
 	`, true)
 
-	ifStmt := tester.getFuncStatementNode(0,2).(*node.IfStatementNode)
+	ifStmt := tester.getFuncStatementNode(0, 2).(*node.IfStatementNode)
 	tester.assertDesignator(
 		ifStmt.Condition,
 		tester.getLocalVariableSymbol(0, 0),
@@ -255,7 +255,7 @@ func TestLocalVarWithReturn(t *testing.T) {
 		}
 	`, true)
 
-	returnStmt := tester.getFuncStatementNode(0,1).(*node.ReturnStatementNode)
+	returnStmt := tester.getFuncStatementNode(0, 1).(*node.ReturnStatementNode)
 	tester.assertDesignator(
 		returnStmt.Expressions[0],
 		tester.getLocalVariableSymbol(0, 0),

@@ -10,16 +10,16 @@ import (
  *	IL Builder constructs Metadata
  */
 type ILBuilder struct {
-	symbolTable *symbol.SymbolTable
-	MetaData *il.MetaData
+	symbolTable  *symbol.SymbolTable
+	MetaData     *il.MetaData
 	functionRefs map[*symbol.FunctionSymbol]int
-	Errors []error
+	Errors       []error
 }
 
 func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
-		symbolTable: symbolTable,
-		MetaData: &il.MetaData{},
+		symbolTable:  symbolTable,
+		MetaData:     &il.MetaData{},
 		functionRefs: map[*symbol.FunctionSymbol]int{},
 	}
 	builder.GenerateMetaData()
@@ -92,7 +92,6 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 	for _, local := range function.LocalVariables {
 		functionData.LocalTypes = append(functionData.LocalTypes, b.getTypeRef(local.Type))
 	}
-
 
 }
 

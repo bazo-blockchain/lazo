@@ -9,15 +9,15 @@ import (
 
 type Generator struct {
 	symbolTable *symbol.SymbolTable
-	ilBuilder *emit.ILBuilder
-	Metadata *il.MetaData
-	errors []error
+	ilBuilder   *emit.ILBuilder
+	Metadata    *il.MetaData
+	errors      []error
 }
 
 func New(symbolTable *symbol.SymbolTable) *Generator {
 	p := &Generator{
 		symbolTable: symbolTable,
-		ilBuilder: emit.NewILBuilder(symbolTable),
+		ilBuilder:   emit.NewILBuilder(symbolTable),
 	}
 	p.Metadata = p.ilBuilder.MetaData
 	return p

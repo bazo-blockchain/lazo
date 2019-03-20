@@ -27,7 +27,7 @@ func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 	v.ConcreteVisitor.VisitStatementBlock(node.Body)
 }
 
-func (v *AbstractVisitor) VisitStatementBlock(stmts []StatementNode){
+func (v *AbstractVisitor) VisitStatementBlock(stmts []StatementNode) {
 	for _, statement := range stmts {
 		statement.Accept(v.ConcreteVisitor)
 	}
@@ -85,5 +85,3 @@ func (v *AbstractVisitor) VisitBoolLiteralNode(node *BoolLiteralNode) {
 func (v *AbstractVisitor) VisitErrorNode(node *ErrorNode) {
 	// Nothing to do here
 }
-
-

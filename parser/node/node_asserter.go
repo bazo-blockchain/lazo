@@ -84,7 +84,7 @@ func AssertBoolLiteral(t *testing.T, node *BoolLiteralNode, value bool) {
 	assert.Equal(t, node.Value, value)
 }
 
-func AssertError(t *testing.T, node *ErrorNode,  message string) {
+func AssertError(t *testing.T, node *ErrorNode, message string) {
 	assert.Equal(t, node.Message, message)
 }
 

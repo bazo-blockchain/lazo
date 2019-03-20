@@ -142,7 +142,7 @@ func (p *Parser) parseStatementBlock() []node.StatementNode {
 		}
 	}
 	p.check(token.CloseBrace)
-	if !p.isSymbol(token.Else){
+	if !p.isSymbol(token.Else) {
 		p.checkAndSkipNewLines(token.NewLine)
 	}
 	return statements
@@ -202,7 +202,7 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 
 	designator := &node.DesignatorNode{
 		AbstractNode: abstractNode,
-		Value:     	  identifier,
+		Value:        identifier,
 	}
 	p.nextToken() // skip '=' sign
 
@@ -210,9 +210,9 @@ func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentSta
 	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.AssignmentStatementNode{
-		AbstractNode:	abstractNode,
-		Left:			designator,
-		Right:			expression,
+		AbstractNode: abstractNode,
+		Left:         designator,
+		Right:        expression,
 	}
 }
 
@@ -239,9 +239,9 @@ func (p *Parser) parseIfStatement() *node.IfStatementNode {
 
 	return &node.IfStatementNode{
 		AbstractNode: abstractNode,
-		Condition: condition,
-		Then: then,
-		Else: alternative,
+		Condition:    condition,
+		Then:         then,
+		Else:         alternative,
 	}
 }
 
@@ -254,7 +254,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	if !p.isSymbol(token.NewLine) {
 		returnValues = append(returnValues, p.parseExpression())
 
-		for !p.isEnd() && p.isSymbol(token.Comma){
+		for !p.isEnd() && p.isSymbol(token.Comma) {
 			p.nextToken() // skip ','
 			returnValues = append(returnValues, p.parseExpression())
 		}
