@@ -114,4 +114,5 @@ func generate(symbolTable *symbol.SymbolTable) {
 	}
 
 	metadata.Save("metadata.json")
+	metadata.SaveBazoIL("program.il")
 }
