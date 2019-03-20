@@ -18,7 +18,7 @@ func NewILAssembler(function *il.FunctionData) *ILAssembler {
 }
 
 func (a *ILAssembler) Complete() {
-	a.Emit(il.RET)
+	// a.Emit(il.RET)
 	// resolve labels
 }
 

@@ -10,6 +10,7 @@ addons:
 script:
   - go test -v ./... -coverprofile=coverage.out -coverpkg=./...
   - go run main.go compile program.lazo
+  - go run main.go exec program.il
   - sonar-scanner
 
 after_success:

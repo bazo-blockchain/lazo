@@ -31,6 +31,6 @@ func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStat
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode){
-	v.assembler.EmitOperand(il.LOAD, node.Value)
+	v.assembler.EmitOperand(il.PUSH, node.Value)
 }
 

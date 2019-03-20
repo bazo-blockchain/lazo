@@ -2,4 +2,8 @@ contract Test {
     function int test() {
         return 1
     }
+
+    function int test2() {
+        return 2
+    }
 }

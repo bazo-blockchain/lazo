@@ -30,7 +30,11 @@ func (d *Metadata) SaveBazoIL(outputFile string) {
 	w := bufio.NewWriter(f)
 
 	for _, function := range d.Contract.Functions {
+		// w.WriteString(fmt.Sprintf("%s: \n", function.Identifier)) // function calls does not work
 		for _, code := range function.Instructions {
+			if code.OpCode == RET {
+				continue
+			}
 			var operand interface{}
 			if code.Operand != nil {
 				operand = fmt.Sprintf("%v", code.Operand)
@@ -40,5 +44,6 @@ func (d *Metadata) SaveBazoIL(outputFile string) {
 			w.WriteString(fmt.Sprintf("%s %v \n", OpCodeLiterals[code.OpCode], operand))
 		}
 	}
+	w.WriteString("HALT \n")
 	w.Flush()
 }

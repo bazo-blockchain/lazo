@@ -1,3 +1,3 @@
-LOAD 1 
-RET  
-RET  
+PUSH 1 
+PUSH 2 
+HALT 
