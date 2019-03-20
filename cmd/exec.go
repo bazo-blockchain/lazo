@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	bazoVM "github.com/tk-codes/bazo-smartcontract/src/vm"
-	ilParser "github.com/tk-codes/bazo-smartcontract/src/parser"
 	"github.com/spf13/cobra"
+	ilParser "github.com/tk-codes/bazo-smartcontract/src/parser"
+	bazoVM "github.com/tk-codes/bazo-smartcontract/src/vm"
 	"io/ioutil"
 )
 

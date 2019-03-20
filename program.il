@@ -1,3 +1,4 @@
 PUSH 1 
-PUSH 2 
+PUSH 1 
+ADD  
 HALT 

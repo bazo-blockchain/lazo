@@ -28,7 +28,7 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 
 func (a *ILAssembler) EmitOperand(opCode il.OpCode, operand interface{}) {
 	a.function.Instructions = append(a.function.Instructions, &il.Instruction{
-		OpCode: opCode,
+		OpCode:  opCode,
 		Operand: operand,
 	})
 }
