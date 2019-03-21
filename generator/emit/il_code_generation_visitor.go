@@ -78,6 +78,11 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 	}
 }
 
+func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+
+
+}
+
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
 	v.assembler.Emit(il.RET)
