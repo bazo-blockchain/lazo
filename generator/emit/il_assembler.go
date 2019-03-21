@@ -4,21 +4,20 @@ import (
 	"github.com/bazo-blockchain/lazo/generator/il"
 )
 
-
-type Label struct {}
+type Label struct{}
 
 /**
  * IL Assembler creates IL Instructions
  */
 type ILAssembler struct {
 	function *il.FunctionData
-	targets map[*Label]int
+	targets  map[*Label]int
 }
 
 func NewILAssembler(function *il.FunctionData) *ILAssembler {
 	return &ILAssembler{
 		function: function,
-		targets: map[*Label]int{},
+		targets:  map[*Label]int{},
 	}
 }
 
