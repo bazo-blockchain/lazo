@@ -1,7 +1,6 @@
 package il
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -34,13 +33,13 @@ func (d *Metadata) SaveBazoByteCode(outputFile string) {
 			if code.OpCode == RET {
 				continue
 			}
-			var operand interface{}
+			bytes := []byte{byte(code.OpCode)}
 			if code.Operand != nil {
-				operand = fmt.Sprintf("%v", code.Operand)
-			} else {
-				operand = ""
+				bytes = append(bytes, code.Operand.([]byte)...)
 			}
-			w.WriteString(fmt.Sprintf("%s %v \n", OpCodeLiterals[code.OpCode], operand))
+			fmt.Println(bytes)
+			f.Write(bytes)
 		}
 	}
+	f.Write([]byte{byte(HALT)})
 }

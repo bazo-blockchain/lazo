@@ -28,7 +28,6 @@ func NewCodeGenerationVisitor(
 	return v
 }
 
-
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		switch expNode.Operator {
@@ -149,7 +148,9 @@ func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStat
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
-	v.assembler.EmitOperand(il.PUSH, node.Value)
+	bytes := []byte{1, 0}
+	bytes = append(bytes, node.Value.Bytes()...)
+	v.assembler.EmitOperand(il.PUSH, bytes)
 }
 
 // Helper Functions

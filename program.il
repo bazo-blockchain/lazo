@@ -1,4 +1,0 @@
-PUSH 8
-PUSH 5
-ADD
-HALT
