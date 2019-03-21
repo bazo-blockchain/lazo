@@ -79,8 +79,31 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 }
 
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+	endLabel := v.assembler.CreateLabel()
+	node.Condition.Accept(v)
+	if node.Else == nil {
+		// If-Statement
+		// TODO Make sure that it works the same way as brfalse does!!!
+		v.assembler.EmitOperand(il.JMPIF, endLabel)
+		for _, stmt := range node.Then {
+			stmt.Accept(v)
+		}
+	} else {
+		// If-Else-Statement
+		elseLabel := v.assembler.CreateLabel()
+		// TODO Make sure that it works the same way as brfalse does!!!
+		v.assembler.EmitOperand(il.JMPIF, elseLabel)
+		for _, stmt := range node.Then {
+			stmt.Accept(v)
+		}
+		v.assembler.EmitOperand(il.JMP, endLabel)
+		v.assembler.SetLabel(elseLabel)
+		for _, stmt := range node.Else {
+			stmt.Accept(v)
+		}
 
-
+	}
+	v.assembler.SetLabel(endLabel)
 }
 
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {

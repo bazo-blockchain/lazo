@@ -18,6 +18,7 @@ type ILAssembler struct {
 func NewILAssembler(function *il.FunctionData) *ILAssembler {
 	return &ILAssembler{
 		function: function,
+		targets: map[*Label]int{},
 	}
 }
 

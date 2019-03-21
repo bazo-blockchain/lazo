@@ -1,5 +1,5 @@
+JMPIF &{} 
+PUSH 1 
+JMP &{} 
 PUSH 2 
-NEG  
-PUSH 2 
-EQ  
 HALT 
