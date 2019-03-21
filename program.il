@@ -1,4 +1,3 @@
-PUSH 1 
-PUSH 1 
-ADD  
+PUSH 2 
+NEG  
 HALT 

@@ -32,7 +32,16 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(node *node.BinaryExp
 		v.assembler.Emit(op)
 	} else {
 		// TODO complete binary exp logic
-		panic("binary operator not yet supported")
+		panic("binary operator not supported")
+	}
+}
+
+func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
+	if op, ok := unaryOpCodes[node.Operator]; ok {
+		v.AbstractVisitor.VisitUnaryExpressionNode(node)
+		v.assembler.Emit(op)
+	} else {
+		panic("unary operator not supported")
 	}
 }
 
@@ -53,4 +62,8 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction:    il.SUB,
 	token.Multiplication: il.MULT,
 	token.Division:       il.DIV,
+}
+
+var unaryOpCodes = map[token.Symbol]il.OpCode{
+	token.Subtraction: il.NEG,
 }
