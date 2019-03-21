@@ -28,6 +28,7 @@ func NewCodeGenerationVisitor(
 	return v
 }
 
+
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		switch expNode.Operator {
@@ -41,15 +42,51 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 				v.assembler.EmitOperand(il.PUSH, left.Value)
 			}
 			v.assembler.Emit(op)
-
 		default:
 			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
 			v.assembler.Emit(op)
 		}
-	} else {
-		// TODO complete binary exp logic
-		panic("binary operator not supported")
+		return
 	}
+
+	if expNode.Operator == token.And {
+		returnFalseLabel := v.assembler.CreateLabel()
+		skipLabel := v.assembler.CreateLabel()
+		expNode.Left.Accept(v)
+		v.assembler.Emit(il.NEG)
+		v.assembler.EmitOperand(il.JMPIF, returnFalseLabel)
+		expNode.Right.Accept(v)
+		v.assembler.Emit(il.NEG)
+		v.assembler.EmitOperand(il.JMPIF, returnFalseLabel)
+		// Load constant boolean true
+		v.assembler.EmitOperand(il.PUSH, 1)
+		v.assembler.EmitOperand(il.JMP, skipLabel)
+		v.assembler.SetLabel(returnFalseLabel)
+		// Load constant boolean false
+		v.assembler.EmitOperand(il.PUSH, 0)
+		v.assembler.SetLabel(skipLabel)
+		return
+	}
+
+	if expNode.Operator == token.Or {
+		returnTrueLabel := v.assembler.CreateLabel()
+		skipLabel := v.assembler.CreateLabel()
+		expNode.Left.Accept(v)
+		v.assembler.EmitOperand(il.JMPIF, returnTrueLabel)
+		expNode.Right.Accept(v)
+		v.assembler.EmitOperand(il.JMPIF, returnTrueLabel)
+		// Load constant boolean false
+		v.assembler.EmitOperand(il.PUSH, 1)
+		v.assembler.EmitOperand(il.JMP, skipLabel)
+		v.assembler.SetLabel(returnTrueLabel)
+		// Load constant boolean true
+		v.assembler.EmitOperand(il.PUSH, 1)
+		v.assembler.SetLabel(skipLabel)
+		return
+	}
+
+	// TODO complete binary exp logic
+	panic("binary operator not supported")
 }
 
 func lessThan(x *big.Int, y *big.Int) bool {
