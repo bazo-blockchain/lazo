@@ -83,7 +83,8 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 	node.Condition.Accept(v)
 	if node.Else == nil {
 		// If-Statement
-		// TODO Make sure that it works the same way as brfalse does!!!
+		// Negate so
+		v.assembler.Emit(il.NEG)
 		v.assembler.EmitOperand(il.JMPIF, endLabel)
 		for _, stmt := range node.Then {
 			stmt.Accept(v)
@@ -91,7 +92,7 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 	} else {
 		// If-Else-Statement
 		elseLabel := v.assembler.CreateLabel()
-		// TODO Make sure that it works the same way as brfalse does!!!
+		v.assembler.Emit(il.NEG)
 		v.assembler.EmitOperand(il.JMPIF, elseLabel)
 		for _, stmt := range node.Then {
 			stmt.Accept(v)

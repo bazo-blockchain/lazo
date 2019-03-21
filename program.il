@@ -1,3 +1,4 @@
+NEG  
 JMPIF &{} 
 PUSH 1 
 JMP &{} 
