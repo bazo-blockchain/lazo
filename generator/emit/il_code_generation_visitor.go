@@ -103,7 +103,7 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 	if node.Else == nil {
 		// If-Statement
 		v.assembler.Emit(il.NEG)
-		v.assembler.EmitOperand(il.JMPIF, endLabel)
+		v.assembler.JmpIf(endLabel)
 		for _, stmt := range node.Then {
 			stmt.Accept(v)
 		}
@@ -131,7 +131,7 @@ func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStat
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
-	v.pushInt(node.Value)
+	v.assembler.PushInt(node.Value)
 }
 
 // Helper Functions
@@ -171,12 +171,4 @@ func sub(x *big.Int, y *big.Int) *big.Int {
 func add(x *big.Int, y *big.Int) *big.Int {
 	value := big.NewInt(0).Add(x, y)
 	return value
-}
-
-func (v *ILCodeGenerationVisitor) pushInt(value *big.Int) {
-	var sign byte
-	if value.Sign() == -1 {
-		sign = 1
-	}
-	v.assembler.EmitOperand(il.PUSH, append([]byte{1, sign}, value.Bytes()...))
 }
