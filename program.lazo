@@ -1,9 +1,5 @@
 contract Test {
-    function int test() {
-        if (true) {
-            return 1
-        } else {
-            return 2
-        }
+    function bool test() {
+        return true && true
     }
 }
