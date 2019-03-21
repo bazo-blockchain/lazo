@@ -1,10 +1,12 @@
 package emit
 
 import (
+	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"math/big"
 )
 
 type ILCodeGenerationVisitor struct {
@@ -26,14 +28,45 @@ func NewCodeGenerationVisitor(
 	return v
 }
 
-func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
-	if op, ok := binaryOpCodes[node.Operator]; ok {
-		v.AbstractVisitor.VisitBinaryExpressionNode(node)
-		v.assembler.Emit(op)
+func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
+	if op, ok := binaryOpCodes[expNode.Operator]; ok {
+		switch expNode.Operator {
+		case token.Exponent:
+			exponent := expNode.Right.(*node.IntegerLiteralNode)
+			left := expNode.Left.(*node.IntegerLiteralNode)
+			expNode.Right = expNode.Left
+			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
+			for i := big.NewInt(0); lessThan(i, sub(exponent.Value, big.NewInt(2))); i = add(i, big.NewInt(1)) {
+				v.assembler.Emit(op)
+				v.assembler.EmitOperand(il.PUSH, left.Value)
+			}
+			v.assembler.Emit(op)
+
+		default:
+			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
+			v.assembler.Emit(op)
+		}
 	} else {
 		// TODO complete binary exp logic
 		panic("binary operator not supported")
 	}
+}
+
+func lessThan(x *big.Int, y *big.Int) bool {
+	value := x.Cmp(y) == -1
+	return value
+}
+
+func sub(x *big.Int, y *big.Int) *big.Int {
+	value := big.NewInt(0).Sub(x, y)
+	valstr := value.String()
+	fmt.Println(valstr)
+	return value
+}
+
+func add(x *big.Int, y *big.Int) *big.Int {
+	value := big.NewInt(0).Add(x, y)
+	return value
 }
 
 func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
@@ -62,6 +95,8 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction:    il.SUB,
 	token.Multiplication: il.MULT,
 	token.Division:       il.DIV,
+	token.Modulo:		  il.MOD,
+	token.Exponent:		  il.MULT,
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
