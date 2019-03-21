@@ -14,14 +14,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e56f844f207ccb0e941ad716b76b29e2c1bb2c53b073691c85a4c7643a89567e"
-  name = "github.com/bazo-blockchain/bazo-parser"
-  packages = ["parser"]
-  pruneopts = "UT"
-  revision = "1d995244c63b0124752238615361176df6ee1ed2"
-
-[[projects]]
-  branch = "master"
   digest = "1:df3ec5d54c84275405bf82b9db685e572bc086ae9dda3d970721c562904b46ce"
   name = "github.com/bazo-blockchain/bazo-vm"
   packages = ["vm"]
@@ -134,7 +126,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/bazo-blockchain/bazo-parser/parser",
     "github.com/bazo-blockchain/bazo-vm/vm",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
