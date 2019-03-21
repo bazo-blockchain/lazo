@@ -22,8 +22,8 @@ func NewILAssembler(function *il.FunctionData) *ILAssembler {
 }
 
 func (a *ILAssembler) Complete() {
-	// a.Emit(il.RET)
-	// resolve labels
+	a.Emit(il.RET)
+	a.FixLabels()
 }
 
 func (a *ILAssembler) CreateLabel() *Label {

@@ -1,8 +1,8 @@
 NEG  
-JMPIF &{} 
+JMPIF 5 
 NEG  
-JMPIF &{} 
+JMPIF 3 
 PUSH 1 
-JMP &{} 
+JMP 1 
 PUSH 0 
 HALT 
