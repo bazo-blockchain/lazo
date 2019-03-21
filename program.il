@@ -1,5 +1,5 @@
 PUSH 2 
-PUSH 2 
-MULT  
 NEG  
+PUSH 2 
+EQ  
 HALT 

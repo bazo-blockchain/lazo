@@ -97,6 +97,12 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Division:       il.DIV,
 	token.Modulo:		  il.MOD,
 	token.Exponent:		  il.MULT,
+	token.Greater: 		  il.GT,
+	token.GreaterEqual:   il.GTE,
+	token.LessEqual:	  il.LTE,
+	token.Less: 		  il.LT,
+	token.Equal:		  il.EQ,
+	token.Unequal:		  il.NEQ,
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
