@@ -83,7 +83,6 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 	node.Condition.Accept(v)
 	if node.Else == nil {
 		// If-Statement
-		// Negate so
 		v.assembler.Emit(il.NEG)
 		v.assembler.EmitOperand(il.JMPIF, endLabel)
 		for _, stmt := range node.Then {
