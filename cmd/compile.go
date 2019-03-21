@@ -113,6 +113,5 @@ func generate(symbolTable *symbol.SymbolTable) {
 		os.Exit(1)
 	}
 
-	metadata.Save("metadata.json")
-	metadata.SaveBazoIL("program.il")
+	metadata.SaveBazoByteCode("program.bc")
 }

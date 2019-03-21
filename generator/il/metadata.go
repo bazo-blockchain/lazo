@@ -21,13 +21,12 @@ func (d *Metadata) Save(destinationFile string) {
 	_ = ioutil.WriteFile(destinationFile, contract, 0644)
 }
 
-func (d *Metadata) SaveBazoIL(outputFile string) {
+func (d *Metadata) SaveBazoByteCode(outputFile string) {
 	f, err := os.Create(outputFile)
+	defer f.Close()
 	if err != nil {
 		panic(err)
 	}
-
-	w := bufio.NewWriter(f)
 
 	for _, function := range d.Contract.Functions {
 		// w.WriteString(fmt.Sprintf("%s: \n", function.Identifier)) // function calls does not work
@@ -44,6 +43,4 @@ func (d *Metadata) SaveBazoIL(outputFile string) {
 			w.WriteString(fmt.Sprintf("%s %v \n", OpCodeLiterals[code.OpCode], operand))
 		}
 	}
-	w.WriteString("HALT \n")
-	w.Flush()
 }
