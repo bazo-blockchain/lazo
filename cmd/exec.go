@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	ilParser "github.com/bazo-blockchain/bazo-parser/parser"
+	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/spf13/cobra"
-	ilParser "github.com/tk-codes/bazo-smartcontract/src/parser"
-	bazoVM "github.com/tk-codes/bazo-smartcontract/src/vm"
 	"io/ioutil"
 )
 
@@ -32,8 +32,19 @@ func execute(ilSourceFile string) {
 	}
 
 	ilCode := ilParser.Parse(string(contract))
-	vm := bazoVM.NewVM()
-	vm.SetContractCode(ilCode)
-	vm.Exec(true)
-	fmt.Println(vm.GetResult())
+	fmt.Println(ilCode)
+	ilCode = []byte{
+		vm.PUSH, 1, 0, 4, // push 1 argument, 0=positive, int 4
+		vm.PUSH, 1, 0, 3,
+		vm.ADD,			 // add 4 + 3 = 7
+		vm.HALT,
+	}
+
+	vm := vm.NewVM(vm.NewMockContext(ilCode))
+	isSuccess := vm.Exec(true)
+	if !isSuccess {
+		panic("Code execution failed")
+	}
+	result, _ := vm.PeekResult()
+	fmt.Printf("%d", result) // [0, 7] => +7
 }
