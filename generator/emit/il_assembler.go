@@ -5,22 +5,24 @@ import (
 	"math/big"
 )
 
-type Label struct{}
+type Label uint
 
 /**
  * IL Assembler creates IL Instructions
  */
 type ILAssembler struct {
-	function    *il.FunctionData
-	targets     map[*Label]int
-	byteCounter int
+	function     *il.FunctionData
+	targets      map[Label]int
+	labelCounter int
+	byteCounter  int
 }
 
 func NewILAssembler(function *il.FunctionData) *ILAssembler {
 	return &ILAssembler{
-		function:    function,
-		targets:     map[*Label]int{},
-		byteCounter: 0,
+		function:     function,
+		targets:      map[Label]int{},
+		labelCounter: -1,
+		byteCounter:  0,
 	}
 }
 
@@ -29,18 +31,19 @@ func (a *ILAssembler) Complete() {
 	a.ResolveLabels()
 }
 
-func (a *ILAssembler) CreateLabel() *Label {
-	return &Label{}
+func (a *ILAssembler) CreateLabel() Label {
+	a.labelCounter++
+	return Label(a.labelCounter)
 }
 
-func (a *ILAssembler) SetLabel(label *Label) {
+func (a *ILAssembler) SetLabel(label Label) {
 	a.targets[label] = a.byteCounter
 }
 
 func (a *ILAssembler) ResolveLabels() {
 	for _, instruction := range a.function.Instructions {
 		operand := instruction.Operand
-		if op, ok := operand.(*Label); ok {
+		if op, ok := operand.(Label); ok {
 			instruction.Operand = []byte{0, byte(a.targets[op])}
 		}
 	}
@@ -51,6 +54,7 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 	a.byteCounter++
 }
 
+// TODO: Refactor to private function
 func (a *ILAssembler) EmitOperand(opCode il.OpCode, operand interface{}) {
 	a.function.Instructions = append(a.function.Instructions, &il.Instruction{
 		OpCode:  opCode,
@@ -69,12 +73,17 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	a.byteCounter += 3 + total
 }
 
-func (a *ILAssembler) Jmp(label *Label) {
+func (a *ILAssembler) Jmp(label Label) {
 	a.EmitOperand(il.JMP, label)
 	a.byteCounter += 3
 }
 
-func (a *ILAssembler) JmpIf(label *Label) {
+func (a *ILAssembler) JmpIfTrue(label Label) {
 	a.EmitOperand(il.JMPIF, label)
 	a.byteCounter += 3
+}
+
+func (a *ILAssembler) NegBool() {
+	a.PushInt(big.NewInt(0))
+	a.Emit(il.EQ)
 }

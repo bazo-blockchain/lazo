@@ -98,24 +98,22 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 }
 
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+	elseLabel := v.assembler.CreateLabel()
 	endLabel := v.assembler.CreateLabel()
-	node.Condition.Accept(v) // 1 if equal, otherwise 0
-	if node.Else == nil {
-		// If-Statement
-		v.assembler.Emit(il.NEG)
-		v.assembler.JmpIf(endLabel)
-		v.VisitStatementBlock(node.Then)
-	} else {
-		// If-Else-Statement
-		elseLabel := v.assembler.CreateLabel()
-		v.assembler.Emit(il.NEG)	 // <-- does not work, because 0 NEG => 0
-		v.assembler.JmpIf(elseLabel) // jump if 1
-		v.VisitStatementBlock(node.Then)
-		v.assembler.Jmp(endLabel)
 
-		v.assembler.SetLabel(elseLabel)
-		v.VisitStatementBlock(node.Else)
-	}
+	// Condition
+	node.Condition.Accept(v)
+	v.assembler.NegBool()
+	v.assembler.JmpIfTrue(elseLabel)
+
+	// Then
+	v.VisitStatementBlock(node.Then)
+	v.assembler.Jmp(endLabel)
+
+	// Else
+	v.assembler.SetLabel(elseLabel)
+	v.VisitStatementBlock(node.Else)
+
 	v.assembler.SetLabel(endLabel)
 }
 
