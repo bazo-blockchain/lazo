@@ -1,7 +1,6 @@
 package emit
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"math/big"
 )
@@ -42,7 +41,6 @@ func (a *ILAssembler) ResolveLabels() {
 	for _, instruction := range a.function.Instructions {
 		operand := instruction.Operand
 		if op, ok := operand.(*Label); ok {
-			fmt.Println(a.targets[op])
 			instruction.Operand = []byte{0, byte(a.targets[op])}
 		}
 	}
@@ -69,6 +67,11 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	total := len(bytes)
 	a.EmitOperand(il.PUSH, append([]byte{byte(total), sign}, bytes...))
 	a.byteCounter += 3 + total
+}
+
+func (a *ILAssembler) Jmp(label *Label) {
+	a.EmitOperand(il.JMP, label)
+	a.byteCounter += 3
 }
 
 func (a *ILAssembler) JmpIf(label *Label) {

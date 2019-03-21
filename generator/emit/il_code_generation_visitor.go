@@ -99,35 +99,29 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	endLabel := v.assembler.CreateLabel()
-	node.Condition.Accept(v)
+	node.Condition.Accept(v) // 1 if equal, otherwise 0
 	if node.Else == nil {
 		// If-Statement
 		v.assembler.Emit(il.NEG)
 		v.assembler.JmpIf(endLabel)
-		for _, stmt := range node.Then {
-			stmt.Accept(v)
-		}
+		v.VisitStatementBlock(node.Then)
 	} else {
 		// If-Else-Statement
 		elseLabel := v.assembler.CreateLabel()
-		v.assembler.Emit(il.NEG)
-		v.assembler.EmitOperand(il.JMPIF, elseLabel)
-		for _, stmt := range node.Then {
-			stmt.Accept(v)
-		}
-		v.assembler.EmitOperand(il.JMP, endLabel)
-		v.assembler.SetLabel(elseLabel)
-		for _, stmt := range node.Else {
-			stmt.Accept(v)
-		}
+		v.assembler.Emit(il.NEG)	 // <-- does not work, because 0 NEG => 0
+		v.assembler.JmpIf(elseLabel) // jump if 1
+		v.VisitStatementBlock(node.Then)
+		v.assembler.Jmp(endLabel)
 
+		v.assembler.SetLabel(elseLabel)
+		v.VisitStatementBlock(node.Else)
 	}
 	v.assembler.SetLabel(endLabel)
 }
 
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
-	v.assembler.Emit(il.RET)
+	v.assembler.Emit(il.HALT)
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
