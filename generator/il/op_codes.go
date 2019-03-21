@@ -35,12 +35,12 @@ const (
 	SSTORE
 	LOAD
 	SLOAD
-	ADDRESS  // Address of account
-	ISSUER   // Owner of smart contract account
-	BALANCE  // Balance of account
+	ADDRESS // Address of account
+	ISSUER  // Owner of smart contract account
+	BALANCE // Balance of account
 	CALLER
-	CALLVAL   // Amount of bazo coins transacted in transaction
-	CALLDATA  // Parameters and function signature hash
+	CALLVAL  // Amount of bazo coins transacted in transaction
+	CALLDATA // Parameters and function signature hash
 	NEWMAP
 	MAPHASKEY
 	MAPPUSH

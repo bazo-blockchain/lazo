@@ -38,7 +38,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
 			for i := big.NewInt(0); lessThan(i, sub(exponent.Value, big.NewInt(2))); i = add(i, big.NewInt(1)) {
 				v.assembler.Emit(op)
-				v.assembler.EmitOperand(il.PUSH, left.Value)
+				v.assembler.AddInstruction(il.PUSH, left.Value)
 			}
 			v.assembler.Emit(op)
 		default:
@@ -53,16 +53,16 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		skipLabel := v.assembler.CreateLabel()
 		expNode.Left.Accept(v)
 		v.assembler.Emit(il.NEG)
-		v.assembler.EmitOperand(il.JMPIF, returnFalseLabel)
+		v.assembler.AddInstruction(il.JMPIF, returnFalseLabel)
 		expNode.Right.Accept(v)
 		v.assembler.Emit(il.NEG)
-		v.assembler.EmitOperand(il.JMPIF, returnFalseLabel)
+		v.assembler.AddInstruction(il.JMPIF, returnFalseLabel)
 		// Load constant boolean true
-		v.assembler.EmitOperand(il.PUSH, 1)
-		v.assembler.EmitOperand(il.JMP, skipLabel)
+		v.assembler.AddInstruction(il.PUSH, 1)
+		v.assembler.AddInstruction(il.JMP, skipLabel)
 		v.assembler.SetLabel(returnFalseLabel)
 		// Load constant boolean false
-		v.assembler.EmitOperand(il.PUSH, 0)
+		v.assembler.AddInstruction(il.PUSH, 0)
 		v.assembler.SetLabel(skipLabel)
 		return
 	}
@@ -71,15 +71,15 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		returnTrueLabel := v.assembler.CreateLabel()
 		skipLabel := v.assembler.CreateLabel()
 		expNode.Left.Accept(v)
-		v.assembler.EmitOperand(il.JMPIF, returnTrueLabel)
+		v.assembler.AddInstruction(il.JMPIF, returnTrueLabel)
 		expNode.Right.Accept(v)
-		v.assembler.EmitOperand(il.JMPIF, returnTrueLabel)
+		v.assembler.AddInstruction(il.JMPIF, returnTrueLabel)
 		// Load constant boolean false
-		v.assembler.EmitOperand(il.PUSH, 1)
-		v.assembler.EmitOperand(il.JMP, skipLabel)
+		v.assembler.AddInstruction(il.PUSH, 1)
+		v.assembler.AddInstruction(il.JMP, skipLabel)
 		v.assembler.SetLabel(returnTrueLabel)
 		// Load constant boolean true
-		v.assembler.EmitOperand(il.PUSH, 1)
+		v.assembler.AddInstruction(il.PUSH, 1)
 		v.assembler.SetLabel(skipLabel)
 		return
 	}
@@ -119,7 +119,7 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
-	v.assembler.Emit(il.HALT)
+	v.assembler.Emit(il.HALT) // FIXME: Temporary until function calls are implemented
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
