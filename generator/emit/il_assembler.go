@@ -23,7 +23,7 @@ func NewILAssembler(function *il.FunctionData) *ILAssembler {
 
 func (a *ILAssembler) Complete() {
 	a.Emit(il.RET)
-	a.FixLabels()
+	a.ResolveLabels()
 }
 
 func (a *ILAssembler) CreateLabel() *Label {
@@ -34,7 +34,7 @@ func (a *ILAssembler) SetLabel(label *Label) {
 	a.targets[label] = len(a.function.Instructions)
 }
 
-func (a *ILAssembler) FixLabels() {
+func (a *ILAssembler) ResolveLabels() {
 	for i, instruction := range a.function.Instructions {
 		operand := instruction.Operand
 		if op, ok := operand.(*Label); ok {

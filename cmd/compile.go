@@ -113,5 +113,5 @@ func generate(symbolTable *symbol.SymbolTable) {
 		os.Exit(1)
 	}
 
-	metadata.SaveBazoByteCode("program.bc")
+	metadata.SaveByteCode("program.bc")
 }

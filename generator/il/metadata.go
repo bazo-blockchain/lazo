@@ -20,7 +20,7 @@ func (d *Metadata) Save(destinationFile string) {
 	_ = ioutil.WriteFile(destinationFile, contract, 0644)
 }
 
-func (d *Metadata) SaveBazoByteCode(outputFile string) {
+func (d *Metadata) SaveByteCode(outputFile string) {
 	f, err := os.Create(outputFile)
 	defer f.Close()
 	if err != nil {

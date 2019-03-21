@@ -88,23 +88,6 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 	panic("binary operator not supported")
 }
 
-func lessThan(x *big.Int, y *big.Int) bool {
-	value := x.Cmp(y) == -1
-	return value
-}
-
-func sub(x *big.Int, y *big.Int) *big.Int {
-	value := big.NewInt(0).Sub(x, y)
-	valstr := value.String()
-	fmt.Println(valstr)
-	return value
-}
-
-func add(x *big.Int, y *big.Int) *big.Int {
-	value := big.NewInt(0).Add(x, y)
-	return value
-}
-
 func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
 	if op, ok := unaryOpCodes[node.Operator]; ok {
 		v.AbstractVisitor.VisitUnaryExpressionNode(node)
@@ -148,9 +131,7 @@ func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStat
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
-	bytes := []byte{1, 0}
-	bytes = append(bytes, node.Value.Bytes()...)
-	v.assembler.EmitOperand(il.PUSH, bytes)
+	v.pushInt(node.Value)
 }
 
 // Helper Functions
@@ -173,4 +154,29 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
+}
+
+func lessThan(x *big.Int, y *big.Int) bool {
+	value := x.Cmp(y) == -1
+	return value
+}
+
+func sub(x *big.Int, y *big.Int) *big.Int {
+	value := big.NewInt(0).Sub(x, y)
+	valstr := value.String()
+	fmt.Println(valstr)
+	return value
+}
+
+func add(x *big.Int, y *big.Int) *big.Int {
+	value := big.NewInt(0).Add(x, y)
+	return value
+}
+
+func (v *ILCodeGenerationVisitor) pushInt(value *big.Int) {
+	var sign byte
+	if value.Sign() == -1 {
+		sign = 1
+	}
+	v.assembler.EmitOperand(il.PUSH, append([]byte{1, sign}, value.Bytes()...))
 }
