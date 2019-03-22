@@ -113,6 +113,16 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 
 }
 
+func (v *ILCodeGenerationVisitor) VisitAssignmentNode(node *node.AssignmentStatementNode) {
+	// TODO Implement
+	v.AbstractVisitor.VisitAssignmentStatementNode(node)
+}
+
+func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
+	// TODO Implement
+	v.AbstractVisitor.VisitDesignatorNode(node)
+}
+
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	elseLabel := v.assembler.CreateLabel()
 	endLabel := v.assembler.CreateLabel()
@@ -150,6 +160,16 @@ func (v *ILCodeGenerationVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNod
 		boolVal = big.NewInt(0)
 	}
 	v.assembler.PushInt(boolVal)
+}
+
+func (v *ILCodeGenerationVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {
+	// TODO Implement
+	v.AbstractVisitor.VisitStringLiteralNode(node)
+}
+
+func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
+	// TODO Implement
+	v.AbstractVisitor.VisitCharacterLiteralNode(node)
 }
 
 // Helper Functions

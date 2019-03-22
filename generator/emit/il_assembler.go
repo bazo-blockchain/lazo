@@ -65,6 +65,14 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	a.byteCounter += 3 + total
 }
 
+func (a *ILAssembler) PushString(value string) {
+	// TODO Implement
+}
+
+func (a *ILAssembler) PushCharacter(value rune) {
+	// TODO Implement
+}
+
 func (a *ILAssembler) Jmp(label Label) {
 	a.addInstruction(il.JMP, label)
 	a.byteCounter += 3
