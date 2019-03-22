@@ -50,7 +50,7 @@ func (a *ILAssembler) ResolveLabels() {
 }
 
 func (a *ILAssembler) Emit(opCode il.OpCode) {
-	a.AddInstruction(opCode, nil)
+	a.addInstruction(opCode, nil)
 	a.byteCounter++
 }
 
@@ -61,17 +61,17 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	}
 	bytes := value.Bytes()
 	total := len(bytes)
-	a.AddInstruction(il.PUSH, append([]byte{byte(total), sign}, bytes...))
+	a.addInstruction(il.PUSH, append([]byte{byte(total), sign}, bytes...))
 	a.byteCounter += 3 + total
 }
 
 func (a *ILAssembler) Jmp(label Label) {
-	a.AddInstruction(il.JMP, label)
+	a.addInstruction(il.JMP, label)
 	a.byteCounter += 3
 }
 
 func (a *ILAssembler) JmpIfTrue(label Label) {
-	a.AddInstruction(il.JMPIF, label)
+	a.addInstruction(il.JMPIF, label)
 	a.byteCounter += 3
 }
 
@@ -82,7 +82,7 @@ func (a *ILAssembler) NegBool() {
 
 // TODO: Make it a private function
 // Remove direct access to this function in the visitor. Use Emit or explicit functions
-func (a *ILAssembler) AddInstruction(opCode il.OpCode, operand interface{}) {
+func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}) {
 	a.function.Instructions = append(a.function.Instructions, &il.Instruction{
 		OpCode:  opCode,
 		Operand: operand,

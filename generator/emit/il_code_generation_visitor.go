@@ -38,7 +38,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
 			for i := big.NewInt(0); lessThan(i, sub(exponent.Value, big.NewInt(2))); i = add(i, big.NewInt(1)) {
 				v.assembler.Emit(op)
-				v.assembler.AddInstruction(il.PUSH, left.Value)
+				v.assembler.PushInt(left.Value)
 			}
 			v.assembler.Emit(op)
 		default:
@@ -48,41 +48,41 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
-	if expNode.Operator == token.And {
-		returnFalseLabel := v.assembler.CreateLabel()
-		skipLabel := v.assembler.CreateLabel()
-		expNode.Left.Accept(v)
-		v.assembler.Emit(il.NEG)
-		v.assembler.AddInstruction(il.JMPIF, returnFalseLabel)
-		expNode.Right.Accept(v)
-		v.assembler.Emit(il.NEG)
-		v.assembler.AddInstruction(il.JMPIF, returnFalseLabel)
-		// Load constant boolean true
-		v.assembler.AddInstruction(il.PUSH, 1)
-		v.assembler.AddInstruction(il.JMP, skipLabel)
-		v.assembler.SetLabel(returnFalseLabel)
-		// Load constant boolean false
-		v.assembler.AddInstruction(il.PUSH, 0)
-		v.assembler.SetLabel(skipLabel)
-		return
-	}
-
-	if expNode.Operator == token.Or {
-		returnTrueLabel := v.assembler.CreateLabel()
-		skipLabel := v.assembler.CreateLabel()
-		expNode.Left.Accept(v)
-		v.assembler.AddInstruction(il.JMPIF, returnTrueLabel)
-		expNode.Right.Accept(v)
-		v.assembler.AddInstruction(il.JMPIF, returnTrueLabel)
-		// Load constant boolean false
-		v.assembler.AddInstruction(il.PUSH, 1)
-		v.assembler.AddInstruction(il.JMP, skipLabel)
-		v.assembler.SetLabel(returnTrueLabel)
-		// Load constant boolean true
-		v.assembler.AddInstruction(il.PUSH, 1)
-		v.assembler.SetLabel(skipLabel)
-		return
-	}
+	//if expNode.Operator == token.And {
+	//	returnFalseLabel := v.assembler.CreateLabel()
+	//	skipLabel := v.assembler.CreateLabel()
+	//	expNode.Left.Accept(v)
+	//	v.assembler.NegBool()
+	//	v.assembler.JmpIfTrue(returnFalseLabel)
+	//	expNode.Right.Accept(v)
+	//	v.assembler.NegBool()
+	//	v.assembler.JmpIfTrue(returnFalseLabel)
+	//	// Load constant boolean true
+	//	v.assembler.PushInt(big.NewInt(1))
+	//	v.assembler.Jmp(skipLabel)
+	//	v.assembler.SetLabel(returnFalseLabel)
+	//	// Load constant boolean false
+	//	v.assembler.PushInt(big.NewInt(0))
+	//	v.assembler.SetLabel(skipLabel)
+	//	return
+	//}
+	//
+	//if expNode.Operator == token.Or {
+	//	returnTrueLabel := v.assembler.CreateLabel()
+	//	skipLabel := v.assembler.CreateLabel()
+	//	expNode.Left.Accept(v)
+	//	v.assembler.JmpIfTrue(returnTrueLabel)
+	//	expNode.Right.Accept(v)
+	//	v.assembler.JmpIfTrue(returnTrueLabel)
+	//	// Load constant boolean false
+	//	v.assembler.PushInt(big.NewInt(1))
+	//	v.assembler.Jmp(skipLabel)
+	//	v.assembler.SetLabel(returnTrueLabel)
+	//	// Load constant boolean true
+	//	v.assembler.PushInt(big.NewInt(1))
+	//	v.assembler.SetLabel(skipLabel)
+	//	return
+	//}
 
 	// TODO complete binary exp logic
 	panic("binary operator not supported")
