@@ -48,41 +48,49 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
-	//if expNode.Operator == token.And {
-	//	returnFalseLabel := v.assembler.CreateLabel()
-	//	skipLabel := v.assembler.CreateLabel()
-	//	expNode.Left.Accept(v)
-	//	v.assembler.NegBool()
-	//	v.assembler.JmpIfTrue(returnFalseLabel)
-	//	expNode.Right.Accept(v)
-	//	v.assembler.NegBool()
-	//	v.assembler.JmpIfTrue(returnFalseLabel)
-	//	// Load constant boolean true
-	//	v.assembler.PushInt(big.NewInt(1))
-	//	v.assembler.Jmp(skipLabel)
-	//	v.assembler.SetLabel(returnFalseLabel)
-	//	// Load constant boolean false
-	//	v.assembler.PushInt(big.NewInt(0))
-	//	v.assembler.SetLabel(skipLabel)
-	//	return
-	//}
-	//
-	//if expNode.Operator == token.Or {
-	//	returnTrueLabel := v.assembler.CreateLabel()
-	//	skipLabel := v.assembler.CreateLabel()
-	//	expNode.Left.Accept(v)
-	//	v.assembler.JmpIfTrue(returnTrueLabel)
-	//	expNode.Right.Accept(v)
-	//	v.assembler.JmpIfTrue(returnTrueLabel)
-	//	// Load constant boolean false
-	//	v.assembler.PushInt(big.NewInt(1))
-	//	v.assembler.Jmp(skipLabel)
-	//	v.assembler.SetLabel(returnTrueLabel)
-	//	// Load constant boolean true
-	//	v.assembler.PushInt(big.NewInt(1))
-	//	v.assembler.SetLabel(skipLabel)
-	//	return
-	//}
+	if expNode.Operator == token.And {
+		returnFalseLabel := v.assembler.CreateLabel()
+		skipLabel := v.assembler.CreateLabel()
+		expNode.Left.Accept(v)
+		v.assembler.NegBool()
+		v.assembler.JmpIfTrue(returnFalseLabel)
+		expNode.Right.Accept(v)
+		v.assembler.NegBool()
+		v.assembler.JmpIfTrue(returnFalseLabel)
+		// Load constant boolean true
+		v.assembler.PushInt(big.NewInt(1))
+		v.assembler.Jmp(skipLabel)
+		v.assembler.SetLabel(returnFalseLabel)
+		// Load constant boolean false
+		v.assembler.PushInt(big.NewInt(0))
+		v.assembler.SetLabel(skipLabel)
+		return
+	}
+
+	if expNode.Operator == token.Or {
+		returnTrueLabel := v.assembler.CreateLabel()
+		skipLabel := v.assembler.CreateLabel()
+		expNode.Left.Accept(v)
+		// Double negation fixes Bug in JMPIF on VM
+		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
+		v.assembler.NegBool()
+		v.assembler.NegBool()
+		v.assembler.JmpIfTrue(returnTrueLabel)
+		expNode.Right.Accept(v)
+		// Double negation fixes Bug in JMPIF on VM
+		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
+		v.assembler.NegBool()
+		v.assembler.NegBool()
+		v.assembler.JmpIfTrue(returnTrueLabel)
+		// Load constant boolean false
+		v.assembler.PushInt(big.NewInt(0))
+		v.assembler.Jmp(skipLabel)
+		v.assembler.SetLabel(returnTrueLabel)
+		// Load constant boolean true
+		v.assembler.PushInt(big.NewInt(1))
+		v.assembler.SetLabel(skipLabel)
+		return
+	}
 
 	// TODO complete binary exp logic
 	panic("binary operator not supported")
@@ -124,6 +132,16 @@ func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStat
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.assembler.PushInt(node.Value)
+}
+
+func (v *ILCodeGenerationVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
+	var boolVal *big.Int // Default value is 0
+	if node.Value {
+		boolVal = big.NewInt(1)
+	} else {
+		boolVal = big.NewInt(0)
+	}
+	v.assembler.PushInt(boolVal)
 }
 
 // Helper Functions
