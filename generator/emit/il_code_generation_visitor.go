@@ -100,9 +100,17 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 	if op, ok := unaryOpCodes[node.Operator]; ok {
 		v.AbstractVisitor.VisitUnaryExpressionNode(node)
 		v.assembler.Emit(op)
-	} else {
-		panic("unary operator not supported")
+		return
 	}
+
+	if node.Operator == token.Not {
+		v.AbstractVisitor.VisitUnaryExpressionNode(node)
+		v.assembler.NegBool()
+		return
+	}
+
+	panic("unary operator not supported")
+
 }
 
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
@@ -164,6 +172,7 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
+	token.Addition:	   il.NOP,
 }
 
 func lessThan(x *big.Int, y *big.Int) bool {
