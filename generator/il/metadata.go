@@ -29,7 +29,7 @@ func (d *Metadata) SaveByteCode(outputFile string) {
 	f.Write(d.GetByteCode())
 }
 
-func (d *Metadata) GetByteCode() []byte{
+func (d *Metadata) GetByteCode() []byte {
 	var byteCode []byte
 	bytePos := 0
 
@@ -50,7 +50,7 @@ func (d *Metadata) GetByteCode() []byte{
 	return byteCode
 }
 
-func generateByteCode(code *Instruction, bytePos int) []byte{
+func generateByteCode(code *Instruction, bytePos int) []byte {
 	bytes := []byte{byte(code.OpCode)}
 	if code.Operand != nil {
 		bytes = append(bytes, code.Operand.([]byte)...)

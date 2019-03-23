@@ -26,7 +26,7 @@ func NewILAssembler(bytePos int) *ILAssembler {
 	}
 }
 
-func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, int){
+func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, int) {
 	if halt {
 		a.Emit(il.HALT)
 	} else {

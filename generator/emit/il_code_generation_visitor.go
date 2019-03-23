@@ -191,7 +191,7 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
-	token.Addition:	   il.NOP,
+	token.Addition:    il.NOP,
 }
 
 func lessThan(x *big.Int, y *big.Int) bool {

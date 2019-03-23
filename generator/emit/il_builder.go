@@ -13,7 +13,7 @@ import (
 type ILBuilder struct {
 	symbolTable       *symbol.SymbolTable
 	Metadata          *il.Metadata
-	functionRefs      map[*symbol.FunctionSymbol]int
+	functionData      map[*symbol.FunctionSymbol]*il.FunctionData
 	functionPositions map[*symbol.FunctionSymbol]int
 	Errors            []error
 }
@@ -22,7 +22,7 @@ func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
 		symbolTable:       symbolTable,
 		Metadata:          &il.Metadata{},
-		functionRefs:      map[*symbol.FunctionSymbol]int{},
+		functionData:      map[*symbol.FunctionSymbol]*il.FunctionData{},
 		functionPositions: map[*symbol.FunctionSymbol]int{},
 	}
 	builder.generateMetadata()
@@ -43,11 +43,7 @@ func (b *ILBuilder) Complete() {
 }
 
 func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *il.FunctionData {
-	return b.Metadata.Contract.Functions[b.GetFunctionRef(function)]
-}
-
-func (b *ILBuilder) GetFunctionRef(symbol *symbol.FunctionSymbol) int {
-	return b.functionRefs[symbol]
+	return b.functionData[function]
 }
 
 func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos int) {
@@ -81,7 +77,7 @@ func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 		Identifier: function.GetIdentifier(),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
-	b.functionRefs[function] = len(b.functionRefs)
+	b.functionData[function] = functionData
 }
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
@@ -97,7 +93,7 @@ func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
 }
 
 func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
-	functionData := b.getFunctionData(function)
+	functionData := b.GetFunctionData(function)
 
 	for _, rtype := range function.ReturnTypes {
 		functionData.ReturnTypes = append(functionData.ReturnTypes, b.getTypeRef(rtype))
@@ -125,8 +121,4 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
 	} else {
 		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.GetIdentifier()))
 	}
-}
-
-func (b *ILBuilder) getFunctionData(symbol *symbol.FunctionSymbol) *il.FunctionData {
-	return b.Metadata.Contract.Functions[b.GetFunctionRef(symbol)]
 }
