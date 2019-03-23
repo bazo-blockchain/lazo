@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Format the entire project
+go fmt ./...

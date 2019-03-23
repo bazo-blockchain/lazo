@@ -66,6 +66,9 @@ Example:
 * `lazo compile program.lazo --stage=p`: Compile the source code only until the parser stage.
                 
 ## Development
+
+Run `./scripts/set-hooks.sh` to setup git hooks.
+
 ###  Dependency Management
 
 Packages are managed by [dep](https://golang.github.io/dep/). Install dep and run `dep ensure` to install all the dependencies.

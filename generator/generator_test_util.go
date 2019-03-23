@@ -54,7 +54,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	return tester
 }
 
-func (gt *GeneratorTestUtil) assertBytes(bytes ...byte){
+func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
 	assert.Equal(gt.t, len(gt.result), len(bytes))
 
 	for i, b := range bytes {
