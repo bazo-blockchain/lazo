@@ -11,24 +11,24 @@ type Label uint
  * IL Assembler creates IL Instructions
  */
 type ILAssembler struct {
-	function     *il.FunctionData
+	instructions []*il.Instruction
 	targets      map[Label]int
 	labelCounter int
 	byteCounter  int
 }
 
-func NewILAssembler(function *il.FunctionData) *ILAssembler {
+func NewILAssembler(bytePos int) *ILAssembler {
 	return &ILAssembler{
-		function:     function,
 		targets:      map[Label]int{},
 		labelCounter: -1,
-		byteCounter:  0,
+		byteCounter:  bytePos,
 	}
 }
 
-func (a *ILAssembler) Complete() {
+func (a *ILAssembler) Complete() []*il.Instruction{
 	a.Emit(il.RET)
 	a.ResolveLabels()
+	return a.instructions
 }
 
 func (a *ILAssembler) CreateLabel() Label {
@@ -41,7 +41,7 @@ func (a *ILAssembler) SetLabel(label Label) {
 }
 
 func (a *ILAssembler) ResolveLabels() {
-	for _, instruction := range a.function.Instructions {
+	for _, instruction := range a.instructions {
 		operand := instruction.Operand
 		if op, ok := operand.(Label); ok {
 			instruction.Operand = []byte{0, byte(a.targets[op])}
@@ -91,7 +91,7 @@ func (a *ILAssembler) NegBool() {
 // TODO: Make it a private function
 // Remove direct access to this function in the visitor. Use Emit or explicit functions
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}) {
-	a.function.Instructions = append(a.function.Instructions, &il.Instruction{
+	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,
 		Operand: operand,
 	})

@@ -26,10 +26,14 @@ func (d *Metadata) SaveByteCode(outputFile string) {
 	if err != nil {
 		panic(err)
 	}
+	f.Write(d.GetByteCode())
+}
+
+func (d *Metadata) GetByteCode() []byte{
+	var byteCode []byte
 
 	for _, function := range d.Contract.Functions {
 		fmt.Printf("%s: \n", function.Identifier)
-		// w.WriteString(fmt.Sprintf("%s: \n", function.Identifier)) // function calls does not work
 		byteCounter := 0
 		for _, code := range function.Instructions {
 			if code.OpCode == RET {
@@ -40,9 +44,10 @@ func (d *Metadata) SaveByteCode(outputFile string) {
 				bytes = append(bytes, code.Operand.([]byte)...)
 			}
 			fmt.Printf("%d: %s %v \n", byteCounter, OpCodes[code.OpCode].Name, bytes)
-			f.Write(bytes)
+			byteCode = append(byteCode, bytes...)
 			byteCounter += len(bytes)
 		}
 	}
-	f.Write([]byte{byte(HALT)})
+	byteCode = append(byteCode, byte(HALT))
+	return byteCode
 }

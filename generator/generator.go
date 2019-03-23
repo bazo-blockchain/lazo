@@ -24,6 +24,8 @@ func New(symbolTable *symbol.SymbolTable) *Generator {
 }
 
 func (g *Generator) Run() (*il.Metadata, []error) {
+	// call first function
+	// Halt
 	for _, function := range g.symbolTable.GlobalScope.Contract.Functions {
 		g.generateIL(function)
 	}
@@ -36,8 +38,8 @@ func (g *Generator) generateIL(function *symbol.FunctionSymbol) {
 	funcData := g.ilBuilder.GetFunctionData(function)
 	funcNode := g.symbolTable.GetNodeBySymbol(function).(*node.FunctionNode)
 
-	assembler := emit.NewILAssembler(funcData)
+	assembler := emit.NewILAssembler(0)
 	v := emit.NewCodeGenerationVisitor(g.symbolTable, function, assembler)
 	v.VisitStatementBlock(funcNode.Body)
-	assembler.Complete()
+	funcData.Instructions = assembler.Complete()
 }

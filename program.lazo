@@ -1,5 +1,5 @@
 contract Test {
-    function bool test() {
-        return !true
+    function int test() {
+        return 1 + 1
     }
 }

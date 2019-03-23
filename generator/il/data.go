@@ -19,7 +19,8 @@ type FunctionData struct {
 }
 
 type ContractData struct {
-	Identifier string          `json:"ID"`
-	Fields     []TypeData      `json:"Fields"`
-	Functions  []*FunctionData `json:"Functions"`
+	Identifier   string          `json:"ID"`
+	Fields       []TypeData      `json:"Fields"`
+	Functions    []*FunctionData `json:"Functions"`
+	Instructions []*Instruction  `json:"Instructions"`
 }
