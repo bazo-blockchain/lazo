@@ -2,15 +2,15 @@ package generator
 
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/emit"
-	"github.com/bazo-blockchain/lazo/generator/il"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
 type Generator struct {
 	symbolTable *symbol.SymbolTable
 	ilBuilder   *emit.ILBuilder
-	metaData    *il.Metadata
+	metaData    *data.Metadata
 	bytePos     int
 	errors      []error
 }
@@ -25,7 +25,7 @@ func New(symbolTable *symbol.SymbolTable) *Generator {
 	return g
 }
 
-func (g *Generator) Run() (*il.Metadata, []error) {
+func (g *Generator) Run() (*data.Metadata, []error) {
 	contract := g.symbolTable.GlobalScope.Contract
 	g.generateContractIL(contract)
 

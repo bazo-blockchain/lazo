@@ -1,8 +1,9 @@
-package il
+package data
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bazo-blockchain/lazo/generator/il"
 	"io/ioutil"
 	"os"
 )
@@ -50,11 +51,11 @@ func (d *Metadata) GetByteCode() []byte {
 	return byteCode
 }
 
-func generateByteCode(code *Instruction, bytePos int) []byte {
+func generateByteCode(code *il.Instruction, bytePos int) []byte {
 	bytes := []byte{byte(code.OpCode)}
 	if code.Operand != nil {
 		bytes = append(bytes, code.Operand.([]byte)...)
 	}
-	fmt.Printf("%d: %s %v \n", bytePos, OpCodes[code.OpCode].Name, bytes)
+	fmt.Printf("%d: %s %v \n", bytePos, il.OpCodes[code.OpCode].Name, bytes)
 	return bytes
 }

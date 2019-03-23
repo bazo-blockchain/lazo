@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/checker"
-	"github.com/bazo-blockchain/lazo/generator/il"
+	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser"
 	"gotest.tools/assert"
@@ -15,7 +15,7 @@ import (
 
 type GeneratorTestUtil struct {
 	t        *testing.T
-	metaData *il.Metadata
+	metaData *data.Metadata
 	code     []byte
 	result   []byte
 	errors   []error
@@ -54,7 +54,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	return tester
 }
 
-func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
+func (gt *GeneratorTestUtil) assertBytes(bytes ...byte){
 	assert.Equal(gt.t, len(gt.result), len(bytes))
 
 	for i, b := range bytes {

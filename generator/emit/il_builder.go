@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/il"
 )
 
@@ -12,8 +13,8 @@ import (
  */
 type ILBuilder struct {
 	symbolTable       *symbol.SymbolTable
-	Metadata          *il.Metadata
-	functionData      map[*symbol.FunctionSymbol]*il.FunctionData
+	Metadata          *data.Metadata
+	functionData      map[*symbol.FunctionSymbol]*data.FunctionData
 	functionPositions map[*symbol.FunctionSymbol]int
 	Errors            []error
 }
@@ -21,8 +22,8 @@ type ILBuilder struct {
 func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
 		symbolTable:       symbolTable,
-		Metadata:          &il.Metadata{},
-		functionData:      map[*symbol.FunctionSymbol]*il.FunctionData{},
+		Metadata:          &data.Metadata{},
+		functionData:      map[*symbol.FunctionSymbol]*data.FunctionData{},
 		functionPositions: map[*symbol.FunctionSymbol]int{},
 	}
 	builder.generateMetadata()
@@ -42,7 +43,7 @@ func (b *ILBuilder) Complete() {
 	}
 }
 
-func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *il.FunctionData {
+func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *data.FunctionData {
 	return b.functionData[function]
 }
 
@@ -64,7 +65,7 @@ func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 }
 
 func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
-	b.Metadata.Contract = &il.ContractData{
+	b.Metadata.Contract = &data.ContractData{
 		Identifier: contract.GetIdentifier(),
 	}
 	for _, function := range contract.Functions {
@@ -73,7 +74,7 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 }
 
 func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
-	functionData := &il.FunctionData{
+	functionData := &data.FunctionData{
 		Identifier: function.GetIdentifier(),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
@@ -108,16 +109,16 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 	}
 }
 
-func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
+func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) data.TypeData {
 	scope := b.symbolTable.GlobalScope
 	if sym.GetIdentifier() == scope.BoolType.GetIdentifier() {
-		return il.BoolType
+		return data.BoolType
 	} else if sym.GetIdentifier() == scope.CharType.GetIdentifier() {
-		return il.CharType
+		return data.CharType
 	} else if sym.GetIdentifier() == scope.StringType.GetIdentifier() {
-		return il.StringType
+		return data.StringType
 	} else if sym.GetIdentifier() == scope.IntType.GetIdentifier() {
-		return il.IntType
+		return data.IntType
 	} else {
 		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.GetIdentifier()))
 	}
