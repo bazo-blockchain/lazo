@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/il"
@@ -10,17 +11,19 @@ import (
  *	IL Builder constructs Metadata
  */
 type ILBuilder struct {
-	symbolTable  *symbol.SymbolTable
-	Metadata     *il.Metadata
-	functionRefs map[*symbol.FunctionSymbol]int
-	Errors       []error
+	symbolTable       *symbol.SymbolTable
+	Metadata          *il.Metadata
+	functionRefs      map[*symbol.FunctionSymbol]int
+	functionPositions map[*symbol.FunctionSymbol]int
+	Errors            []error
 }
 
 func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
-		symbolTable:  symbolTable,
-		Metadata:     &il.Metadata{},
-		functionRefs: map[*symbol.FunctionSymbol]int{},
+		symbolTable:       symbolTable,
+		Metadata:          &il.Metadata{},
+		functionRefs:      map[*symbol.FunctionSymbol]int{},
+		functionPositions: map[*symbol.FunctionSymbol]int{},
 	}
 	builder.generateMetadata()
 	return builder
@@ -33,13 +36,22 @@ func (b *ILBuilder) generateMetadata() {
 }
 
 func (b *ILBuilder) Complete() {
+	b.fixOperands(b.Metadata.Contract.Instructions)
 	for _, function := range b.Metadata.Contract.Functions {
 		b.fixOperands(function.Instructions)
 	}
 }
 
 func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *il.FunctionData {
-	return b.Metadata.Contract.Functions[b.getFunctionRef(function)]
+	return b.Metadata.Contract.Functions[b.GetFunctionRef(function)]
+}
+
+func (b *ILBuilder) GetFunctionRef(symbol *symbol.FunctionSymbol) int {
+	return b.functionRefs[symbol]
+}
+
+func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos int) {
+	b.functionPositions[symbol] = pos
 }
 
 func (b *ILBuilder) fixOperands(code []*il.Instruction) {
@@ -47,7 +59,10 @@ func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 		if typeSymbol, ok := instruction.Operand.(*symbol.TypeSymbol); ok {
 			instruction.Operand = b.getTypeRef(typeSymbol)
 		} else if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
-			instruction.Operand = b.getFunctionRef(functionSymbol)
+			operand := make([]byte, 3)
+			binary.BigEndian.PutUint16(operand, uint16(b.functionPositions[functionSymbol]))
+			operand[2] = byte(len(functionSymbol.Parameters))
+			instruction.Operand = operand
 		}
 	}
 }
@@ -66,7 +81,7 @@ func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 		Identifier: function.GetIdentifier(),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
-	b.functionRefs[function] = len(b.Metadata.Contract.Functions) - 1
+	b.functionRefs[function] = len(b.functionRefs)
 }
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
@@ -79,7 +94,6 @@ func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
 	for _, function := range contract.Functions {
 		b.fixFunction(function)
 	}
-
 }
 
 func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
@@ -98,10 +112,6 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 	}
 }
 
-func (b *ILBuilder) getFunctionRef(symbol *symbol.FunctionSymbol) int {
-	return b.functionRefs[symbol]
-}
-
 func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
 	scope := b.symbolTable.GlobalScope
 	if sym.GetIdentifier() == scope.BoolType.GetIdentifier() {
@@ -118,5 +128,5 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) il.TypeData {
 }
 
 func (b *ILBuilder) getFunctionData(symbol *symbol.FunctionSymbol) *il.FunctionData {
-	return b.Metadata.Contract.Functions[b.getFunctionRef(symbol)]
+	return b.Metadata.Contract.Functions[b.GetFunctionRef(symbol)]
 }

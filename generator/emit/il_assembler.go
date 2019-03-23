@@ -1,6 +1,7 @@
 package emit
 
 import (
+	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"math/big"
 )
@@ -25,10 +26,14 @@ func NewILAssembler(bytePos int) *ILAssembler {
 	}
 }
 
-func (a *ILAssembler) Complete() []*il.Instruction{
-	a.Emit(il.RET)
+func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, int){
+	if halt {
+		a.Emit(il.HALT)
+	} else {
+		a.Emit(il.RET)
+	}
 	a.ResolveLabels()
-	return a.instructions
+	return a.instructions, a.byteCounter
 }
 
 func (a *ILAssembler) CreateLabel() Label {
@@ -54,6 +59,9 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 	a.byteCounter++
 }
 
+// OpCode helpers (Order in the same order as defined)
+// --------------------------------------------------
+
 func (a *ILAssembler) PushInt(value *big.Int) {
 	var sign byte
 	if value.Sign() == -1 {
@@ -61,8 +69,10 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	}
 	bytes := value.Bytes()
 	total := len(bytes)
-	a.addInstruction(il.PUSH, append([]byte{byte(total), sign}, bytes...))
-	a.byteCounter += 3 + total
+	operand := append([]byte{byte(total), sign}, bytes...)
+
+	a.addInstruction(il.PUSH, operand)
+	a.byteCounter += len(operand) + 1
 }
 
 func (a *ILAssembler) PushString(value string) {
@@ -71,6 +81,11 @@ func (a *ILAssembler) PushString(value string) {
 
 func (a *ILAssembler) PushCharacter(value rune) {
 	// TODO Implement
+}
+
+func (a *ILAssembler) NegBool() {
+	a.PushInt(big.NewInt(0))
+	a.Emit(il.EQ)
 }
 
 func (a *ILAssembler) Jmp(label Label) {
@@ -83,13 +98,11 @@ func (a *ILAssembler) JmpIfTrue(label Label) {
 	a.byteCounter += 3
 }
 
-func (a *ILAssembler) NegBool() {
-	a.PushInt(big.NewInt(0))
-	a.Emit(il.EQ)
+func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
+	a.addInstruction(il.CALL, function)
+	a.byteCounter += 4
 }
 
-// TODO: Make it a private function
-// Remove direct access to this function in the visitor. Use Emit or explicit functions
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,

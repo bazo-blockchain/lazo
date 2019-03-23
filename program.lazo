@@ -1,5 +1,9 @@
 contract Test {
     function int test() {
-        return 1 + 1
+        return 1 + 8
+    }
+
+    function int test2() {
+        return 2 + 2
     }
 }

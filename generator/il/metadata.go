@@ -31,23 +31,30 @@ func (d *Metadata) SaveByteCode(outputFile string) {
 
 func (d *Metadata) GetByteCode() []byte{
 	var byteCode []byte
+	bytePos := 0
+
+	for _, code := range d.Contract.Instructions {
+		bytes := generateByteCode(code, bytePos)
+		byteCode = append(byteCode, bytes...)
+		bytePos += len(bytes)
+	}
 
 	for _, function := range d.Contract.Functions {
 		fmt.Printf("%s: \n", function.Identifier)
-		byteCounter := 0
 		for _, code := range function.Instructions {
-			if code.OpCode == RET {
-				continue
-			}
-			bytes := []byte{byte(code.OpCode)}
-			if code.Operand != nil {
-				bytes = append(bytes, code.Operand.([]byte)...)
-			}
-			fmt.Printf("%d: %s %v \n", byteCounter, OpCodes[code.OpCode].Name, bytes)
+			bytes := generateByteCode(code, bytePos)
 			byteCode = append(byteCode, bytes...)
-			byteCounter += len(bytes)
+			bytePos += len(bytes)
 		}
 	}
-	byteCode = append(byteCode, byte(HALT))
 	return byteCode
+}
+
+func generateByteCode(code *Instruction, bytePos int) []byte{
+	bytes := []byte{byte(code.OpCode)}
+	if code.Operand != nil {
+		bytes = append(bytes, code.Operand.([]byte)...)
+	}
+	fmt.Printf("%d: %s %v \n", bytePos, OpCodes[code.OpCode].Name, bytes)
+	return bytes
 }
