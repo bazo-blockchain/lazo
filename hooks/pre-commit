@@ -1,4 +1,7 @@
 #!/bin/sh
 
 # Format the entire project
-go fmt ./...
+for i in $(git diff --name-only --cached | grep ".go"); do
+    go fmt "$i"
+    git add "$i";
+done;
