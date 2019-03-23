@@ -3,6 +3,7 @@ package emit
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/il"
+	"github.com/bazo-blockchain/lazo/generator/util"
 	"math/big"
 )
 
@@ -63,10 +64,7 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 // --------------------------------------------------
 
 func (a *ILAssembler) PushInt(value *big.Int) {
-	var sign byte
-	if value.Sign() == -1 {
-		sign = 1
-	}
+	sign := util.GetSignByte(value)
 	bytes := value.Bytes()
 	total := len(bytes)
 	operand := append([]byte{byte(total), sign}, bytes...)

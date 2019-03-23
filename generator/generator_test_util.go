@@ -6,9 +6,11 @@ import (
 	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/generator/data"
+	"github.com/bazo-blockchain/lazo/generator/util"
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser"
 	"gotest.tools/assert"
+	"math/big"
 	"strings"
 	"testing"
 )
@@ -52,6 +54,11 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	tester.result = result
 	tester.errors = append(tester.errors, vmError)
 	return tester
+}
+
+func (gt *GeneratorTestUtil) assertInt(value *big.Int) {
+	bytes := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
+	gt.assertBytes(bytes...)
 }
 
 func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
