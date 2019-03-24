@@ -1,8 +1,5 @@
 contract Test {
     function int test() {
-        int x
-        int y
-        y = 3
-        return y
+        return 1 + 1
     }
 }

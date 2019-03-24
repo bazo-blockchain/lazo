@@ -3,6 +3,7 @@ package generator
 import (
 	"bufio"
 	"fmt"
+	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/generator/data"
@@ -16,11 +17,12 @@ import (
 )
 
 type GeneratorTestUtil struct {
-	t        *testing.T
-	metaData *data.Metadata
-	code     []byte
-	result   []byte
-	errors   []error
+	t         *testing.T
+	metadata  *data.Metadata
+	code      []byte
+	variables []protocol.ByteArray
+	result    []byte
+	errors    []error
 }
 
 func newGeneratorTestUtil(t *testing.T, contractCode string) *GeneratorTestUtil {
@@ -42,11 +44,14 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 		t: t,
 	}
 
-	tester.metaData, tester.errors = New(symbolTable).Run()
+	tester.metadata, tester.errors = New(symbolTable).Run()
 	assert.Equal(t, len(err), 0, "Error while generating byte code")
 
-	tester.code = tester.metaData.GetByteCode()
-	bazoVM := vm.NewVM(vm.NewMockContext(tester.code))
+	tester.code, tester.variables = tester.metadata.CreateContract()
+	context := vm.NewMockContext(tester.code)
+	context.ContractVariables = tester.variables
+
+	bazoVM := vm.NewVM(context)
 	isSuccess := bazoVM.Exec(true)
 	assert.Assert(t, isSuccess, "Code execution failed")
 

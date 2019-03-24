@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator"
@@ -36,12 +37,12 @@ var compileCommand = &cobra.Command{
 		if len(args) == 0 {
 			cmd.Help()
 		} else {
-			compile(args[0])
+			Compile(args[0])
 		}
 	},
 }
 
-func compile(sourceFile string) {
+func Compile(sourceFile string) ([]byte, []protocol.ByteArray) {
 	file, err := os.Open(sourceFile)
 	if err != nil {
 		panic(err)
@@ -50,7 +51,7 @@ func compile(sourceFile string) {
 	lexer := scan(file)
 	syntaxTree := parse(lexer)
 	symbolTable := check(syntaxTree)
-	generate(symbolTable)
+	return generate(symbolTable)
 }
 
 func scan(file io.Reader) *lexer.Lexer {
@@ -104,7 +105,7 @@ func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 	return symbolTable
 }
 
-func generate(symbolTable *symbol.SymbolTable) {
+func generate(symbolTable *symbol.SymbolTable) ([]byte, []protocol.ByteArray) {
 	generator := generator.New(symbolTable)
 	metadata, errors := generator.Run()
 
@@ -113,5 +114,5 @@ func generate(symbolTable *symbol.SymbolTable) {
 		os.Exit(1)
 	}
 
-	metadata.SaveByteCode("program.bc")
+	return metadata.CreateContract()
 }
