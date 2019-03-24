@@ -1,6 +1,6 @@
 contract Test {
-    function int test() {
-        return 1 + 8
+    function bool test() {
+        return true && true
     }
 
     function int test2() {

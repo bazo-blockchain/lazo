@@ -49,21 +49,19 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 	}
 
 	if expNode.Operator == token.And {
-		returnFalseLabel := v.assembler.CreateLabel()
-		skipLabel := v.assembler.CreateLabel()
+		falseLabel := v.assembler.CreateLabel()
+		endLabel := v.assembler.CreateLabel()
+
 		expNode.Left.Accept(v)
 		v.assembler.NegBool()
-		v.assembler.JmpIfTrue(returnFalseLabel)
+		v.assembler.JmpIfTrue(falseLabel)
 		expNode.Right.Accept(v)
-		v.assembler.NegBool()
-		v.assembler.JmpIfTrue(returnFalseLabel)
-		// Load constant boolean true
-		v.assembler.PushInt(big.NewInt(1))
-		v.assembler.Jmp(skipLabel)
-		v.assembler.SetLabel(returnFalseLabel)
-		// Load constant boolean false
-		v.assembler.PushInt(big.NewInt(0))
-		v.assembler.SetLabel(skipLabel)
+		v.assembler.Jmp(endLabel)
+
+		v.assembler.SetLabel(falseLabel)
+		v.assembler.PushBool(false)
+
+		v.assembler.SetLabel(endLabel)
 		return
 	}
 
@@ -152,13 +150,7 @@ func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLite
 }
 
 func (v *ILCodeGenerationVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
-	var boolVal *big.Int // Default value is 0
-	if node.Value {
-		boolVal = big.NewInt(1)
-	} else {
-		boolVal = big.NewInt(0)
-	}
-	v.assembler.PushInt(boolVal)
+	v.assembler.PushBool(node.Value)
 }
 
 func (v *ILCodeGenerationVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {

@@ -61,6 +61,14 @@ func (gt *GeneratorTestUtil) assertInt(value *big.Int) {
 	gt.assertBytes(bytes...)
 }
 
+func (gt *GeneratorTestUtil) assertBool(value bool) {
+	if value {
+		gt.assertBytes(0, 1)
+	} else {
+		gt.assertBytes(0)
+	}
+}
+
 func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
 	assert.Equal(gt.t, len(gt.result), len(bytes))
 

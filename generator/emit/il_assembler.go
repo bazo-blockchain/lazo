@@ -73,6 +73,14 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	a.byteCounter += len(operand) + 1
 }
 
+func (a *ILAssembler) PushBool(value bool) {
+	if value {
+		a.PushInt(big.NewInt(1))
+	} else {
+		a.PushInt(big.NewInt(0))
+	}
+}
+
 func (a *ILAssembler) PushString(value string) {
 	// TODO Implement
 }
@@ -82,7 +90,12 @@ func (a *ILAssembler) PushCharacter(value rune) {
 }
 
 func (a *ILAssembler) NegBool() {
-	a.PushInt(big.NewInt(0))
+	a.PushBool(false)
+	a.Emit(il.EQ)
+}
+
+func (a *ILAssembler) ConvertToBool() {
+	a.PushBool(true)
 	a.Emit(il.EQ)
 }
 
