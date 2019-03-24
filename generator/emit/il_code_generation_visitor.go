@@ -44,9 +44,16 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.assembler.Store(byte(index))
 }
 
-func (v *ILCodeGenerationVisitor) VisitAssignmentNode(node *node.AssignmentStatementNode) {
-	// TODO Implement
-	v.AbstractVisitor.VisitAssignmentStatementNode(node)
+func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+	node.Right.Accept(v)
+
+	decl := v.symbolTable.GetDeclByDesignator(node.Left)
+	index, isContractField := v.getVarIndex(decl)
+
+	if !isContractField {
+		v.assembler.Store(index)
+	}
+	// TODO: Implement contract field SSTORE
 }
 
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -175,17 +182,12 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 
 func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
+	index, isContractField := v.getVarIndex(decl)
 
-	switch decl.(type) {
-	case *symbol.LocalVariableSymbol:
-		index := v.function.GetVarIndex(decl.GetIdentifier())
-		if index == -1 {
-			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
-		}
-		v.assembler.Load(byte(index))
-	default:
-		panic("Not implemented")
+	if !isContractField {
+		v.assembler.Load(index)
 	}
+	// TODO: Implement contract field SLOAD
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
@@ -219,6 +221,20 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 		v.assembler.PushBool(false)
 	default:
 		panic(fmt.Sprintf("%s not supported", typeSymbol.Identifier))
+	}
+}
+
+// Returns: variable index and isContractField
+func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
+	switch decl.(type) {
+	case *symbol.LocalVariableSymbol:
+		index := v.function.GetVarIndex(decl.GetIdentifier())
+		if index == -1 {
+			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
+		}
+		return byte(index), false
+	default:
+		panic("Not implemented")
 	}
 }
 

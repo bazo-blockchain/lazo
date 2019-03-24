@@ -27,7 +27,6 @@ func TestLocalVarInt(t *testing.T) {
 			return x
 		}
 	`)
-
 	tester.assertInt(big.NewInt(3))
 
 	tester = newGeneratorTestUtil(t, `
@@ -37,7 +36,40 @@ func TestLocalVarInt(t *testing.T) {
 			return y
 		}
 	`)
+	tester.assertInt(big.NewInt(4))
+}
 
+func TestAssignmentInt(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x
+			int y
+			x = 3
+			return x
+		}
+	`)
+	tester.assertInt(big.NewInt(3))
+
+	tester = newGeneratorTestUtil(t, `
+		function int test() {
+			int x
+			int y
+			x = 3
+			return y
+		}
+	`)
+	tester.assertInt(big.NewInt(0))
+}
+
+func TestReAssignmentInt(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 3
+			int y = 4
+			x = y
+			return x
+		}
+	`)
 	tester.assertInt(big.NewInt(4))
 }
 
