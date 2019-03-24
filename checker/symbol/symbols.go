@@ -66,6 +66,15 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 	return symbols
 }
 
+func (sym *ContractSymbol) GetFieldIndex(id string) int {
+	for i, s := range sym.Fields {
+		if s.GetIdentifier() == id {
+			return i
+		}
+	}
+	return -1
+}
+
 func (sym *ContractSymbol) String() string {
 	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.Identifier, sym.Fields, sym.Functions)
 }

@@ -113,6 +113,10 @@ func (a *ILAssembler) Store(index byte) {
 	a.addInstruction(il.STORE, []byte{index}, 1)
 }
 
+func (a *ILAssembler) StoreField(index byte) {
+	a.addInstruction(il.SSTORE, []byte{index}, 1)
+}
+
 func (a *ILAssembler) Load(index byte) {
 	a.addInstruction(il.LOAD, []byte{index}, 1)
 }

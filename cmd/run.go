@@ -27,12 +27,14 @@ func execute(sourceFile string) {
 	code, variables := Compile(sourceFile)
 	context := vm.NewMockContext(code)
 	context.ContractVariables = variables
+	context.Fee += (uint64(len(variables))) * 1000
 
 	vm := vm.NewVM(context)
 	isSuccess := vm.Exec(true)
-	if !isSuccess {
-		panic("Code execution failed")
-	}
 	result, _ := vm.PeekResult()
+	if !isSuccess {
+		panic(fmt.Sprintf("Runtime Error: %s", result))
+	}
+
 	fmt.Printf("%d", result) // [0, 7] => +7
 }

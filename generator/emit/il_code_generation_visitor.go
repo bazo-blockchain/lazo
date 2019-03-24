@@ -3,6 +3,7 @@ package emit
 import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
@@ -34,14 +35,23 @@ func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
 	contractSymbol := v.symbolTable.GlobalScope.Contract
 	contractData := v.ilBuilder.Metadata.Contract
 
-	//for _, variable := range node.Variables {
-	//	variable.Accept(v.ConcreteVisitor)
-	//}
+	v.generateConstructorIL(node, contractSymbol, contractData)
+	v.generateFunctionIL(node, contractSymbol, contractData)
+}
 
+func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
+	contractData *data.ContractData) {
 	v.assembler = NewILAssembler(&v.bytePos)
 	v.assembler.Call(contractSymbol.Functions[0])
 	contractData.Instructions = v.assembler.Complete(true)
 
+	//for _, variable := range node.Variables {
+	//	variable.Accept(v.ConcreteVisitor)
+	//}
+}
+
+func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
+	contractData *data.ContractData) {
 	for i, function := range node.Functions {
 		v.function = contractSymbol.Functions[i]
 		funcData := contractData.Functions[i]
@@ -77,10 +87,11 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.Assign
 	decl := v.symbolTable.GetDeclByDesignator(node.Left)
 	index, isContractField := v.getVarIndex(decl)
 
-	if !isContractField {
+	if isContractField {
+		v.assembler.StoreField(index)
+	} else {
 		v.assembler.Store(index)
 	}
-	// TODO: Implement contract field SSTORE
 }
 
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -260,6 +271,13 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
 		}
 		return byte(index), false
+	case *symbol.FieldSymbol:
+		contract := decl.GetScope().(*symbol.ContractSymbol)
+		index := contract.GetFieldIndex(decl.GetIdentifier())
+		if index == -1 {
+			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
+		}
+		return byte(index), true
 	default:
 		panic("Not implemented")
 	}
