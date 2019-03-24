@@ -14,20 +14,20 @@ type Label uint
  */
 type ILAssembler struct {
 	instructions []*il.Instruction
-	targets      map[Label]int
+	targets      map[Label]uint16
 	labelCounter int
-	byteCounter  int
+	byteCounter  uint16
 }
 
-func NewILAssembler(bytePos int) *ILAssembler {
+func NewILAssembler(bytePos uint16) *ILAssembler {
 	return &ILAssembler{
-		targets:      map[Label]int{},
+		targets:      map[Label]uint16{},
 		labelCounter: -1,
 		byteCounter:  bytePos,
 	}
 }
 
-func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, int) {
+func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, uint16) {
 	if halt {
 		a.Emit(il.HALT)
 	} else {
@@ -65,10 +65,10 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 func (a *ILAssembler) PushInt(value *big.Int) {
 	sign := util.GetSignByte(value)
 	bytes := value.Bytes()
-	total := len(bytes)
-	operand := append([]byte{byte(total), sign}, bytes...)
+	total := byte(len(bytes))
+	operand := append([]byte{total, sign}, bytes...)
 
-	a.addInstruction(il.PUSH, operand, len(operand))
+	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
 func (a *ILAssembler) PushBool(value bool) {
@@ -117,10 +117,10 @@ func (a *ILAssembler) Load(index byte) {
 	a.addInstruction(il.LOAD, []byte{index}, 1)
 }
 
-func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize int) {
+func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,
 		Operand: operand,
 	})
-	a.byteCounter += operandSize + 1
+	a.byteCounter += uint16(operandSize) + 1
 }

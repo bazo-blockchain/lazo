@@ -15,7 +15,7 @@ type ILBuilder struct {
 	symbolTable       *symbol.SymbolTable
 	Metadata          *data.Metadata
 	functionData      map[*symbol.FunctionSymbol]*data.FunctionData
-	functionPositions map[*symbol.FunctionSymbol]int
+	functionPositions map[*symbol.FunctionSymbol]uint16
 	Errors            []error
 }
 
@@ -24,7 +24,7 @@ func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 		symbolTable:       symbolTable,
 		Metadata:          &data.Metadata{},
 		functionData:      map[*symbol.FunctionSymbol]*data.FunctionData{},
-		functionPositions: map[*symbol.FunctionSymbol]int{},
+		functionPositions: map[*symbol.FunctionSymbol]uint16{},
 	}
 	builder.generateMetadata()
 	return builder
@@ -48,7 +48,7 @@ func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *data.Funct
 	return b.functionData[function]
 }
 
-func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos int) {
+func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos uint16) {
 	b.functionPositions[symbol] = pos
 }
 

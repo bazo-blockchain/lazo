@@ -15,7 +15,7 @@ type ILCodeGenerationVisitor struct {
 	ilBuilder   *ILBuilder
 	function    *symbol.FunctionSymbol
 	assembler   *ILAssembler
-	bytePos     int
+	bytePos     uint16
 	Errors      []error
 }
 
