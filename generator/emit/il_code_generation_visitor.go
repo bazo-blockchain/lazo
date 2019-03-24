@@ -38,7 +38,10 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	if node.Expression == nil {
 		v.pushDefault(targetType)
 	}
-	v.assembler.Store()
+
+	// TODO: Differentiate between local variable and field variable
+	index := v.function.GetVarIndex(node.Identifier)
+	v.assembler.Store(byte(index))
 }
 
 func (v *ILCodeGenerationVisitor) VisitAssignmentNode(node *node.AssignmentStatementNode) {

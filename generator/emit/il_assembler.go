@@ -109,8 +109,8 @@ func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
 	a.addInstruction(il.CALL, function, 3)
 }
 
-func (a *ILAssembler) Store() {
-	a.addInstruction(il.STORE, []byte{0}, 1) // FIXME: BUG in VM - STORE reads a byte unnecessarily
+func (a *ILAssembler) Store(index byte) {
+	a.addInstruction(il.STORE, []byte{index}, 1)
 }
 
 func (a *ILAssembler) Load(index byte) {

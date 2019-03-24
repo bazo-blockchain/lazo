@@ -22,8 +22,19 @@ func TestLocalVarIntDefaultValue(t *testing.T) {
 func TestLocalVarInt(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
-			int x = 4
+			int x = 3
+			int y = 4
 			return x
+		}
+	`)
+
+	tester.assertInt(big.NewInt(3))
+
+	tester = newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 3
+			int y = 4
+			return y
 		}
 	`)
 
