@@ -56,8 +56,7 @@ func (a *ILAssembler) ResolveLabels() {
 }
 
 func (a *ILAssembler) Emit(opCode il.OpCode) {
-	a.addInstruction(opCode, nil)
-	a.byteCounter++
+	a.addInstruction(opCode, nil, 0)
 }
 
 // OpCode helpers (Order in the same order as defined)
@@ -69,8 +68,7 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	total := len(bytes)
 	operand := append([]byte{byte(total), sign}, bytes...)
 
-	a.addInstruction(il.PUSH, operand)
-	a.byteCounter += len(operand) + 1
+	a.addInstruction(il.PUSH, operand, len(operand))
 }
 
 func (a *ILAssembler) PushBool(value bool) {
@@ -100,23 +98,29 @@ func (a *ILAssembler) ConvertToBool() {
 }
 
 func (a *ILAssembler) Jmp(label Label) {
-	a.addInstruction(il.JMP, label)
-	a.byteCounter += 3
+	a.addInstruction(il.JMP, label, 2)
 }
 
 func (a *ILAssembler) JmpIfTrue(label Label) {
-	a.addInstruction(il.JMPIF, label)
-	a.byteCounter += 3
+	a.addInstruction(il.JMPIF, label, 2)
 }
 
 func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
-	a.addInstruction(il.CALL, function)
-	a.byteCounter += 4
+	a.addInstruction(il.CALL, function, 3)
 }
 
-func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}) {
+func (a *ILAssembler) Store() {
+	a.addInstruction(il.STORE, []byte{0}, 1) // FIXME: BUG in VM - STORE reads a byte unnecessarily
+}
+
+func (a *ILAssembler) Load(index byte) {
+	a.addInstruction(il.LOAD, []byte{index}, 1)
+}
+
+func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize int) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,
 		Operand: operand,
 	})
+	a.byteCounter += operandSize + 1
 }

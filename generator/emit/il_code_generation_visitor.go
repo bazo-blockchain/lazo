@@ -28,6 +28,67 @@ func NewCodeGenerationVisitor(
 	return v
 }
 
+// Statements
+// -----------
+
+func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
+	v.AbstractVisitor.VisitVariableNode(node)
+	targetType := v.symbolTable.FindTypeByNode(node.Type)
+
+	if node.Expression == nil {
+		v.pushDefault(targetType)
+	}
+	v.assembler.Store()
+}
+
+func (v *ILCodeGenerationVisitor) VisitAssignmentNode(node *node.AssignmentStatementNode) {
+	// TODO Implement
+	v.AbstractVisitor.VisitAssignmentStatementNode(node)
+}
+
+func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+	v.AbstractVisitor.VisitReturnStatementNode(node)
+	v.assembler.Emit(il.RET)
+}
+
+func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+	elseLabel := v.assembler.CreateLabel()
+	endLabel := v.assembler.CreateLabel()
+
+	// Condition
+	node.Condition.Accept(v)
+	v.assembler.NegBool()
+	v.assembler.JmpIfTrue(elseLabel)
+
+	// Then
+	v.VisitStatementBlock(node.Then)
+	v.assembler.Jmp(endLabel)
+
+	// Else
+	v.assembler.SetLabel(elseLabel)
+	v.VisitStatementBlock(node.Else)
+
+	v.assembler.SetLabel(endLabel)
+}
+
+// Expressions
+// -----------
+
+var binaryOpCodes = map[token.Symbol]il.OpCode{
+	token.Addition:       il.ADD,
+	token.Subtraction:    il.SUB,
+	token.Multiplication: il.MULT,
+	token.Division:       il.DIV,
+	token.Modulo:         il.MOD,
+	token.Exponent:       il.MULT,
+	token.Greater:        il.GT,
+	token.GreaterEqual:   il.GTE,
+	token.LessEqual:      il.LTE,
+	token.Less:           il.LT,
+	token.Equal:          il.EQ,
+	token.Unequal:        il.NEQ,
+}
+
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		switch expNode.Operator {
@@ -88,6 +149,11 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 	panic("binary operator not supported")
 }
 
+var unaryOpCodes = map[token.Symbol]il.OpCode{
+	token.Subtraction: il.NEG,
+	token.Addition:    il.NOP,
+}
+
 func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
 	if op, ok := unaryOpCodes[node.Operator]; ok {
 		v.AbstractVisitor.VisitUnaryExpressionNode(node)
@@ -104,39 +170,19 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpre
 	panic("unary operator not supported")
 }
 
-func (v *ILCodeGenerationVisitor) VisitAssignmentNode(node *node.AssignmentStatementNode) {
-	// TODO Implement
-	v.AbstractVisitor.VisitAssignmentStatementNode(node)
-}
-
 func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
-	// TODO Implement
-	v.AbstractVisitor.VisitDesignatorNode(node)
-}
+	decl := v.symbolTable.GetDeclByDesignator(node)
 
-func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
-	elseLabel := v.assembler.CreateLabel()
-	endLabel := v.assembler.CreateLabel()
-
-	// Condition
-	node.Condition.Accept(v)
-	v.assembler.NegBool()
-	v.assembler.JmpIfTrue(elseLabel)
-
-	// Then
-	v.VisitStatementBlock(node.Then)
-	v.assembler.Jmp(endLabel)
-
-	// Else
-	v.assembler.SetLabel(elseLabel)
-	v.VisitStatementBlock(node.Else)
-
-	v.assembler.SetLabel(endLabel)
-}
-
-func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
-	v.AbstractVisitor.VisitReturnStatementNode(node)
-	v.assembler.Emit(il.RET)
+	switch decl.(type) {
+	case *symbol.LocalVariableSymbol:
+		index := v.function.GetVarIndex(decl.GetIdentifier())
+		if index == -1 {
+			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
+		}
+		v.assembler.Load(byte(index))
+	default:
+		panic("Not implemented")
+	}
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
@@ -160,24 +206,17 @@ func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.Character
 // Helper Functions
 // ----------------
 
-var binaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Addition:       il.ADD,
-	token.Subtraction:    il.SUB,
-	token.Multiplication: il.MULT,
-	token.Division:       il.DIV,
-	token.Modulo:         il.MOD,
-	token.Exponent:       il.MULT,
-	token.Greater:        il.GT,
-	token.GreaterEqual:   il.GTE,
-	token.LessEqual:      il.LTE,
-	token.Less:           il.LT,
-	token.Equal:          il.EQ,
-	token.Unequal:        il.NEQ,
-}
+func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
+	gs := v.symbolTable.GlobalScope
 
-var unaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Subtraction: il.NEG,
-	token.Addition:    il.NOP,
+	switch typeSymbol {
+	case gs.IntType:
+		v.assembler.PushInt(big.NewInt(0))
+	case gs.BoolType:
+		v.assembler.PushBool(false)
+	default:
+		panic(fmt.Sprintf("%s not supported", typeSymbol.Identifier))
+	}
 }
 
 func lessThan(x *big.Int, y *big.Int) bool {

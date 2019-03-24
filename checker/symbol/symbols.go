@@ -113,6 +113,15 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 	return symbols
 }
 
+func (sym *FunctionSymbol) GetVarIndex(id string) int {
+	for i, s := range sym.AllDeclarations() {
+		if s.GetIdentifier() == id {
+			return i
+		}
+	}
+	return -1
+}
+
 func (sym *FunctionSymbol) String() string {
 	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.Identifier, sym.Parameters, sym.LocalVariables)
 }

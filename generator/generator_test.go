@@ -8,6 +8,28 @@ import (
 // Statements
 // ----------
 
+func TestLocalVarIntDefaultValue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x
+			return x
+		}
+	`)
+
+	tester.assertInt(big.NewInt(0))
+}
+
+func TestLocalVarInt(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 4
+			return x
+		}
+	`)
+
+	tester.assertInt(big.NewInt(4))
+}
+
 // TODO: Test if, assignment, local variable and return statements
 
 // Expressions
@@ -16,7 +38,7 @@ import (
 func TestAddition(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
-        	return 1 + 2
+			return 1 + 2
 		}
 	`)
 
@@ -26,7 +48,7 @@ func TestAddition(t *testing.T) {
 func TestLogicAndTrue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return true && true
+			return true && true
 		}
 	`)
 
@@ -36,7 +58,7 @@ func TestLogicAndTrue(t *testing.T) {
 func TestLogicAndFalse(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return true && false
+			return true && false
 		}
 	`)
 
@@ -46,7 +68,7 @@ func TestLogicAndFalse(t *testing.T) {
 func TestLogicAndFalseShortCircuit(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return false && true
+			return false && true
 		}
 	`)
 
@@ -56,7 +78,7 @@ func TestLogicAndFalseShortCircuit(t *testing.T) {
 func TestLogicAndFalseShortCircuit2(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return false && false
+			return false && false
 		}
 	`)
 
@@ -66,7 +88,7 @@ func TestLogicAndFalseShortCircuit2(t *testing.T) {
 func TestLogicOrFalse(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return false || false
+			return false || false
 		}
 	`)
 
@@ -76,7 +98,7 @@ func TestLogicOrFalse(t *testing.T) {
 func TestLogicOrTrue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return false || true
+			return false || true
 		}
 	`)
 
@@ -86,7 +108,7 @@ func TestLogicOrTrue(t *testing.T) {
 func TestLogicOrTrueShortCircuit(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return true || false
+			return true || false
 		}
 	`)
 
@@ -96,7 +118,7 @@ func TestLogicOrTrueShortCircuit(t *testing.T) {
 func TestLogicOrTrueShortCircuit2(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
-        	return true || true
+			return true || true
 		}
 	`)
 
