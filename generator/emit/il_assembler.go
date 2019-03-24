@@ -16,25 +16,25 @@ type ILAssembler struct {
 	instructions []*il.Instruction
 	targets      map[Label]uint16
 	labelCounter int
-	byteCounter  uint16
+	bytePos      *uint16
 }
 
-func NewILAssembler(bytePos uint16) *ILAssembler {
+func NewILAssembler(bytePos *uint16) *ILAssembler {
 	return &ILAssembler{
 		targets:      map[Label]uint16{},
 		labelCounter: -1,
-		byteCounter:  bytePos,
+		bytePos:      bytePos,
 	}
 }
 
-func (a *ILAssembler) Complete(halt bool) ([]*il.Instruction, uint16) {
+func (a *ILAssembler) Complete(halt bool) []*il.Instruction {
 	if halt {
 		a.Emit(il.HALT)
 	} else {
 		a.Emit(il.RET)
 	}
 	a.ResolveLabels()
-	return a.instructions, a.byteCounter
+	return a.instructions
 }
 
 func (a *ILAssembler) CreateLabel() Label {
@@ -43,7 +43,7 @@ func (a *ILAssembler) CreateLabel() Label {
 }
 
 func (a *ILAssembler) SetLabel(label Label) {
-	a.targets[label] = a.byteCounter
+	a.targets[label] = *a.bytePos
 }
 
 func (a *ILAssembler) ResolveLabels() {
@@ -122,5 +122,5 @@ func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, oper
 		OpCode:  opCode,
 		Operand: operand,
 	})
-	a.byteCounter += uint16(operandSize) + 1
+	*a.bytePos += uint16(operandSize) + 1
 }

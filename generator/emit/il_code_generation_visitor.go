@@ -38,19 +38,19 @@ func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
 	//	variable.Accept(v.ConcreteVisitor)
 	//}
 
-	v.assembler = NewILAssembler(v.bytePos)
+	v.assembler = NewILAssembler(&v.bytePos)
 	v.assembler.Call(contractSymbol.Functions[0])
-	contractData.Instructions, v.bytePos = v.assembler.Complete(true)
+	contractData.Instructions = v.assembler.Complete(true)
 
 	for i, function := range node.Functions {
 		v.function = contractSymbol.Functions[i]
 		funcData := contractData.Functions[i]
 
 		v.ilBuilder.SetFunctionPos(v.function, v.bytePos)
-		v.assembler = NewILAssembler(v.bytePos)
+		v.assembler = NewILAssembler(&v.bytePos)
 		function.Accept(v.ConcreteVisitor)
 
-		funcData.Instructions, v.bytePos = v.assembler.Complete(false)
+		funcData.Instructions = v.assembler.Complete(false)
 		v.function = nil
 	}
 }
