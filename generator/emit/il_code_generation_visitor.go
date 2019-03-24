@@ -66,27 +66,21 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 	}
 
 	if expNode.Operator == token.Or {
-		returnTrueLabel := v.assembler.CreateLabel()
-		skipLabel := v.assembler.CreateLabel()
+		trueLabel := v.assembler.CreateLabel()
+		endLabel := v.assembler.CreateLabel()
+
 		expNode.Left.Accept(v)
-		// Double negation fixes Bug in JMPIF on VM
+		// ConvertToBool fixes Bug in JMPIF on VM
 		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
-		v.assembler.NegBool()
-		v.assembler.NegBool()
-		v.assembler.JmpIfTrue(returnTrueLabel)
+		v.assembler.ConvertToBool()
+		v.assembler.JmpIfTrue(trueLabel)
 		expNode.Right.Accept(v)
-		// Double negation fixes Bug in JMPIF on VM
-		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
-		v.assembler.NegBool()
-		v.assembler.NegBool()
-		v.assembler.JmpIfTrue(returnTrueLabel)
-		// Load constant boolean false
-		v.assembler.PushInt(big.NewInt(0))
-		v.assembler.Jmp(skipLabel)
-		v.assembler.SetLabel(returnTrueLabel)
-		// Load constant boolean true
-		v.assembler.PushInt(big.NewInt(1))
-		v.assembler.SetLabel(skipLabel)
+		v.assembler.Jmp(endLabel)
+
+		v.assembler.SetLabel(trueLabel)
+		v.assembler.PushBool(true)
+
+		v.assembler.SetLabel(endLabel)
 		return
 	}
 

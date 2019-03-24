@@ -1,6 +1,10 @@
 contract Test {
-    function bool test() {
-        return true && true
+    function int test() {
+        if ( false || false) {
+            return 10
+        } else {
+            return 8
+        }
     }
 
     function int test2() {

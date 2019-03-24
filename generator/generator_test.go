@@ -63,4 +63,44 @@ func TestLogicAndFalseShortCircuit2(t *testing.T) {
 	tester.assertBool(false)
 }
 
+func TestLogicOrFalse(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+        	return false || false
+		}
+	`)
+
+	tester.assertBool(false)
+}
+
+func TestLogicOrTrue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+        	return false || true
+		}
+	`)
+
+	tester.assertBool(true)
+}
+
+func TestLogicOrTrueShortCircuit(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+        	return true || false
+		}
+	`)
+
+	tester.assertBool(true)
+}
+
+func TestLogicOrTrueShortCircuit2(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+        	return true || true
+		}
+	`)
+
+	tester.assertBool(true)
+}
+
 // TODO: Test all type of expressions
