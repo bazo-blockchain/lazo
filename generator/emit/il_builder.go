@@ -36,11 +36,12 @@ func (b *ILBuilder) generateMetadata() {
 	b.fixContract(contract)
 }
 
-func (b *ILBuilder) Complete() {
+func (b *ILBuilder) Complete() *data.Metadata {
 	b.fixOperands(b.Metadata.Contract.Instructions)
 	for _, function := range b.Metadata.Contract.Functions {
 		b.fixOperands(function.Instructions)
 	}
+	return b.Metadata
 }
 
 func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *data.FunctionData {

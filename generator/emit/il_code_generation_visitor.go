@@ -12,20 +12,47 @@ import (
 type ILCodeGenerationVisitor struct {
 	node.AbstractVisitor
 	symbolTable *symbol.SymbolTable
+	ilBuilder   *ILBuilder
 	function    *symbol.FunctionSymbol
 	assembler   *ILAssembler
+	bytePos     int
 	Errors      []error
 }
 
 func NewCodeGenerationVisitor(
-	symbolTable *symbol.SymbolTable, function *symbol.FunctionSymbol, assembler *ILAssembler) *ILCodeGenerationVisitor {
+	symbolTable *symbol.SymbolTable, ilBuilder *ILBuilder) *ILCodeGenerationVisitor {
 	v := &ILCodeGenerationVisitor{
 		symbolTable: symbolTable,
-		function:    function,
-		assembler:   assembler,
+		ilBuilder:   ilBuilder,
+		bytePos:     0,
 	}
 	v.ConcreteVisitor = v
 	return v
+}
+
+func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
+	contractSymbol := v.symbolTable.GlobalScope.Contract
+	contractData := v.ilBuilder.Metadata.Contract
+
+	//for _, variable := range node.Variables {
+	//	variable.Accept(v.ConcreteVisitor)
+	//}
+
+	v.assembler = NewILAssembler(v.bytePos)
+	v.assembler.Call(contractSymbol.Functions[0])
+	contractData.Instructions, v.bytePos = v.assembler.Complete(true)
+
+	for i, function := range node.Functions {
+		v.function = contractSymbol.Functions[i]
+		funcData := contractData.Functions[i]
+
+		v.ilBuilder.SetFunctionPos(v.function, v.bytePos)
+		v.assembler = NewILAssembler(v.bytePos)
+		function.Accept(v.ConcreteVisitor)
+
+		funcData.Instructions, v.bytePos = v.assembler.Complete(false)
+		v.function = nil
+	}
 }
 
 // Statements
