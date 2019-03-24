@@ -121,6 +121,10 @@ func (a *ILAssembler) Load(index byte) {
 	a.addInstruction(il.LOAD, []byte{index}, 1)
 }
 
+func (a *ILAssembler) LoadField(index byte) {
+	a.addInstruction(il.SLOAD, []byte{index}, 1)
+}
+
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,

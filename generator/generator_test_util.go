@@ -3,7 +3,6 @@ package generator
 import (
 	"bufio"
 	"fmt"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/generator/data"
@@ -17,12 +16,11 @@ import (
 )
 
 type GeneratorTestUtil struct {
-	t         *testing.T
-	metadata  *data.Metadata
-	code      []byte
-	variables []protocol.ByteArray
-	result    []byte
-	errors    []error
+	t        *testing.T
+	metadata *data.Metadata
+	context  *vm.MockContext
+	result   []byte
+	errors   []error
 }
 
 func newGeneratorTestUtil(t *testing.T, contractCode string) *GeneratorTestUtil {
@@ -47,15 +45,17 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	tester.metadata, tester.errors = New(symbolTable).Run()
 	assert.Equal(t, len(err), 0, "Error while generating byte code")
 
-	tester.code, tester.variables = tester.metadata.CreateContract()
-	context := vm.NewMockContext(tester.code)
-	context.ContractVariables = tester.variables
+	byteCode, variables := tester.metadata.CreateContract()
+	context := vm.NewMockContext(byteCode)
+	context.ContractVariables = variables
+	context.Fee += (uint64(len(variables))) * 1000
+	tester.context = context
 
 	bazoVM := vm.NewVM(context)
 	isSuccess := bazoVM.Exec(true)
-	assert.Assert(t, isSuccess, "Code execution failed")
-
 	result, vmError := bazoVM.PeekResult()
+	assert.Assert(t, isSuccess, string(result))
+
 	tester.result = result
 	tester.errors = append(tester.errors, vmError)
 	return tester
@@ -75,9 +75,19 @@ func (gt *GeneratorTestUtil) assertBool(value bool) {
 }
 
 func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
-	assert.Equal(gt.t, len(gt.result), len(bytes))
+	gt.compareBytes(gt.result, bytes)
+}
 
-	for i, b := range bytes {
-		assert.Equal(gt.t, gt.result[i], b)
+func (gt *GeneratorTestUtil) assertVariableInt(index int, value *big.Int) {
+	bytes := gt.context.ContractVariables[index]
+	expected := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
+	gt.compareBytes(bytes, expected)
+}
+
+func (gt *GeneratorTestUtil) compareBytes(actual []byte, expected []byte) {
+	assert.Equal(gt.t, len(actual), len(expected))
+
+	for i, b := range actual {
+		assert.Equal(gt.t, b, expected[i])
 	}
 }

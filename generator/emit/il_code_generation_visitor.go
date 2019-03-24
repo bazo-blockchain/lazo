@@ -48,6 +48,8 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 	//for _, variable := range node.Variables {
 	//	variable.Accept(v.ConcreteVisitor)
 	//}
+
+	// constructor code comes here
 }
 
 func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
@@ -222,10 +224,11 @@ func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode)
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	index, isContractField := v.getVarIndex(decl)
 
-	if !isContractField {
+	if isContractField {
+		v.assembler.LoadField(index)
+	} else {
 		v.assembler.Load(index)
 	}
-	// TODO: Implement contract field SLOAD
 }
 
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {

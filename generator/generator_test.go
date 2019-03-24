@@ -1,9 +1,28 @@
 package generator
 
 import (
+	"gotest.tools/assert"
 	"math/big"
 	"testing"
 )
+
+// Contract Fields
+// ---------------
+
+func TestContractFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+
+		function void test() {
+			x = 3
+		}
+	`)
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(3))
+}
 
 // Statements
 // ----------
