@@ -1,7 +1,6 @@
 contract Test {
 
-    function string test() {
-        string x
-        return x
+    function int test() {
+        return 2 ** 2
     }
 }

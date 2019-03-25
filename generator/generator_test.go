@@ -158,6 +158,42 @@ func TestReAssignmentInt(t *testing.T) {
 	tester.assertInt(big.NewInt(4))
 }
 
+func TestReAssignmentBool(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+			bool x = true
+			bool y = false
+			x = y
+			return x
+		}
+	`)
+	tester.assertBool(false)
+}
+
+func TestReAssignmentString(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function string test() {
+			string x = "abc"
+			string y = "def"
+			x = y
+			return x
+		}
+	`)
+	tester.assertString("def")
+}
+
+func TestReAssignmentChar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function char test() {
+			char x = 'c'
+			char y = 'd'
+			x = y
+			return x
+		}
+	`)
+	tester.assertChar('d')
+}
+
 // TODO: Test if, assignment, local variable and return statements
 
 // Expressions
@@ -171,6 +207,96 @@ func TestAddition(t *testing.T) {
 	`)
 
 	tester.assertInt(big.NewInt(3))
+}
+
+func TestSubtraction(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 - 1
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestMultiplication(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 * 3
+		}
+	`)
+
+	tester.assertInt(big.NewInt(6))
+}
+
+func TestDivision(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 10 / 5
+		}
+	`)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestDivisionRound(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 5 / 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestModulo(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 5 % 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestExponent(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3
+		}
+	`)
+
+	tester.assertInt(big.NewInt(8))
+}
+
+func TestMultipleExponent(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 2 ** 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(16))
+}
+
+func TestPointBeforeLine(t *testing.T){
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 8 - 4 * 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(0))
+}
+
+func TestNegativeResult(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 1 - 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(-1))
 }
 
 func TestLogicAndTrue(t *testing.T) {
