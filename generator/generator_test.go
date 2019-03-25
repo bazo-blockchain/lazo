@@ -194,6 +194,28 @@ func TestReAssignmentChar(t *testing.T) {
 	tester.assertChar('d')
 }
 
+//func TestReturnMultipleValuesSameTypes(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		function (int, int) test() {
+//			int x = 1
+//			int y = 2
+//			return x, y
+//		}
+//	`)
+//	tester.assertInt(big.NewInt(2))
+//}
+
+//func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		function (int, bool) test() {
+//			int x = 1
+//			bool y = true
+//			return x,y
+//		}
+//	`)
+//	tester.assertBool(true)
+//}
+
 // TODO: Test if, assignment, local variable and return statements
 
 // Expressions
