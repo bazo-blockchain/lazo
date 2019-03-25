@@ -269,7 +269,7 @@ func TestExponent(t *testing.T) {
 	tester.assertInt(big.NewInt(8))
 }
 
-func TestMultipleExponent(t *testing.T) {
+func TestNestedExponents(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
 			return 2 ** 2 ** 2
@@ -277,6 +277,16 @@ func TestMultipleExponent(t *testing.T) {
 	`)
 
 	tester.assertInt(big.NewInt(16))
+}
+
+func TestMultipleExponent(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 2 ** 2 ** 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(65536))
 }
 
 func TestPointBeforeLine(t *testing.T){

@@ -146,7 +146,7 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 func (v *ILCodeGenerationVisitor) calculateExponent(expNode *node.BinaryExpressionNode) *big.Int {
 	operand := expNode.Left.(*node.IntegerLiteralNode).Value
 	if binNode, ok := expNode.Right.(*node.BinaryExpressionNode); ok {
-		return big.NewInt(0).Mul(v.calculateExponent(binNode), operand)
+		return big.NewInt(0).Exp(v.calculateExponent(binNode), operand, nil)
 	}
 
 	exponent := expNode.Right.(*node.IntegerLiteralNode).Value
@@ -161,7 +161,6 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 			if binExpNode, ok := expNode.Right.(*node.BinaryExpressionNode); ok {
 				v.AbstractVisitor.VisitBinaryExpressionNode(binExpNode)
 			}
-
 			exponent = v.calculateExponent(expNode)
 			left := expNode.Left.(*node.IntegerLiteralNode)
 			expNode.Right = expNode.Left
@@ -170,7 +169,9 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 				v.assembler.Emit(op)
 				v.assembler.PushInt(left.Value)
 			}
-			v.assembler.Emit(op)
+			if exponent.Cmp(big.NewInt(2)) != 0{
+				v.assembler.Emit(op)
+			}
 		default:
 			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
 			v.assembler.Emit(op)
