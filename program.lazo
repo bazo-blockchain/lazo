@@ -1,7 +1,5 @@
 contract Test {
-    int x = 1
-    function int test() {
-        x = 2
-        return x
+    function string test() {
+        return "x"
     }
 }

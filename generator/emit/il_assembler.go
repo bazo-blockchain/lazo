@@ -80,11 +80,17 @@ func (a *ILAssembler) PushBool(value bool) {
 }
 
 func (a *ILAssembler) PushString(value string) {
-	// TODO Implement
+	bytes := []byte(value)
+	total := byte(len(bytes))
+	operand := append([]byte{total, 0}, bytes...)
+	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
 func (a *ILAssembler) PushCharacter(value rune) {
-	// TODO Implement
+	bytes := []byte(string(value))
+	total := byte(len(bytes))
+	operand := append([]byte{total, 0}, bytes...)
+	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
 func (a *ILAssembler) NegBool() {
