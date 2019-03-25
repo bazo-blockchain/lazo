@@ -261,6 +261,10 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 		v.assembler.PushInt(big.NewInt(0))
 	case gs.BoolType:
 		v.assembler.PushBool(false)
+	case gs.StringType:
+		v.assembler.PushString("")
+	case gs.CharType:
+		v.assembler.PushCharacter('0')
 	default:
 		panic(fmt.Sprintf("%s not supported", typeSymbol.Identifier))
 	}

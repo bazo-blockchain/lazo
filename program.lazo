@@ -1,13 +1,7 @@
 contract Test {
-    int x
 
-    function int test() {
-        int y = 5
-        return y
-    }
-
-    function int test2() {
-        x = 3
+    function string test() {
+        string x
         return x
     }
 }

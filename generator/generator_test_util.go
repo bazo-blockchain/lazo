@@ -74,6 +74,17 @@ func (gt *GeneratorTestUtil) assertBool(value bool) {
 	}
 }
 
+func (gt *GeneratorTestUtil) assertString(value string) {
+	bytes := append([]byte{0}, []byte(value)...)
+	gt.assertBytes(bytes...)
+}
+
+func (gt *GeneratorTestUtil) assertChar(value rune) {
+	bytes := []byte(string(value))
+	bytes = append([]byte{0}, bytes...)
+	gt.assertBytes(bytes...)
+}
+
 func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
 	gt.compareBytes(gt.result, bytes)
 }

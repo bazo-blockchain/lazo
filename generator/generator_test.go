@@ -58,6 +58,72 @@ func TestLocalVarInt(t *testing.T) {
 	tester.assertInt(big.NewInt(4))
 }
 
+func TestLocVarBoolDefautValue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+			bool x
+			return x
+		}
+	`)
+
+	tester.assertBool(false)
+}
+
+func TestLocVarBool(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+			bool x = true
+			return x
+		}
+	`)
+
+	tester.assertBool(true)
+}
+
+func TestLocVarStringDefautValue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function string test() {
+			string x
+			return x
+		}
+	`)
+
+	tester.assertString("")
+}
+
+func TestLocVarString(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function string test() {
+			string x = "hello"
+			return x
+		}
+	`)
+
+	tester.assertString("hello")
+}
+
+func TestLocVarCharDefautValue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function char test() {
+			char x
+			return x
+		}
+	`)
+
+	tester.assertChar('0')
+}
+
+func TestLocVarChar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function char test() {
+			char x = 'c'
+			return x
+		}
+	`)
+
+	tester.assertChar('c')
+}
+
 func TestAssignmentInt(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
