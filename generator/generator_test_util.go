@@ -75,6 +75,15 @@ func (gt *GeneratorTestUtil) assertBool(value bool) {
 	}
 }
 
+// Can be deleted as soon as VM is fixed
+func (gt *GeneratorTestUtil) assertBoolAfterNot(value bool) {
+	if value {
+		gt.assertBytes(1)
+	} else {
+		gt.assertBytes(0)
+	}
+}
+
 func (gt *GeneratorTestUtil) assertString(value string) {
 	bytes := append([]byte{0}, []byte(value)...)
 	gt.assertBytes(bytes...)

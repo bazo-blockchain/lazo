@@ -389,4 +389,24 @@ func TestLogicOrTrueShortCircuit2(t *testing.T) {
 	tester.assertBool(true)
 }
 
+func TestLogicNot(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+			return !true
+		}
+	`)
+
+	tester.assertBoolAfterNot(false)
+}
+
+func TestLogicNotNot(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function bool test() {
+			return !!true
+		}
+	`)
+
+	tester.assertBoolAfterNot(true)
+}
+
 // TODO: Test all type of expressions
