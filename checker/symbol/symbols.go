@@ -131,6 +131,15 @@ func (sym *FunctionSymbol) GetVarIndex(id string) int {
 	return -1
 }
 
+func (sym *FunctionSymbol) IsLocalVar(id string) bool {
+	for _, s := range sym.LocalVariables {
+		if s.GetIdentifier() == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (sym *FunctionSymbol) String() string {
 	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.Identifier, sym.Parameters, sym.LocalVariables)
 }

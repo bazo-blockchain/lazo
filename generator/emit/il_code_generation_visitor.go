@@ -78,9 +78,13 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 		v.pushDefault(targetType)
 	}
 
-	// TODO: Differentiate between local variable and field variable
 	index := v.function.GetVarIndex(node.Identifier)
-	v.assembler.Store(byte(index))
+	isContractField := !v.function.IsLocalVar(node.Identifier)
+	if isContractField {
+		v.assembler.StoreField(byte(index))
+	} else {
+		v.assembler.Store(byte(index))
+	}
 }
 
 func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
@@ -195,7 +199,6 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
-	// TODO complete binary exp logic
 	panic("binary operator not supported")
 }
 
