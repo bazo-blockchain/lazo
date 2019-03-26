@@ -216,7 +216,153 @@ func TestReAssignmentChar(t *testing.T) {
 //	tester.assertBool(true)
 //}
 
-// TODO: Test if, assignment, local variable and return statements
+func TestIfStatement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (true) {
+				return 1
+			}
+			return 0
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestSkipIfStatement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (false) {
+				return 1
+			}
+			return 0
+		}
+	`)
+
+	tester.assertInt(big.NewInt(0))
+}
+
+func TestIfElseStatement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (true) {
+				return 1
+			} else {
+				return 0
+			}
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestIfElseStatementAlternative(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (false) {
+				return 1
+			} else {
+				return 0
+			}
+		}
+	`)
+
+	tester.assertInt(big.NewInt(0))
+}
+
+func TestNestedIfStatement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (true) {
+				if (true) {
+					return 1
+				}
+			} 
+			return 0
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestNestedIfStatementAlternative(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			if (true) {
+				if (false) {
+					return 1
+				} else {
+					return 2
+				}
+			} 
+			return 0
+		}
+	`)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestSingleReturnValue(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 1
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestTwoReturnValues(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function (int, int) test() {
+			return 1, 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestThreeReturnValues(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function (int, int, int) test() {
+			return 1, 2, 3
+		}
+	`)
+
+	tester.assertInt(big.NewInt(3))
+}
+
+// TODO Should Fail
+//func TestFourReturnValues(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		function (int, int, int, int) test() {
+//			return 1, 2, 3, 4
+//		}
+//	`)
+//
+//	tester.assertInt(big.NewInt(1))
+//}
+
+
+
+// TODO Has semantic errors
+//func TestAssignment(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		int x = 3
+//
+//		function void set() {
+//			x = 5
+//		}
+//
+//		function int get() {
+//			return x
+//		}
+//	`)
+//
+//	tester.assertInt(big.NewInt(3))
+//}
+
+// TODO: Test if, assignment, local variable and return statements, Test for Errors
 
 // Expressions
 // -----------
@@ -430,5 +576,3 @@ func TestLogicNotNot(t *testing.T) {
 
 	tester.assertBoolAfterNot(true)
 }
-
-// TODO: Test all type of expressions
