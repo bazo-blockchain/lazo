@@ -169,7 +169,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 				v.assembler.Emit(op)
 				v.assembler.PushInt(left.Value)
 			}
-			if exponent.Cmp(big.NewInt(2)) != 0{
+			if exponent.Cmp(big.NewInt(2)) != 0 {
 				v.assembler.Emit(op)
 			}
 		default:

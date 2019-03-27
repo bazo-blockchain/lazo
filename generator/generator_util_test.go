@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-type GeneratorTestUtil struct {
+type generatorTestUtil struct {
 	t        *testing.T
 	metadata *data.Metadata
 	context  *vm.MockContext
@@ -23,14 +23,14 @@ type GeneratorTestUtil struct {
 	errors   []error
 }
 
-func newGeneratorTestUtil(t *testing.T, contractCode string) *GeneratorTestUtil {
+func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
 	return newGeneratorTestUtilWithRawInput(
 		t,
 		fmt.Sprintf("contract Test {\n %s \n }", contractCode),
 	)
 }
 
-func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestUtil {
+func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *generatorTestUtil {
 	p := parser.New(lexer.New(bufio.NewReader(strings.NewReader(code))))
 	program, err := p.ParseProgram()
 	assert.Equal(t, len(err), 0, "Program has syntax errors", err)
@@ -38,7 +38,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	symbolTable, err := checker.New(program).Run()
 	assert.Equal(t, len(err), 0, "Program has semantic errors")
 
-	tester := &GeneratorTestUtil{
+	tester := &generatorTestUtil{
 		t: t,
 	}
 
@@ -62,12 +62,12 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *GeneratorTestU
 	return tester
 }
 
-func (gt *GeneratorTestUtil) assertInt(value *big.Int) {
+func (gt *generatorTestUtil) assertInt(value *big.Int) {
 	bytes := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
 	gt.assertBytes(bytes...)
 }
 
-func (gt *GeneratorTestUtil) assertBool(value bool) {
+func (gt *generatorTestUtil) assertBool(value bool) {
 	if value {
 		gt.assertBytes(0, 1)
 	} else {
@@ -76,7 +76,7 @@ func (gt *GeneratorTestUtil) assertBool(value bool) {
 }
 
 // Can be deleted as soon as VM is fixed
-func (gt *GeneratorTestUtil) assertBoolAfterNot(value bool) {
+func (gt *generatorTestUtil) assertBoolAfterNot(value bool) {
 	if value {
 		gt.assertBytes(1)
 	} else {
@@ -84,28 +84,28 @@ func (gt *GeneratorTestUtil) assertBoolAfterNot(value bool) {
 	}
 }
 
-func (gt *GeneratorTestUtil) assertString(value string) {
+func (gt *generatorTestUtil) assertString(value string) {
 	bytes := append([]byte{0}, []byte(value)...)
 	gt.assertBytes(bytes...)
 }
 
-func (gt *GeneratorTestUtil) assertChar(value rune) {
+func (gt *generatorTestUtil) assertChar(value rune) {
 	bytes := []byte(string(value))
 	bytes = append([]byte{0}, bytes...)
 	gt.assertBytes(bytes...)
 }
 
-func (gt *GeneratorTestUtil) assertBytes(bytes ...byte) {
+func (gt *generatorTestUtil) assertBytes(bytes ...byte) {
 	gt.compareBytes(gt.result, bytes)
 }
 
-func (gt *GeneratorTestUtil) assertVariableInt(index int, value *big.Int) {
+func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
 	bytes := gt.context.ContractVariables[index]
 	expected := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
 	gt.compareBytes(bytes, expected)
 }
 
-func (gt *GeneratorTestUtil) compareBytes(actual []byte, expected []byte) {
+func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 	assert.Equal(gt.t, len(actual), len(expected))
 
 	for i, b := range actual {

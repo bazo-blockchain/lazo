@@ -343,8 +343,6 @@ func TestThreeReturnValues(t *testing.T) {
 //	tester.assertInt(big.NewInt(1))
 //}
 
-
-
 // TODO Has semantic errors
 //func TestAssignment(t *testing.T) {
 //	tester := newGeneratorTestUtil(t, `
@@ -457,7 +455,7 @@ func TestMultipleExponent(t *testing.T) {
 	tester.assertInt(big.NewInt(65536))
 }
 
-func TestPointBeforeLine(t *testing.T){
+func TestPointBeforeLine(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
 			return 8 - 4 * 2
