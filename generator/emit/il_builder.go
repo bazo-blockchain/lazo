@@ -1,11 +1,13 @@
 package emit
 
 import (
+	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/il"
+	"strings"
 )
 
 /**
@@ -123,4 +125,42 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) data.TypeData {
 	} else {
 		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.GetIdentifier()))
 	}
+}
+
+// Helper Functions
+// ----------------
+
+func createFuncHash(funcSig string) [4]byte {
+	h := sha256.Sum256([]byte(funcSig))
+	var arr [4]byte
+	for i := 0; i < 4; i++ {
+		arr[i] = h[i]
+	}
+	return arr
+}
+
+func createFuncSignature(function *symbol.FunctionSymbol) string {
+	var sb strings.Builder
+
+	sb.WriteRune('(')
+	for i, r := range function.ReturnTypes {
+		if i > 0 {
+			sb.WriteRune(',')
+		}
+		sb.WriteString(r.Identifier)
+	}
+	sb.WriteRune(')')
+
+	sb.WriteString(function.Identifier)
+
+	sb.WriteRune('(')
+	for i, p := range function.Parameters {
+		if i > 0 {
+			sb.WriteRune(',')
+		}
+		sb.WriteString(p.Type.Identifier)
+	}
+	sb.WriteRune(')')
+
+	return sb.String()
 }

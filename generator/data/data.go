@@ -12,17 +12,18 @@ const (
 	StringType
 )
 
-type FunctionData struct {
-	Identifier   string            `json:"ID"`
-	ReturnTypes  []TypeData        `json:"ReturnTypes"`
-	ParamTypes   []TypeData        `json:"ParamTypes"`
-	LocalTypes   []TypeData        `json:"LocalTypes"`
-	Instructions []*il.Instruction `json:"Instructions"`
+type ContractData struct {
+	Identifier   string
+	Fields       []TypeData
+	Functions    []*FunctionData
+	Instructions []*il.Instruction
 }
 
-type ContractData struct {
-	Identifier   string            `json:"ID"`
-	Fields       []TypeData        `json:"Fields"`
-	Functions    []*FunctionData   `json:"Functions"`
-	Instructions []*il.Instruction `json:"Instructions"`
+type FunctionData struct {
+	Identifier   string
+	ReturnTypes  []TypeData
+	ParamTypes   []TypeData
+	LocalTypes   []TypeData
+	Instructions []*il.Instruction
+	Hash         [4]byte
 }
