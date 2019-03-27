@@ -9,6 +9,21 @@ import (
 // Contract Fields
 // ---------------
 
+func TestContractFieldDefault(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+
+		function int test() {
+			return x
+		}
+	`)
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(0))
+}
+
 func TestContractFieldExpression(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int x = 4 * 12
@@ -406,10 +421,33 @@ func TestAddition(t *testing.T) {
 	tester.assertInt(big.NewInt(3))
 }
 
+func TestAdditionVar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 1
+			int y = 2
+			return x + y
+		}
+	`)
+
+	tester.assertInt(big.NewInt(3))
+}
+
 func TestSubtraction(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
 			return 2 - 1
+		}
+	`)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestSubtractionVar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 1
+			return 2 - x
 		}
 	`)
 
@@ -426,10 +464,32 @@ func TestMultiplication(t *testing.T) {
 	tester.assertInt(big.NewInt(6))
 }
 
+func TestMultiplicationVar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 2
+			return x * 3
+		}
+	`)
+
+	tester.assertInt(big.NewInt(6))
+}
+
 func TestDivision(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
 			return 10 / 5
+		}
+	`)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestDivisionVar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 5
+			return 10 / x
 		}
 	`)
 
@@ -466,14 +526,27 @@ func TestExponent(t *testing.T) {
 	tester.assertInt(big.NewInt(8))
 }
 
-func TestNestedExponents(t *testing.T) {
+// TODO: Fix exponent
+func TestExponentVar(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
-			return 2 ** 2 ** 2
+			int x = 3
+			return 2 ** x
 		}
 	`)
 
-	tester.assertInt(big.NewInt(16))
+	tester.assertInt(big.NewInt(8))
+}
+
+// TODO: Fix exponent (right associativity 2^6
+func TestNestedExponents(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3 ** 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(512))
 }
 
 func TestMultipleExponent(t *testing.T) {
@@ -593,7 +666,7 @@ func TestLogicNot(t *testing.T) {
 		}
 	`)
 
-	tester.assertBoolAfterNot(false)
+	tester.assertInternalBool(false)
 }
 
 func TestLogicNotNot(t *testing.T) {
@@ -603,5 +676,5 @@ func TestLogicNotNot(t *testing.T) {
 		}
 	`)
 
-	tester.assertBoolAfterNot(true)
+	tester.assertInternalBool(true)
 }

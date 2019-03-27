@@ -76,7 +76,7 @@ func (gt *generatorTestUtil) assertBool(value bool) {
 }
 
 // Can be deleted as soon as VM is fixed
-func (gt *generatorTestUtil) assertBoolAfterNot(value bool) {
+func (gt *generatorTestUtil) assertInternalBool(value bool) {
 	if value {
 		gt.assertBytes(1)
 	} else {
