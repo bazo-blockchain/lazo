@@ -9,6 +9,37 @@ import (
 // Contract Fields
 // ---------------
 
+func TestContractFieldExpression(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x = 4 * 12
+
+		function int test() {
+			return x
+		}
+	`)
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(48))
+}
+
+func TestMultipleContractFields(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x = 4 * 12
+		int y = 3 * 12
+
+		function int test() {
+			return y
+		}
+	`)
+
+	assert.Equal(t, tester.context.ContractVariables[1] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[1] == nil, false)
+	tester.assertVariableInt(1, big.NewInt(36))
+}
+
 func TestContractFieldAssignment(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int x
