@@ -24,13 +24,26 @@ type generatorTestUtil struct {
 }
 
 func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
+	txData := []byte{
+		0, 0, // call constructor
+	}
+
 	return newGeneratorTestUtilWithRawInput(
 		t,
 		fmt.Sprintf("contract Test {\n %s \n }", contractCode),
+		txData,
 	)
 }
 
-func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *generatorTestUtil {
+func newGeneratorTextUtilWithTx(t *testing.T, contractCode string, txData []byte) *generatorTestUtil {
+	return newGeneratorTestUtilWithRawInput(
+		t,
+		fmt.Sprintf("contract Test {\n %s \n }", contractCode),
+		txData,
+	)
+}
+
+func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) *generatorTestUtil {
 	p := parser.New(lexer.New(bufio.NewReader(strings.NewReader(code))))
 	program, err := p.ParseProgram()
 	assert.Equal(t, len(err), 0, "Program has syntax errors", err)
@@ -48,6 +61,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string) *generatorTestU
 	byteCode, variables := tester.metadata.CreateContract()
 	context := vm.NewMockContext(byteCode)
 	context.ContractVariables = variables
+	context.Data = txData
 	context.Fee += (uint64(len(variables))) * 1000
 	context.Fee += 10000 // To be able to calculate 2^16
 	tester.context = context

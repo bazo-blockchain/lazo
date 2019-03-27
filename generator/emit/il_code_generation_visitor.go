@@ -35,14 +35,40 @@ func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
 	contractSymbol := v.symbolTable.GlobalScope.Contract
 	contractData := v.ilBuilder.Metadata.Contract
 
+	v.assembler = NewILAssembler(&v.bytePos)
+	v.generateABI(contractSymbol, contractData)
 	v.generateConstructorIL(node, contractSymbol, contractData)
 	v.generateFunctionIL(node, contractSymbol, contractData)
 }
 
-func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
+func (v *ILCodeGenerationVisitor) generateABI(contractSymbol *symbol.ContractSymbol,
 	contractData *data.ContractData) {
-	v.assembler = NewILAssembler(&v.bytePos)
+	v.assembler.Emit(il.CALLDATA)
 
+	for i, functionData := range contractData.Functions {
+		v.assembler.Emit(il.DUP)
+		v.assembler.PushFuncHash(functionData.Hash)
+		v.assembler.Emit(il.NEQ)
+
+		checkNextFuncLabel := v.assembler.CreateLabel()
+		v.assembler.JmpIfTrue(checkNextFuncLabel)
+		v.assembler.Call(contractSymbol.Functions[i])
+		v.assembler.Emit(il.HALT)
+
+		v.assembler.SetLabel(checkNextFuncLabel)
+	}
+}
+
+func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
+	contractSymbol *symbol.ContractSymbol, contractData *data.ContractData) {
+	constructorLabel := v.assembler.CreateLabel()
+
+	v.assembler.PushBool(false)
+	v.assembler.Emit(il.EQ)
+	v.assembler.JmpIfTrue(constructorLabel)
+	v.assembler.Emit(il.HALT)
+
+	v.assembler.SetLabel(constructorLabel)
 	for _, variable := range node.Variables {
 		variable.Accept(v.ConcreteVisitor)
 	}

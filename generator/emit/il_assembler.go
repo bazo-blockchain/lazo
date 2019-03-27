@@ -9,9 +9,7 @@ import (
 
 type Label uint
 
-/**
- * IL Assembler creates IL Instructions
- */
+// ILAssembler creates IL instructions
 type ILAssembler struct {
 	instructions []*il.Instruction
 	targets      map[Label]uint16
@@ -93,6 +91,15 @@ func (a *ILAssembler) PushCharacter(value rune) {
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
+func (a *ILAssembler) PushFuncHash(hash [4]byte) {
+	var operand = make([]byte, 5)
+	operand[0] = 3 // actually 4
+	//operand[1] = 0 // Fix for VM PUSH
+	copy(operand[1:], hash[:])
+
+	a.addInstruction(il.PUSH, operand, byte(len(operand)))
+}
+
 func (a *ILAssembler) NegBool() {
 	a.PushBool(false)
 	a.Emit(il.EQ)
@@ -113,6 +120,10 @@ func (a *ILAssembler) JmpIfTrue(label Label) {
 
 func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
 	a.addInstruction(il.CALL, function, 3)
+}
+
+func (a *ILAssembler) CallIf(function *symbol.FunctionSymbol) {
+	a.addInstruction(il.CALLIF, function, 3)
 }
 
 func (a *ILAssembler) Store(index byte) {

@@ -70,6 +70,28 @@ func TestContractFieldAssignment(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(3))
 }
 
+// Call contract functions externally
+// ----------------------------------
+
+func TestFuncCallByHash(t *testing.T) {
+	txData := []byte{
+		3,
+		0x51, 0xA3, 0x52, 0xE1,
+	}
+
+	tester := newGeneratorTextUtilWithTx(t, `
+		function int doNotCall() {
+			return 4
+		}
+
+		function int doCall() {
+			return 5
+		}
+	`, txData)
+
+	tester.assertInt(big.NewInt(5))
+}
+
 // Statements
 // ----------
 

@@ -79,6 +79,7 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 	functionData := &data.FunctionData{
 		Identifier: function.GetIdentifier(),
+		Hash:       createFuncHash(createFuncSignature(function)),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
 	b.functionData[function] = functionData
