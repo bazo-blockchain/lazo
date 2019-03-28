@@ -25,6 +25,7 @@ func (g *Generator) Run() (*data.Metadata, []error) {
 
 	v := emit.NewCodeGenerationVisitor(g.symbolTable, g.ilBuilder)
 	contractNode.Accept(v)
+	g.errors = v.Errors
 	metadata := g.ilBuilder.Complete()
 
 	return metadata, g.errors

@@ -7,6 +7,7 @@ import (
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"github.com/pkg/errors"
 	"math/big"
 )
 
@@ -221,29 +222,31 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		v.assembler.SetLabel(endLabel)
 		return
 	}
-
-	panic("binary operator not supported")
+	v.reportError(expNode, fmt.Sprintf("binary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
-	token.Addition:    il.NOP,
 }
 
-func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
-	if op, ok := unaryOpCodes[node.Operator]; ok {
-		v.AbstractVisitor.VisitUnaryExpressionNode(node)
+func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryExpression) {
+	if op, ok := unaryOpCodes[expNode.Operator]; ok {
+		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
 		v.assembler.Emit(op)
 		return
 	}
 
-	if node.Operator == token.Not {
-		v.AbstractVisitor.VisitUnaryExpressionNode(node)
-		v.assembler.NegBool()
+	if expNode.Operator == token.Addition {
+		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
 		return
 	}
 
-	panic("unary operator not supported")
+	if expNode.Operator == token.Not {
+		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
+		v.assembler.NegBool()
+		return
+	}
+	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
 func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
@@ -289,7 +292,8 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 	case gs.CharType:
 		v.assembler.PushCharacter('0')
 	default:
-		panic(fmt.Sprintf("%s not supported", typeSymbol.Identifier))
+		typeNode := v.symbolTable.GetNodeBySymbol(typeSymbol)
+		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.Identifier))
 	}
 }
 
@@ -312,4 +316,9 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 	default:
 		panic("Not implemented")
 	}
+}
+
+func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {
+	v.Errors = append(v.Errors, errors.New(
+		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }
