@@ -313,20 +313,3 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 		panic("Not implemented")
 	}
 }
-
-func lessThan(x *big.Int, y *big.Int) bool {
-	value := x.Cmp(y) == -1
-	return value
-}
-
-func sub(x *big.Int, y *big.Int) *big.Int {
-	value := big.NewInt(0).Sub(x, y)
-	valstr := value.String()
-	fmt.Println(valstr)
-	return value
-}
-
-func add(x *big.Int, y *big.Int) *big.Int {
-	value := big.NewInt(0).Add(x, y)
-	return value
-}
