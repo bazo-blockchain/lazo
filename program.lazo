@@ -1,5 +1,4 @@
 contract Test {
-
     function int test() {
         return 2 ** 2
     }
