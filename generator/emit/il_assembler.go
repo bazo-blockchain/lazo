@@ -94,7 +94,6 @@ func (a *ILAssembler) PushCharacter(value rune) {
 func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	var operand = make([]byte, 5)
 	operand[0] = 3 // actually 4
-	//operand[1] = 0 // Fix for VM PUSH
 	copy(operand[1:], hash[:])
 
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))

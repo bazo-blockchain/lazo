@@ -92,6 +92,26 @@ func TestFuncCallByHash(t *testing.T) {
 	tester.assertInt(big.NewInt(5))
 }
 
+func TestFuncCallByHashWithParams(t *testing.T) {
+	txData := []byte{
+		1, 0, 2,
+		1, 0, 4,
+		3, 0x35, 0x2E, 0x00, 0x80,
+	}
+
+	tester := newGeneratorTextUtilWithTx(t, `
+		function int doNotCall() {
+			return 4
+		}
+
+		function int doCall(int x, int y) {
+			return x * y
+		}
+	`, txData)
+
+	tester.assertInt(big.NewInt(8))
+}
+
 // Statements
 // ----------
 

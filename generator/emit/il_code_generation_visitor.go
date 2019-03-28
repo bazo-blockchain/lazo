@@ -52,6 +52,7 @@ func (v *ILCodeGenerationVisitor) generateABI(contractSymbol *symbol.ContractSym
 
 		checkNextFuncLabel := v.assembler.CreateLabel()
 		v.assembler.JmpIfTrue(checkNextFuncLabel)
+		v.assembler.Emit(il.POP) // Remove function hash from top of call stack
 		v.assembler.Call(contractSymbol.Functions[i])
 		v.assembler.Emit(il.HALT)
 
@@ -63,7 +64,7 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 	contractSymbol *symbol.ContractSymbol, contractData *data.ContractData) {
 	constructorLabel := v.assembler.CreateLabel()
 
-	v.assembler.PushBool(false)
+	v.assembler.PushInt(big.NewInt(0))
 	v.assembler.Emit(il.EQ)
 	v.assembler.JmpIfTrue(constructorLabel)
 	v.assembler.Emit(il.HALT)
@@ -99,6 +100,11 @@ func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, co
 func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
+
+	// parameter symbol should not be default initialized
+	if node.Expression == nil && v.function != nil && !v.function.IsLocalVar(node.Identifier) {
+		return
+	}
 
 	if node.Expression == nil {
 		v.pushDefault(targetType)
@@ -320,7 +326,7 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 // Returns: variable index and isContractField
 func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 	switch decl.(type) {
-	case *symbol.LocalVariableSymbol:
+	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol:
 		index := v.function.GetVarIndex(decl.GetIdentifier())
 		if index == -1 {
 			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
