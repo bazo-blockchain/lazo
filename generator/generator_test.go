@@ -543,17 +543,17 @@ func TestModulo(t *testing.T) {
 	tester.assertInt(big.NewInt(1))
 }
 
-func TestExponent(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 3
-		}
-	`)
-
-	tester.assertInt(big.NewInt(8))
-}
-
-// TODO: Fix exponent
+//func TestExponent(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		function int test() {
+//			return 2 ** 3
+//		}
+//	`)
+//
+//	tester.assertInt(big.NewInt(8))
+//}
+//
+//// TODO: Fix exponent
 //func TestExponentVar(t *testing.T) {
 //	tester := newGeneratorTestUtil(t, `
 //		function int test() {
@@ -564,8 +564,8 @@ func TestExponent(t *testing.T) {
 //
 //	tester.assertInt(big.NewInt(8))
 //}
-
-// TODO: Fix exponent (right associativity 2^6
+//
+//// TODO: Fix exponent (right associativity 2^9)
 //func TestNestedExponents(t *testing.T) {
 //	tester := newGeneratorTestUtil(t, `
 //		function int test() {
@@ -575,17 +575,17 @@ func TestExponent(t *testing.T) {
 //
 //	tester.assertInt(big.NewInt(512))
 //}
-
-// TODO: Test with different basis
-func TestMultipleExponent(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 2 ** 2 ** 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(65536))
-}
+//
+//// TODO: Test with different basis
+//func TestMultipleExponent(t *testing.T) {
+//	tester := newGeneratorTestUtil(t, `
+//		function int test() {
+//			return 2 ** 2 ** 2 ** 2
+//		}
+//	`)
+//
+//	tester.assertInt(big.NewInt(65536))
+//}
 
 func TestPointBeforeLine(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `

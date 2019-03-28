@@ -171,7 +171,6 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Multiplication: il.MULT,
 	token.Division:       il.DIV,
 	token.Modulo:         il.MOD,
-	token.Exponent:       il.MULT,
 	token.Greater:        il.GT,
 	token.GreaterEqual:   il.GTE,
 	token.LessEqual:      il.LTE,
@@ -180,39 +179,10 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Unequal:        il.NEQ,
 }
 
-func (v *ILCodeGenerationVisitor) calculateExponent(expNode *node.BinaryExpressionNode) *big.Int {
-	operand := expNode.Left.(*node.IntegerLiteralNode).Value
-	if binNode, ok := expNode.Right.(*node.BinaryExpressionNode); ok {
-		return big.NewInt(0).Exp(v.calculateExponent(binNode), operand, nil)
-	}
-
-	exponent := expNode.Right.(*node.IntegerLiteralNode).Value
-	return exponent
-}
-
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
-		switch expNode.Operator {
-		case token.Exponent:
-			var exponent *big.Int
-			if binExpNode, ok := expNode.Right.(*node.BinaryExpressionNode); ok {
-				v.AbstractVisitor.VisitBinaryExpressionNode(binExpNode)
-			}
-			exponent = v.calculateExponent(expNode)
-			left := expNode.Left.(*node.IntegerLiteralNode)
-			expNode.Right = expNode.Left
-			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
-			for i := big.NewInt(0); lessThan(i, sub(exponent, big.NewInt(2))); i = add(i, big.NewInt(1)) {
-				v.assembler.Emit(op)
-				v.assembler.PushInt(left.Value)
-			}
-			if exponent.Cmp(big.NewInt(2)) != 0 {
-				v.assembler.Emit(op)
-			}
-		default:
-			v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
-			v.assembler.Emit(op)
-		}
+		v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
+		v.assembler.Emit(op)
 		return
 	}
 
