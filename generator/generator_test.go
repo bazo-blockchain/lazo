@@ -282,27 +282,27 @@ func TestReAssignmentChar(t *testing.T) {
 	tester.assertChar('d')
 }
 
-//func TestReturnMultipleValuesSameTypes(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function (int, int) test() {
-//			int x = 1
-//			int y = 2
-//			return x, y
-//		}
-//	`)
-//	tester.assertInt(big.NewInt(2))
-//}
+func TestReturnMultipleValuesSameTypes(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function (int, int) test() {
+			int x = 1
+			int y = 2
+			return x, y
+		}
+	`)
+	tester.assertInt(big.NewInt(2))
+}
 
-//func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function (int, bool) test() {
-//			int x = 1
-//			bool y = true
-//			return x,y
-//		}
-//	`)
-//	tester.assertBool(true)
-//}
+func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function (int, bool) test() {
+			int x = 1
+			bool y = true
+			return x,y
+		}
+	`)
+	tester.assertBool(true)
+}
 
 func TestIfStatement(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
@@ -420,35 +420,20 @@ func TestThreeReturnValues(t *testing.T) {
 	tester.assertInt(big.NewInt(3))
 }
 
-// TODO Should Fail
-//func TestFourReturnValues(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function (int, int, int, int) test() {
-//			return 1, 2, 3, 4
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(1))
-//}
+func TestAssignment(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x = 4
+	
+		function void set() {
+			x = 5
+		}
+	`)
 
-// TODO Has semantic errors
-//func TestAssignment(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		int x = 3
-//
-//		function void set() {
-//			x = 5
-//		}
-//
-//		function int get() {
-//			return x
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(3))
-//}
-
-// TODO: Test if, assignment, local variable and return statements, Test for Errors
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(5))
+}
 
 // Expressions
 // -----------
