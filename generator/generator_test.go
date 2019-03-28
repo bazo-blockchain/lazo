@@ -420,7 +420,7 @@ func TestThreeReturnValues(t *testing.T) {
 	tester.assertInt(big.NewInt(3))
 }
 
-func TestAssignment(t *testing.T) {
+func TestSetter(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int x = 4
 	
