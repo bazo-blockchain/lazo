@@ -66,6 +66,15 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 	return symbols
 }
 
+func (sym *ContractSymbol) GetFieldIndex(id string) int {
+	for i, s := range sym.Fields {
+		if s.GetIdentifier() == id {
+			return i
+		}
+	}
+	return -1
+}
+
 func (sym *ContractSymbol) String() string {
 	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.Identifier, sym.Fields, sym.Functions)
 }
@@ -111,6 +120,24 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 		symbols = append(symbols, s)
 	}
 	return symbols
+}
+
+func (sym *FunctionSymbol) GetVarIndex(id string) int {
+	for i, s := range sym.AllDeclarations() {
+		if s.GetIdentifier() == id {
+			return i
+		}
+	}
+	return -1
+}
+
+func (sym *FunctionSymbol) IsLocalVar(id string) bool {
+	for _, s := range sym.LocalVariables {
+		if s.GetIdentifier() == id {
+			return true
+		}
+	}
+	return false
 }
 
 func (sym *FunctionSymbol) String() string {

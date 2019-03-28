@@ -1,7 +1,5 @@
 contract Test {
-    function int hello () {
-    int x
-    x = true
-    return x
+    function int test() {
+        return 2 * 2
     }
 }

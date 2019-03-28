@@ -68,7 +68,7 @@ func TestContractWithVariable(t *testing.T) {
 	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
 }
 
-func TestContractWithFunction(t *testing.T){
+func TestContractWithFunction(t *testing.T) {
 	p := newParserFromInput(`contract Test {
 		function void test() {
 
@@ -98,7 +98,7 @@ func TestVariableDeclarationWithoutNewLine(t *testing.T) {
 	assertHasError(t, p)
 }
 
-func TestCharVariableStatement(t *testing.T){
+func TestCharVariableStatement(t *testing.T) {
 	p := newParserFromInput("char a = 'c'\n")
 	v := p.parseVariableStatement()
 
@@ -106,7 +106,7 @@ func TestCharVariableStatement(t *testing.T){
 	assertNoErrors(t, p)
 }
 
-func TestIntVariableStatement(t *testing.T){
+func TestIntVariableStatement(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseVariableStatement()
 
@@ -114,7 +114,7 @@ func TestIntVariableStatement(t *testing.T){
 	assertNoErrors(t, p)
 }
 
-func TestVariableStatementWONewline(t *testing.T){
+func TestVariableStatementWONewline(t *testing.T) {
 	p := newParserFromInput("char a = 'c'")
 	p.parseVariableStatement()
 
@@ -369,7 +369,7 @@ func TestAssignmentStatementWONewline(t *testing.T) {
 // Statement with Fix token
 // ------------------------
 
-func TestStatementWithFixTokenReturn(t *testing.T){
+func TestStatementWithFixTokenReturn(t *testing.T) {
 	p := newParserFromInput("return\n")
 	v := p.parseStatementWithFixToken()
 
@@ -377,7 +377,7 @@ func TestStatementWithFixTokenReturn(t *testing.T){
 	assertNoErrors(t, p)
 }
 
-func TestStatementWithFixTokenReturnValue(t *testing.T){
+func TestStatementWithFixTokenReturnValue(t *testing.T) {
 	p := newParserFromInput("return 5\n")
 	v := p.parseStatementWithFixToken()
 
@@ -385,7 +385,7 @@ func TestStatementWithFixTokenReturnValue(t *testing.T){
 	assertNoErrors(t, p)
 }
 
-func TestStatementWithFixTokenMultipleReturnValue(t *testing.T){
+func TestStatementWithFixTokenMultipleReturnValue(t *testing.T) {
 	p := newParserFromInput("return 5, 4\n")
 	v := p.parseStatementWithFixToken()
 
@@ -396,7 +396,7 @@ func TestStatementWithFixTokenMultipleReturnValue(t *testing.T){
 // Statement with Identifier
 // -------------------------
 
-func TestStatementWithIdentifier(t *testing.T){
+func TestStatementWithIdentifier(t *testing.T) {
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
 
@@ -404,7 +404,7 @@ func TestStatementWithIdentifier(t *testing.T){
 	assertNoErrors(t, p)
 }
 
-func TestStatementWithIdentifierAssignment(t *testing.T){
+func TestStatementWithIdentifierAssignment(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseStatementWithIdentifier()
 

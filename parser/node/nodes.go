@@ -152,7 +152,7 @@ func (n *ReturnStatementNode) Accept(v Visitor) {
 
 type AssignmentStatementNode struct {
 	AbstractNode
-	Left *DesignatorNode
+	Left  *DesignatorNode
 	Right ExpressionNode
 }
 

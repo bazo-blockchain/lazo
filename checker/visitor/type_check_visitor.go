@@ -109,7 +109,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			v.reportError(node, "&& and || can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
-	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo:
+	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to expressions of type int")
 		}

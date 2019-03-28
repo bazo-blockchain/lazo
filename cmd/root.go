@@ -9,8 +9,8 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "lazo",
 	Short: "Lazo is a tool for managing Lazo source code",
-	Long: `Lazo is a tool for managing Lazo source code on the Bazo Blockchain`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `Lazo is a tool for managing Lazo source code on the Bazo Blockchain`,
+	Run: func(cmd *cobra.Command, _ []string) {
 		cmd.Help()
 	},
 }
