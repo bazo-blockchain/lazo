@@ -106,7 +106,7 @@ func AssertBinaryExpression(t *testing.T, node ExpressionNode, left string, righ
 }
 
 func AssertUnaryExpression(t *testing.T, node ExpressionNode, expr string, op token.Symbol) {
-	unExpr, ok := node.(*UnaryExpression)
+	unExpr, ok := node.(*UnaryExpressionNode)
 
 	assert.Equal(t, ok, true)
 	assert.Equal(t, unExpr.Expression.String(), expr)

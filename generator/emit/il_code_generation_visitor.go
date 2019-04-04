@@ -229,7 +229,7 @@ var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
 }
 
-func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryExpression) {
+func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryExpressionNode) {
 	if op, ok := unaryOpCodes[expNode.Operator]; ok {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
 		v.assembler.Emit(op)

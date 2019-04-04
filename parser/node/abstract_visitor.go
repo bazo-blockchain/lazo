@@ -64,7 +64,7 @@ func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) 
 	node.Left.Accept(v.ConcreteVisitor)
 	node.Right.Accept(v.ConcreteVisitor)
 }
-func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpression) {
+func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpressionNode) {
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 func (v *AbstractVisitor) VisitDesignatorNode(node *DesignatorNode) {

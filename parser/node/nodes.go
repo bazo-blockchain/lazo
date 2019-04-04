@@ -213,19 +213,19 @@ func (n *BinaryExpressionNode) Accept(v Visitor) {
 
 // --------------------------
 
-// UnaryExpression composes abstract node and holds the type, identifier and expression
-type UnaryExpression struct {
+// UnaryExpressionNode composes abstract node and holds the type, identifier and expression
+type UnaryExpressionNode struct {
 	AbstractNode
 	Operator   token.Symbol
 	Expression ExpressionNode
 }
 
-func (n *UnaryExpression) String() string {
+func (n *UnaryExpressionNode) String() string {
 	return fmt.Sprintf("(%s%s)", token.SymbolLexeme[n.Operator], n.Expression)
 }
 
 // Accept lets a visitor to traverse its node structure
-func (n *UnaryExpression) Accept(v Visitor) {
+func (n *UnaryExpressionNode) Accept(v Visitor) {
 	v.VisitUnaryExpressionNode(n)
 }
 
