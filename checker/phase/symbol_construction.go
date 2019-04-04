@@ -15,6 +15,8 @@ type symbolConstruction struct {
 	errors      []error
 }
 
+// RunSymbolConstruction prepares global scope, creates symbols and checks identifiers
+// Returns errors that occurred during construction
 func RunSymbolConstruction(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
 	symTable := symbol.NewSymbolTable()
 	construction := symbolConstruction{
