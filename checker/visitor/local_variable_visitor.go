@@ -24,7 +24,8 @@ func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.F
 	return v
 }
 
-// VisitStatementBlock adds a new block scope, visits the statements and removes the block scope again
+// VisitStatementBlock adds a new block scope, visits the statements and removes the last blockscope as otherwise
+// the variable will be visible to all statements.
 func (v *LocalVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 	v.blockScopes = append(v.blockScopes, []*symbol.LocalVariableSymbol{}) // add new block scope
 	v.AbstractVisitor.VisitStatementBlock(stmts)
