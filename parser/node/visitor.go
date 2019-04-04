@@ -1,5 +1,6 @@
 package node
 
+// Visitor is the interface that defines the functions a concrete visitor should implement.
 type Visitor interface {
 	VisitProgramNode(node *ProgramNode)
 	VisitContractNode(node *ContractNode)
