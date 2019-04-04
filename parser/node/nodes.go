@@ -231,6 +231,7 @@ func (n *UnaryExpressionNode) Accept(v Visitor) {
 
 // --------------------------
 
+// DesignatorNode composes abstract node and holds the designator name.
 type DesignatorNode struct {
 	AbstractNode
 	Value string
@@ -240,7 +241,7 @@ func (n *DesignatorNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
 }
 
-// Accept lets a visitor to traverse its node structure
+// Accept lets a visitor to traverse its node structure.
 func (n *DesignatorNode) Accept(v Visitor) {
 	v.VisitDesignatorNode(n)
 }
@@ -249,6 +250,7 @@ func (n *DesignatorNode) Accept(v Visitor) {
 // Literal Nodes
 // --------------------------
 
+// IntegerLiteralNode composes abstract node and holds the int value.
 type IntegerLiteralNode struct {
 	AbstractNode
 	Value *big.Int
@@ -258,13 +260,14 @@ func (n *IntegerLiteralNode) String() string {
 	return fmt.Sprintf("%d", n.Value)
 }
 
-// Accept lets a visitor to traverse its node structure
+// Accept lets a visitor to traverse its node structure.
 func (n *IntegerLiteralNode) Accept(v Visitor) {
 	v.VisitIntegerLiteralNode(n)
 }
 
 // --------------------------
 
+// StringLiteralNode composes abstract node and holds string literal value.
 type StringLiteralNode struct {
 	AbstractNode
 	Value string
@@ -274,13 +277,14 @@ func (n *StringLiteralNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
 }
 
-// Accept lets a visitor to traverse its node structure
+// Accept lets a visitor to traverse its node structure.
 func (n *StringLiteralNode) Accept(v Visitor) {
 	v.VisitStringLiteralNode(n)
 }
 
 // --------------------------
 
+// CharacterLiteralNode composes abstract node and holds character literal value.
 type CharacterLiteralNode struct {
 	AbstractNode
 	Value rune
@@ -297,6 +301,7 @@ func (n *CharacterLiteralNode) Accept(v Visitor) {
 
 // --------------------------
 
+// BoolLiteralNode composes abstract node and holds boolean literal value.
 type BoolLiteralNode struct {
 	AbstractNode
 	Value bool
@@ -313,6 +318,7 @@ func (n *BoolLiteralNode) Accept(v Visitor) {
 
 // --------------------------
 
+// ErrorNode composes abstract node and holds the syntax error message.
 type ErrorNode struct {
 	AbstractNode
 	Message string
@@ -322,7 +328,7 @@ func (n *ErrorNode) String() string {
 	return fmt.Sprintf("[%s] ERROR: %s", n.Pos(), n.Message)
 }
 
-// Accept lets a visitor to traverse its node structure
+// Accept lets a visitor to traverse its node structure.
 func (n *ErrorNode) Accept(v Visitor) {
 	v.VisitErrorNode(n)
 }
