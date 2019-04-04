@@ -184,12 +184,12 @@ func (lex *Lexer) readCharacter() token.Token {
 
 func (lex *Lexer) readFixToken() token.Token {
 	// Check if the character could belong to a multi character operation
-	if symbol, ok := token.PossibleMultiCharOperation[lex.current]; ok {
+	if symbol, ok := token.PossibleMultiCharOperators[lex.current]; ok {
 		buf := []rune{lex.current}
 		lex.nextChar()
 
 		// Check if the concatenated characters really build a multi character operation
-		if multiCharSymbol, ok := token.MultiCharOperation[string(buf[0])+string(lex.current)]; ok {
+		if multiCharSymbol, ok := token.MultiCharOperators[string(buf[0])+string(lex.current)]; ok {
 			buf = append(buf, lex.current)
 			symbol = multiCharSymbol
 			lex.nextChar()
@@ -201,7 +201,7 @@ func (lex *Lexer) readFixToken() token.Token {
 			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
-	} else if symbol, ok := token.SingleCharOperations[lex.current]; ok { // Check if the character is a single character operator
+	} else if symbol, ok := token.SingleCharOperators[lex.current]; ok { // Check if the character is a single character operator
 		abstractToken := lex.newAbstractToken(string(lex.current))
 		lex.nextChar()
 
@@ -239,7 +239,7 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 	lexeme := string(buf)
 	abstractToken := lex.newAbstractToken(lexeme)
 
-	if symbol, ok := token.LogicalOperation[lexeme]; ok {
+	if symbol, ok := token.LogicalOperators[lexeme]; ok {
 		lex.nextChar()
 		return &token.FixToken{
 			AbstractToken: abstractToken,
