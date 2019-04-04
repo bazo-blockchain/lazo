@@ -1,3 +1,4 @@
+// Package token contains all the supported token types and their functions.
 package token
 
 import (
@@ -26,7 +27,7 @@ type Token interface {
 	Type() TokenType
 }
 
-// AbstractToken contains token position and lexeme, which all concrete tokens have
+// AbstractToken contains token position and lexeme, which all concrete tokens have.
 type AbstractToken struct {
 	Position
 	Lexeme string
