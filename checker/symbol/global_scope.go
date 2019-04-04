@@ -2,6 +2,8 @@ package symbol
 
 import "fmt"
 
+// GlobalScope encapsulates global information such as the contract, types, built-ins, constants a.s.o.
+// It is used to lookup global information
 type GlobalScope struct {
 	AbstractSymbol
 	Contract         *ContractSymbol
@@ -27,6 +29,7 @@ func newGlobalScope() *GlobalScope {
 	return gs
 }
 
+// AllDeclarations returns all declarations made within the global scope such as types, built-ins and constants
 func (gs *GlobalScope) AllDeclarations() []Symbol {
 	var symbols []Symbol
 	for _, s := range gs.Types {
@@ -41,6 +44,7 @@ func (gs *GlobalScope) AllDeclarations() []Symbol {
 	return symbols
 }
 
+// String creates a string representation of the global scope
 func (gs *GlobalScope) String() string {
 	return fmt.Sprintf("\n Types: %s"+
 		"\n Built-in Types: %s"+
