@@ -1,7 +1,9 @@
 package token
 
+// Symbol is the type of allowed fixed symbols in the source code
 type Symbol int
 
+// Allowed fixed symbols
 const (
 	EOF Symbol = iota
 	NewLine
@@ -49,6 +51,7 @@ const (
 	False
 )
 
+// SymbolLexeme maps the Symbol type to its lexeme value
 var SymbolLexeme = map[Symbol]string{
 	EOF:     "EOF",
 	NewLine: `\n`,
@@ -96,6 +99,7 @@ var SymbolLexeme = map[Symbol]string{
 	False:    "false",
 }
 
+// Keywords maps reserved literal values to the Symbol type
 var Keywords = map[string]Symbol{
 	"contract": Contract,
 	"return":   Return,
@@ -106,12 +110,14 @@ var Keywords = map[string]Symbol{
 	"false":    False,
 }
 
+// BooleanConstants maps Symbol type to built-in boolean value
 var BooleanConstants = map[Symbol]bool{
 	True:  true,
 	False: false,
 }
 
-var SingleCharOperations = map[rune]Symbol{
+// SingleCharOperators maps single character to Symbol type
+var SingleCharOperators = map[rune]Symbol{
 	':': Colon,
 	',': Comma,
 	'.': Period,
@@ -127,7 +133,8 @@ var SingleCharOperations = map[rune]Symbol{
 	'%': Modulo,
 }
 
-var PossibleMultiCharOperation = map[rune]Symbol{
+// PossibleMultiCharOperators maps the first character of a possible operation to the Symbol type.
+var PossibleMultiCharOperators = map[rune]Symbol{
 	'=': Assign,
 	'>': Greater,
 	'<': Less,
@@ -136,16 +143,18 @@ var PossibleMultiCharOperation = map[rune]Symbol{
 	'*': Multiplication,
 }
 
-var LogicalOperation = map[string]Symbol{
-	"&&": And,
-	"||": Or,
-}
-
-var MultiCharOperation = map[string]Symbol{
+// MultiCharOperators maps the full literal value of the operation to the Symbol type.
+var MultiCharOperators = map[string]Symbol{
 	"==": Equal,
 	"!=": Unequal,
 	">=": GreaterEqual,
 	"<=": LessEqual,
 
 	"**": Exponent,
+}
+
+// LogicalOperators maps the logical operator to Symbol type.
+var LogicalOperators = map[string]Symbol{
+	"&&": And,
+	"||": Or,
 }

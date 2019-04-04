@@ -35,25 +35,51 @@ func (tester *lexerTestUtil) assertTotal(total int) {
 }
 
 func (tester *lexerTestUtil) assertInteger(index int, value *big.Int) {
-	token.AssertInteger(tester.t, tester.tokens[index], value)
+	tok, ok := tester.tokens[index].(*token.IntegerToken)
+
+	assert.Equal(tester.t, ok, true)
+	assert.Equal(tester.t, tok.Value.Cmp(value) == 0, true)
 }
 
 func (tester *lexerTestUtil) assertIdentifer(index int, value string) {
-	token.AssertIdentifier(tester.t, tester.tokens[index], value)
+	assertIdentifier(tester.t, tester.tokens[index], value)
 }
 
 func (tester *lexerTestUtil) assertString(index int, value string) {
-	token.AssertString(tester.t, tester.tokens[index], value)
+	tok, ok := tester.tokens[index].(*token.StringToken)
+
+	assert.Equal(tester.t, ok, true)
+	assert.Equal(tester.t, tok.Literal(), value)
 }
 
 func (tester *lexerTestUtil) assertCharacter(index int, value rune) {
-	token.AssertCharacter(tester.t, tester.tokens[index], value)
+	tok, ok := tester.tokens[index].(*token.CharacterToken)
+
+	assert.Equal(tester.t, ok, true)
+	assert.Equal(tester.t, tok.Value, value)
 }
 
 func (tester *lexerTestUtil) assertFixToken(index int, value token.Symbol) {
-	token.AssertFixToken(tester.t, tester.tokens[index], value)
+	assertFixToken(tester.t, tester.tokens[index], value)
 }
 
 func (tester *lexerTestUtil) assertError(index int, value string) {
-	token.AssertError(tester.t, tester.tokens[index], value)
+	tok, ok := tester.tokens[index].(*token.ErrorToken)
+
+	assert.Equal(tester.t, ok, true)
+	assert.Equal(tester.t, tok.Literal(), value)
+}
+
+func assertIdentifier(t *testing.T, tok token.Token, value string) {
+	tok, ok := tok.(*token.IdentifierToken)
+
+	assert.Equal(t, ok, true)
+	assert.Equal(t, tok.Literal(), value)
+}
+
+func assertFixToken(t *testing.T, tok token.Token, value token.Symbol) {
+	ftok, ok := tok.(*token.FixToken)
+
+	assert.Equal(t, ok, true)
+	assert.Equal(t, ftok.Value, value)
 }
