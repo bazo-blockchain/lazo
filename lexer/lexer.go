@@ -1,3 +1,6 @@
+// Package lexer performs lexical analysis and creates tokens.
+// It reads the input source code character by character, recognizes the lexemes
+// and outputs a sequence of tokens describing the lexemes.
 package lexer
 
 import (
