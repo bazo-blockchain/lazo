@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TypeCheckVisitor contains the symbol table, contract symbol, current function and errors. It traverses the abstract
+// syntax tree and checks if types match
 type TypeCheckVisitor struct {
 	node.AbstractVisitor
 	symbolTable     *symbol.SymbolTable
@@ -16,6 +18,7 @@ type TypeCheckVisitor struct {
 	Errors          []error
 }
 
+// NewTypeCheckVisitor creates a new TypeCheckVisitor
 func NewTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *TypeCheckVisitor {
 	v := &TypeCheckVisitor{
 		symbolTable:    symbolTable,
@@ -25,6 +28,7 @@ func NewTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol
 	return v
 }
 
+// VisitContractNode visits the fields and functions of the contract
 func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 	for _, variable := range node.Variables {
 		variable.Accept(v.ConcreteVisitor)
@@ -41,6 +45,7 @@ func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 // Statements
 // ----------
 
+// VisitVariableNode checks whether the variable type and value are of the same type
 func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
@@ -51,6 +56,7 @@ func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	}
 }
 
+// VisitReturnStatementNode checks whether the return types and the values are of the same type
 func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
 	returnNodes := node.Expressions
@@ -74,6 +80,7 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 	}
 }
 
+// VisitAssignmentStatementNode checks whether the left and right part of the assignment are of the same type
 func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
@@ -86,6 +93,7 @@ func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 	}
 }
 
+// VisitIfStatementNode checks whether the condition is a boolean expression
 func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
 	if !v.isBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
@@ -96,6 +104,8 @@ func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 // Expressions
 // -----------
 
+// VisitBinaryExpressionNode checks if the types for different binary expressions match
+// Expressions are &&, ||, +, -, *, /, %, **, ==, !=, >, >=, <= and <
 func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
 	v.AbstractVisitor.VisitBinaryExpressionNode(node)
 	left := node.Left
@@ -134,6 +144,8 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	}
 }
 
+// VisitUnaryExpressionNode checks that types of unary expressions are valid
+// Expressions are +, -, !
 func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
@@ -157,22 +169,27 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) 
 	}
 }
 
+// VisitTypeNode currently does nothing
 func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
 }
 
+// VisitIntegerLiteralNode maps the integer literal node to its type
 func (v *TypeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 }
 
+// VisitBoolLiteralNode maps the bool literal node to its type
 func (v *TypeCheckVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 }
 
+// VisitStringLiteralNode maps the string literal to its type
 func (v *TypeCheckVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
 }
 
+// VisitCharacterLiteralNode maps the character literal to its type
 func (v *TypeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.CharType)
 }
