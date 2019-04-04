@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"io"
@@ -10,6 +9,8 @@ import (
 	"math/big"
 )
 
+// Lexer holds the current character and position from the given reader.
+// It is used to scan characters and create tokens.
 type Lexer struct {
 	reader     *bufio.Reader
 	current    rune
@@ -18,6 +19,9 @@ type Lexer struct {
 	isEnd      bool
 }
 
+// New creates a new Lexer struct with the given reader and initializes the current position.
+// It also reads the first character and initializes the current character.
+// It returns the created lexer struct
 func New(reader *bufio.Reader) *Lexer {
 	lex := &Lexer{
 		reader:     reader,
@@ -27,6 +31,10 @@ func New(reader *bufio.Reader) *Lexer {
 	return lex
 }
 
+// NextToken reads character by character from reader and creates a token when possible.
+// White space is skipped and, therefore, no token is created for that.
+// However, tokens are created for new lines, since they are part of the syntax.
+// It returns the created token containing the token position (line and column), the literal itself and the token type.
 func (lex *Lexer) NextToken() token.Token {
 	lex.skipWhiteSpace()
 
@@ -136,9 +144,9 @@ func (lex *Lexer) readString() token.Token {
 		return &token.StringToken{
 			AbstractToken: abstractToken,
 		}
-	} else {
-		return lex.newErrorToken(abstractToken, "String not closed")
 	}
+
+	return lex.newErrorToken(abstractToken, "String not closed")
 }
 
 func (lex *Lexer) readCharacter() token.Token {
@@ -170,9 +178,8 @@ func (lex *Lexer) readCharacter() token.Token {
 			AbstractToken: abstractToken,
 			Value:         []rune(lexeme)[0],
 		}
-	} else {
-		return lex.newErrorToken(abstractToken, "Character not closed")
 	}
+	return lex.newErrorToken(abstractToken, "Character not closed")
 }
 
 func (lex *Lexer) readFixToken() token.Token {
@@ -238,9 +245,9 @@ func (lex *Lexer) readLogicalFixToken() token.Token {
 			AbstractToken: abstractToken,
 			Value:         symbol,
 		}
-	} else {
-		return lex.newErrorToken(abstractToken, "Invalid Symbol")
 	}
+
+	return lex.newErrorToken(abstractToken, "Invalid Symbol")
 }
 
 func (lex *Lexer) nextChar() {
@@ -269,9 +276,8 @@ func (lex *Lexer) peekChar() (rune, error) {
 	if readError == nil {
 		unreadError := lex.reader.UnreadRune()
 		return char, unreadError
-	} else {
-		return char, readError
 	}
+	return char, readError
 }
 
 // Helpers
@@ -327,7 +333,7 @@ func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string
 				}
 			} else {
 				lex.nextChar()
-				return string(buf), errors.New(fmt.Sprintf("Escape code %c is not allowed", charToEscape))
+				return string(buf), fmt.Errorf("escape code %c is not allowed", charToEscape)
 			}
 		} else {
 			buf = append(buf, lex.current)
