@@ -1,3 +1,5 @@
+// Package parser performs syntactic analysis and creates nodes.
+// It takes the token stream from lexer, recognizes the nodes and outputs an abstract syntax tree (AST).
 package parser
 
 import (
@@ -5,9 +7,11 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
+// Parser is a LL(k=2) parser, which means "Left-to-right, Leftmost derivation" top-down parser.
+// It holds 2 lookahead tokens (current and peek token) from the given lexer to parse the input.
+// It also collects all the syntactic errors.
 type Parser struct {
 	lex          *lexer.Lexer
 	currentToken token.Token
@@ -15,18 +19,28 @@ type Parser struct {
 	errors       []error
 }
 
+// New creates a new Parser struct with the given lexer.
+// Since it is a LL(2) parser, it reads the next two tokens and initializes current and peek tokens.
+// It returns the created parser struct.
 func New(lex *lexer.Lexer) *Parser {
 	p := &Parser{
 		lex: lex,
 	}
 
-	// read two tokens at the beginning
 	p.nextToken()
 	p.nextTokenWhileNewLine()
 
 	return p
 }
 
+// ParseProgram reads token by token from lexer and creates a ProgramNode (aka. abstract syntax tree).
+//
+// The syntax tree consists of nodes. Every node stands for a construct of the source code.
+// Abstract in this context means that not every detail is captured in the syntax tree.
+// For example, already recognized keywords (e.g. 'contract', 'if' etc.) and fix symbols (e.g. comma, parentheses etc.)
+// are skipped, since they are not relevant for further steps.
+//
+// It returns the parsed ProgramNode/syntax tree and syntactic errors
 func (p *Parser) ParseProgram() (*node.ProgramNode, []error) {
 	program := &node.ProgramNode{}
 
@@ -395,5 +409,5 @@ func (p *Parser) isEnd() bool {
 
 func (p *Parser) addError(msg string) {
 	p.errors = append(p.errors,
-		errors.New(fmt.Sprintf("[%s] ERROR: %s", p.currentToken.Pos().String(), msg)))
+		fmt.Errorf("[%s] ERROR: %s", p.currentToken.Pos().String(), msg))
 }

@@ -16,7 +16,7 @@ func TestStateWithoutCode(t *testing.T) {
 	assertLexerState(t, lex, true, 0, "1:0")
 
 	tok := lex.NextToken()
-	token.AssertFixToken(t, tok, token.EOF)
+	assertFixToken(t, tok, token.EOF)
 	assert.Equal(t, tok.Pos().String(), "1:0")
 
 	// it shouldn't have changed the initial lexer state
@@ -30,12 +30,12 @@ func TestStateWithCode(t *testing.T) {
 	assertLexerState(t, lex, false, 't', "1:1")
 
 	tok := lex.NextToken()
-	token.AssertIdentifier(t, tok, "test")
+	assertIdentifier(t, tok, "test")
 	assert.Equal(t, tok.Pos().String(), "1:1")
 	assertLexerState(t, lex, true, 0, "1:4")
 
 	tok = lex.NextToken()
-	token.AssertFixToken(t, tok, token.EOF)
+	assertFixToken(t, tok, token.EOF)
 	assert.Equal(t, tok.Pos().String(), "1:4")
 	assertLexerState(t, lex, true, 0, "1:4")
 }
@@ -441,18 +441,18 @@ func TestLinuxNewLine(t *testing.T) {
 	lex := New(bufio.NewReader(strings.NewReader("\n \n")))
 
 	tok := lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 	tok = lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 }
 
 func TestWindowsNewLine(t *testing.T) {
 	lex := New(bufio.NewReader(strings.NewReader("\r\n")))
 
 	tok := lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 	tok = lex.NextToken()
-	token.AssertFixToken(t, tok, token.EOF)
+	assertFixToken(t, tok, token.EOF)
 }
 
 func TestSystemNewLine(t *testing.T) {
@@ -462,11 +462,11 @@ func TestSystemNewLine(t *testing.T) {
 	`)))
 
 	tok := lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 	tok = lex.NextToken() // skip 1
 	tok = lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 	tok = lex.NextToken() // skip 2
 	tok = lex.NextToken()
-	token.AssertFixToken(t, tok, token.NewLine)
+	assertFixToken(t, tok, token.NewLine)
 }

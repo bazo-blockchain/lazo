@@ -132,8 +132,8 @@ func (p *Parser) parseExpressionRest() node.ExpressionNode {
 	return p.parseOperand()
 }
 
-func (p *Parser) parseUnaryExpression() *node.UnaryExpression {
-	return &node.UnaryExpression{
+func (p *Parser) parseUnaryExpression() *node.UnaryExpressionNode {
+	return &node.UnaryExpressionNode{
 		AbstractNode: p.newAbstractNode(),
 		Operator:     p.readSymbol(),
 		Expression:   p.parseFactor(),

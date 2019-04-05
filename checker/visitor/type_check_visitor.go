@@ -146,7 +146,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 
 // VisitUnaryExpressionNode checks that types of unary expressions are valid
 // Expressions are +, -, !
-func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
+func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNode) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
 	operandType := v.symbolTable.GetTypeByExpression(operand)
