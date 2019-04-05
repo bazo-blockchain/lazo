@@ -7,9 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// DesignatorResolutionVisitor contains the symbol table, contract, current function, current statement and errors.
-// It traverses the abstract syntax tree and maps designators to its declarations.
-type DesignatorResolutionVisitor struct {
+type designatorResolutionVisitor struct {
 	node.AbstractVisitor
 	symbolTable           *symbol.SymbolTable
 	contractSymbol        *symbol.ContractSymbol
@@ -18,9 +16,8 @@ type DesignatorResolutionVisitor struct {
 	Errors                []error
 }
 
-// NewDesignatorResolutionVisitor creates a new DesignatorResolutionVisitor
-func NewDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *DesignatorResolutionVisitor {
-	v := &DesignatorResolutionVisitor{
+func newDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *designatorResolutionVisitor {
+	v := &designatorResolutionVisitor{
 		symbolTable:    symbolTable,
 		contractSymbol: contractSymbol,
 	}
@@ -29,7 +26,7 @@ func NewDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSym
 }
 
 // VisitContractNode visits all fields and functions of the contract. Stores the current function in the visitor.
-func (v *DesignatorResolutionVisitor) VisitContractNode(node *node.ContractNode) {
+func (v *designatorResolutionVisitor) VisitContractNode(node *node.ContractNode) {
 	for _, variable := range node.Variables {
 		variable.Accept(v.ConcreteVisitor)
 	}
@@ -43,7 +40,7 @@ func (v *DesignatorResolutionVisitor) VisitContractNode(node *node.ContractNode)
 }
 
 // VisitStatementBlock visits all the statements of the statement block
-func (v *DesignatorResolutionVisitor) VisitStatementBlock(stmts []node.StatementNode) {
+func (v *designatorResolutionVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 	for _, statement := range stmts {
 		v.currentStatement = statement
 		statement.Accept(v.ConcreteVisitor)
@@ -53,7 +50,7 @@ func (v *DesignatorResolutionVisitor) VisitStatementBlock(stmts []node.Statement
 
 // VisitDesignatorNode visits the designator node, maps the designator to its declaration and
 // maps the expression to the type
-func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
+func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
 	var scope symbol.Symbol
 	if v.currentFunctionSymbol == nil {
 		scope = v.contractSymbol
@@ -74,7 +71,7 @@ func (v *DesignatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	v.symbolTable.MapExpressionToType(node, getType(sym))
 }
 
-func (v *DesignatorResolutionVisitor) reportError(node node.Node, msg string) {
+func (v *designatorResolutionVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, errors.New(
 		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }

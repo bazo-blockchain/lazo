@@ -8,9 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TypeCheckVisitor contains the symbol table, contract symbol, current function and errors. It traverses the abstract
-// syntax tree and checks if types match
-type TypeCheckVisitor struct {
+type typeCheckVisitor struct {
 	node.AbstractVisitor
 	symbolTable     *symbol.SymbolTable
 	contractSymbol  *symbol.ContractSymbol
@@ -18,9 +16,8 @@ type TypeCheckVisitor struct {
 	Errors          []error
 }
 
-// NewTypeCheckVisitor creates a new TypeCheckVisitor
-func NewTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *TypeCheckVisitor {
-	v := &TypeCheckVisitor{
+func newTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol.ContractSymbol) *typeCheckVisitor {
+	v := &typeCheckVisitor{
 		symbolTable:    symbolTable,
 		contractSymbol: contractSymbol,
 	}
@@ -29,7 +26,7 @@ func NewTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol
 }
 
 // VisitContractNode visits the fields and functions of the contract
-func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
+func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 	for _, variable := range node.Variables {
 		variable.Accept(v.ConcreteVisitor)
 	}
@@ -46,7 +43,7 @@ func (v *TypeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 // ----------
 
 // VisitVariableNode checks whether the variable type and value are of the same type
-func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
+func (v *typeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
 	expType := v.symbolTable.GetTypeByExpression(node.Expression)
@@ -57,7 +54,7 @@ func (v *TypeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 }
 
 // VisitReturnStatementNode checks whether the return types and the values are of the same type
-func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+func (v *typeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
 	returnNodes := node.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
@@ -81,7 +78,7 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 }
 
 // VisitAssignmentStatementNode checks whether the left and right part of the assignment are of the same type
-func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
@@ -94,7 +91,7 @@ func (v *TypeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 }
 
 // VisitIfStatementNode checks whether the condition is a boolean expression
-func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+func (v *typeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
 	if !v.isBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
 		v.reportError(node, "condition must return boolean")
@@ -106,7 +103,7 @@ func (v *TypeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 
 // VisitBinaryExpressionNode checks if the types for different binary expressions match
 // Expressions are &&, ||, +, -, *, /, %, **, ==, !=, >, >=, <= and <
-func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
+func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
 	v.AbstractVisitor.VisitBinaryExpressionNode(node)
 	left := node.Left
 	right := node.Right
@@ -146,7 +143,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 
 // VisitUnaryExpressionNode checks that types of unary expressions are valid
 // Expressions are +, -, !
-func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNode) {
+func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNode) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
 	operandType := v.symbolTable.GetTypeByExpression(operand)
@@ -170,43 +167,43 @@ func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 }
 
 // VisitTypeNode currently does nothing
-func (v *TypeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
+func (v *typeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
 }
 
 // VisitIntegerLiteralNode maps the integer literal node to its type
-func (v *TypeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
+func (v *typeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 }
 
 // VisitBoolLiteralNode maps the bool literal node to its type
-func (v *TypeCheckVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
+func (v *typeCheckVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 }
 
 // VisitStringLiteralNode maps the string literal to its type
-func (v *TypeCheckVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {
+func (v *typeCheckVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
 }
 
 // VisitCharacterLiteralNode maps the character literal to its type
-func (v *TypeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
+func (v *typeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.CharType)
 }
 
-func (v *TypeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.IntType
 }
 
-func (v *TypeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.BoolType
 }
 
-func (v *TypeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
 }
 
-func (v *TypeCheckVisitor) reportError(node node.Node, msg string) {
+func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, errors.New(
 		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }

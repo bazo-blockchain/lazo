@@ -30,15 +30,15 @@ func New(syntaxTree *node.ProgramNode) *Checker {
 // If errors occur during one of those phases, the process is stopped at the end of the failing phase.
 // Returns the symbol table and errors
 func (c *Checker) Run() (*symbol.SymbolTable, []error) {
-	c.symbolTable, c.errors = symbolconstruction.RunSymbolConstruction(c.syntaxTree)
+	c.symbolTable, c.errors = symbolconstruction.Run(c.syntaxTree)
 	if !c.hasErrors() {
-		c.errors = typeresolution.RunTypeResolution(c.symbolTable)
+		c.errors = typeresolution.Run(c.symbolTable)
 	}
 	if !c.hasErrors() {
-		c.errors = designatorresolution.RunDesignatorResolution(c.symbolTable)
+		c.errors = designatorresolution.Run(c.symbolTable)
 	}
 	if !c.hasErrors() {
-		c.errors = typecheck.RunTypeChecker(c.symbolTable)
+		c.errors = typecheck.Run(c.symbolTable)
 	}
 	return c.symbolTable, c.errors
 }
