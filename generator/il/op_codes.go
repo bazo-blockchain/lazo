@@ -1,5 +1,6 @@
 package il
 
+// OpCode abstracts an OpCode
 type OpCode byte
 
 // The opcodes are copied from VM
@@ -66,6 +67,7 @@ const (
 	ADDR
 )
 
+// OpCodeDef contains the code, name, number of arguments, argument types, gas price and gas factor of the opcode
 type OpCodeDef struct {
 	code      OpCode
 	Name      string
@@ -75,6 +77,7 @@ type OpCodeDef struct {
 	gasFactor uint64
 }
 
+// OpCodes contains all opcode definitions
 var OpCodes = []OpCodeDef{
 	{PUSH, "push", 1, []int{BYTES}, 1, 1},
 	{DUP, "dup", 0, nil, 1, 2},

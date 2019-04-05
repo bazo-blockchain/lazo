@@ -6,10 +6,12 @@ import (
 	"github.com/bazo-blockchain/lazo/generator/il"
 )
 
+// Metadata contains the ContractData
 type Metadata struct {
 	Contract *ContractData
 }
 
+// CreateContract returns the byte code for the contract together with the contract fields
 func (d *Metadata) CreateContract() ([]byte, []protocol.ByteArray) {
 	return d.getByteCode(), d.getVariables()
 }
