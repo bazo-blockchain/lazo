@@ -53,25 +53,25 @@ func (ct *CheckerTestUtil) assertTotalErrors(total int) {
 
 func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {
 	contractSymbol := ct.symbolTable.GlobalScope.Contract
-	assert.Equal(ct.t, contractSymbol.GetScope(), ct.symbolTable.GlobalScope)
+	assert.Equal(ct.t, contractSymbol.Scope(), ct.symbolTable.GlobalScope)
 	assert.Equal(ct.t, len(contractSymbol.Fields), totalVars)
 	assert.Equal(ct.t, len(contractSymbol.Functions), totalFunctions)
 	assert.Equal(ct.t, len(contractSymbol.AllDeclarations()), totalVars+totalFunctions)
 
 	contractNode, ok := ct.symbolTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 	assert.Assert(ct.t, ok)
-	assert.Equal(ct.t, contractSymbol.GetIdentifier(), contractNode.Name)
+	assert.Equal(ct.t, contractSymbol.Identifier(), contractNode.Name)
 }
 
 func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbol) {
 	fieldSymbol := ct.symbolTable.GlobalScope.Contract.Fields[index]
-	assert.Equal(ct.t, fieldSymbol.GetScope(), ct.symbolTable.GlobalScope.Contract)
+	assert.Equal(ct.t, fieldSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
 	assert.Equal(ct.t, fieldSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(fieldSymbol.AllDeclarations()), 0)
 
 	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
-	assert.Equal(ct.t, fieldSymbol.GetIdentifier(), fieldNode.Identifier)
+	assert.Equal(ct.t, fieldSymbol.Identifier(), fieldNode.Identifier)
 
 	if fieldNode.Expression != nil {
 		ct.assertExpressionType(fieldNode.Expression, expectedType)
@@ -80,7 +80,7 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 
 func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, totalParams int, totalVars int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[index]
-	assert.Equal(ct.t, functionSymbol.GetScope(), ct.symbolTable.GlobalScope.Contract)
+	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
 	assert.Equal(ct.t, len(functionSymbol.ReturnTypes), totalReturnTypes)
 	assert.Equal(ct.t, len(functionSymbol.Parameters), totalParams)
 	assert.Equal(ct.t, len(functionSymbol.LocalVariables), totalVars)
@@ -88,7 +88,7 @@ func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, total
 
 	functionNode, ok := ct.symbolTable.GetNodeBySymbol(functionSymbol).(*node.FunctionNode)
 	assert.Assert(ct.t, ok)
-	assert.Equal(ct.t, functionSymbol.GetIdentifier(), functionNode.Name)
+	assert.Equal(ct.t, functionSymbol.Identifier(), functionNode.Name)
 }
 
 func (ct *CheckerTestUtil) assertReturnType(funcIndex int, returnTypeIndex int, expectedType *symbol.TypeSymbol) {
@@ -102,13 +102,13 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
 	paramSymbol := functionSymbol.Parameters[paramIndex]
-	assert.Equal(ct.t, paramSymbol.GetScope(), functionSymbol)
+	assert.Equal(ct.t, paramSymbol.Scope(), functionSymbol)
 	assert.Equal(ct.t, paramSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(paramSymbol.AllDeclarations()), 0)
 
 	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
-	assert.Equal(ct.t, paramSymbol.GetIdentifier(), varNode.Identifier)
+	assert.Equal(ct.t, paramSymbol.Identifier(), varNode.Identifier)
 }
 
 func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
@@ -116,14 +116,14 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
 	varSymbol := functionSymbol.LocalVariables[varIndex]
-	assert.Equal(ct.t, varSymbol.GetScope(), functionSymbol)
+	assert.Equal(ct.t, varSymbol.Scope(), functionSymbol)
 	assert.Equal(ct.t, varSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
 	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)
 
 	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.VariableNode)
 	assert.Assert(ct.t, ok)
-	assert.Equal(ct.t, varSymbol.GetIdentifier(), varNode.Identifier)
+	assert.Equal(ct.t, varSymbol.Identifier(), varNode.Identifier)
 
 	if varNode.Expression != nil {
 		ct.assertExpressionType(varNode.Expression, expectedType)

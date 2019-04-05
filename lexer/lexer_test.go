@@ -118,7 +118,7 @@ func TestMixedIntegers(t *testing.T) {
 	tester.assertIdentifer(3, "G")
 }
 
-// Identifier Tokens
+// ID Tokens
 // -----------------
 
 func TestValidIdentifers(t *testing.T) {

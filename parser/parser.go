@@ -369,7 +369,7 @@ func (p *Parser) readIdentifier() string {
 	if tok, ok := p.currentToken.(*token.IdentifierToken); ok {
 		identifier = tok.Literal()
 	} else {
-		p.addError("Identifier expected")
+		p.addError("ID expected")
 		identifier = "ERROR"
 	}
 

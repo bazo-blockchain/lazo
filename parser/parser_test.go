@@ -390,7 +390,7 @@ func TestStatementWithFixTokenMultipleReturnValue(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
-// Statement with Identifier
+// Statement with ID
 // -------------------------
 
 func TestStatementWithIdentifier(t *testing.T) {
