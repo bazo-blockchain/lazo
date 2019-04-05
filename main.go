@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/bazo-blockchain/lazo/cmd"
+	"github.com/bazo-blockchain/lazo/cli"
 )
 
 func main() {
-	cmd.Execute()
+	cli.Execute()
 }
