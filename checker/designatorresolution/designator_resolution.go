@@ -10,9 +10,9 @@ type designatorResolution struct {
 	errors   []error
 }
 
-// RunDesignatorResolution resolves designators to its declaration
+// Run resolves designators to its declaration
 // Returns errors that occurred during resolution
-func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
+func Run(symTable *symbol.SymbolTable) []error {
 	resolution := designatorResolution{
 		symTable: symTable,
 	}
@@ -22,7 +22,7 @@ func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
 
 func (dr *designatorResolution) resolveDesignators() {
 	contractSymbol := dr.symTable.GlobalScope.Contract
-	v := NewDesignatorResolutionVisitor(dr.symTable, contractSymbol)
+	v := newDesignatorResolutionVisitor(dr.symTable, contractSymbol)
 	contractNode := dr.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 
 	contractNode.Accept(v)

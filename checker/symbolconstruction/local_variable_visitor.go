@@ -5,18 +5,15 @@ import (
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
-// LocalVariableVisitor contains the symbol table, the function and the block scopes. It traverses the abstract syntax
-// tree to record the variables visibility
-type LocalVariableVisitor struct {
+type localVariableVisitor struct {
 	node.AbstractVisitor
 	symbolTable *symbol.SymbolTable
 	function    *symbol.FunctionSymbol
 	blockScopes [][]*symbol.LocalVariableSymbol
 }
 
-// NewLocalVariableVisitor creates a new LocalVariableVisitor
-func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.FunctionSymbol) *LocalVariableVisitor {
-	v := &LocalVariableVisitor{
+func newLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.FunctionSymbol) *localVariableVisitor {
+	v := &localVariableVisitor{
 		symbolTable: symbolTable,
 		function:    function,
 	}
@@ -26,14 +23,14 @@ func NewLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.F
 
 // VisitStatementBlock adds a new block scope, visits the statements and removes the last blockscope as otherwise
 // the variable will be visible to all statements.
-func (v *LocalVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
+func (v *localVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 	v.blockScopes = append(v.blockScopes, []*symbol.LocalVariableSymbol{}) // add new block scope
 	v.AbstractVisitor.VisitStatementBlock(stmts)
 	v.blockScopes = v.blockScopes[:len(v.blockScopes)-1] // remove last block scope
 }
 
 // VisitVariableNode records the visibility of the local variable and adds the local variable to the block scopes
-func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
+func (v *localVariableVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.recordVisiblity(node)
 
 	sym := symbol.NewLocalVariableSymbol(v.function, node.Identifier)
@@ -45,22 +42,22 @@ func (v *LocalVariableVisitor) VisitVariableNode(node *node.VariableNode) {
 }
 
 // VisitAssignmentStatementNode records the visibility
-func (v *LocalVariableVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+func (v *localVariableVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.recordVisiblity(node)
 }
 
 // VisitIfStatementNode records the visibility
-func (v *LocalVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
+func (v *localVariableVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.recordVisiblity(node)
 	v.AbstractVisitor.VisitIfStatementNode(node)
 }
 
 // VisitReturnStatementNode records the visibility
-func (v *LocalVariableVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
+func (v *localVariableVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.recordVisiblity(node)
 }
 
-func (v *LocalVariableVisitor) recordVisiblity(stmt node.StatementNode) {
+func (v *localVariableVisitor) recordVisiblity(stmt node.StatementNode) {
 	for _, scope := range v.blockScopes {
 		for _, localVariable := range scope {
 			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)

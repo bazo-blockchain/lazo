@@ -12,9 +12,9 @@ type typeResolution struct {
 	errors   []error
 }
 
-// RunTypeResolution performs type resolution
+// Run performs type resolution
 // Returns errors that occurred during type resolution
-func RunTypeResolution(symTable *symbol.SymbolTable) []error {
+func Run(symTable *symbol.SymbolTable) []error {
 	resolution := typeResolution{
 		symTable: symTable,
 	}

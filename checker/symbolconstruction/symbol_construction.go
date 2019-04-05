@@ -14,9 +14,9 @@ type symbolConstruction struct {
 	errors      []error
 }
 
-// RunSymbolConstruction prepares global scope, creates symbols and checks identifiers
+// Run prepares global scope, creates symbols and checks identifiers
 // Returns errors that occurred during construction
-func RunSymbolConstruction(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
+func Run(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
 	symTable := symbol.NewSymbolTable()
 	construction := symbolConstruction{
 		symbolTable: symTable,
@@ -104,7 +104,7 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 		sc.registerParameter(functionSymbol, parameter)
 	}
 
-	v := NewLocalVariableVisitor(sc.symbolTable, functionSymbol)
+	v := newLocalVariableVisitor(sc.symbolTable, functionSymbol)
 	v.VisitStatementBlock(node.Body)
 }
 

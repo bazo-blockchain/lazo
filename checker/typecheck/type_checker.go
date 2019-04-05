@@ -10,9 +10,9 @@ type typeChecker struct {
 	errors   []error
 }
 
-// RunTypeChecker performs type checks
+// Run performs type checks
 // Returns errors that occurred during type checking
-func RunTypeChecker(symTable *symbol.SymbolTable) []error {
+func Run(symTable *symbol.SymbolTable) []error {
 	check := typeChecker{
 		symTable: symTable,
 	}
@@ -22,7 +22,7 @@ func RunTypeChecker(symTable *symbol.SymbolTable) []error {
 
 func (tc *typeChecker) checkTypes() {
 	contractSymbol := tc.symTable.GlobalScope.Contract
-	v := NewTypeCheckVisitor(tc.symTable, contractSymbol)
+	v := newTypeCheckVisitor(tc.symTable, contractSymbol)
 	contractNode := tc.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 
 	contractNode.Accept(v)
