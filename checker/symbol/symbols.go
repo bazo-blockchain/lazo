@@ -7,34 +7,34 @@ import (
 
 // Symbol declares functions which symbols have to implement
 type Symbol interface {
-	GetScope() Symbol
-	GetIdentifier() string
+	Scope() Symbol
+	Identifier() string
 	AllDeclarations() []Symbol
 	String() string
 }
 
 // AbstractSymbol is part of all symbols and contains the scope and identifier
 type AbstractSymbol struct {
-	Scope      Symbol
-	Identifier string
+	Parent Symbol
+	ID     string
 }
 
 // NewAbstractSymbol is a helper function that creates a new abstract symbol
 func NewAbstractSymbol(scope Symbol, identifier string) AbstractSymbol {
 	return AbstractSymbol{
-		Scope:      scope,
-		Identifier: identifier,
+		Parent: scope,
+		ID:     identifier,
 	}
 }
 
-// GetScope returns the scope of the symbol (will be deleted)
-func (sym *AbstractSymbol) GetScope() Symbol {
-	return sym.Scope
+// Scope returns the scope of the symbol (will be deleted)
+func (sym *AbstractSymbol) Scope() Symbol {
+	return sym.Parent
 }
 
-// GetIdentifier returns the identifier of the identifier (will be deleted)
-func (sym *AbstractSymbol) GetIdentifier() string {
-	return sym.Identifier
+// Identifier returns the identifier of the identifier (will be deleted)
+func (sym *AbstractSymbol) Identifier() string {
+	return sym.ID
 }
 
 // AllDeclarations returns an empty symbol slice
@@ -44,7 +44,7 @@ func (sym *AbstractSymbol) AllDeclarations() []Symbol {
 
 // String creates the string representation for the abstract symbol
 func (sym *AbstractSymbol) String() string {
-	return fmt.Sprintf("Abstract Symbol: %s", sym.Identifier)
+	return fmt.Sprintf("Abstract Symbol: %s", sym.ID)
 }
 
 // Concrete Symbols
@@ -79,7 +79,7 @@ func (sym *ContractSymbol) AllDeclarations() []Symbol {
 // GetFieldIndex returns the index of the field
 func (sym *ContractSymbol) GetFieldIndex(id string) int {
 	for i, s := range sym.Fields {
-		if s.GetIdentifier() == id {
+		if s.Identifier() == id {
 			return i
 		}
 	}
@@ -88,7 +88,7 @@ func (sym *ContractSymbol) GetFieldIndex(id string) int {
 
 // String creates the string representation for the ContractSymbol
 func (sym *ContractSymbol) String() string {
-	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.Identifier, sym.Fields, sym.Functions)
+	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.ID, sym.Fields, sym.Functions)
 }
 
 //----------------
@@ -108,7 +108,7 @@ func NewFieldSymbol(scope Symbol, identifier string) *FieldSymbol {
 
 // String creates the string representation of the FieldSymbol
 func (sym *FieldSymbol) String() string {
-	return fmt.Sprintf("%s %s", sym.Type, sym.Identifier)
+	return fmt.Sprintf("%s %s", sym.Type, sym.ID)
 }
 
 //----------------
@@ -143,7 +143,7 @@ func (sym *FunctionSymbol) AllDeclarations() []Symbol {
 // GetVarIndex returns the index of a variable
 func (sym *FunctionSymbol) GetVarIndex(id string) int {
 	for i, s := range sym.AllDeclarations() {
-		if s.GetIdentifier() == id {
+		if s.Identifier() == id {
 			return i
 		}
 	}
@@ -153,7 +153,7 @@ func (sym *FunctionSymbol) GetVarIndex(id string) int {
 // IsLocalVar checks whether the id is a local variable or not
 func (sym *FunctionSymbol) IsLocalVar(id string) bool {
 	for _, s := range sym.LocalVariables {
-		if s.GetIdentifier() == id {
+		if s.Identifier() == id {
 			return true
 		}
 	}
@@ -162,7 +162,7 @@ func (sym *FunctionSymbol) IsLocalVar(id string) bool {
 
 // String creates the string representation for the FunctionSymbol
 func (sym *FunctionSymbol) String() string {
-	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.Identifier, sym.Parameters, sym.LocalVariables)
+	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.ID, sym.Parameters, sym.LocalVariables)
 }
 
 //----------------
@@ -211,7 +211,7 @@ func NewVariableSymbol(scope Symbol, identifier string) *VariableSymbol {
 
 // String creates the string representation of the VariableSymbol
 func (sym *VariableSymbol) String() string {
-	return fmt.Sprintf("%s %s", sym.Type, sym.Identifier)
+	return fmt.Sprintf("%s %s", sym.Type, sym.ID)
 }
 
 //----------------
@@ -232,7 +232,7 @@ func NewConstantSymbol(scope Symbol, identifier string, typeSymbol *TypeSymbol) 
 
 // String creates the string representation of the ConstantSymbol
 func (sym *ConstantSymbol) String() string {
-	return fmt.Sprintf("Constant %s", sym.Identifier)
+	return fmt.Sprintf("Constant %s", sym.ID)
 }
 
 //----------------
@@ -251,5 +251,5 @@ func NewTypeSymbol(scope Symbol, identifier string) *TypeSymbol {
 
 // String creates a new string representation for TypeSymbol
 func (sym *TypeSymbol) String() string {
-	return fmt.Sprintf("Type %s", sym.Identifier)
+	return fmt.Sprintf("Type %s", sym.ID)
 }

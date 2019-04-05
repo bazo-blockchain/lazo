@@ -132,7 +132,7 @@ var reservedKeywords = []string{"char", "int", "bool", "string", "this", "null",
 
 func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 	for _, keyword := range reservedKeywords {
-		if sym.GetIdentifier() == keyword {
+		if sym.Identifier() == keyword {
 			sc.reportError(sym, fmt.Sprintf("Reserved keyword '%s' cannot be used as an identifier", keyword))
 		}
 	}
@@ -150,9 +150,9 @@ func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
 	allDecl := sym.AllDeclarations()
 	for r, decl := range allDecl {
 		for c, otherDecl := range allDecl {
-			if c > r && decl.GetIdentifier() == otherDecl.GetIdentifier() {
+			if c > r && decl.Identifier() == otherDecl.Identifier() {
 				sc.reportError(otherDecl,
-					fmt.Sprintf("Identifier '%s' is already declared", otherDecl.GetIdentifier()))
+					fmt.Sprintf("ID '%s' is already declared", otherDecl.Identifier()))
 				break
 			}
 		}

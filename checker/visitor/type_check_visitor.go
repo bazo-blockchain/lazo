@@ -71,7 +71,7 @@ func (v *TypeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 				if nodeType != rtype {
 					v.reportError(node, fmt.Sprintf("Return Type mismatch: expected %s, given %s",
-						rtype.Identifier, nodeType.Identifier))
+						rtype.ID, nodeType.ID))
 				}
 			}
 		}

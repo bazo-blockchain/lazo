@@ -72,7 +72,7 @@ func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 
 func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 	b.Metadata.Contract = &data.ContractData{
-		Identifier: contract.GetIdentifier(),
+		Identifier: contract.Identifier(),
 	}
 	for _, function := range contract.Functions {
 		b.registerFunction(function)
@@ -81,7 +81,7 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 
 func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 	functionData := &data.FunctionData{
-		Identifier: function.GetIdentifier(),
+		Identifier: function.Identifier(),
 		Hash:       createFuncHash(createFuncSignature(function)),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
@@ -118,16 +118,16 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 
 func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) data.TypeData {
 	scope := b.symbolTable.GlobalScope
-	if sym.GetIdentifier() == scope.BoolType.GetIdentifier() {
+	if sym.Identifier() == scope.BoolType.Identifier() {
 		return data.BoolType
-	} else if sym.GetIdentifier() == scope.CharType.GetIdentifier() {
+	} else if sym.Identifier() == scope.CharType.Identifier() {
 		return data.CharType
-	} else if sym.GetIdentifier() == scope.StringType.GetIdentifier() {
+	} else if sym.Identifier() == scope.StringType.Identifier() {
 		return data.StringType
-	} else if sym.GetIdentifier() == scope.IntType.GetIdentifier() {
+	} else if sym.Identifier() == scope.IntType.Identifier() {
 		return data.IntType
 	} else {
-		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.GetIdentifier()))
+		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.Identifier()))
 	}
 }
 
@@ -151,18 +151,18 @@ func createFuncSignature(function *symbol.FunctionSymbol) string {
 		if i > 0 {
 			sb.WriteRune(',')
 		}
-		sb.WriteString(r.Identifier)
+		sb.WriteString(r.ID)
 	}
 	sb.WriteRune(')')
 
-	sb.WriteString(function.Identifier)
+	sb.WriteString(function.ID)
 
 	sb.WriteRune('(')
 	for i, p := range function.Parameters {
 		if i > 0 {
 			sb.WriteRune(',')
 		}
-		sb.WriteString(p.Type.Identifier)
+		sb.WriteString(p.Type.ID)
 	}
 	sb.WriteRune(')')
 

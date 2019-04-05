@@ -27,7 +27,7 @@ func NewSymbolTable() *SymbolTable {
 // Returns the type or nil
 func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	for _, compilationType := range t.GlobalScope.Types {
-		if compilationType.GetIdentifier() == identifier {
+		if compilationType.Identifier() == identifier {
 			return compilationType
 		}
 	}
@@ -48,11 +48,11 @@ func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 		return nil
 	}
 	for _, declaration := range scope.AllDeclarations() {
-		if declaration.GetIdentifier() == identifier {
+		if declaration.Identifier() == identifier {
 			return declaration
 		}
 	}
-	return t.Find(scope.GetScope(), identifier)
+	return t.Find(scope.Scope(), identifier)
 }
 
 // MapSymbolToNode maps a symbol to its node
@@ -87,5 +87,5 @@ func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *T
 
 // String creates a string representation for the symbol table
 func (t *SymbolTable) String() string {
-	return fmt.Sprintf("Global Scope: %s", t.GlobalScope)
+	return fmt.Sprintf("Global Parent: %s", t.GlobalScope)
 }

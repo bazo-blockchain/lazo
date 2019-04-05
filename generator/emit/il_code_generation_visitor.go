@@ -307,7 +307,7 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 		v.assembler.PushCharacter('0')
 	default:
 		typeNode := v.symbolTable.GetNodeBySymbol(typeSymbol)
-		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.Identifier))
+		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.ID))
 	}
 }
 
@@ -315,16 +315,16 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 	switch decl.(type) {
 	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol:
-		index := v.function.GetVarIndex(decl.GetIdentifier())
+		index := v.function.GetVarIndex(decl.Identifier())
 		if index == -1 {
-			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
+			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
 		return byte(index), false
 	case *symbol.FieldSymbol:
-		contract := decl.GetScope().(*symbol.ContractSymbol)
-		index := contract.GetFieldIndex(decl.GetIdentifier())
+		contract := decl.Scope().(*symbol.ContractSymbol)
+		index := contract.GetFieldIndex(decl.Identifier())
 		if index == -1 {
-			panic(fmt.Sprintf("Variable not found %s", decl.GetIdentifier()))
+			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
 		return byte(index), true
 	default:

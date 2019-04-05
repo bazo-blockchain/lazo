@@ -13,7 +13,7 @@ func TestEmptyProgram(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, ``, false)
 }
 
-// Global Scope
+// Global Parent
 // ------------
 
 func TestGlobalScope(t *testing.T) {
@@ -30,16 +30,16 @@ func TestGlobalScope(t *testing.T) {
 	assert.Equal(t, len(gs.Constants), 3)
 
 	// Built-in types
-	assert.Equal(t, gs.NullType.GetIdentifier(), "@NULL")
-	assert.Equal(t, gs.BoolType.GetIdentifier(), "bool")
-	assert.Equal(t, gs.CharType.GetIdentifier(), "char")
-	assert.Equal(t, gs.StringType.GetIdentifier(), "string")
-	assert.Equal(t, gs.IntType.GetIdentifier(), "int")
+	assert.Equal(t, gs.NullType.Identifier(), "@NULL")
+	assert.Equal(t, gs.BoolType.Identifier(), "bool")
+	assert.Equal(t, gs.CharType.Identifier(), "char")
+	assert.Equal(t, gs.StringType.Identifier(), "string")
+	assert.Equal(t, gs.IntType.Identifier(), "int")
 
 	// Constants
-	assert.Equal(t, gs.TrueConstant.GetIdentifier(), "true")
-	assert.Equal(t, gs.FalseConstant.GetIdentifier(), "false")
-	assert.Equal(t, gs.NullConstant.GetIdentifier(), "null")
+	assert.Equal(t, gs.TrueConstant.Identifier(), "true")
+	assert.Equal(t, gs.FalseConstant.Identifier(), "false")
+	assert.Equal(t, gs.NullConstant.Identifier(), "null")
 }
 
 // Contract Symbol
@@ -273,7 +273,7 @@ func TestFunctionWithIfElse(t *testing.T) {
 	tester.assertLocalVariable(0, 4, tester.globalScope.StringType, 1)
 }
 
-// Identifier Checks
+// ID Checks
 // -----------------
 
 func TestInvalidFieldName(t *testing.T) {

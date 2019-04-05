@@ -97,7 +97,7 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 	case *symbol.LocalVariableSymbol:
 		return sym.(*symbol.LocalVariableSymbol).Type
 	default:
-		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.GetIdentifier()))
+		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.Identifier()))
 	}
 }
 
