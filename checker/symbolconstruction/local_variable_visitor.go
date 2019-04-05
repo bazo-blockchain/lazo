@@ -1,4 +1,4 @@
-package visitor
+package symbolconstruction
 
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"

@@ -1,8 +1,7 @@
-package phase
+package typecheck
 
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
-	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
@@ -23,7 +22,7 @@ func RunTypeChecker(symTable *symbol.SymbolTable) []error {
 
 func (tc *typeChecker) checkTypes() {
 	contractSymbol := tc.symTable.GlobalScope.Contract
-	v := visitor.NewTypeCheckVisitor(tc.symTable, contractSymbol)
+	v := NewTypeCheckVisitor(tc.symTable, contractSymbol)
 	contractNode := tc.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 
 	contractNode.Accept(v)
