@@ -7,6 +7,7 @@ import (
 	"math/big"
 )
 
+// Label contain an unsigned int. They are used to jump to certain points within the byte code.
 type Label uint
 
 // ILAssembler creates IL instructions
@@ -17,6 +18,7 @@ type ILAssembler struct {
 	bytePos      *uint16
 }
 
+// NewILAssembler creates a new ILAssembler
 func NewILAssembler(bytePos *uint16) *ILAssembler {
 	return &ILAssembler{
 		targets:      map[Label]uint16{},
@@ -25,6 +27,8 @@ func NewILAssembler(bytePos *uint16) *ILAssembler {
 	}
 }
 
+// Complete appends a HALT or RET instruction to the byte code and resolves the labels.
+// Returns the instructions
 func (a *ILAssembler) Complete(halt bool) []*il.Instruction {
 	if halt {
 		a.Emit(il.HALT)
@@ -35,15 +39,18 @@ func (a *ILAssembler) Complete(halt bool) []*il.Instruction {
 	return a.instructions
 }
 
+// CreateLabel increases the label counter and creates a new label
 func (a *ILAssembler) CreateLabel() Label {
 	a.labelCounter++
 	return Label(a.labelCounter)
 }
 
+// SetLabel sets the label to a certain position in the byte code
 func (a *ILAssembler) SetLabel(label Label) {
 	a.targets[label] = *a.bytePos
 }
 
+// ResolveLabels resolves the label and sets the instruction operand
 func (a *ILAssembler) ResolveLabels() {
 	for _, instruction := range a.instructions {
 		operand := instruction.Operand
@@ -53,6 +60,7 @@ func (a *ILAssembler) ResolveLabels() {
 	}
 }
 
+// Emit adds a new instruction to the byte code
 func (a *ILAssembler) Emit(opCode il.OpCode) {
 	a.addInstruction(opCode, nil, 0)
 }
@@ -60,6 +68,7 @@ func (a *ILAssembler) Emit(opCode il.OpCode) {
 // OpCode helpers (Order in the same order as defined)
 // --------------------------------------------------
 
+// PushInt is a helper function that emits byte code to push an integer to the stack.
 func (a *ILAssembler) PushInt(value *big.Int) {
 	sign := util.GetSignByte(value)
 	bytes := value.Bytes()
@@ -69,6 +78,7 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
+// PushBool is a helper function that emits byte code to push a boolean to the stack.
 func (a *ILAssembler) PushBool(value bool) {
 	if value {
 		a.PushInt(big.NewInt(1))
@@ -77,6 +87,7 @@ func (a *ILAssembler) PushBool(value bool) {
 	}
 }
 
+// PushString is a helper that emits byte code to push a string to the stack
 func (a *ILAssembler) PushString(value string) {
 	bytes := []byte(value)
 	total := byte(len(bytes))
@@ -84,6 +95,7 @@ func (a *ILAssembler) PushString(value string) {
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
+// PushCharacter is a helper that emits byte code to push a character to the stack
 func (a *ILAssembler) PushCharacter(value rune) {
 	bytes := []byte(string(value))
 	total := byte(len(bytes))
@@ -91,6 +103,7 @@ func (a *ILAssembler) PushCharacter(value rune) {
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
+// PushFuncHash is a helper that emits byte code to push a function hash to the stack
 func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	var operand = make([]byte, 5)
 	operand[0] = 3 // actually 4
@@ -99,44 +112,62 @@ func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	a.addInstruction(il.PUSH, operand, byte(len(operand)))
 }
 
+// NegBool is a helper that negates a boolean value on the stack
 func (a *ILAssembler) NegBool() {
 	a.PushBool(false)
 	a.Emit(il.EQ)
 }
 
+// ConvertToBool is a helper that converts a value to a boolean on the stack
 func (a *ILAssembler) ConvertToBool() {
 	a.PushBool(true)
 	a.Emit(il.EQ)
 }
 
+// Jmp is a helper that adds a JMP instruction to the byte code
+// Is used to jump to labels within the byte code
 func (a *ILAssembler) Jmp(label Label) {
 	a.addInstruction(il.JMP, label, 2)
 }
 
+// JmpIfTrue is a helper that adds a JMPIF instruction to the byte code
+// Is used to jump to labels within the byte code if the value at the top of the stack is 1 (true)
 func (a *ILAssembler) JmpIfTrue(label Label) {
 	a.addInstruction(il.JMPIF, label, 2)
 }
 
+// Call is a helper that adds a CALL instruction to the byte code
+// Is used to call functions
 func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
 	a.addInstruction(il.CALL, function, 3)
 }
 
+// CallIf is a helper that adds a CALLIF instruction to the byte code
+// Is used to call functions if the value at the top of the stack is 1 (true)
 func (a *ILAssembler) CallIf(function *symbol.FunctionSymbol) {
 	a.addInstruction(il.CALLIF, function, 3)
 }
 
+// Store is a helper that adds a STORE instruction to the byte code
+// Is used to store the value at the top of the stack in the call stack.
 func (a *ILAssembler) Store(index byte) {
 	a.addInstruction(il.STORE, []byte{index}, 1)
 }
 
+// StoreField is a helper that adds a SSTORE instruction to the byte code
+// Is used to store the value at the top of the stack within the contract variables (fields) at a certain index
 func (a *ILAssembler) StoreField(index byte) {
 	a.addInstruction(il.SSTORE, []byte{index}, 1)
 }
 
+// Load is a helper that adds a LOAD instruction to the byte code
+// Is used to load the variable at the given index from the call stack to the evaluation stack
 func (a *ILAssembler) Load(index byte) {
 	a.addInstruction(il.LOAD, []byte{index}, 1)
 }
 
+// LoadField is a helper that adds a SLOAD instruction to the byte code
+// Is used to load the variable at the given index from the contract variables (fields) to the evaluation stack
 func (a *ILAssembler) LoadField(index byte) {
 	a.addInstruction(il.SLOAD, []byte{index}, 1)
 }
