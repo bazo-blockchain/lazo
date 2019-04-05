@@ -463,10 +463,10 @@ func TestSystemNewLine(t *testing.T) {
 
 	tok := lex.NextToken()
 	assertFixToken(t, tok, token.NewLine)
-	tok = lex.NextToken() // skip 1
+	lex.NextToken() // skip 1
 	tok = lex.NextToken()
 	assertFixToken(t, tok, token.NewLine)
-	tok = lex.NextToken() // skip 2
+	lex.NextToken() // skip 2
 	tok = lex.NextToken()
 	assertFixToken(t, tok, token.NewLine)
 }
