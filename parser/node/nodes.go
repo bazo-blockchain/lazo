@@ -48,7 +48,7 @@ type ProgramNode struct {
 }
 
 func (n *ProgramNode) String() string {
-	return fmt.Sprintf("%s", n.Contract)
+	return fmt.Sprintf("%s", getNodeString(n.Contract))
 }
 
 // Accept lets a visitor to traverse its node structure.
@@ -111,7 +111,13 @@ type VariableNode struct {
 }
 
 func (n *VariableNode) String() string {
-	return fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), n.Type.Identifier, n.Identifier, n.Expression)
+	var str string
+	if n.Expression == nil {
+		str = fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
+	} else {
+		str = fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), getNodeString(n.Type), n.Identifier, getNodeString(n.Expression))
+	}
+	return str
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -147,7 +153,7 @@ type IfStatementNode struct {
 }
 
 func (n *IfStatementNode) String() string {
-	return fmt.Sprintf("\n [%s] IF %s THEN %s ELSE %s", n.Pos(), n.Condition, n.Then, n.Else)
+	return fmt.Sprintf("\n [%s] IF %s THEN %s ELSE %s", n.Pos(), getNodeString(n.Condition), n.Then, n.Else)
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -182,7 +188,7 @@ type AssignmentStatementNode struct {
 }
 
 func (n *AssignmentStatementNode) String() string {
-	return fmt.Sprintf("\n [%s] ASSIGN %s %s", n.Pos(), n.Left, n.Right)
+	return fmt.Sprintf("\n [%s] ASSIGN %s %s", n.Pos(), getNodeString(n.Left), getNodeString(n.Right))
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -203,7 +209,7 @@ type BinaryExpressionNode struct {
 }
 
 func (n *BinaryExpressionNode) String() string {
-	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], n.Right)
+	return fmt.Sprintf("(%s %s %s)", n.Left, token.SymbolLexeme[n.Operator], getNodeString(n.Right))
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -221,7 +227,7 @@ type UnaryExpressionNode struct {
 }
 
 func (n *UnaryExpressionNode) String() string {
-	return fmt.Sprintf("(%s%s)", token.SymbolLexeme[n.Operator], n.Expression)
+	return fmt.Sprintf("(%s%s)", token.SymbolLexeme[n.Operator], getNodeString(n.Expression))
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -331,4 +337,12 @@ func (n *ErrorNode) String() string {
 // Accept lets a visitor to traverse its node structure.
 func (n *ErrorNode) Accept(v Visitor) {
 	v.VisitErrorNode(n)
+}
+
+func getNodeString(node Node) string {
+	if node == nil {
+		return ""
+	} else {
+		return node.String()
+	}
 }
