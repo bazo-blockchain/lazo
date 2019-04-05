@@ -1,4 +1,4 @@
-package phase
+package typeresolution
 
 import (
 	"fmt"

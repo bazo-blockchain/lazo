@@ -1,9 +1,8 @@
-package phase
+package symbolconstruction
 
 import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
-	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"github.com/pkg/errors"
 )
@@ -105,7 +104,7 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 		sc.registerParameter(functionSymbol, parameter)
 	}
 
-	v := visitor.NewLocalVariableVisitor(sc.symbolTable, functionSymbol)
+	v := NewLocalVariableVisitor(sc.symbolTable, functionSymbol)
 	v.VisitStatementBlock(node.Body)
 }
 

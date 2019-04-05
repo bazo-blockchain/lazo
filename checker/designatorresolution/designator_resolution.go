@@ -1,8 +1,7 @@
-package phase
+package designatorresolution
 
 import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
-	"github.com/bazo-blockchain/lazo/checker/visitor"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
@@ -23,7 +22,7 @@ func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
 
 func (dr *designatorResolution) resolveDesignators() {
 	contractSymbol := dr.symTable.GlobalScope.Contract
-	v := visitor.NewDesignatorResolutionVisitor(dr.symTable, contractSymbol)
+	v := NewDesignatorResolutionVisitor(dr.symTable, contractSymbol)
 	contractNode := dr.symTable.GetNodeBySymbol(contractSymbol).(*node.ContractNode)
 
 	contractNode.Accept(v)

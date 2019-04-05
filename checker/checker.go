@@ -1,8 +1,11 @@
 package checker
 
 import (
-	"github.com/bazo-blockchain/lazo/checker/phase"
+	"github.com/bazo-blockchain/lazo/checker/designatorresolution"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
+	"github.com/bazo-blockchain/lazo/checker/symbolconstruction"
+	"github.com/bazo-blockchain/lazo/checker/typecheck"
+	"github.com/bazo-blockchain/lazo/checker/typeresolution"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
@@ -27,15 +30,15 @@ func New(syntaxTree *node.ProgramNode) *Checker {
 // If errors occur during one of those phases, the process is stopped at the end of the failing phase.
 // Returns the symbol table and errors
 func (c *Checker) Run() (*symbol.SymbolTable, []error) {
-	c.symbolTable, c.errors = phase.RunSymbolConstruction(c.syntaxTree)
+	c.symbolTable, c.errors = symbolconstruction.RunSymbolConstruction(c.syntaxTree)
 	if !c.hasErrors() {
-		c.errors = phase.RunTypeResolution(c.symbolTable)
+		c.errors = typeresolution.RunTypeResolution(c.symbolTable)
 	}
 	if !c.hasErrors() {
-		c.errors = phase.RunDesignatorResolution(c.symbolTable)
+		c.errors = designatorresolution.RunDesignatorResolution(c.symbolTable)
 	}
 	if !c.hasErrors() {
-		c.errors = phase.RunTypeChecker(c.symbolTable)
+		c.errors = typecheck.RunTypeChecker(c.symbolTable)
 	}
 	return c.symbolTable, c.errors
 }
