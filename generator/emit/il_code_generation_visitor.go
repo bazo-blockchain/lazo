@@ -11,6 +11,7 @@ import (
 	"math/big"
 )
 
+// ILCodeGenerationVisitor generates the IL Code
 type ILCodeGenerationVisitor struct {
 	node.AbstractVisitor
 	symbolTable *symbol.SymbolTable
@@ -21,6 +22,7 @@ type ILCodeGenerationVisitor struct {
 	Errors      []error
 }
 
+// NewCodeGenerationVisitor creates a new CodeGenerationVisitor
 func NewCodeGenerationVisitor(
 	symbolTable *symbol.SymbolTable, ilBuilder *ILBuilder) *ILCodeGenerationVisitor {
 	v := &ILCodeGenerationVisitor{
@@ -32,6 +34,7 @@ func NewCodeGenerationVisitor(
 	return v
 }
 
+// VisitContractNode creates a new IL Assembler, generates the ABI, Constructor IL Code and Function IL Code
 func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
 	contractSymbol := v.symbolTable.GlobalScope.Contract
 	contractData := v.ilBuilder.Metadata.Contract
@@ -98,6 +101,7 @@ func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, co
 // Statements
 // -----------
 
+// VisitVariableNode generates the IL Code for a variable node and default initializes it if required
 func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
@@ -125,6 +129,7 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	}
 }
 
+// VisitAssignmentStatementNode generates the IL Code for an assignment
 func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	node.Right.Accept(v)
 
@@ -138,11 +143,13 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.Assign
 	}
 }
 
+// VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
 	v.assembler.Emit(il.RET)
 }
 
+// VisitIfStatementNode generates the IL Code for an If or an If-Else Statement
 func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	elseLabel := v.assembler.CreateLabel()
 	endLabel := v.assembler.CreateLabel()
@@ -180,6 +187,7 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Unequal:        il.NEQ,
 }
 
+// VisitBinaryExpressionNode generates the IL Code for all Binary Expressions
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
@@ -229,6 +237,7 @@ var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Subtraction: il.NEG,
 }
 
+// VisitUnaryExpressionNode generates the IL Code for all unary expressions
 func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryExpressionNode) {
 	if op, ok := unaryOpCodes[expNode.Operator]; ok {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
@@ -249,6 +258,7 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
+// VisitDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	index, isContractField := v.getVarIndex(decl)
@@ -260,18 +270,22 @@ func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode)
 	}
 }
 
+// VisitIntegerLiteralNode pushes an integer to the stack
 func (v *ILCodeGenerationVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.assembler.PushInt(node.Value)
 }
 
+// VisitBoolLiteralNode pushes a boolean to the stack
 func (v *ILCodeGenerationVisitor) VisitBoolLiteralNode(node *node.BoolLiteralNode) {
 	v.assembler.PushBool(node.Value)
 }
 
+// VisitStringLiteralNode pushes a string to the stack
 func (v *ILCodeGenerationVisitor) VisitStringLiteralNode(node *node.StringLiteralNode) {
 	v.assembler.PushString(node.Value)
 }
 
+// VisitCharacterLiteralNode pushes a character to the stack
 func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteralNode) {
 	v.assembler.PushCharacter(node.Value)
 }

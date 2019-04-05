@@ -10,9 +10,8 @@ import (
 	"strings"
 )
 
-/**
- *	IL Builder constructs Metadata
- */
+// ILBuilder contains the symbol table, meta data, function data, function positions and errors. It constructs
+// meta data.
 type ILBuilder struct {
 	symbolTable       *symbol.SymbolTable
 	Metadata          *data.Metadata
@@ -21,6 +20,7 @@ type ILBuilder struct {
 	Errors            []error
 }
 
+// NewILBuilder creates a new ILBuilder
 func NewILBuilder(symbolTable *symbol.SymbolTable) *ILBuilder {
 	builder := &ILBuilder{
 		symbolTable:       symbolTable,
@@ -38,6 +38,7 @@ func (b *ILBuilder) generateMetadata() {
 	b.fixContract(contract)
 }
 
+// Complete finished the meta data generation by setting the instructions operand where it is missing
 func (b *ILBuilder) Complete() *data.Metadata {
 	b.fixOperands(b.Metadata.Contract.Instructions)
 	for _, function := range b.Metadata.Contract.Functions {
@@ -46,10 +47,12 @@ func (b *ILBuilder) Complete() *data.Metadata {
 	return b.Metadata
 }
 
+// GetFunctionData returns the function data for a given function
 func (b *ILBuilder) GetFunctionData(function *symbol.FunctionSymbol) *data.FunctionData {
 	return b.functionData[function]
 }
 
+// SetFunctionPos sets the functions position
 func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos uint16) {
 	b.functionPositions[symbol] = pos
 }
