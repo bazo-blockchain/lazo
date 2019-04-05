@@ -87,5 +87,5 @@ func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *T
 
 // String creates a string representation for the symbol table
 func (t *SymbolTable) String() string {
-	return fmt.Sprintf("Global Parent: %s", t.GlobalScope)
+	return fmt.Sprintf("Global Scope: %s", t.GlobalScope)
 }
