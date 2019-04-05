@@ -13,7 +13,7 @@ func TestEmptyProgram(t *testing.T) {
 	_ = newCheckerTestUtilWithRawInput(t, ``, false)
 }
 
-// Global Parent
+// Global Scope
 // ------------
 
 func TestGlobalScope(t *testing.T) {
