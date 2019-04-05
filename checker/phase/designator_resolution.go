@@ -11,6 +11,8 @@ type designatorResolution struct {
 	errors   []error
 }
 
+// RunDesignatorResolution resolves designators to its declaration
+// Returns errors that occurred during resolution
 func RunDesignatorResolution(symTable *symbol.SymbolTable) []error {
 	resolution := designatorResolution{
 		symTable: symTable,

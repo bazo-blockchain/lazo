@@ -7,20 +7,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-type TypeResolution struct {
+type typeResolution struct {
 	symTable *symbol.SymbolTable
 	errors   []error
 }
 
+// RunTypeResolution performs type resolution
+// Returns errors that occurred during type resolution
 func RunTypeResolution(symTable *symbol.SymbolTable) []error {
-	resolution := TypeResolution{
+	resolution := typeResolution{
 		symTable: symTable,
 	}
 	resolution.resolveTypesInContractSymbol()
 	return resolution.errors
 }
 
-func (tr *TypeResolution) resolveTypesInContractSymbol() {
+func (tr *typeResolution) resolveTypesInContractSymbol() {
 	contractSymbol := tr.symTable.GlobalScope.Contract
 	for _, field := range contractSymbol.Fields {
 		tr.resolveTypeInFieldSymbol(field)
@@ -31,12 +33,12 @@ func (tr *TypeResolution) resolveTypesInContractSymbol() {
 	}
 }
 
-func (tr *TypeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
+func (tr *typeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
 	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
 	symbol.Type = tr.resolveType(fieldNode.Type)
 }
 
-func (tr *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
+func (tr *typeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
 	functionNode := tr.symTable.GetNodeBySymbol(sym).(*node.FunctionNode)
 
 	tr.resolveReturnTypes(sym, functionNode)
@@ -52,7 +54,7 @@ func (tr *TypeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 	}
 }
 
-func (tr *TypeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functionNode *node.FunctionNode) {
+func (tr *typeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functionNode *node.FunctionNode) {
 	total := len(functionNode.ReturnTypes)
 	if total > 3 {
 		tr.reportError(functionNode, "More than 3 return types are not allowed")
@@ -69,7 +71,7 @@ func (tr *TypeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functio
 	}
 }
 
-func (tr *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
+func (tr *typeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
 	result := tr.symTable.FindTypeByNode(node)
 	if result == nil {
 		tr.reportError(node, fmt.Sprintf("Invalid type '%s'", node.Identifier))
@@ -77,7 +79,7 @@ func (tr *TypeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
 	return result
 }
 
-func (tr *TypeResolution) reportError(node node.Node, msg string) {
+func (tr *typeResolution) reportError(node node.Node, msg string) {
 	tr.errors = append(tr.errors, errors.New(
 		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
+// SymbolTable maps symbols to nodes, designators to declarations, expressions to types and contains the global scope
 type SymbolTable struct {
 	GlobalScope            *GlobalScope
 	symbolToNode           map[Symbol]node.Node
@@ -12,6 +13,7 @@ type SymbolTable struct {
 	expressionTypes        map[node.ExpressionNode]*TypeSymbol
 }
 
+// NewSymbolTable creates a new symbol table and initializes mappings
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		GlobalScope:            newGlobalScope(),
@@ -21,6 +23,8 @@ func NewSymbolTable() *SymbolTable {
 	}
 }
 
+// FindTypeByIdentifier searches for a type
+// Returns the type or nil
 func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	for _, compilationType := range t.GlobalScope.Types {
 		if compilationType.GetIdentifier() == identifier {
@@ -31,10 +35,14 @@ func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 	return nil
 }
 
+// FindTypeByNode searches for a type
+// Returns the type or nil
 func (t *SymbolTable) FindTypeByNode(node *node.TypeNode) *TypeSymbol {
 	return t.FindTypeByIdentifier(node.Identifier)
 }
 
+// Find recursively searches for a symbol within a specific scope
+// Returns the symbol or nil
 func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 	if scope == nil {
 		return nil
@@ -47,30 +55,37 @@ func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 	return t.Find(scope.GetScope(), identifier)
 }
 
+// MapSymbolToNode maps a symbol to its node
 func (t *SymbolTable) MapSymbolToNode(symbol Symbol, node node.Node) {
 	t.symbolToNode[symbol] = node
 }
 
+// GetNodeBySymbol returns the node linked to the symbol
 func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 	return t.symbolToNode[symbol]
 }
 
+// MapDesignatorToDecl maps a designator to a declaration
 func (t *SymbolTable) MapDesignatorToDecl(designatorNode *node.DesignatorNode, symbol Symbol) {
 	t.designatorDeclarations[designatorNode] = symbol
 }
 
+// GetDeclByDesignator returns the declaration for a designator
 func (t *SymbolTable) GetDeclByDesignator(designatorNode *node.DesignatorNode) Symbol {
 	return t.designatorDeclarations[designatorNode]
 }
 
+// MapExpressionToType maps an expression to its type
 func (t *SymbolTable) MapExpressionToType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
 	t.expressionTypes[expressionNode] = symbol
 }
 
+// GetTypeByExpression returns the type of the expression
 func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *TypeSymbol {
 	return t.expressionTypes[expressionNode]
 }
 
+// String creates a string representation for the symbol table
 func (t *SymbolTable) String() string {
 	return fmt.Sprintf("Global Scope: %s", t.GlobalScope)
 }
