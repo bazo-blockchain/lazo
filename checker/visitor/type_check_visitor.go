@@ -134,7 +134,7 @@ func (v *TypeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	}
 }
 
-func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpression) {
+func (v *TypeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNode) {
 	v.AbstractVisitor.VisitUnaryExpressionNode(node)
 	operand := node.Expression
 	operandType := v.symbolTable.GetTypeByExpression(operand)

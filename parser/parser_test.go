@@ -1,11 +1,8 @@
 package parser
 
 import (
-	"bufio"
-	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
-	"strings"
 	"testing"
 )
 
@@ -17,7 +14,7 @@ func TestEmptyProgram(t *testing.T) {
 	program, _ := p.ParseProgram()
 
 	assertNoErrors(t, p)
-	node.AssertProgram(t, program, false)
+	assertProgram(t, program, false)
 }
 
 func TestProgramWithNewlines(t *testing.T) {
@@ -46,8 +43,8 @@ func TestEmptyContract(t *testing.T) {
 	program, _ := p.ParseProgram()
 
 	assertNoErrors(t, p)
-	node.AssertProgram(t, program, true)
-	node.AssertContract(t, program.Contract, "Test", 0, 0)
+	assertProgram(t, program, true)
+	assertContract(t, program.Contract, "Test", 0, 0)
 }
 
 func TestContractWithVariable(t *testing.T) {
@@ -58,9 +55,9 @@ func TestContractWithVariable(t *testing.T) {
 	c := p.parseContract()
 
 	assertNoErrors(t, p)
-	node.AssertContract(t, c, "Test", 2, 0)
-	node.AssertVariable(t, c.Variables[0], "int", "x")
-	node.AssertVariable(t, c.Variables[1], "int", "y")
+	assertContract(t, c, "Test", 2, 0)
+	assertVariable(t, c.Variables[0], "int", "x")
+	assertVariable(t, c.Variables[1], "int", "y")
 
 	// Positions
 	assert.Equal(t, c.Pos().String(), "1:1")
@@ -77,8 +74,8 @@ func TestContractWithFunction(t *testing.T) {
 	c := p.parseContract()
 
 	assertNoErrors(t, p)
-	node.AssertContract(t, c, "Test", 0, 1)
-	node.AssertFunction(t, c.Functions[0], "test", 1, 0, 0)
+	assertContract(t, c, "Test", 0, 1)
+	assertFunction(t, c.Functions[0], "test", 1, 0, 0)
 }
 
 // Variable Nodes
@@ -88,7 +85,7 @@ func TestVariable(t *testing.T) {
 	p := newParserFromInput("int x \n")
 	v := p.parseVariableStatement()
 
-	node.AssertVariable(t, v, "int", "x")
+	assertVariable(t, v, "int", "x")
 	assertNoErrors(t, p)
 }
 
@@ -102,7 +99,7 @@ func TestCharVariableStatement(t *testing.T) {
 	p := newParserFromInput("char a = 'c'\n")
 	v := p.parseVariableStatement()
 
-	node.AssertVariableStatement(t, v, "char", "a", "c")
+	assertVariableStatement(t, v, "char", "a", "c")
 	assertNoErrors(t, p)
 }
 
@@ -110,7 +107,7 @@ func TestIntVariableStatement(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseVariableStatement()
 
-	node.AssertVariableStatement(t, v, "int", "a", "5")
+	assertVariableStatement(t, v, "int", "a", "5")
 	assertNoErrors(t, p)
 }
 
@@ -127,56 +124,56 @@ func TestVariableStatementWONewline(t *testing.T) {
 func TestEmptyFunction(t *testing.T) {
 	p := newParserFromInput("function void test(){\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 1, 0, 0)
+	assertFunction(t, f, "test", 1, 0, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParam(t *testing.T) {
 	p := newParserFromInput("function void test(int a){\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 1, 1, 0)
+	assertFunction(t, f, "test", 1, 1, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParams(t *testing.T) {
 	p := newParserFromInput("function void test(int a, int b){\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 1, 2, 0)
+	assertFunction(t, f, "test", 1, 2, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithMultipleRTypes(t *testing.T) {
 	p := newParserFromInput("function (int, int) test(){\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 2, 0, 0)
+	assertFunction(t, f, "test", 2, 0, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithParamsAndRTypes(t *testing.T) {
 	p := newParserFromInput("function (int, int) test(int a, int b){\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 2, 2, 0)
+	assertFunction(t, f, "test", 2, 2, 0)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithStatement(t *testing.T) {
 	p := newParserFromInput("function void test(){\nint a\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 1, 0, 1)
+	assertFunction(t, f, "test", 1, 0, 1)
 	assertNoErrors(t, p)
 }
 
 func TestFunctionWithMultipleStatements(t *testing.T) {
 	p := newParserFromInput("function void test(){\nint a\nint b\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 1, 0, 2)
+	assertFunction(t, f, "test", 1, 0, 2)
 	assertNoErrors(t, p)
 }
 
 func TestFullFunction(t *testing.T) {
 	p := newParserFromInput("function (int, int) test(int a, int b){\nint a\nint b\n}\n")
 	f := p.parseFunction()
-	node.AssertFunction(t, f, "test", 2, 2, 2)
+	assertFunction(t, f, "test", 2, 2, 2)
 	assertNoErrors(t, p)
 }
 
@@ -211,7 +208,7 @@ func TestEmptyStatementBlock(t *testing.T) {
 	p := newParserFromInput("{\n}\n")
 	v := p.parseStatementBlock()
 
-	node.AssertStatementBlock(t, v, 0)
+	assertStatementBlock(t, v, 0)
 	assertNoErrors(t, p)
 }
 
@@ -219,7 +216,7 @@ func TestStatementBlock(t *testing.T) {
 	p := newParserFromInput("{\nint a = 5\n}\n")
 	v := p.parseStatementBlock()
 
-	node.AssertStatementBlock(t, v, 1)
+	assertStatementBlock(t, v, 1)
 	assertNoErrors(t, p)
 }
 
@@ -227,7 +224,7 @@ func TestMultipleStatementBlock(t *testing.T) {
 	p := newParserFromInput("{\nint a = 5\nint b = 4\n}\n")
 	v := p.parseStatementBlock()
 
-	node.AssertStatementBlock(t, v, 2)
+	assertStatementBlock(t, v, 2)
 	assertNoErrors(t, p)
 }
 
@@ -244,7 +241,7 @@ func TestEmptyReturnStatement(t *testing.T) {
 	p := newParserFromInput("return \n")
 	v := p.parseReturnStatement()
 
-	node.AssertReturnStatement(t, v, 0)
+	assertReturnStatement(t, v, 0)
 	assertNoErrors(t, p)
 }
 
@@ -252,7 +249,7 @@ func TestSingleReturnStatement(t *testing.T) {
 	p := newParserFromInput("return 1\n")
 	v := p.parseReturnStatement()
 
-	node.AssertReturnStatement(t, v, 1)
+	assertReturnStatement(t, v, 1)
 	assertNoErrors(t, p)
 }
 
@@ -260,7 +257,7 @@ func TestMultipleReturnStatement(t *testing.T) {
 	p := newParserFromInput("return 1, 2\n")
 	v := p.parseReturnStatement()
 
-	node.AssertReturnStatement(t, v, 2)
+	assertReturnStatement(t, v, 2)
 	assertNoErrors(t, p)
 }
 
@@ -271,7 +268,7 @@ func TestIfStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 0, 0)
+	assertIfStatement(t, v, "true", 0, 0)
 	assertNoErrors(t, p)
 }
 
@@ -279,7 +276,7 @@ func TestIfStatementSingleStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\nint a \n} else{\nint b\n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 1, 1)
+	assertIfStatement(t, v, "true", 1, 1)
 	assertNoErrors(t, p)
 }
 
@@ -287,7 +284,7 @@ func TestIfStatementSingleThenStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\nint a \n} else{\n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 1, 0)
+	assertIfStatement(t, v, "true", 1, 0)
 	assertNoErrors(t, p)
 }
 
@@ -295,7 +292,7 @@ func TestIfStatementSingleElseStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\n int a \n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 0, 1)
+	assertIfStatement(t, v, "true", 0, 1)
 	assertNoErrors(t, p)
 }
 
@@ -303,7 +300,7 @@ func TestIfStatementMultipleStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\nint a\n int b\n} else{\nint c\n int d\n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 2, 2)
+	assertIfStatement(t, v, "true", 2, 2)
 	assertNoErrors(t, p)
 }
 
@@ -311,7 +308,7 @@ func TestIfStatementMultipleThenStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\nint a\n int b\n} else{\n}\n")
 	v := p.parseIfStatement()
 
-	node.AssertIfStatement(t, v, "true", 2, 0)
+	assertIfStatement(t, v, "true", 2, 0)
 	assertNoErrors(t, p)
 }
 
@@ -319,7 +316,7 @@ func TestIfStatementMultipleElseStatement(t *testing.T) {
 	p := newParserFromInput("if(true){\n} else{\nint c\n int d\n}\n")
 	v := p.parseStatement()
 
-	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 2)
+	assertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 2)
 	assertNoErrors(t, p)
 }
 
@@ -327,7 +324,7 @@ func TestIfStatementWOElse(t *testing.T) {
 	p := newParserFromInput("if(true){\n}\n")
 	v := p.parseStatementWithFixToken()
 
-	node.AssertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 0)
+	assertIfStatement(t, v.(*node.IfStatementNode), "true", 0, 0)
 	assertNoErrors(t, p)
 }
 
@@ -346,7 +343,7 @@ func TestAssignmentStatement(t *testing.T) {
 	i := p.readIdentifier()
 	v := p.parseAssignmentStatement(i)
 
-	node.AssertAssignmentStatement(t, v, "a", "5")
+	assertAssignmentStatement(t, v, "a", "5")
 	assertNoErrors(t, p)
 }
 
@@ -354,7 +351,7 @@ func TestAssignmentStatementChar(t *testing.T) {
 	p := newParserFromInput("a = 'c'\n")
 	s := p.parseStatementWithIdentifier()
 
-	node.AssertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "a", "c")
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "a", "c")
 	assertNoErrors(t, p)
 }
 
@@ -373,7 +370,7 @@ func TestStatementWithFixTokenReturn(t *testing.T) {
 	p := newParserFromInput("return\n")
 	v := p.parseStatementWithFixToken()
 
-	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT []")
+	assertStatement(t, v, "\n [1:1] RETURNSTMT []")
 	assertNoErrors(t, p)
 }
 
@@ -381,7 +378,7 @@ func TestStatementWithFixTokenReturnValue(t *testing.T) {
 	p := newParserFromInput("return 5\n")
 	v := p.parseStatementWithFixToken()
 
-	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT [5]")
+	assertStatement(t, v, "\n [1:1] RETURNSTMT [5]")
 	assertNoErrors(t, p)
 }
 
@@ -389,7 +386,7 @@ func TestStatementWithFixTokenMultipleReturnValue(t *testing.T) {
 	p := newParserFromInput("return 5, 4\n")
 	v := p.parseStatementWithFixToken()
 
-	node.AssertStatement(t, v, "\n [1:1] RETURNSTMT [5 4]")
+	assertStatement(t, v, "\n [1:1] RETURNSTMT [5 4]")
 	assertNoErrors(t, p)
 }
 
@@ -400,7 +397,7 @@ func TestStatementWithIdentifier(t *testing.T) {
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
 
-	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = %!s(<nil>)")
+	assertStatement(t, v, "\n [1:1] VARIABLE int a = %!s(<nil>)")
 	assertNoErrors(t, p)
 }
 
@@ -408,7 +405,7 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseStatementWithIdentifier()
 
-	node.AssertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
+	assertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
 	assertNoErrors(t, p)
 }
 
@@ -418,20 +415,5 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 func TestTypeNode(t *testing.T) {
 	p := newParserFromInput("int")
 	v := p.parseType()
-	node.AssertType(t, v, "int")
-}
-
-// Helpers
-// ------------------------------
-
-func newParserFromInput(input string) *Parser {
-	return New(lexer.New(bufio.NewReader(strings.NewReader(input))))
-}
-
-func assertHasError(t *testing.T, p *Parser) {
-	assert.Equal(t, len(p.errors) > 0, true)
-}
-
-func assertNoErrors(t *testing.T, p *Parser) {
-	assert.Equal(t, len(p.errors), 0)
+	assertType(t, v, "int")
 }
