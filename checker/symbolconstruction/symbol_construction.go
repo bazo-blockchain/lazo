@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type symbolConstruction struct {
@@ -163,5 +162,5 @@ func (sc *symbolConstruction) reportError(sym symbol.Symbol, msg string) {
 	if sym != nil {
 		pos = sc.symbolTable.GetNodeBySymbol(sym).Pos().String()
 	}
-	sc.errors = append(sc.errors, errors.New(fmt.Sprintf("[%s] %s", pos, msg)))
+	sc.errors = append(sc.errors, fmt.Errorf("[%s] %s", pos, msg))
 }

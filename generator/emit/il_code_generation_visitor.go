@@ -7,7 +7,6 @@ import (
 	"github.com/bazo-blockchain/lazo/generator/il"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 	"math/big"
 )
 
@@ -333,6 +332,5 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {
-	v.Errors = append(v.Errors, errors.New(
-		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
+	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }
