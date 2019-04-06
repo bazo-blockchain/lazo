@@ -74,7 +74,10 @@ Run `./scripts/set-hooks.sh` to setup git hooks.
 
 ###  Dependency Management
 
-Packages are managed by [dep](https://golang.github.io/dep/). Install dep and run `dep ensure` to install all the dependencies.
+Packages are managed by [Go Modules](https://github.com/golang/go/wiki/Modules). 
+
+Set the environment variable `GO111MODULE=on` and run `go mod vendor` 
+to install all the dependencies into the local vendor directory.
 
 ### Run Compiler from Source
 
