@@ -397,7 +397,7 @@ func TestStatementWithIdentifier(t *testing.T) {
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
 
-	assertStatement(t, v, "\n [1:1] VARIABLE int a = %!s(<nil>)")
+	assertStatement(t, v, "\n [1:1] VARIABLE int a")
 	assertNoErrors(t, p)
 }
 

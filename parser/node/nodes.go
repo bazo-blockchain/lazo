@@ -134,7 +134,7 @@ type TypeNode struct {
 }
 
 func (n *TypeNode) String() string {
-	return fmt.Sprintf("TYPE %s", n.Identifier)
+	return fmt.Sprintf("%s", n.Identifier)
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -342,7 +342,6 @@ func (n *ErrorNode) Accept(v Visitor) {
 func getNodeString(node Node) string {
 	if node == nil {
 		return ""
-	} else {
-		return node.String()
 	}
+	return node.String()
 }
