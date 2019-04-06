@@ -1,11 +1,7 @@
 contract Test {
-    int x
-    int y = 5
-
-    bool b
-    bool x = true
-
-    function int test(int a, int b) {
-        return a * b
+    function int test() {
+        int x
+        int y = 5
+        return x * y
     }
 }
