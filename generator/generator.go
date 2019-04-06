@@ -1,3 +1,5 @@
+// Package generator generates IL instructions for Bazo VM.
+// It takes the symbol table from checker and outputs metadata to create Bazo byte code.
 package generator
 
 import (

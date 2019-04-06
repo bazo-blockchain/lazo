@@ -1,3 +1,4 @@
+// Package symbol contains all the supported symbol types and their functions.
 package symbol
 
 import (
