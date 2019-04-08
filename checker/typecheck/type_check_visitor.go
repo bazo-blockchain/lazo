@@ -5,7 +5,6 @@ import (
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type typeCheckVisitor struct {
@@ -204,6 +203,5 @@ func (v *typeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
 }
 
 func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
-	v.Errors = append(v.Errors, errors.New(
-		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
+	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }

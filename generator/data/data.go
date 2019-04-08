@@ -1,3 +1,4 @@
+// Package data contains all the supported metadata types.
 package data
 
 import "github.com/bazo-blockchain/lazo/generator/il"

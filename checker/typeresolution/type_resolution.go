@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type typeResolution struct {
@@ -80,6 +79,5 @@ func (tr *typeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
 }
 
 func (tr *typeResolution) reportError(node node.Node, msg string) {
-	tr.errors = append(tr.errors, errors.New(
-		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
+	tr.errors = append(tr.errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }

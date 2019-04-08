@@ -1,9 +1,9 @@
 package il
 
-// OpCode abstracts an OpCode
+// OpCode is the type of byte code supported on Bazo VM
 type OpCode byte
 
-// The opcodes are copied from VM
+// Supported OpCodes. The OpCodes are copied from Bazo VM.
 // See https://github.com/bazo-blockchain/bazo-vm/blob/master/vm/op_codes.go
 const (
 	PUSH OpCode = iota
@@ -60,6 +60,7 @@ const (
 	//	MAPCONTAINSKEY
 )
 
+// Supported OpCode argument types
 const (
 	BYTES = iota + 1
 	BYTE

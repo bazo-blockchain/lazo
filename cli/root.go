@@ -1,3 +1,4 @@
+// Package cli contains the supported lazo commands.
 package cli
 
 import (
@@ -15,6 +16,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute executes the lazo command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

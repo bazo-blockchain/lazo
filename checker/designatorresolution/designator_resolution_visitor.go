@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"github.com/pkg/errors"
 )
 
 type designatorResolutionVisitor struct {
@@ -72,8 +71,7 @@ func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 }
 
 func (v *designatorResolutionVisitor) reportError(node node.Node, msg string) {
-	v.Errors = append(v.Errors, errors.New(
-		fmt.Sprintf("[%s] %s", node.Pos(), msg)))
+	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }
 
 func containsStatement(list []node.StatementNode, element node.StatementNode) bool {

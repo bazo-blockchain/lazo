@@ -42,6 +42,7 @@ var compileCommand = &cobra.Command{
 	},
 }
 
+// Compile compiles the given Lazo source code into Bazo byte code.
 func Compile(sourceFile string) ([]byte, []protocol.ByteArray) {
 	file, err := os.Open(sourceFile)
 	if err != nil {

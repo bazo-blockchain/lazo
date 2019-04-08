@@ -1,3 +1,5 @@
+// Package checker performs semantic analysis and create a symbol table.
+// It takes the abstract syntax tree from parser, creates symbols, checks types and outputs a symbol table.
 package checker
 
 import (
