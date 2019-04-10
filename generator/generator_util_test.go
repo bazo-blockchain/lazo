@@ -99,14 +99,11 @@ func (gt *generatorTestUtil) assertInternalBool(value bool) {
 }
 
 func (gt *generatorTestUtil) assertString(value string) {
-	bytes := append([]byte{0}, []byte(value)...)
-	gt.assertBytes(bytes...)
+	gt.assertBytes([]byte(value)...)
 }
 
 func (gt *generatorTestUtil) assertChar(value rune) {
-	bytes := []byte(string(value))
-	bytes = append([]byte{0}, bytes...)
-	gt.assertBytes(bytes...)
+	gt.assertBytes(byte(value))
 }
 
 func (gt *generatorTestUtil) assertBytes(bytes ...byte) {
