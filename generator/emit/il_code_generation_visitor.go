@@ -193,6 +193,14 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
+	if expNode.Operator == token.Exponent {
+		// Visit right node first because of right associativity
+		expNode.Right.Accept(v) // exponent
+		expNode.Left.Accept(v)  // basis
+		v.assembler.Emit(il.Exp)
+		return
+	}
+
 	if expNode.Operator == token.And {
 		falseLabel := v.assembler.CreateLabel()
 		endLabel := v.assembler.CreateLabel()

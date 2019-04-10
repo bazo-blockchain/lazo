@@ -481,6 +481,16 @@ func TestSubtractionVar(t *testing.T) {
 	tester.assertInt(big.NewInt(1))
 }
 
+func TestSubtractionNegative(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 1 - 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(-1))
+}
+
 func TestMultiplication(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
@@ -543,51 +553,69 @@ func TestModulo(t *testing.T) {
 	tester.assertInt(big.NewInt(1))
 }
 
-//func TestExponent(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 3
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(8))
-//}
-//
-//// TODO: Fix exponent
-//func TestExponentVar(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			int x = 3
-//			return 2 ** x
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(8))
-//}
-//
-//// TODO: Fix exponent (right associativity 2^9)
-//func TestNestedExponents(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 3 ** 2
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(512))
-//}
-//
-//// TODO: Test with different basis
-//func TestMultipleExponent(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 2 ** 2 ** 2
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(65536))
-//}
+func TestExponent(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3
+		}
+	`)
 
-func TestPointBeforeLine(t *testing.T) {
+	tester.assertInt(big.NewInt(8))
+}
+
+func TestExponentVar(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			int x = 3
+			return 2 ** x
+		}
+	`)
+
+	tester.assertInt(big.NewInt(8))
+}
+
+// right associativity 2^9
+func TestNestedExponents(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3 ** 2
+		}
+	`)
+
+	tester.assertInt(big.NewInt(512))
+}
+
+func TestMultipleExponent(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3 ** 4 ** 0
+		}
+	`)
+
+	tester.assertInt(big.NewInt(8))
+}
+
+func TestExpWithMul(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 * 3 ** 4
+		}
+	`)
+
+	tester.assertInt(big.NewInt(162))
+}
+
+func TestExpWithMul2(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		function int test() {
+			return 2 ** 3 * 4
+		}
+	`)
+
+	tester.assertInt(big.NewInt(32))
+}
+
+func TestSubMulOrder(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
 			return 8 - 4 * 2
@@ -597,14 +625,14 @@ func TestPointBeforeLine(t *testing.T) {
 	tester.assertInt(big.NewInt(0))
 }
 
-func TestNegativeResult(t *testing.T) {
+func TestSubExpOrder(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
-			return 1 - 2
+			return 10 - 3 ** 2 - 1
 		}
 	`)
 
-	tester.assertInt(big.NewInt(-1))
+	tester.assertInt(big.NewInt(0))
 }
 
 func TestLogicAndTrue(t *testing.T) {
