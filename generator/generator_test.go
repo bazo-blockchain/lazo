@@ -146,7 +146,7 @@ func TestLocalVarInt(t *testing.T) {
 	tester.assertInt(big.NewInt(4))
 }
 
-func TestLocVarBoolDefautValue(t *testing.T) {
+func TestLocVarBoolDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
 			bool x
@@ -168,7 +168,7 @@ func TestLocVarBool(t *testing.T) {
 	tester.assertBool(true)
 }
 
-func TestLocVarStringDefautValue(t *testing.T) {
+func TestLocVarStringDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function string test() {
 			string x
@@ -190,7 +190,7 @@ func TestLocVarString(t *testing.T) {
 	tester.assertString("hello")
 }
 
-func TestLocVarCharDefautValue(t *testing.T) {
+func TestLocVarCharDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function char test() {
 			char x
@@ -435,8 +435,8 @@ func TestSetter(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(5))
 }
 
-// Expressions
-// -----------
+// Arithmetic Expressions
+// ----------------------
 
 func TestAddition(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
@@ -635,24 +635,15 @@ func TestSubExpOrder(t *testing.T) {
 	tester.assertInt(big.NewInt(0))
 }
 
-func TestLogicAndTrue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true && true
-		}
-	`)
+// Logical Expressions
+// -------------------
 
-	tester.assertBool(true)
+func TestLogicAndTrue(t *testing.T) {
+	assertBoolExpr(t, "true && true", true)
 }
 
 func TestLogicAndFalse(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true && false
-		}
-	`)
-
-	tester.assertBool(false)
+	assertBoolExpr(t, "true && false", false)
 }
 
 func TestLogicAndFalseShortCircuit(t *testing.T) {
@@ -733,4 +724,51 @@ func TestLogicNotNot(t *testing.T) {
 	`)
 
 	tester.assertBool(true)
+}
+
+// Equality Comparison
+// --------------------
+
+func TestIntEqual(t *testing.T) {
+	assertBoolExpr(t, "4 == 4", true)
+	assertBoolExpr(t, "-4 == -4", true)
+	assertBoolExpr(t, "1 == 2", false)
+}
+
+func TestIntUnequal(t *testing.T) {
+	assertBoolExpr(t, "4 != 4", false)
+	assertBoolExpr(t, "-4 != -4", false)
+	assertBoolExpr(t, "1 != 2", true)
+}
+
+func TestBoolEqual(t *testing.T) {
+	assertBoolExpr(t, "true == true", true)
+	assertBoolExpr(t, "false == false", true)
+	assertBoolExpr(t, "true == false", false)
+}
+
+func TestBoolUnequal(t *testing.T) {
+	assertBoolExpr(t, "true != true", false)
+	assertBoolExpr(t, "false != false", false)
+	assertBoolExpr(t, "true != false", true)
+}
+
+func TestCharEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' == 'a'", true)
+	assertBoolExpr(t, "'a' == 'b'", false)
+}
+
+func TestCharUnequal(t *testing.T) {
+	assertBoolExpr(t, "'a' != 'a'", false)
+	assertBoolExpr(t, "'a' != 'b'", true)
+}
+
+func TestStringEqual(t *testing.T) {
+	assertBoolExpr(t, " \"hello\" == \"hello\" ", true)
+	assertBoolExpr(t, " \"hello\" == \"world\" ", false)
+}
+
+func TestStringUnequal(t *testing.T) {
+	assertBoolExpr(t, " \"hello\" != \"hello\" ", false)
+	assertBoolExpr(t, " \"hello\" != \"world\" ", true)
 }

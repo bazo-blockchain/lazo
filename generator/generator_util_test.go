@@ -115,3 +115,9 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 		assert.Equal(gt.t, b, expected[i])
 	}
 }
+
+func assertBoolExpr(t *testing.T, expr string, expected bool) {
+	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
+	tester := newGeneratorTestUtil(t, code)
+	tester.assertBool(expected)
+}
