@@ -81,16 +81,8 @@ func (gt *generatorTestUtil) assertInt(value *big.Int) {
 	gt.assertBytes(bytes...)
 }
 
-func (gt *generatorTestUtil) assertBool(value bool) {
-	if value {
-		gt.assertBytes(0, 1)
-	} else {
-		gt.assertBytes(0)
-	}
-}
-
 // Can be deleted as soon as VM is fixed
-func (gt *generatorTestUtil) assertInternalBool(value bool) {
+func (gt *generatorTestUtil) assertBool(value bool) {
 	if value {
 		gt.assertBytes(1)
 	} else {

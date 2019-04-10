@@ -86,11 +86,13 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 
 // PushBool is a helper function that emits byte code to push a boolean to the stack.
 func (a *ILAssembler) PushBool(value bool) {
+	var byteVal byte
 	if value {
-		a.PushInt(big.NewInt(1))
+		byteVal = 1
 	} else {
-		a.PushInt(big.NewInt(0))
+		byteVal = 0
 	}
+	a.addInstruction(il.PushBool, []byte{byteVal}, 1)
 }
 
 // PushString is a helper that emits byte code to push a string to the stack

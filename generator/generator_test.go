@@ -694,7 +694,7 @@ func TestLogicNot(t *testing.T) {
 		}
 	`)
 
-	tester.assertInternalBool(false)
+	tester.assertBool(false)
 }
 
 func TestLogicNotNot(t *testing.T) {
@@ -704,5 +704,5 @@ func TestLogicNotNot(t *testing.T) {
 		}
 	`)
 
-	tester.assertInternalBool(true)
+	tester.assertBool(true)
 }
