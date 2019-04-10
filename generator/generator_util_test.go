@@ -25,7 +25,7 @@ type generatorTestUtil struct {
 
 func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
 	txData := []byte{
-		0, 0, // call constructor
+		1, 0, // call constructor
 	}
 
 	return newGeneratorTestUtilWithRawInput(

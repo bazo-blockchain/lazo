@@ -75,7 +75,7 @@ func TestContractFieldAssignment(t *testing.T) {
 
 func TestFuncCallByHash(t *testing.T) {
 	txData := []byte{
-		3,
+		4,
 		0x51, 0xA3, 0x52, 0xE1,
 	}
 
@@ -94,9 +94,9 @@ func TestFuncCallByHash(t *testing.T) {
 
 func TestFuncCallByHashWithParams(t *testing.T) {
 	txData := []byte{
-		1, 0, 2,
-		1, 0, 4,
-		3, 0x35, 0x2E, 0x00, 0x80,
+		2, 0, 2,
+		2, 0, 4,
+		4, 0x35, 0x2E, 0x00, 0x80,
 	}
 
 	tester := newGeneratorTextUtilWithTx(t, `

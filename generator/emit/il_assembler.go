@@ -31,9 +31,9 @@ func NewILAssembler(bytePos *uint16) *ILAssembler {
 // Returns the instructions
 func (a *ILAssembler) Complete(halt bool) []*il.Instruction {
 	if halt {
-		a.Emit(il.HALT)
+		a.Emit(il.Halt)
 	} else {
-		a.Emit(il.RET)
+		a.Emit(il.Ret)
 	}
 	a.ResolveLabels()
 	return a.instructions
@@ -73,9 +73,15 @@ func (a *ILAssembler) PushInt(value *big.Int) {
 	sign := util.GetSignByte(value)
 	bytes := value.Bytes()
 	total := byte(len(bytes))
-	operand := append([]byte{total, sign}, bytes...)
 
-	a.addInstruction(il.PUSH, operand, byte(len(operand)))
+	var operand []byte
+	if total == 0 {
+		operand = []byte{0}
+	} else {
+		operand = append([]byte{total, sign}, bytes...)
+	}
+
+	a.addInstruction(il.PushInt, operand, byte(len(operand)))
 }
 
 // PushBool is a helper function that emits byte code to push a boolean to the stack.
@@ -91,85 +97,83 @@ func (a *ILAssembler) PushBool(value bool) {
 func (a *ILAssembler) PushString(value string) {
 	bytes := []byte(value)
 	total := byte(len(bytes))
-	operand := append([]byte{total, 0}, bytes...)
-	a.addInstruction(il.PUSH, operand, byte(len(operand)))
+	operand := append([]byte{total}, bytes...)
+	a.addInstruction(il.PushStr, operand, byte(len(operand)))
 }
 
 // PushCharacter is a helper that emits byte code to push a character to the stack
 func (a *ILAssembler) PushCharacter(value rune) {
-	bytes := []byte(string(value))
-	total := byte(len(bytes))
-	operand := append([]byte{total, 0}, bytes...)
-	a.addInstruction(il.PUSH, operand, byte(len(operand)))
+	operand := []byte(string(value))
+	a.addInstruction(il.PushChar, operand, 1)
 }
 
 // PushFuncHash is a helper that emits byte code to push a function hash to the stack
 func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	var operand = make([]byte, 5)
-	operand[0] = 3 // actually 4
+	operand[0] = 4
 	copy(operand[1:], hash[:])
 
-	a.addInstruction(il.PUSH, operand, byte(len(operand)))
+	a.addInstruction(il.Push, operand, byte(len(operand)))
 }
 
 // NegBool is a helper that negates a boolean value on the stack
 func (a *ILAssembler) NegBool() {
 	a.PushBool(false)
-	a.Emit(il.EQ)
+	a.Emit(il.Eq)
 }
 
 // ConvertToBool is a helper that converts a value to a boolean on the stack
 func (a *ILAssembler) ConvertToBool() {
 	a.PushBool(true)
-	a.Emit(il.EQ)
+	a.Emit(il.Eq)
 }
 
 // Jmp is a helper that adds a JMP instruction to the byte code
 // Is used to jump to labels within the byte code
 func (a *ILAssembler) Jmp(label Label) {
-	a.addInstruction(il.JMP, label, 2)
+	a.addInstruction(il.Jmp, label, 2)
 }
 
-// JmpIfTrue is a helper that adds a JMPIF instruction to the byte code
+// JmpTrue is a helper that adds a JMPIF instruction to the byte code
 // Is used to jump to labels within the byte code if the value at the top of the stack is 1 (true)
-func (a *ILAssembler) JmpIfTrue(label Label) {
-	a.addInstruction(il.JMPIF, label, 2)
+func (a *ILAssembler) JmpTrue(label Label) {
+	a.addInstruction(il.JmpTrue, label, 2)
 }
 
 // Call is a helper that adds a CALL instruction to the byte code
 // Is used to call functions
 func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
-	a.addInstruction(il.CALL, function, 3)
+	a.addInstruction(il.Call, function, 3)
 }
 
-// CallIf is a helper that adds a CALLIF instruction to the byte code
+// CallTrue is a helper that adds a CALLIF instruction to the byte code
 // Is used to call functions if the value at the top of the stack is 1 (true)
-func (a *ILAssembler) CallIf(function *symbol.FunctionSymbol) {
-	a.addInstruction(il.CALLIF, function, 3)
+func (a *ILAssembler) CallTrue(function *symbol.FunctionSymbol) {
+	a.addInstruction(il.CallTrue, function, 3)
 }
 
-// Store is a helper that adds a STORE instruction to the byte code
+// StoreLocal is a helper that adds a STORE instruction to the byte code
 // Is used to store the value at the top of the stack in the call stack.
-func (a *ILAssembler) Store(index byte) {
-	a.addInstruction(il.STORE, []byte{index}, 1)
+func (a *ILAssembler) StoreLocal(index byte) {
+	a.addInstruction(il.StoreLoc, []byte{index}, 1)
 }
 
-// StoreField is a helper that adds a SSTORE instruction to the byte code
+// StoreState is a helper that adds a SSTORE instruction to the byte code
 // Is used to store the value at the top of the stack within the contract variables (fields) at a certain index
-func (a *ILAssembler) StoreField(index byte) {
-	a.addInstruction(il.SSTORE, []byte{index}, 1)
+func (a *ILAssembler) StoreState(index byte) {
+	a.addInstruction(il.StoreSt, []byte{index}, 1)
 }
 
-// Load is a helper that adds a LOAD instruction to the byte code
+// LoadLocal is a helper that adds a LOAD instruction to the byte code
 // Is used to load the variable at the given index from the call stack to the evaluation stack
-func (a *ILAssembler) Load(index byte) {
-	a.addInstruction(il.LOAD, []byte{index}, 1)
+func (a *ILAssembler) LoadLocal(index byte) {
+	a.addInstruction(il.LoadLoc, []byte{index}, 1)
 }
 
-// LoadField is a helper that adds a SLOAD instruction to the byte code
+// LoadState is a helper that adds a SLOAD instruction to the byte code
 // Is used to load the variable at the given index from the contract variables (fields) to the evaluation stack
-func (a *ILAssembler) LoadField(index byte) {
-	a.addInstruction(il.SLOAD, []byte{index}, 1)
+func (a *ILAssembler) LoadState(index byte) {
+	a.addInstruction(il.LoadSt, []byte{index}, 1)
 }
 
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
