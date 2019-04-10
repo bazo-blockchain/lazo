@@ -439,13 +439,7 @@ func TestSetter(t *testing.T) {
 // ----------------------
 
 func TestAddition(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 1 + 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(3))
+	assertIntExpr(t, "1 + 2", 3)
 }
 
 func TestAdditionVar(t *testing.T) {
@@ -461,13 +455,8 @@ func TestAdditionVar(t *testing.T) {
 }
 
 func TestSubtraction(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 - 1
-		}
-	`)
-
-	tester.assertInt(big.NewInt(1))
+	assertIntExpr(t, "2 - 1", 1)
+	assertIntExpr(t, "1 - 2", -1)
 }
 
 func TestSubtractionVar(t *testing.T) {
@@ -481,24 +470,8 @@ func TestSubtractionVar(t *testing.T) {
 	tester.assertInt(big.NewInt(1))
 }
 
-func TestSubtractionNegative(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 1 - 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(-1))
-}
-
 func TestMultiplication(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 * 3
-		}
-	`)
-
-	tester.assertInt(big.NewInt(6))
+	assertIntExpr(t, "2 * 3", 6)
 }
 
 func TestMultiplicationVar(t *testing.T) {
@@ -512,14 +485,13 @@ func TestMultiplicationVar(t *testing.T) {
 	tester.assertInt(big.NewInt(6))
 }
 
-func TestDivision(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 10 / 5
-		}
-	`)
+func TestSubMulOrder(t *testing.T) {
+	assertIntExpr(t, "8 - 4 * 2", 0)
+	assertIntExpr(t, "8 * 4 - 2", 30)
+}
 
-	tester.assertInt(big.NewInt(2))
+func TestDivision(t *testing.T) {
+	assertIntExpr(t, "10 / 5", 2)
 }
 
 func TestDivisionVar(t *testing.T) {
@@ -534,33 +506,17 @@ func TestDivisionVar(t *testing.T) {
 }
 
 func TestDivisionRound(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 5 / 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(2))
+	assertIntExpr(t, "5 / 2", 2)
 }
 
 func TestModulo(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 5 % 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(1))
+	assertIntExpr(t, "5 % 2", 1)
 }
 
 func TestExponent(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 3
-		}
-	`)
-
-	tester.assertInt(big.NewInt(8))
+	assertIntExpr(t, "2 ** 3", 8)
+	assertIntExpr(t, "2 ** 3 ** 2", 512) // 2^9
+	assertIntExpr(t, "2 ** 3 ** 4 ** 0", 8)
 }
 
 func TestExponentVar(t *testing.T) {
@@ -574,65 +530,13 @@ func TestExponentVar(t *testing.T) {
 	tester.assertInt(big.NewInt(8))
 }
 
-// right associativity 2^9
-func TestNestedExponents(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 3 ** 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(512))
-}
-
-func TestMultipleExponent(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 3 ** 4 ** 0
-		}
-	`)
-
-	tester.assertInt(big.NewInt(8))
-}
-
 func TestExpWithMul(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 * 3 ** 4
-		}
-	`)
-
-	tester.assertInt(big.NewInt(162))
+	assertIntExpr(t, "2 * 3 ** 4", 162)
+	assertIntExpr(t, "2 ** 3 * 4", 32)
 }
 
-func TestExpWithMul2(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 ** 3 * 4
-		}
-	`)
-
-	tester.assertInt(big.NewInt(32))
-}
-
-func TestSubMulOrder(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 8 - 4 * 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(0))
-}
-
-func TestSubExpOrder(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 10 - 3 ** 2 - 1
-		}
-	`)
-
-	tester.assertInt(big.NewInt(0))
+func TestMixedOperators(t *testing.T) {
+	assertIntExpr(t, "5 * 4 + 2 ** 3 - 1", 27)
 }
 
 // Logical Expressions

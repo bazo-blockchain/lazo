@@ -121,3 +121,9 @@ func assertBoolExpr(t *testing.T, expr string, expected bool) {
 	tester := newGeneratorTestUtil(t, code)
 	tester.assertBool(expected)
 }
+
+func assertIntExpr(t *testing.T, expr string, expected int64) {
+	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
+	tester := newGeneratorTestUtil(t, code)
+	tester.assertInt(big.NewInt(expected))
+}
