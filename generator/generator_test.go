@@ -772,3 +772,26 @@ func TestStringUnequal(t *testing.T) {
 	assertBoolExpr(t, " \"hello\" != \"hello\" ", false)
 	assertBoolExpr(t, " \"hello\" != \"world\" ", true)
 }
+
+// Relational Comparison
+// --------------------
+
+func TestIntLess(t *testing.T) {
+	assertBoolExpr(t, "1 < 3", true)
+	assertBoolExpr(t, "3 < 1", false)
+}
+
+func TestIntLessEqual(t *testing.T) {
+	assertBoolExpr(t, "1 <= 3", true)
+	assertBoolExpr(t, "3 <= 1", false)
+}
+
+func TestIntGreater(t *testing.T) {
+	assertBoolExpr(t, "1 > 3", false)
+	assertBoolExpr(t, "3 > 1", true)
+}
+
+func TestIntGreaterEqual(t *testing.T) {
+	assertBoolExpr(t, "1 >= 3", false)
+	assertBoolExpr(t, "3 >= 1", true)
+}
