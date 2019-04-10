@@ -10,6 +10,8 @@ github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410144744-93621acd2ca7 h1:W8/tS
 github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410144744-93621acd2ca7/go.mod h1:i7GFOn/kGnIXJQnwfh6Yi2X1HUFALlF4xiM4+tq8byo=
 github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410152339-68c96d64b79c h1:tHTGT+8X/x3FcXVHtxkflCUHOQuR7e1zC4lSA+onWEs=
 github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410152339-68c96d64b79c/go.mod h1:i7GFOn/kGnIXJQnwfh6Yi2X1HUFALlF4xiM4+tq8byo=
+github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410195638-28694e495b6b h1:mryljDz9EVN6g11TV38Msd1PmwU9HFEJzFNCbmmmwo4=
+github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190410195638-28694e495b6b/go.mod h1:i7GFOn/kGnIXJQnwfh6Yi2X1HUFALlF4xiM4+tq8byo=
 github.com/google/go-cmp v0.2.0 h1:+dTQ8DZQJz0Mb/HjFlkptS1FeQ4cWSnN941F8aEG4SQ=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
@@ -40,6 +42,8 @@ golang.org/x/sys v0.0.0-20190403152447-81d4e9dc473e h1:nFYrTHrdrAOpShe27kaFHjsqY
 golang.org/x/sys v0.0.0-20190403152447-81d4e9dc473e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190405154228-4b34438f7a67 h1:1Fzlr8kkDLQwqMP8GxrhptBLqZG/EDpiATneiZHY998=
 golang.org/x/sys v0.0.0-20190405154228-4b34438f7a67/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20190410170021-cc4d4f50624c h1:OUGWoQpM/o3TxM7Fp3CEqRpaYCbg4H1hOVPnZoUtr2U=
+golang.org/x/sys v0.0.0-20190410170021-cc4d4f50624c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/tools v0.0.0-20180810170437-e96c4e24768d/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gotest.tools v0.0.0-20181223230014-1083505acf35 h1:zpdCK+REwbk+rqjJmHhiCN6iBIigrZ39glqSF0P3KF0=
 gotest.tools v0.0.0-20181223230014-1083505acf35/go.mod h1:R//lfYlUuTOTfblYI3lGoAAAebUdzjvbmQsuB7Ykd90=

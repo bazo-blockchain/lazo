@@ -778,20 +778,47 @@ func TestStringUnequal(t *testing.T) {
 
 func TestIntLess(t *testing.T) {
 	assertBoolExpr(t, "1 < 3", true)
+	assertBoolExpr(t, "1 < 1", false)
 	assertBoolExpr(t, "3 < 1", false)
 }
 
 func TestIntLessEqual(t *testing.T) {
 	assertBoolExpr(t, "1 <= 3", true)
+	assertBoolExpr(t, "3 <= 3", true)
 	assertBoolExpr(t, "3 <= 1", false)
 }
 
 func TestIntGreater(t *testing.T) {
 	assertBoolExpr(t, "1 > 3", false)
+	assertBoolExpr(t, "1 > 1", false)
 	assertBoolExpr(t, "3 > 1", true)
 }
 
 func TestIntGreaterEqual(t *testing.T) {
 	assertBoolExpr(t, "1 >= 3", false)
 	assertBoolExpr(t, "3 >= 1", true)
+}
+
+func TestCharLess(t *testing.T) {
+	assertBoolExpr(t, "'a' < 'b'", true)
+	assertBoolExpr(t, "'a' < 'a'", false)
+	assertBoolExpr(t, "'b' < 'a'", false)
+}
+
+func TestCharLessEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' <= 'b'", true)
+	assertBoolExpr(t, "'b' <= 'b'", true)
+	assertBoolExpr(t, "'b' <= 'a'", false)
+}
+
+func TestCharGreater(t *testing.T) {
+	assertBoolExpr(t, "'a' > 'b'", false)
+	assertBoolExpr(t, "'a' > 'a'", false)
+	assertBoolExpr(t, "'b' > 'a'", true)
+}
+
+func TestCharGreaterEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' >= 'b'", false)
+	assertBoolExpr(t, "'b' >= 'b'", true)
+	assertBoolExpr(t, "'b' >= 'a'", true)
 }
