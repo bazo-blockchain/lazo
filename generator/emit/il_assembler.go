@@ -118,12 +118,6 @@ func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	a.addInstruction(il.Push, operand, byte(len(operand)))
 }
 
-// NegBool is a helper that negates a boolean value on the stack
-func (a *ILAssembler) NegBool() {
-	a.PushBool(false)
-	a.Emit(il.Eq)
-}
-
 // ConvertToBool is a helper that converts a value to a boolean on the stack
 func (a *ILAssembler) ConvertToBool() {
 	a.PushBool(true)
@@ -136,10 +130,16 @@ func (a *ILAssembler) Jmp(label Label) {
 	a.addInstruction(il.Jmp, label, 2)
 }
 
-// JmpTrue is a helper that adds a JMPIF instruction to the byte code
+// JmpTrue is a helper that adds a JmpTrue instruction to the byte code
 // Is used to jump to labels within the byte code if the value at the top of the stack is 1 (true)
 func (a *ILAssembler) JmpTrue(label Label) {
 	a.addInstruction(il.JmpTrue, label, 2)
+}
+
+// JmpFalse is a helper that adds a JmpFalse instruction to the byte code
+// Is used to jump to labels within the byte code if the value at the top of the stack is 0 (false)
+func (a *ILAssembler) JmpFalse(label Label) {
+	a.addInstruction(il.JmpFalse, label, 2)
 }
 
 // Call is a helper that adds a CALL instruction to the byte code

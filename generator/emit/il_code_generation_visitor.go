@@ -155,8 +155,7 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 
 	// Condition
 	node.Condition.Accept(v)
-	v.assembler.NegBool()
-	v.assembler.JmpTrue(elseLabel)
+	v.assembler.JmpFalse(elseLabel)
 
 	// Then
 	v.VisitStatementBlock(node.Then)
@@ -199,8 +198,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		endLabel := v.assembler.CreateLabel()
 
 		expNode.Left.Accept(v)
-		v.assembler.NegBool()
-		v.assembler.JmpTrue(falseLabel)
+		v.assembler.JmpFalse(falseLabel)
 		expNode.Right.Accept(v)
 		v.assembler.Jmp(endLabel)
 
@@ -251,7 +249,7 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 
 	if expNode.Operator == token.Not {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
-		v.assembler.NegBool()
+		v.assembler.Emit(il.Neg)
 		return
 	}
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
