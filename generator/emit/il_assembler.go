@@ -118,12 +118,6 @@ func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	a.addInstruction(il.Push, operand, byte(len(operand)))
 }
 
-// ConvertToBool is a helper that converts a value to a boolean on the stack
-func (a *ILAssembler) ConvertToBool() {
-	a.PushBool(true)
-	a.Emit(il.Eq)
-}
-
 // Jmp is a helper that adds a JMP instruction to the byte code
 // Is used to jump to labels within the byte code
 func (a *ILAssembler) Jmp(label Label) {

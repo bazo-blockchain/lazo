@@ -214,9 +214,6 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		endLabel := v.assembler.CreateLabel()
 
 		expNode.Left.Accept(v)
-		// ConvertToBool fixes Bug in JMPIF on VM
-		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
-		v.assembler.ConvertToBool()
 		v.assembler.JmpTrue(trueLabel)
 		expNode.Right.Accept(v)
 		v.assembler.Jmp(endLabel)
