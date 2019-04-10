@@ -638,92 +638,30 @@ func TestSubExpOrder(t *testing.T) {
 // Logical Expressions
 // -------------------
 
-func TestLogicAndTrue(t *testing.T) {
+func TestLogicAnd(t *testing.T) {
 	assertBoolExpr(t, "true && true", true)
-}
-
-func TestLogicAndFalse(t *testing.T) {
 	assertBoolExpr(t, "true && false", false)
 }
 
-func TestLogicAndFalseShortCircuit(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false && true
-		}
-	`)
-
-	tester.assertBool(false)
+func TestLogicAndShortCircuit(t *testing.T) {
+	assertBoolExpr(t, "false && true", false)
+	assertBoolExpr(t, "false && false", false)
 }
 
-func TestLogicAndFalseShortCircuit2(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false && false
-		}
-	`)
-
-	tester.assertBool(false)
+func TestLogicOr(t *testing.T) {
+	assertBoolExpr(t, "false || false", false)
+	assertBoolExpr(t, "false || true", true)
 }
 
-func TestLogicOrFalse(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false || false
-		}
-	`)
-
-	tester.assertBool(false)
-}
-
-func TestLogicOrTrue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false || true
-		}
-	`)
-
-	tester.assertBool(true)
-}
-
-func TestLogicOrTrueShortCircuit(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true || false
-		}
-	`)
-
-	tester.assertBool(true)
-}
-
-func TestLogicOrTrueShortCircuit2(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true || true
-		}
-	`)
-
-	tester.assertBool(true)
+func TestLogicOrShortCircuit(t *testing.T) {
+	assertBoolExpr(t, "true || false", true)
+	assertBoolExpr(t, "true || true", true)
 }
 
 func TestLogicNot(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return !true
-		}
-	`)
-
-	tester.assertBool(false)
-}
-
-func TestLogicNotNot(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return !!true
-		}
-	`)
-
-	tester.assertBool(true)
+	assertBoolExpr(t, "!true", false)
+	assertBoolExpr(t, "!false", true)
+	assertBoolExpr(t, "!!true", true)
 }
 
 // Equality Comparison
