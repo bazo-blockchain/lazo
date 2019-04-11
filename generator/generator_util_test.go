@@ -25,7 +25,7 @@ type generatorTestUtil struct {
 
 func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
 	txData := []byte{
-		0, 0, // call constructor
+		1, 0, // call constructor
 	}
 
 	return newGeneratorTestUtilWithRawInput(
@@ -81,16 +81,8 @@ func (gt *generatorTestUtil) assertInt(value *big.Int) {
 	gt.assertBytes(bytes...)
 }
 
-func (gt *generatorTestUtil) assertBool(value bool) {
-	if value {
-		gt.assertBytes(0, 1)
-	} else {
-		gt.assertBytes(0)
-	}
-}
-
 // Can be deleted as soon as VM is fixed
-func (gt *generatorTestUtil) assertInternalBool(value bool) {
+func (gt *generatorTestUtil) assertBool(value bool) {
 	if value {
 		gt.assertBytes(1)
 	} else {
@@ -99,14 +91,11 @@ func (gt *generatorTestUtil) assertInternalBool(value bool) {
 }
 
 func (gt *generatorTestUtil) assertString(value string) {
-	bytes := append([]byte{0}, []byte(value)...)
-	gt.assertBytes(bytes...)
+	gt.assertBytes([]byte(value)...)
 }
 
 func (gt *generatorTestUtil) assertChar(value rune) {
-	bytes := []byte(string(value))
-	bytes = append([]byte{0}, bytes...)
-	gt.assertBytes(bytes...)
+	gt.assertBytes(byte(value))
 }
 
 func (gt *generatorTestUtil) assertBytes(bytes ...byte) {
@@ -125,4 +114,16 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 	for i, b := range actual {
 		assert.Equal(gt.t, b, expected[i])
 	}
+}
+
+func assertBoolExpr(t *testing.T, expr string, expected bool) {
+	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
+	tester := newGeneratorTestUtil(t, code)
+	tester.assertBool(expected)
+}
+
+func assertIntExpr(t *testing.T, expr string, expected int64) {
+	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
+	tester := newGeneratorTestUtil(t, code)
+	tester.assertInt(big.NewInt(expected))
 }

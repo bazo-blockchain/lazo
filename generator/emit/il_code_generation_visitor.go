@@ -46,18 +46,18 @@ func (v *ILCodeGenerationVisitor) VisitContractNode(node *node.ContractNode) {
 
 func (v *ILCodeGenerationVisitor) generateABI(contractSymbol *symbol.ContractSymbol,
 	contractData *data.ContractData) {
-	v.assembler.Emit(il.CALLDATA)
+	v.assembler.Emit(il.CallData)
 
 	for i, functionData := range contractData.Functions {
-		v.assembler.Emit(il.DUP)
+		v.assembler.Emit(il.Dup)
 		v.assembler.PushFuncHash(functionData.Hash)
-		v.assembler.Emit(il.NEQ)
+		v.assembler.Emit(il.NotEq)
 
 		checkNextFuncLabel := v.assembler.CreateLabel()
-		v.assembler.JmpIfTrue(checkNextFuncLabel)
-		v.assembler.Emit(il.POP) // Remove function hash from top of call stack
+		v.assembler.JmpTrue(checkNextFuncLabel)
+		v.assembler.Emit(il.Pop) // Remove function hash from top of call stack
 		v.assembler.Call(contractSymbol.Functions[i])
-		v.assembler.Emit(il.HALT)
+		v.assembler.Emit(il.Halt)
 
 		v.assembler.SetLabel(checkNextFuncLabel)
 	}
@@ -68,9 +68,9 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 	constructorLabel := v.assembler.CreateLabel()
 
 	v.assembler.PushInt(big.NewInt(0))
-	v.assembler.Emit(il.EQ)
-	v.assembler.JmpIfTrue(constructorLabel)
-	v.assembler.Emit(il.HALT)
+	v.assembler.Emit(il.Eq)
+	v.assembler.JmpTrue(constructorLabel)
+	v.assembler.Emit(il.Halt)
 
 	v.assembler.SetLabel(constructorLabel)
 	for _, variable := range node.Variables {
@@ -116,14 +116,14 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 
 	if v.function == nil {
 		index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
-		v.assembler.StoreField(byte(index))
+		v.assembler.StoreState(byte(index))
 	} else {
 		index := v.function.GetVarIndex(node.Identifier)
 		isContractField := !v.function.IsLocalVar(node.Identifier)
 		if isContractField {
-			v.assembler.StoreField(byte(index))
+			v.assembler.StoreState(byte(index))
 		} else {
-			v.assembler.Store(byte(index))
+			v.assembler.StoreLocal(byte(index))
 		}
 	}
 }
@@ -136,16 +136,16 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.Assign
 	index, isContractField := v.getVarIndex(decl)
 
 	if isContractField {
-		v.assembler.StoreField(index)
+		v.assembler.StoreState(index)
 	} else {
-		v.assembler.Store(index)
+		v.assembler.StoreLocal(index)
 	}
 }
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
-	v.assembler.Emit(il.RET)
+	v.assembler.Emit(il.Ret)
 }
 
 // VisitIfStatementNode generates the IL Code for an If or an If-Else Statement
@@ -155,8 +155,7 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 
 	// Condition
 	node.Condition.Accept(v)
-	v.assembler.NegBool()
-	v.assembler.JmpIfTrue(elseLabel)
+	v.assembler.JmpFalse(elseLabel)
 
 	// Then
 	v.VisitStatementBlock(node.Then)
@@ -173,17 +172,17 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 // -----------
 
 var binaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Addition:       il.ADD,
-	token.Subtraction:    il.SUB,
-	token.Multiplication: il.MULT,
-	token.Division:       il.DIV,
-	token.Modulo:         il.MOD,
-	token.Greater:        il.GT,
-	token.GreaterEqual:   il.GTE,
-	token.LessEqual:      il.LTE,
-	token.Less:           il.LT,
-	token.Equal:          il.EQ,
-	token.Unequal:        il.NEQ,
+	token.Addition:       il.Add,
+	token.Subtraction:    il.Sub,
+	token.Multiplication: il.Mul,
+	token.Division:       il.Div,
+	token.Modulo:         il.Mod,
+	token.Greater:        il.Gt,
+	token.GreaterEqual:   il.GtEq,
+	token.LessEqual:      il.LtEq,
+	token.Less:           il.Lt,
+	token.Equal:          il.Eq,
+	token.Unequal:        il.NotEq,
 }
 
 // VisitBinaryExpressionNode generates the IL Code for all Binary Expressions
@@ -194,13 +193,20 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
+	if expNode.Operator == token.Exponent {
+		// Visit right node first because of right associativity
+		expNode.Right.Accept(v) // exponent
+		expNode.Left.Accept(v)  // basis
+		v.assembler.Emit(il.Exp)
+		return
+	}
+
 	if expNode.Operator == token.And {
 		falseLabel := v.assembler.CreateLabel()
 		endLabel := v.assembler.CreateLabel()
 
 		expNode.Left.Accept(v)
-		v.assembler.NegBool()
-		v.assembler.JmpIfTrue(falseLabel)
+		v.assembler.JmpFalse(falseLabel)
 		expNode.Right.Accept(v)
 		v.assembler.Jmp(endLabel)
 
@@ -216,10 +222,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		endLabel := v.assembler.CreateLabel()
 
 		expNode.Left.Accept(v)
-		// ConvertToBool fixes Bug in JMPIF on VM
-		// VM Stores [0 1] on stack for value 1 but JMP IF only reads the first Byte
-		v.assembler.ConvertToBool()
-		v.assembler.JmpIfTrue(trueLabel)
+		v.assembler.JmpTrue(trueLabel)
 		expNode.Right.Accept(v)
 		v.assembler.Jmp(endLabel)
 
@@ -233,7 +236,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Subtraction: il.NEG,
+	token.Subtraction: il.Neg,
 }
 
 // VisitUnaryExpressionNode generates the IL Code for all unary expressions
@@ -251,7 +254,7 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 
 	if expNode.Operator == token.Not {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
-		v.assembler.NegBool()
+		v.assembler.Emit(il.Neg)
 		return
 	}
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
@@ -263,9 +266,9 @@ func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode)
 	index, isContractField := v.getVarIndex(decl)
 
 	if isContractField {
-		v.assembler.LoadField(index)
+		v.assembler.LoadState(index)
 	} else {
-		v.assembler.Load(index)
+		v.assembler.LoadLocal(index)
 	}
 }
 

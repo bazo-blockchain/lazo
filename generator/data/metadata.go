@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"github.com/bazo-blockchain/bazo-miner/protocol"
+	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/generator/il"
 )
 
@@ -46,6 +47,6 @@ func generateByteCode(code *il.Instruction, bytePos int) []byte {
 	if code.Operand != nil {
 		bytes = append(bytes, code.Operand.([]byte)...)
 	}
-	fmt.Printf("%d: %s %v \n", bytePos, il.OpCodes[code.OpCode].Name, bytes)
+	fmt.Printf("%d: %s %v \n", bytePos, vm.OpCodes[code.OpCode].Name, bytes)
 	return bytes
 }

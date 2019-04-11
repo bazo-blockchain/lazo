@@ -75,7 +75,7 @@ func TestContractFieldAssignment(t *testing.T) {
 
 func TestFuncCallByHash(t *testing.T) {
 	txData := []byte{
-		3,
+		4,
 		0x51, 0xA3, 0x52, 0xE1,
 	}
 
@@ -94,9 +94,9 @@ func TestFuncCallByHash(t *testing.T) {
 
 func TestFuncCallByHashWithParams(t *testing.T) {
 	txData := []byte{
-		1, 0, 2,
-		1, 0, 4,
-		3, 0x35, 0x2E, 0x00, 0x80,
+		2, 0, 2,
+		2, 0, 4,
+		4, 0x35, 0x2E, 0x00, 0x80,
 	}
 
 	tester := newGeneratorTextUtilWithTx(t, `
@@ -146,7 +146,7 @@ func TestLocalVarInt(t *testing.T) {
 	tester.assertInt(big.NewInt(4))
 }
 
-func TestLocVarBoolDefautValue(t *testing.T) {
+func TestLocVarBoolDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function bool test() {
 			bool x
@@ -168,7 +168,7 @@ func TestLocVarBool(t *testing.T) {
 	tester.assertBool(true)
 }
 
-func TestLocVarStringDefautValue(t *testing.T) {
+func TestLocVarStringDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function string test() {
 			string x
@@ -190,7 +190,7 @@ func TestLocVarString(t *testing.T) {
 	tester.assertString("hello")
 }
 
-func TestLocVarCharDefautValue(t *testing.T) {
+func TestLocVarCharDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function char test() {
 			char x
@@ -435,17 +435,11 @@ func TestSetter(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(5))
 }
 
-// Expressions
-// -----------
+// Arithmetic Expressions
+// ----------------------
 
 func TestAddition(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 1 + 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(3))
+	assertIntExpr(t, "1 + 2", 3)
 }
 
 func TestAdditionVar(t *testing.T) {
@@ -461,13 +455,8 @@ func TestAdditionVar(t *testing.T) {
 }
 
 func TestSubtraction(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 - 1
-		}
-	`)
-
-	tester.assertInt(big.NewInt(1))
+	assertIntExpr(t, "2 - 1", 1)
+	assertIntExpr(t, "1 - 2", -1)
 }
 
 func TestSubtractionVar(t *testing.T) {
@@ -482,13 +471,7 @@ func TestSubtractionVar(t *testing.T) {
 }
 
 func TestMultiplication(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 2 * 3
-		}
-	`)
-
-	tester.assertInt(big.NewInt(6))
+	assertIntExpr(t, "2 * 3", 6)
 }
 
 func TestMultiplicationVar(t *testing.T) {
@@ -502,14 +485,13 @@ func TestMultiplicationVar(t *testing.T) {
 	tester.assertInt(big.NewInt(6))
 }
 
-func TestDivision(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 10 / 5
-		}
-	`)
+func TestSubMulOrder(t *testing.T) {
+	assertIntExpr(t, "8 - 4 * 2", 0)
+	assertIntExpr(t, "8 * 4 - 2", 30)
+}
 
-	tester.assertInt(big.NewInt(2))
+func TestDivision(t *testing.T) {
+	assertIntExpr(t, "10 / 5", 2)
 }
 
 func TestDivisionVar(t *testing.T) {
@@ -524,185 +506,161 @@ func TestDivisionVar(t *testing.T) {
 }
 
 func TestDivisionRound(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 5 / 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(2))
+	assertIntExpr(t, "5 / 2", 2)
 }
 
 func TestModulo(t *testing.T) {
+	assertIntExpr(t, "5 % 2", 1)
+}
+
+func TestExponent(t *testing.T) {
+	assertIntExpr(t, "2 ** 3", 8)
+	assertIntExpr(t, "2 ** 3 ** 2", 512) // 2^9
+	assertIntExpr(t, "2 ** 3 ** 4 ** 0", 8)
+}
+
+func TestExponentVar(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		function int test() {
-			return 5 % 2
+			int x = 3
+			return 2 ** x
 		}
 	`)
 
-	tester.assertInt(big.NewInt(1))
+	tester.assertInt(big.NewInt(8))
 }
 
-//func TestExponent(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 3
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(8))
-//}
-//
-//// TODO: Fix exponent
-//func TestExponentVar(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			int x = 3
-//			return 2 ** x
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(8))
-//}
-//
-//// TODO: Fix exponent (right associativity 2^9)
-//func TestNestedExponents(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 3 ** 2
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(512))
-//}
-//
-//// TODO: Test with different basis
-//func TestMultipleExponent(t *testing.T) {
-//	tester := newGeneratorTestUtil(t, `
-//		function int test() {
-//			return 2 ** 2 ** 2 ** 2
-//		}
-//	`)
-//
-//	tester.assertInt(big.NewInt(65536))
-//}
-
-func TestPointBeforeLine(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 8 - 4 * 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(0))
+func TestExpWithMul(t *testing.T) {
+	assertIntExpr(t, "2 * 3 ** 4", 162)
+	assertIntExpr(t, "2 ** 3 * 4", 32)
 }
 
-func TestNegativeResult(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function int test() {
-			return 1 - 2
-		}
-	`)
-
-	tester.assertInt(big.NewInt(-1))
+func TestMixedOperators(t *testing.T) {
+	assertIntExpr(t, "5 * 4 + 2 ** 3 - 1", 27)
 }
 
-func TestLogicAndTrue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true && true
-		}
-	`)
+// Logical Expressions
+// -------------------
 
-	tester.assertBool(true)
+func TestLogicAnd(t *testing.T) {
+	assertBoolExpr(t, "true && true", true)
+	assertBoolExpr(t, "true && false", false)
 }
 
-func TestLogicAndFalse(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true && false
-		}
-	`)
-
-	tester.assertBool(false)
+func TestLogicAndShortCircuit(t *testing.T) {
+	assertBoolExpr(t, "false && true", false)
+	assertBoolExpr(t, "false && false", false)
 }
 
-func TestLogicAndFalseShortCircuit(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false && true
-		}
-	`)
-
-	tester.assertBool(false)
+func TestLogicOr(t *testing.T) {
+	assertBoolExpr(t, "false || false", false)
+	assertBoolExpr(t, "false || true", true)
 }
 
-func TestLogicAndFalseShortCircuit2(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false && false
-		}
-	`)
-
-	tester.assertBool(false)
-}
-
-func TestLogicOrFalse(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false || false
-		}
-	`)
-
-	tester.assertBool(false)
-}
-
-func TestLogicOrTrue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return false || true
-		}
-	`)
-
-	tester.assertBool(true)
-}
-
-func TestLogicOrTrueShortCircuit(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true || false
-		}
-	`)
-
-	tester.assertBool(true)
-}
-
-func TestLogicOrTrueShortCircuit2(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return true || true
-		}
-	`)
-
-	tester.assertBool(true)
+func TestLogicOrShortCircuit(t *testing.T) {
+	assertBoolExpr(t, "true || false", true)
+	assertBoolExpr(t, "true || true", true)
 }
 
 func TestLogicNot(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return !true
-		}
-	`)
-
-	tester.assertInternalBool(false)
+	assertBoolExpr(t, "!true", false)
+	assertBoolExpr(t, "!false", true)
+	assertBoolExpr(t, "!!true", true)
 }
 
-func TestLogicNotNot(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		function bool test() {
-			return !!true
-		}
-	`)
+// Equality Comparison
+// --------------------
 
-	tester.assertInternalBool(true)
+func TestIntEqual(t *testing.T) {
+	assertBoolExpr(t, "4 == 4", true)
+	assertBoolExpr(t, "-4 == -4", true)
+	assertBoolExpr(t, "1 == 2", false)
+}
+
+func TestIntUnequal(t *testing.T) {
+	assertBoolExpr(t, "4 != 4", false)
+	assertBoolExpr(t, "-4 != -4", false)
+	assertBoolExpr(t, "1 != 2", true)
+}
+
+func TestBoolEqual(t *testing.T) {
+	assertBoolExpr(t, "true == true", true)
+	assertBoolExpr(t, "false == false", true)
+	assertBoolExpr(t, "true == false", false)
+}
+
+func TestBoolUnequal(t *testing.T) {
+	assertBoolExpr(t, "true != true", false)
+	assertBoolExpr(t, "false != false", false)
+	assertBoolExpr(t, "true != false", true)
+}
+
+func TestCharEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' == 'a'", true)
+	assertBoolExpr(t, "'a' == 'b'", false)
+}
+
+func TestCharUnequal(t *testing.T) {
+	assertBoolExpr(t, "'a' != 'a'", false)
+	assertBoolExpr(t, "'a' != 'b'", true)
+}
+
+func TestStringEqual(t *testing.T) {
+	assertBoolExpr(t, " \"hello\" == \"hello\" ", true)
+	assertBoolExpr(t, " \"hello\" == \"world\" ", false)
+}
+
+func TestStringUnequal(t *testing.T) {
+	assertBoolExpr(t, " \"hello\" != \"hello\" ", false)
+	assertBoolExpr(t, " \"hello\" != \"world\" ", true)
+}
+
+// Relational Comparison
+// --------------------
+
+func TestIntLess(t *testing.T) {
+	assertBoolExpr(t, "1 < 3", true)
+	assertBoolExpr(t, "1 < 1", false)
+	assertBoolExpr(t, "3 < 1", false)
+}
+
+func TestIntLessEqual(t *testing.T) {
+	assertBoolExpr(t, "1 <= 3", true)
+	assertBoolExpr(t, "3 <= 3", true)
+	assertBoolExpr(t, "3 <= 1", false)
+}
+
+func TestIntGreater(t *testing.T) {
+	assertBoolExpr(t, "1 > 3", false)
+	assertBoolExpr(t, "1 > 1", false)
+	assertBoolExpr(t, "3 > 1", true)
+}
+
+func TestIntGreaterEqual(t *testing.T) {
+	assertBoolExpr(t, "1 >= 3", false)
+	assertBoolExpr(t, "3 >= 1", true)
+}
+
+func TestCharLess(t *testing.T) {
+	assertBoolExpr(t, "'a' < 'b'", true)
+	assertBoolExpr(t, "'a' < 'a'", false)
+	assertBoolExpr(t, "'b' < 'a'", false)
+}
+
+func TestCharLessEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' <= 'b'", true)
+	assertBoolExpr(t, "'b' <= 'b'", true)
+	assertBoolExpr(t, "'b' <= 'a'", false)
+}
+
+func TestCharGreater(t *testing.T) {
+	assertBoolExpr(t, "'a' > 'b'", false)
+	assertBoolExpr(t, "'a' > 'a'", false)
+	assertBoolExpr(t, "'b' > 'a'", true)
+}
+
+func TestCharGreaterEqual(t *testing.T) {
+	assertBoolExpr(t, "'a' >= 'b'", false)
+	assertBoolExpr(t, "'b' >= 'b'", true)
+	assertBoolExpr(t, "'b' >= 'a'", true)
 }

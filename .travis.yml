@@ -3,6 +3,9 @@ language: go
 go:
   - "1.11.x"
 
+env:
+  - GO111MODULE=on
+
 addons:
   sonarcloud:
     organization: "bazo-blockchain"
