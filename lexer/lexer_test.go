@@ -182,6 +182,11 @@ func TestNotClosedString(t *testing.T) {
 	tester.assertError(0, "not closed")
 }
 
+func TestUnicodeString(t *testing.T) {
+	tester := newLexerTestUtil(t, `"pound £"`)
+	tester.assertError(0, "pound £")
+}
+
 // Character Tokens
 // ----------------
 func TestCharacter(t *testing.T) {
