@@ -26,6 +26,11 @@ func assertNoErrors(t *testing.T, p *Parser) {
 	assert.Equal(t, len(p.errors), 0)
 }
 
+func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {
+	err := p.errors[index].Error()
+	assert.Assert(t, strings.Contains(err, errSubStr), err)
+}
+
 func assertProgram(t *testing.T, node *node.ProgramNode, hasContract bool) {
 	assert.Equal(t, node.Contract != nil, hasContract)
 }
