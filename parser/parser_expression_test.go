@@ -224,6 +224,14 @@ func TestInvalidDesignator(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Function Call Expressions
+// --------------------------
+
+func TestFuncCall(t *testing.T) {
+	e := parseExpressionFromInput(t, "test()")
+	assertFuncCall(t, e, "test")
+}
+
 // Literal Expressions
 // -------------------
 

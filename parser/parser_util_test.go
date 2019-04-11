@@ -130,3 +130,15 @@ func assertUnaryExpression(t *testing.T, n node.ExpressionNode, expr string, op 
 	assert.Equal(t, unExpr.Expression.String(), expr)
 	assert.Equal(t, unExpr.Operator, op)
 }
+
+func assertFuncCall(t *testing.T, n node.ExpressionNode, designator string, args ...string) {
+	funcCall, ok := n.(*node.FuncCallNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, funcCall.Designator.String(), designator)
+
+	assert.Equal(t, len(funcCall.Args), len(args))
+	for i, a := range args {
+		assert.Equal(t, funcCall.Args[i].String(), a)
+	}
+}

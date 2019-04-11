@@ -253,6 +253,24 @@ func (n *DesignatorNode) Accept(v Visitor) {
 }
 
 // --------------------------
+
+// FuncCallNode compose abstract node and holds designator and arguments
+type FuncCallNode struct {
+	AbstractNode
+	Designator *DesignatorNode
+	Args       []ExpressionNode
+}
+
+func (n *FuncCallNode) String() string {
+	return fmt.Sprintf("%s(%s)", n.Designator, n.Args)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *FuncCallNode) Accept(v Visitor) {
+	v.VisitFuncCallNode(n)
+}
+
+// --------------------------
 // Literal Nodes
 // --------------------------
 
