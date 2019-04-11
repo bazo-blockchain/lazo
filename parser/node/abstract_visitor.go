@@ -84,6 +84,14 @@ func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpressionNode) {
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
+// VisitFuncCallNode traverses the funcCall expression
+func (v *AbstractVisitor) VisitFuncCallNode(node *FuncCallNode) {
+	node.Designator.Accept(v.ConcreteVisitor)
+	for _, expr := range node.Args {
+		expr.Accept(v.ConcreteVisitor)
+	}
+}
+
 // VisitDesignatorNode does nothing because it is the terminal node.
 func (v *AbstractVisitor) VisitDesignatorNode(node *DesignatorNode) {
 	// Nothing to do here
