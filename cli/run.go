@@ -29,7 +29,7 @@ func execute(sourceFile string) {
 	context.ContractVariables = variables
 	context.Fee += (uint64(len(variables))) * 1000
 	context.Data = []byte{
-		0, // total bytes
+		1, // total bytes
 		0, // Contract Init Flag
 		//3,
 		//19, 70, 101, 78, // Function hash
