@@ -39,7 +39,7 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 	}
 	tester.symbolTable, tester.errors = New(program).Run()
 	tester.globalScope = tester.symbolTable.GlobalScope
-	assert.Equal(t, len(tester.errors) == 0, isValidCode)
+	assert.Equal(t, len(tester.errors) == 0, isValidCode, tester.errors)
 
 	return tester
 }

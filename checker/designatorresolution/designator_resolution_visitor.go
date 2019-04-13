@@ -94,13 +94,7 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 	case *symbol.LocalVariableSymbol:
 		return sym.(*symbol.LocalVariableSymbol).Type
 	case *symbol.FunctionSymbol:
-		fs := sym.(*symbol.FunctionSymbol)
-		if len(fs.ReturnTypes) > 0 {
-			// Function with multiple returns values are allowed only in variable & assignment statements.
-			// Therefore, it is safe to return the type of the first return value
-			return fs.ReturnTypes[0]
-		}
-		// void function has no type
+		// FuncCall expression type will be resolved in type checker
 		return nil
 	default:
 		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.Identifier()))

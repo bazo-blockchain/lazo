@@ -381,3 +381,115 @@ func TestMixedExpressionTypeMismatch(t *testing.T) {
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
 }
+
+// Function Calls
+// --------------
+
+func TestFuncNameAsDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test
+
+		function int test() {
+			return 1
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+}
+
+func TestFuncNameAsLocalVar(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function int test() {
+			int test2
+			test2 = test2()
+			return 1
+		}
+
+		function int test2() {
+			return 1
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "test2 is not a function")
+}
+
+func TestFuncCallType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test()
+		bool b = test2()
+
+		function int test() {
+			return 1
+		}
+
+		function bool test2() {
+			return true
+		}
+	`, true)
+
+	tester.assertField(0, tester.globalScope.IntType)
+	tester.assertField(1, tester.globalScope.BoolType)
+}
+
+func TestVoidFuncCall(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			test2()
+		}
+
+		function void test2() {
+		}
+	`, true)
+
+	fc := tester.getFuncStatementNode(0, 0).(*node.FuncCallNode)
+	tester.assertExpressionType(fc, nil)
+}
+
+func TestVoidFuncCallTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test()
+
+		function void test() {
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+}
+
+func TestFuncCallArgsType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool y = test(1, true, "string")
+
+		function bool test(int i, bool b, string s) {
+			return true
+		}
+	`, true)
+
+	fc := tester.getFieldNode(0).Expression.(*node.FuncCallNode)
+	gs := tester.globalScope
+	tester.assertExpressionType(fc.Args[0], gs.IntType)
+	tester.assertExpressionType(fc.Args[1], gs.BoolType)
+	tester.assertExpressionType(fc.Args[2], gs.StringType)
+}
+
+func TestFuncCallArgsMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool y = test(2)
+
+		function bool test() {
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 0 args, got 1")
+}
+
+func TestFuncCallArgsTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		bool y = test(true)
+
+		function bool test(char c) {
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected Type char, got Type bool")
+}
