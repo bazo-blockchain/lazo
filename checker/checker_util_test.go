@@ -51,6 +51,12 @@ func (ct *CheckerTestUtil) assertTotalErrors(total int) {
 	assert.Equal(ct.t, len(ct.errors), total)
 }
 
+func (ct *CheckerTestUtil) assertErrorAt(index int, errSubStr string) {
+	assert.Assert(ct.t, len(ct.errors) > index)
+	err := ct.errors[index].Error()
+	assert.Assert(ct.t, strings.Contains(err, errSubStr), err)
+}
+
 func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {
 	contractSymbol := ct.symbolTable.GlobalScope.Contract
 	assert.Equal(ct.t, contractSymbol.Scope(), ct.symbolTable.GlobalScope)

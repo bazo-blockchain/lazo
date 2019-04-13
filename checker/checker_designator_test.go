@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"gotest.tools/assert"
 	"testing"
 )
 
@@ -269,4 +270,41 @@ func TestUndefinedLocalVarReturn(t *testing.T) {
 		}
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+// Function Call
+// -------------
+
+func TestUndefinedFuncCall(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test()
+	`, false)
+
+	tester.assertErrorAt(0, "Designator test is undefined")
+}
+
+func TestDesignatorWithFuncCall(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+		int y = test(x)
+
+		function int test(int y) {
+			return y
+		}
+	`, true)
+
+	fc := tester.getFieldNode(1).Expression.(*node.FuncCallNode)
+	assert.Equal(t, tester.symbolTable.GetDeclByDesignator(fc.Designator), tester.globalScope.Contract.Functions[0])
+}
+
+func TestUndefinedDesignatorWithFuncCall(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test(x)
+
+		function int test(int y) {
+			return y
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Designator x is undefined")
 }
