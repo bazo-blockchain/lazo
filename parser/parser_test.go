@@ -335,13 +335,24 @@ func TestIfStatementWOElseWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Function Call Statements
+// ------------------------
+
+func TestFuncCallStatement(t *testing.T) {
+	p := newParserFromInput("call() \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertFuncCall(t, s, "call")
+}
+
 // Assignment
 // ----------
 
 func TestAssignmentStatement(t *testing.T) {
 	p := newParserFromInput("a = 5\n")
-	i := p.readIdentifier()
-	v := p.parseAssignmentStatement(i)
+	d := p.parseDesignator()
+	v := p.parseAssignmentStatement(d)
 
 	assertAssignmentStatement(t, v, "a", "5")
 	assertNoErrors(t, p)
@@ -357,10 +368,18 @@ func TestAssignmentStatementChar(t *testing.T) {
 
 func TestAssignmentStatementWONewline(t *testing.T) {
 	p := newParserFromInput("a = 'c'")
-	i := p.readIdentifier()
-	p.parseAssignmentStatement(i)
+	d := p.parseDesignator()
+	_ = p.parseAssignmentStatement(d)
 
 	assertHasError(t, p)
+}
+
+func TestAssignmentWithFuncCall(t *testing.T) {
+	p := newParserFromInput("x = call() \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "x", "call([])")
 }
 
 // Statement with Fix token

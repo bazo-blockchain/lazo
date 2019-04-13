@@ -180,9 +180,11 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 		return p.parseVariableStatement()
 	}
 
-	identifier := p.readIdentifier()
+	designator := p.parseDesignator()
 	if p.isSymbol(token.Assign) {
-		return p.parseAssignmentStatement(identifier)
+		return p.parseAssignmentStatement(designator)
+	} else if p.isSymbol(token.OpenParen) {
+		return p.parseFuncCall(designator)
 	}
 
 	p.addError("%s not yet implemented" + p.currentToken.Literal())
@@ -211,21 +213,15 @@ func (p *Parser) parseVariableStatement() *node.VariableNode {
 	return v
 }
 
-func (p *Parser) parseAssignmentStatement(identifier string) *node.AssignmentStatementNode {
-	abstractNode := p.newAbstractNode()
-
-	designator := &node.DesignatorNode{
-		AbstractNode: abstractNode,
-		Value:        identifier,
-	}
+func (p *Parser) parseAssignmentStatement(left *node.DesignatorNode) *node.AssignmentStatementNode {
 	p.nextToken() // skip '=' sign
 
 	expression := p.parseExpression()
 	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.AssignmentStatementNode{
-		AbstractNode: abstractNode,
-		Left:         designator,
+		AbstractNode: left.AbstractNode,
+		Left:         left,
 		Right:        expression,
 	}
 }
