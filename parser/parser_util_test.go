@@ -27,6 +27,7 @@ func assertNoErrors(t *testing.T, p *Parser) {
 }
 
 func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {
+	assert.Assert(t, len(p.errors) > index)
 	err := p.errors[index].Error()
 	assert.Assert(t, strings.Contains(err, errSubStr), err)
 }

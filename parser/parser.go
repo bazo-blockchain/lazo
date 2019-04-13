@@ -184,7 +184,9 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	if p.isSymbol(token.Assign) {
 		return p.parseAssignmentStatement(designator)
 	} else if p.isSymbol(token.OpenParen) {
-		return p.parseFuncCall(designator)
+		fc := p.parseFuncCall(designator)
+		p.checkAndSkipNewLines(token.NewLine)
+		return fc
 	}
 
 	p.addError("%s not yet implemented" + p.currentToken.Literal())

@@ -346,6 +346,13 @@ func TestFuncCallStatement(t *testing.T) {
 	assertFuncCall(t, s, "call")
 }
 
+func TestFuncCallStatementWithoutNL(t *testing.T) {
+	p := newParserFromInput("call()")
+	_ = p.parseStatement()
+
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
+}
+
 // Assignment
 // ----------
 
