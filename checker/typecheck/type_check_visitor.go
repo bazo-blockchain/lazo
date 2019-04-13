@@ -97,6 +97,13 @@ func (v *typeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	}
 }
 
+func (v *typeCheckVisitor) VisitCallStatementNode(node *node.CallStatementNode) {
+	v.AbstractVisitor.VisitCallStatementNode(node)
+	if v.symbolTable.GetTypeByExpression(node.Call) != nil {
+		v.reportError(node, "function call as statement should be void")
+	}
+}
+
 // Expressions
 // -----------
 

@@ -11,6 +11,7 @@ type Visitor interface {
 	VisitIfStatementNode(node *IfStatementNode)
 	VisitReturnStatementNode(node *ReturnStatementNode)
 	VisitAssignmentStatementNode(node *AssignmentStatementNode)
+	VisitCallStatementNode(node *CallStatementNode)
 	VisitBinaryExpressionNode(node *BinaryExpressionNode)
 	VisitUnaryExpressionNode(node *UnaryExpressionNode)
 	VisitDesignatorNode(node *DesignatorNode)

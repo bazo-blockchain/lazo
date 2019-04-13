@@ -340,10 +340,11 @@ func TestIfStatementWOElseWONewline(t *testing.T) {
 
 func TestFuncCallStatement(t *testing.T) {
 	p := newParserFromInput("call() \n")
-	s := p.parseStatement()
+	s, ok := p.parseStatement().(*node.CallStatementNode)
 
 	assertNoErrors(t, p)
-	assertFuncCall(t, s, "call")
+	assert.Assert(t, ok)
+	assertFuncCall(t, s.Call, "call")
 }
 
 func TestFuncCallStatementWithoutNL(t *testing.T) {

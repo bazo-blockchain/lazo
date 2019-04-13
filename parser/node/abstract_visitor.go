@@ -73,6 +73,11 @@ func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatement
 	node.Right.Accept(v.ConcreteVisitor)
 }
 
+// VisitCallStatementNode traverses the function call expression
+func (v *AbstractVisitor) VisitCallStatementNode(node *CallStatementNode) {
+	node.Call.Accept(v.ConcreteVisitor)
+}
+
 // VisitBinaryExpressionNode traverses the left and right expressions.
 func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) {
 	node.Left.Accept(v.ConcreteVisitor)

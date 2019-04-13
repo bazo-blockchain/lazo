@@ -431,31 +431,6 @@ func TestFuncCallType(t *testing.T) {
 	tester.assertField(1, tester.globalScope.BoolType)
 }
 
-func TestVoidFuncCall(t *testing.T) {
-	tester := newCheckerTestUtil(t, `
-		function void test() {
-			test2()
-		}
-
-		function void test2() {
-		}
-	`, true)
-
-	fc := tester.getFuncStatementNode(0, 0).(*node.FuncCallNode)
-	tester.assertExpressionType(fc, nil)
-}
-
-func TestVoidFuncCallTypeMismatch(t *testing.T) {
-	tester := newCheckerTestUtil(t, `
-		int y = test()
-
-		function void test() {
-		}
-	`, false)
-
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
-}
-
 func TestFuncCallArgsType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		bool y = test(1, true, "string")
@@ -492,4 +467,46 @@ func TestFuncCallArgsTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "expected Type char, got Type bool")
+}
+
+func TestVoidFuncCall(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			test2()
+		}
+
+		function void test2() {
+		}
+	`, true)
+
+	st := tester.getFuncStatementNode(0, 0).(*node.CallStatementNode)
+	tester.assertExpressionType(st.Call, nil)
+}
+
+func TestVoidFuncCallTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int y = test()
+
+		function void test() {
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+}
+
+func TestIntFuncCallAsStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			test2()
+		}
+
+		function int test2() {
+			return 1
+		}
+	`, false)
+
+	st := tester.getFuncStatementNode(0, 0).(*node.CallStatementNode)
+	tester.assertExpressionType(st.Call, tester.globalScope.IntType)
+
+	tester.assertErrorAt(0, "function call as statement should be void")
 }

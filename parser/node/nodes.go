@@ -197,6 +197,23 @@ func (n *AssignmentStatementNode) Accept(v Visitor) {
 }
 
 // --------------------------
+
+// CallStatementNode composes abstract node and holds the function call expression
+type CallStatementNode struct {
+	AbstractNode
+	Call *FuncCallNode
+}
+
+func (n *CallStatementNode) String() string {
+	return fmt.Sprintf("\n [%s] CALL %s", n.Pos(), getNodeString(n.Call))
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *CallStatementNode) Accept(v Visitor) {
+	v.VisitCallStatementNode(n)
+}
+
+// --------------------------
 // Expression Nodes
 // --------------------------
 

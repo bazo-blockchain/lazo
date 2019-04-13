@@ -184,9 +184,7 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	if p.isSymbol(token.Assign) {
 		return p.parseAssignmentStatement(designator)
 	} else if p.isSymbol(token.OpenParen) {
-		fc := p.parseFuncCall(designator)
-		p.checkAndSkipNewLines(token.NewLine)
-		return fc
+		return p.parseCallStatement(designator)
 	}
 
 	p.addError("%s not yet implemented" + p.currentToken.Literal())
@@ -299,6 +297,16 @@ func (p *Parser) parseType() *node.TypeNode {
 	return &node.TypeNode{
 		AbstractNode: p.newAbstractNode(),
 		Identifier:   p.readIdentifier(),
+	}
+}
+
+func (p *Parser) parseCallStatement(designator *node.DesignatorNode) *node.CallStatementNode {
+	fc := p.parseFuncCall(designator)
+	p.checkAndSkipNewLines(token.NewLine)
+
+	return &node.CallStatementNode{
+		AbstractNode: fc.AbstractNode,
+		Call:         fc,
 	}
 }
 
