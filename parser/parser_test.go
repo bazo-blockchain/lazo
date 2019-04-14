@@ -435,7 +435,7 @@ func TestStatementWithIdentifier(t *testing.T) {
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
 
-	assertStatement(t, v, "\n [1:1] VARIABLE int a")
+	assertStatement(t, v, "\n [1:1] VAR int a")
 	assertNoErrors(t, p)
 }
 
@@ -443,7 +443,7 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseStatementWithIdentifier()
 
-	assertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
+	assertStatement(t, v, "\n [1:1] VAR int a = 5")
 	assertNoErrors(t, p)
 }
 

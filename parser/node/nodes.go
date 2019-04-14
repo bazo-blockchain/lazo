@@ -152,11 +152,9 @@ type VariableNode struct {
 }
 
 func (n *VariableNode) String() string {
-	var str string
-	if n.Expression == nil {
-		str = fmt.Sprintf("\n [%s] VARIABLE %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
-	} else {
-		str = fmt.Sprintf("\n [%s] VARIABLE %s %s = %s", n.Pos(), getNodeString(n.Type), n.Identifier, getNodeString(n.Expression))
+	str := fmt.Sprintf("\n [%s] VAR %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
+	if n.Expression != nil {
+		str += fmt.Sprintf(" = %s", getNodeString(n.Expression))
 	}
 	return str
 }
@@ -164,6 +162,30 @@ func (n *VariableNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *VariableNode) Accept(v Visitor) {
 	v.VisitVariableNode(n)
+}
+
+// --------------------------
+
+// MultiVariableNode composes abstract node and holds multiple variables and a function call
+type MultiVariableNode struct {
+	AbstractNode
+	Types       []*TypeNode
+	Identifiers []string
+	FuncCall    *FuncCallNode
+}
+
+func (n *MultiVariableNode) String() string {
+	str := fmt.Sprintf("\n [%s] VARS", n.Pos())
+	for i, id := range n.Identifiers {
+		str += fmt.Sprintf(" %s %s", n.Types[i], id)
+	}
+	str += fmt.Sprintf(" = %s", getNodeString(n.FuncCall))
+	return str
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *MultiVariableNode) Accept(v Visitor) {
+	v.VisitMultiVariableNode(n)
 }
 
 // --------------------------
@@ -235,6 +257,29 @@ func (n *AssignmentStatementNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *AssignmentStatementNode) Accept(v Visitor) {
 	v.VisitAssignmentStatementNode(n)
+}
+
+// --------------------------
+
+// MultiAssignmentStatementNode composes abstract node and holds the target designators and a function call
+type MultiAssignmentStatementNode struct {
+	AbstractNode
+	Designators []*DesignatorNode
+	FuncCall    *FuncCallNode
+}
+
+func (n *MultiAssignmentStatementNode) String() string {
+	str := fmt.Sprintf("\n [%s] VARS", n.Pos())
+	for _, id := range n.Designators {
+		str += fmt.Sprintf(" %s", id)
+	}
+	str += fmt.Sprintf(" = %s", getNodeString(n.FuncCall))
+	return str
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *MultiAssignmentStatementNode) Accept(v Visitor) {
+	v.VisitMultiAssignmentStatementNode(n)
 }
 
 // --------------------------

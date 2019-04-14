@@ -228,7 +228,15 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 }
 
 func (p *Parser) parseVariableStatement() *node.VariableNode {
-	v := p.parseVariable()
+	v := &node.VariableNode{
+		AbstractNode: p.newAbstractNode(),
+		Type:         p.parseType(),
+		Identifier:   p.readIdentifier(),
+	}
+	if p.isSymbol(token.Assign) {
+		p.nextToken()
+		v.Expression = p.parseExpression()
+	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return v
 }
@@ -296,20 +304,6 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 		AbstractNode: abstractNode,
 		Expressions:  returnValues,
 	}
-}
-
-func (p *Parser) parseVariable() *node.VariableNode {
-	v := &node.VariableNode{
-		AbstractNode: p.newAbstractNode(),
-		Type:         p.parseType(),
-		Identifier:   p.readIdentifier(),
-	}
-	if p.isSymbol(token.Assign) {
-		p.nextToken()
-		v.Expression = p.parseExpression()
-	}
-
-	return v
 }
 
 func (p *Parser) parseType() *node.TypeNode {

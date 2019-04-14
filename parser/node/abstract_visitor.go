@@ -61,6 +61,14 @@ func (v *AbstractVisitor) VisitVariableNode(node *VariableNode) {
 	}
 }
 
+// VisitMultiVariableNode traverses multiple variables declarations and
+func (v *AbstractVisitor) VisitMultiVariableNode(node *MultiVariableNode) {
+	for _, t := range node.Types {
+		t.Accept(v.ConcreteVisitor)
+	}
+	node.FuncCall.Accept(v.ConcreteVisitor)
+}
+
 // VisitTypeNode does nothing because it is the terminal node.
 func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
 	// Nothing to do here
@@ -84,6 +92,14 @@ func (v *AbstractVisitor) VisitReturnStatementNode(node *ReturnStatementNode) {
 func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatementNode) {
 	node.Left.Accept(v.ConcreteVisitor)
 	node.Right.Accept(v.ConcreteVisitor)
+}
+
+// VisitMultiAssignmentStatementNode traverses the target designators and the function call
+func (v *AbstractVisitor) VisitMultiAssignmentStatementNode(node *MultiAssignmentStatementNode) {
+	for _, designator := range node.Designators {
+		designator.Accept(v.ConcreteVisitor)
+	}
+	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
 // VisitCallStatementNode traverses the function call expression
