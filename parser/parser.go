@@ -201,10 +201,16 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	}
 
 	designator := p.parseDesignator()
-	if p.isSymbol(token.Assign) {
-		return p.parseAssignmentStatement(designator)
-	} else if p.isSymbol(token.OpenParen) {
-		return p.parseCallStatement(designator)
+	if p.isType(token.SYMBOL) {
+		tok := p.currentToken.(*token.FixToken)
+		switch tok.Value {
+		case token.Assign:
+			return p.parseAssignmentStatement(designator)
+		case token.Comma:
+			return p.parseMultiAssignmentStatement(designator)
+		case token.OpenParen:
+			return p.parseCallStatement(designator)
+		}
 	}
 
 	p.addError("%s not yet implemented" + p.currentToken.Literal())
@@ -279,6 +285,23 @@ func (p *Parser) parseAssignmentStatement(left *node.DesignatorNode) *node.Assig
 		Left:         left,
 		Right:        expression,
 	}
+}
+
+func (p *Parser) parseMultiAssignmentStatement(designator *node.DesignatorNode) *node.MultiAssignmentStatementNode {
+	designators := []*node.DesignatorNode{designator}
+
+	if !p.isEnd() && p.isSymbol(token.Comma) {
+		p.nextToken()
+		designators = append(designators, p.parseDesignator())
+	}
+	p.check(token.Assign)
+	ma := &node.MultiAssignmentStatementNode{
+		AbstractNode: designator.AbstractNode,
+		Designators:  designators,
+		FuncCall:     p.parseFuncCall(p.parseDesignator()),
+	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return ma
 }
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {

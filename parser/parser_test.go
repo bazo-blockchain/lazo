@@ -449,6 +449,36 @@ func TestAssignmentWithFuncCall(t *testing.T) {
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "x", "call([])")
 }
 
+// Multi Assignment
+// ----------------
+
+func TestMultiAssignmentStatement(t *testing.T) {
+	p := newParserFromInput("a, b = call(test(1)) \n")
+	ma, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertNoErrors(t, p)
+	assert.Equal(t, ma.Designators[0].String(), "a")
+	assert.Equal(t, ma.Designators[1].String(), "b")
+	assertFuncCall(t, ma.FuncCall, "call", "test([1])")
+}
+
+func TestMultiAssignmentStatementMissingFuncCall(t *testing.T) {
+	p := newParserFromInput("a, b = 1, 2 \n")
+	_, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiAssignmentStatementInvalidDesignator(t *testing.T) {
+	p := newParserFromInput("a, int x = call() \n")
+	_, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol = expected, but got x")
+}
+
 // Statement with Fix token
 // ------------------------
 
