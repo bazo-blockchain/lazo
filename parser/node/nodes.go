@@ -122,6 +122,24 @@ func (n *FunctionNode) Accept(v Visitor) {
 }
 
 // --------------------------
+
+// ParameterNode composes abstract node and holds the type and identifier
+type ParameterNode struct {
+	AbstractNode
+	Type       *TypeNode
+	Identifier string
+}
+
+func (n *ParameterNode) String() string {
+	return fmt.Sprintf("\n [%s] PARAM %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *ParameterNode) Accept(v Visitor) {
+	v.VisitParameterNode(n)
+}
+
+// --------------------------
 // Statement Nodes
 // --------------------------
 

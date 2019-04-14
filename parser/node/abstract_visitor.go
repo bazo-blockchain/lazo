@@ -41,6 +41,11 @@ func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 	v.ConcreteVisitor.VisitStatementBlock(node.Body)
 }
 
+// VisitParameterNode traverses the type node
+func (v *AbstractVisitor) VisitParameterNode(node *ParameterNode) {
+	node.Type.Accept(v.ConcreteVisitor)
+}
+
 // VisitStatementBlock traverses the statement node.
 func (v *AbstractVisitor) VisitStatementBlock(stmts []StatementNode) {
 	for _, statement := range stmts {
