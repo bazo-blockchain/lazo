@@ -150,10 +150,8 @@ func (ct *CheckerTestUtil) assertMultiLocalVariable(funcIndex int, varIndex int,
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, varSymbol.Identifier(), varNode.Identifiers[multiVarIndex])
 
-	// TODO
-	if varNode.FuncCall != nil {
-		// ct.assertExpressionType(varNode.Expression, expectedType)
-	}
+	calledFuncSym := ct.symbolTable.GetDeclByDesignator(varNode.FuncCall.Designator).(*symbol.FunctionSymbol)
+	assert.Equal(ct.t, calledFuncSym.ReturnTypes[multiVarIndex], expectedType)
 }
 
 func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatementNode, expectedType *symbol.TypeSymbol) {

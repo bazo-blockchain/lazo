@@ -63,6 +63,27 @@ func (v *typeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	}
 }
 
+// VisitMultiVariableNode checks whether the variable types matches with the function return types
+func (v *typeCheckVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) {
+	v.AbstractVisitor.VisitMultiVariableNode(node)
+	calledFuncSym := v.symbolTable.GetDeclByDesignator(node.FuncCall.Designator).(*symbol.FunctionSymbol)
+
+	if len(calledFuncSym.ReturnTypes) != len(node.Types) {
+		v.reportError(node,
+			fmt.Sprintf("function returns %d value(s), but %d variables are initialized",
+				len(calledFuncSym.ReturnTypes), len(node.Types)))
+		return
+	}
+
+	for i, returnType := range calledFuncSym.ReturnTypes {
+		varType := v.symbolTable.FindTypeByNode(node.Types[i])
+		if varType != returnType {
+			v.reportError(node, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+				returnType.ID, varType.ID))
+		}
+	}
+}
+
 // VisitReturnStatementNode checks whether the return types and the values are of the same type
 func (v *typeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
