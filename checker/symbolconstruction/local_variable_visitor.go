@@ -26,7 +26,7 @@ func newLocalVariableVisitor(symbolTable *symbol.SymbolTable, function *symbol.F
 func (v *localVariableVisitor) VisitStatementBlock(stmts []node.StatementNode) {
 	v.blockScopes = append(v.blockScopes, []*symbol.LocalVariableSymbol{}) // add new block scope
 	v.AbstractVisitor.VisitStatementBlock(stmts)
-	v.blockScopes = v.blockScopes[:len(v.blockScopes)-1] // remove last block scope
+	v.blockScopes = v.blockScopes[:v.currentBlockIndex()] // remove last block scope
 }
 
 // VisitVariableNode records the visibility of the local variable and adds the local variable to the block scopes
@@ -37,12 +37,28 @@ func (v *localVariableVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.function.LocalVariables = append(v.function.LocalVariables, sym)
 	v.symbolTable.MapSymbolToNode(sym, node)
 
-	// append the local variable to the actual block scope
-	v.blockScopes[len(v.blockScopes)-1] = append(v.blockScopes[len(v.blockScopes)-1], sym)
+	v.addToScope(sym)
+}
+
+func (v *localVariableVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) {
+	v.recordVisiblity(node)
+
+	for _, id := range node.Identifiers {
+		sym := symbol.NewLocalVariableSymbol(v.function, id)
+		v.function.LocalVariables = append(v.function.LocalVariables, sym)
+		v.symbolTable.MapSymbolToNode(sym, node)
+
+		v.addToScope(sym)
+	}
 }
 
 // VisitAssignmentStatementNode records the visibility
 func (v *localVariableVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
+	v.recordVisiblity(node)
+}
+
+// VisitMultiAssignmentStatementNode records the visibility
+func (v *localVariableVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAssignmentStatementNode) {
 	v.recordVisiblity(node)
 }
 
@@ -63,4 +79,14 @@ func (v *localVariableVisitor) recordVisiblity(stmt node.StatementNode) {
 			localVariable.VisibleIn = append(localVariable.VisibleIn, stmt)
 		}
 	}
+}
+
+func (v *localVariableVisitor) currentBlockIndex() int {
+	return len(v.blockScopes) - 1
+}
+
+func (v *localVariableVisitor) addToScope(sym *symbol.LocalVariableSymbol) {
+	// append the local variable to the actual block scope
+	index := v.currentBlockIndex()
+	v.blockScopes[index] = append(v.blockScopes[index], sym)
 }

@@ -150,7 +150,7 @@ func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
 		for c, otherDecl := range allDecl {
 			if c > r && decl.Identifier() == otherDecl.Identifier() {
 				sc.reportError(otherDecl,
-					fmt.Sprintf("ID '%s' is already declared", otherDecl.Identifier()))
+					fmt.Sprintf("Identifier '%s' is already declared", otherDecl.Identifier()))
 				break
 			}
 		}

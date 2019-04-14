@@ -183,6 +183,16 @@ func (n *MultiVariableNode) String() string {
 	return str
 }
 
+// GetType returns the type of the given variable identifier
+func (n *MultiVariableNode) GetType(id string) *TypeNode {
+	for i, varID := range n.Identifiers {
+		if id == varID {
+			return n.Types[i]
+		}
+	}
+	return nil
+}
+
 // Accept lets a visitor to traverse its node structure
 func (n *MultiVariableNode) Accept(v Visitor) {
 	v.VisitMultiVariableNode(n)

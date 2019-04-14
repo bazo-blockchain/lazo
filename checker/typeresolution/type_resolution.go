@@ -47,9 +47,16 @@ func (tr *typeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 		param.Type = tr.resolveType(paramNode.Type)
 	}
 
-	for _, locVar := range sym.LocalVariables {
-		locVarNode := tr.symTable.GetNodeBySymbol(locVar).(*node.VariableNode)
-		locVar.Type = tr.resolveType(locVarNode.Type)
+	for _, locSym := range sym.LocalVariables {
+		locVarNode := tr.symTable.GetNodeBySymbol(locSym)
+
+		if varNode, ok := locVarNode.(*node.VariableNode); ok {
+			locSym.Type = tr.resolveType(varNode.Type)
+		} else if multiVarNode, ok := locVarNode.(*node.MultiVariableNode); ok {
+			locSym.Type = tr.resolveType(multiVarNode.GetType(locSym.ID))
+		} else {
+			tr.reportError(locVarNode, fmt.Sprintf("Unsupported local variable node type"))
+		}
 	}
 }
 

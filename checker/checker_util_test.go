@@ -136,6 +136,26 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	}
 }
 
+func (ct *CheckerTestUtil) assertMultiLocalVariable(funcIndex int, varIndex int, multiVarIndex int,
+	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	varSymbol := functionSymbol.LocalVariables[varIndex]
+	assert.Equal(ct.t, varSymbol.Scope(), functionSymbol)
+	assert.Equal(ct.t, varSymbol.Type, expectedType)
+	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
+	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)
+
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.MultiVariableNode)
+	assert.Assert(ct.t, ok)
+	assert.Equal(ct.t, varSymbol.Identifier(), varNode.Identifiers[multiVarIndex])
+
+	// TODO
+	if varNode.FuncCall != nil {
+		// ct.assertExpressionType(varNode.Expression, expectedType)
+	}
+}
+
 func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatementNode, expectedType *symbol.TypeSymbol) {
 	ct.assertExpressionType(assignStmt.Left, expectedType)
 	ct.assertExpressionType(assignStmt.Right, expectedType)
