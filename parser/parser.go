@@ -75,7 +75,7 @@ func (p *Parser) parseContract() *node.ContractNode {
 func (p *Parser) parseContractBody(contract *node.ContractNode) {
 	switch p.currentToken.Type() {
 	case token.IDENTIFER:
-		contract.Variables = append(contract.Variables, p.parseVariableStatement())
+		contract.Fields = append(contract.Fields, p.parseField())
 	case token.SYMBOL:
 		ftok, _ := p.currentToken.(*token.FixToken)
 
@@ -91,6 +91,21 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 		p.addError("Unsupported contract part: " + p.currentToken.Literal())
 		p.nextToken()
 	}
+}
+
+func (p *Parser) parseField() *node.FieldNode {
+	v := &node.FieldNode{
+		AbstractNode: p.newAbstractNode(),
+		Type:         p.parseType(),
+		Identifier:   p.readIdentifier(),
+	}
+
+	if p.isSymbol(token.Assign) {
+		p.nextToken()
+		v.Expression = p.parseExpression()
+	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return v
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode {

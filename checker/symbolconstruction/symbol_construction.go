@@ -79,8 +79,8 @@ func (sc *symbolConstruction) registerContract() {
 	sc.globalScope.Contract = contractSymbol
 	sc.symbolTable.MapSymbolToNode(contractSymbol, contractNode)
 
-	for _, variableNode := range contractNode.Variables {
-		sc.registerField(contractSymbol, variableNode)
+	for _, fieldNode := range contractNode.Fields {
+		sc.registerField(contractSymbol, fieldNode)
 	}
 
 	for _, functionNode := range contractNode.Functions {
@@ -88,7 +88,7 @@ func (sc *symbolConstruction) registerContract() {
 	}
 }
 
-func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
+func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.FieldNode) {
 	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
 	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
 	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)

@@ -26,7 +26,7 @@ func newDesignatorResolutionVisitor(symbolTable *symbol.SymbolTable, contractSym
 
 // VisitContractNode visits all fields and functions of the contract. Stores the current function in the visitor.
 func (v *designatorResolutionVisitor) VisitContractNode(node *node.ContractNode) {
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 

@@ -62,12 +62,12 @@ func (n *ProgramNode) Accept(v Visitor) {
 type ContractNode struct {
 	AbstractNode
 	Name      string
-	Variables []*VariableNode
+	Fields    []*FieldNode
 	Functions []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
-	return fmt.Sprintf("[%s] CONTRACT %s \n VARS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Variables, n.Functions)
+	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Fields, n.Functions)
 }
 
 // Accept lets a visitor to traverse its node structure

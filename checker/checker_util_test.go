@@ -75,7 +75,7 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 	assert.Equal(ct.t, fieldSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(fieldSymbol.AllDeclarations()), 0)
 
-	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.VariableNode)
+	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.FieldNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, fieldSymbol.Identifier(), fieldNode.Identifier)
 
@@ -156,8 +156,8 @@ func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expect
 // Helper Functions
 // ----------------
 
-func (ct *CheckerTestUtil) getFieldNode(index int) *node.VariableNode {
-	return ct.syntaxTree.Contract.Variables[index]
+func (ct *CheckerTestUtil) getFieldNode(index int) *node.FieldNode {
+	return ct.syntaxTree.Contract.Fields[index]
 }
 
 func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode {

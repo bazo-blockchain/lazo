@@ -26,7 +26,7 @@ func newTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol
 
 // VisitContractNode visits the fields and functions of the contract
 func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 
@@ -35,6 +35,17 @@ func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 		functionNode := v.symbolTable.GetNodeBySymbol(function)
 		functionNode.Accept(v)
 		v.currentFunction = nil
+	}
+}
+
+// VisitFieldNode checks whether the variable type and value are of the same type
+func (v *typeCheckVisitor) VisitFieldNode(node *node.FieldNode) {
+	v.AbstractVisitor.VisitFieldNode(node)
+	targetType := v.symbolTable.FindTypeByNode(node.Type)
+	expType := v.symbolTable.GetTypeByExpression(node.Expression)
+
+	if node.Expression != nil && targetType != expType {
+		v.reportError(node, fmt.Sprintf("Type mismatch: expected %s, given %s", targetType, expType))
 	}
 }
 

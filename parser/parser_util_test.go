@@ -37,13 +37,16 @@ func assertProgram(t *testing.T, node *node.ProgramNode, hasContract bool) {
 }
 func assertContract(t *testing.T, node *node.ContractNode, name string, totalVars int, totalFunctions int) {
 	assert.Equal(t, node.Name, name)
-	assert.Equal(t, len(node.Variables), totalVars)
+	assert.Equal(t, len(node.Fields), totalVars)
 	assert.Equal(t, len(node.Functions), totalFunctions)
 }
 
-func assertVariable(t *testing.T, node *node.VariableNode, varType string, id string) {
+func assertField(t *testing.T, node *node.FieldNode, varType string, id string, expr string) {
 	assert.Equal(t, node.Type.Identifier, varType)
 	assert.Equal(t, node.Identifier, id)
+	if expr != "" {
+		assertExpression(t, node.Expression, expr)
+	}
 }
 
 func assertFunction(t *testing.T, node *node.FunctionNode, name string, totalRTypes int, totalPTypes int, totalStmts int) {

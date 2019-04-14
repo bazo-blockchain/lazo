@@ -33,7 +33,7 @@ func (tr *typeResolution) resolveTypesInContractSymbol() {
 }
 
 func (tr *typeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
-	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
+	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.FieldNode)
 	symbol.Type = tr.resolveType(fieldNode.Type)
 }
 

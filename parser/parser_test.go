@@ -56,13 +56,13 @@ func TestContractWithVariable(t *testing.T) {
 
 	assertNoErrors(t, p)
 	assertContract(t, c, "Test", 2, 0)
-	assertVariable(t, c.Variables[0], "int", "x")
-	assertVariable(t, c.Variables[1], "int", "y")
+	assertField(t, c.Fields[0], "int", "x", "")
+	assertField(t, c.Fields[1], "int", "y", "")
 
 	// Positions
 	assert.Equal(t, c.Pos().String(), "1:1")
-	assert.Equal(t, c.Variables[0].Pos().String(), "2:3")
-	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
+	assert.Equal(t, c.Fields[0].Pos().String(), "2:3")
+	assert.Equal(t, c.Fields[1].Pos().String(), "3:3")
 }
 
 func TestContractWithFunction(t *testing.T) {
@@ -78,44 +78,29 @@ func TestContractWithFunction(t *testing.T) {
 	assertFunction(t, c.Functions[0], "test", 1, 0, 0)
 }
 
-// Variable Nodes
+// Field Nodes
 // --------------
 
-func TestVariable(t *testing.T) {
+func TestField(t *testing.T) {
 	p := newParserFromInput("int x \n")
-	v := p.parseVariableStatement()
+	f := p.parseField()
 
-	assertVariable(t, v, "int", "x")
+	assertField(t, f, "int", "x", "")
 	assertNoErrors(t, p)
 }
 
-func TestVariableDeclarationWithoutNewLine(t *testing.T) {
+func TestFieldDeclarationWithoutNewLine(t *testing.T) {
 	p := newParserFromInput("int x")
-	_ = p.parseVariableStatement()
+	_ = p.parseField()
 	assertHasError(t, p)
 }
 
-func TestCharVariableStatement(t *testing.T) {
-	p := newParserFromInput("char a = 'c'\n")
-	v := p.parseVariableStatement()
+func TestFieldAssignment(t *testing.T) {
+	p := newParserFromInput("int x = 5\n")
+	f := p.parseField()
 
-	assertVariableStatement(t, v, "char", "a", "c")
+	assertField(t, f, "int", "x", "5")
 	assertNoErrors(t, p)
-}
-
-func TestIntVariableStatement(t *testing.T) {
-	p := newParserFromInput("int a = 5\n")
-	v := p.parseVariableStatement()
-
-	assertVariableStatement(t, v, "int", "a", "5")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatementWONewline(t *testing.T) {
-	p := newParserFromInput("char a = 'c'")
-	p.parseVariableStatement()
-
-	assertHasError(t, p)
 }
 
 // Function Nodes
@@ -226,6 +211,32 @@ func TestMultipleStatementBlock(t *testing.T) {
 
 	assertStatementBlock(t, v, 2)
 	assertNoErrors(t, p)
+}
+
+// Local Variable Statements
+// -------------------------
+
+func TestCharVariableStatement(t *testing.T) {
+	p := newParserFromInput("char a = 'c'\n")
+	v := p.parseVariableStatement()
+
+	assertVariableStatement(t, v, "char", "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestIntVariableStatement(t *testing.T) {
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseVariableStatement()
+
+	assertVariableStatement(t, v, "int", "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatementWONewline(t *testing.T) {
+	p := newParserFromInput("char a = 'c'")
+	p.parseVariableStatement()
+
+	assertHasError(t, p)
 }
 
 // Return statements

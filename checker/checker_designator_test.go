@@ -29,7 +29,7 @@ func TestFieldDesignator(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.syntaxTree.Contract.Variables[1].Expression,
+		tester.syntaxTree.Contract.Fields[1].Expression,
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.IntType)
 }
@@ -40,7 +40,7 @@ func TestMixedDesignatorExpression(t *testing.T) {
 		int y = 2 * x
 	`, true)
 
-	binExpr := tester.syntaxTree.Contract.Variables[1].Expression.(*node.BinaryExpressionNode)
+	binExpr := tester.syntaxTree.Contract.Fields[1].Expression.(*node.BinaryExpressionNode)
 	tester.assertDesignator(
 		binExpr.Right,
 		tester.globalScope.Contract.Fields[0],

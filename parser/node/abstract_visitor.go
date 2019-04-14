@@ -14,7 +14,7 @@ func (v *AbstractVisitor) VisitProgramNode(node *ProgramNode) {
 
 // VisitContractNode traverses the variable and function nodes.
 func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 	for _, function := range node.Functions {

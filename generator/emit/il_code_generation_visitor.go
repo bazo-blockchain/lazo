@@ -73,13 +73,26 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 	v.assembler.Emit(il.Halt)
 
 	v.assembler.SetLabel(constructorLabel)
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 
 	// constructor code comes here
 	v.assembler.Call(contractSymbol.Functions[0])
 	contractData.Instructions = v.assembler.Complete(true)
+}
+
+// VisitFieldNode generates the IL Code for a contract field node and default initializes it if required
+func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
+	v.AbstractVisitor.VisitFieldNode(node)
+	targetType := v.symbolTable.FindTypeByNode(node.Type)
+
+	if node.Expression == nil {
+		v.pushDefault(targetType)
+	}
+
+	index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
+	v.assembler.StoreState(byte(index))
 }
 
 func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
@@ -114,17 +127,12 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 		v.pushDefault(targetType)
 	}
 
-	if v.function == nil {
-		index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
+	index := v.function.GetVarIndex(node.Identifier)
+	isContractField := !v.function.IsLocalVar(node.Identifier)
+	if isContractField {
 		v.assembler.StoreState(byte(index))
 	} else {
-		index := v.function.GetVarIndex(node.Identifier)
-		isContractField := !v.function.IsLocalVar(node.Identifier)
-		if isContractField {
-			v.assembler.StoreState(byte(index))
-		} else {
-			v.assembler.StoreLocal(byte(index))
-		}
+		v.assembler.StoreLocal(byte(index))
 	}
 }
 
