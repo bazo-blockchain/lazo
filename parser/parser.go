@@ -140,8 +140,8 @@ func (p *Parser) parseReturnTypes() []*node.TypeNode {
 	return returnTypes
 }
 
-func (p *Parser) parseParameters() []*node.VariableNode {
-	var parameters []*node.VariableNode
+func (p *Parser) parseParameters() []*node.ParameterNode {
+	var parameters []*node.ParameterNode
 
 	p.check(token.OpenParen)
 	isFirstParam := true
@@ -149,7 +149,12 @@ func (p *Parser) parseParameters() []*node.VariableNode {
 		if !isFirstParam {
 			p.checkAndSkipNewLines(token.Comma)
 		}
-		parameters = append(parameters, p.parseVariable())
+		param := &node.ParameterNode{
+			AbstractNode: p.newAbstractNode(),
+			Type:         p.parseType(),
+			Identifier:   p.readIdentifier(),
+		}
+		parameters = append(parameters, param)
 		isFirstParam = false
 	}
 	p.check(token.CloseParen)

@@ -107,7 +107,7 @@ type FunctionNode struct {
 	AbstractNode
 	Name        string
 	ReturnTypes []*TypeNode
-	Parameters  []*VariableNode
+	Parameters  []*ParameterNode
 	Body        []StatementNode
 }
 

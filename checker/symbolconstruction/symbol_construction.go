@@ -107,7 +107,7 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 	v.VisitStatementBlock(node.Body)
 }
 
-func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
+func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.ParameterNode) {
 	parameterSymbol := symbol.NewParameterSymbol(functionSymbol, node.Identifier)
 	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
 	sc.symbolTable.MapSymbolToNode(parameterSymbol, node)

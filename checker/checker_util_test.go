@@ -112,7 +112,7 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	assert.Equal(ct.t, paramSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(paramSymbol.AllDeclarations()), 0)
 
-	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.VariableNode)
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.ParameterNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, paramSymbol.Identifier(), varNode.Identifier)
 }

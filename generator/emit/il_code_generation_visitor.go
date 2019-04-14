@@ -118,11 +118,6 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
 
-	// parameter symbol should not be default initialized
-	if node.Expression == nil && v.function != nil && !v.function.IsLocalVar(node.Identifier) {
-		return
-	}
-
 	if node.Expression == nil {
 		v.pushDefault(targetType)
 	}

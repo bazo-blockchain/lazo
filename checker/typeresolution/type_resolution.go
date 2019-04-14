@@ -43,7 +43,7 @@ func (tr *typeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 	tr.resolveReturnTypes(sym, functionNode)
 
 	for _, param := range sym.Parameters {
-		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.VariableNode)
+		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.ParameterNode)
 		param.Type = tr.resolveType(paramNode.Type)
 	}
 
