@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
+	"github.com/pkg/errors"
 	"io"
 	"log"
 	"math/big"
@@ -338,6 +339,10 @@ func (lex *Lexer) readEscapedLexeme(pred predicate, allowedCodes []rune) (string
 				lex.nextChar()
 				return string(buf), fmt.Errorf("escape code %c is not allowed", charToEscape)
 			}
+		} else if lex.current > 126 {
+			buf = append(buf, lex.current)
+			lex.nextChar()
+			return string(buf), errors.New("unicode char is not allowed")
 		} else {
 			buf = append(buf, lex.current)
 		}
