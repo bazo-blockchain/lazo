@@ -227,11 +227,18 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 	}
 }
 
-func (p *Parser) parseVariableStatement() *node.VariableNode {
+func (p *Parser) parseVariableStatement() node.StatementNode {
+	varType := p.parseType()
+	id := p.readIdentifier()
+
+	if p.isSymbol(token.Comma) {
+		return p.parseMultiVariableStatement(varType, id)
+	}
+
 	v := &node.VariableNode{
-		AbstractNode: p.newAbstractNode(),
-		Type:         p.parseType(),
-		Identifier:   p.readIdentifier(),
+		AbstractNode: varType.AbstractNode,
+		Type:         varType,
+		Identifier:   id,
 	}
 	if p.isSymbol(token.Assign) {
 		p.nextToken()
@@ -239,6 +246,26 @@ func (p *Parser) parseVariableStatement() *node.VariableNode {
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return v
+}
+
+func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) *node.MultiVariableNode {
+	types := []*node.TypeNode{varType}
+	ids := []string{id}
+
+	if !p.isEnd() && p.isSymbol(token.Comma) {
+		p.nextToken()
+		types = append(types, p.parseType())
+		ids = append(ids, p.readIdentifier())
+	}
+	p.check(token.Assign)
+	mv := &node.MultiVariableNode{
+		AbstractNode: varType.AbstractNode,
+		Types:        types,
+		Identifiers:  ids,
+		FuncCall:     p.parseFuncCall(p.parseDesignator()),
+	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return mv
 }
 
 func (p *Parser) parseAssignmentStatement(left *node.DesignatorNode) *node.AssignmentStatementNode {
@@ -389,7 +416,7 @@ func (p *Parser) readIdentifier() string {
 	if tok, ok := p.currentToken.(*token.IdentifierToken); ok {
 		identifier = tok.Literal()
 	} else {
-		p.addError("ID expected")
+		p.addError("Identifier expected")
 		identifier = "ERROR"
 	}
 

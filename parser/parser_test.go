@@ -218,7 +218,7 @@ func TestMultipleStatementBlock(t *testing.T) {
 
 func TestCharVariableStatement(t *testing.T) {
 	p := newParserFromInput("char a = 'c'\n")
-	v := p.parseVariableStatement()
+	v := p.parseVariableStatement().(*node.VariableNode)
 
 	assertVariableStatement(t, v, "char", "a", "c")
 	assertNoErrors(t, p)
@@ -226,7 +226,7 @@ func TestCharVariableStatement(t *testing.T) {
 
 func TestIntVariableStatement(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
-	v := p.parseVariableStatement()
+	v := p.parseVariableStatement().(*node.VariableNode)
 
 	assertVariableStatement(t, v, "int", "a", "5")
 	assertNoErrors(t, p)
@@ -237,6 +237,54 @@ func TestVariableStatementWONewline(t *testing.T) {
 	p.parseVariableStatement()
 
 	assertHasError(t, p)
+}
+
+// Multi Local Variable Statements
+// -------------------------------
+
+func TestMultiVariableStatement(t *testing.T) {
+	p := newParserFromInput("int x, bool b = call() \n")
+	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, mv.Types[0].Identifier, "int")
+	assert.Equal(t, mv.Identifiers[0], "x")
+	assert.Equal(t, mv.Types[1].Identifier, "bool")
+	assert.Equal(t, mv.Identifiers[1], "b")
+	assertFuncCall(t, mv.FuncCall, "call")
+	assertNoErrors(t, p)
+}
+
+func TestMultiVariableStatementMissingType(t *testing.T) {
+	p := newParserFromInput("int x, = call() \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiVariableStatementMissingID(t *testing.T) {
+	p := newParserFromInput("int x, bool = call() \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiVariableStatementMissingFuncCall(t *testing.T) {
+	p := newParserFromInput("int x, bool b = y, true \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol ( expected, but got ,")
+}
+
+func TestMultiVariableStatementMissingNewLine(t *testing.T) {
+	p := newParserFromInput("int x, bool b = call(1, 2)")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
 }
 
 // Return statements

@@ -180,7 +180,7 @@ func (p *Parser) parseFuncCall(designator *node.DesignatorNode) *node.FuncCallNo
 		AbstractNode: designator.AbstractNode,
 		Designator:   designator,
 	}
-	p.nextToken() // Skip '('
+	p.check(token.OpenParen)
 
 	isFirstArg := true
 	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
