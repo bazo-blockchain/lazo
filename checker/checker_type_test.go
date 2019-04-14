@@ -511,6 +511,21 @@ func TestIntFuncCallAsStatement(t *testing.T) {
 	tester.assertErrorAt(0, "function call as statement should be void")
 }
 
+func TestFuncCallBinary(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y = test2() + 1
+		}
+
+		function int test2() {
+			return 1
+		}
+	`, true)
+
+	st := tester.getFuncStatementNode(0, 0).(*node.VariableNode)
+	tester.assertExpressionType(st.Expression, tester.globalScope.IntType)
+}
+
 // Function Calls with multiple returns
 // ------------------------------------
 
@@ -580,4 +595,18 @@ func TestFuncCallMultiVarTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
+}
+
+func TestMultiFuncCallBinary(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y = test2() + 1
+		}
+
+		function (int, int) test2() {
+			return 1
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
 }

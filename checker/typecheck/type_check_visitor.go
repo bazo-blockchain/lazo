@@ -78,6 +78,8 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNo
 	returnNodes := node.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
 
+	// TODO: Allow funcCall with multiple return values
+
 	if len(returnSymbols) > 0 {
 		if len(returnSymbols) != len(returnNodes) {
 			v.reportError(node,
@@ -144,7 +146,7 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Arithmetic operators can only be applied to expressions of type int")
+			v.reportError(node, "Arithmetic operators can only be applied to int types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Equal, token.Unequal:
@@ -211,11 +213,14 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 				v.checkType(arg, funcSym.Parameters[i].Type)
 			}
 		}
-		// Function with multiple return values are allowed only in variable & assignment statements.
-		// Therefore, it is safe to return the type of the first return value
+	}
+
+	// Function with multiple return values are allowed only in multi-variable, multi-assignment and return statements.
+	// Otherwise, the function call should have only one return type.
+	// Void function has no type.
+	if len(funcSym.ReturnTypes) == 1 {
 		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
 	}
-	// void function has no type
 }
 
 // VisitTypeNode currently does nothing
@@ -268,7 +273,12 @@ func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType *sym
 func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expectedTypes ...*symbol.TypeSymbol) {
 	// Only function call are allowed to have multiple types
 	if fc, ok := expr.(*node.FuncCallNode); ok {
-		calledFuncSym := v.symbolTable.GetDeclByDesignator(fc.Designator).(*symbol.FunctionSymbol)
+		calledFuncSym, ok := v.symbolTable.GetDeclByDesignator(fc.Designator).(*symbol.FunctionSymbol)
+
+		if !ok {
+			v.reportError(fc, fmt.Sprintf("%s is not a function", fc.Designator))
+			return
+		}
 
 		if len(calledFuncSym.ReturnTypes) != len(expectedTypes) {
 			v.reportError(expr,
