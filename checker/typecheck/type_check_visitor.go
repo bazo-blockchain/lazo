@@ -73,28 +73,34 @@ func (v *typeCheckVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) 
 }
 
 // VisitReturnStatementNode checks whether the return types and the values are of the same type
-func (v *typeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
-	v.AbstractVisitor.VisitReturnStatementNode(node)
-	returnNodes := node.Expressions
+func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnStatementNode) {
+	v.AbstractVisitor.VisitReturnStatementNode(returnNode)
+	returnNodes := returnNode.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
 
-	// TODO: Allow funcCall with multiple return values
+	// if funcCall is returned, check the return types of the called function
+	if len(returnNodes) == 1 {
+		if fc, ok := returnNodes[0].(*node.FuncCallNode); ok {
+			v.checkExpressionTypes(fc, returnSymbols...)
+			return
+		}
+	}
 
 	if len(returnSymbols) > 0 {
 		if len(returnSymbols) != len(returnNodes) {
-			v.reportError(node,
+			v.reportError(returnNode,
 				fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
 		} else {
 			for i, rtype := range returnSymbols {
 				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 				if nodeType != rtype {
-					v.reportError(node, fmt.Sprintf("Return Type mismatch: expected %s, given %s",
-						rtype.ID, nodeType.ID))
+					v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+						rtype.ID, getTypeString(nodeType)))
 				}
 			}
 		}
 	} else if len(returnNodes) > 0 {
-		v.reportError(node, "void method should not return expression")
+		v.reportError(returnNode, "void method should not return expression")
 	}
 }
 
@@ -303,10 +309,18 @@ func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expect
 
 	exprType := v.symbolTable.GetTypeByExpression(expr)
 	if exprType != expectedTypes[0] {
-		v.reportError(expr, fmt.Sprintf("Type mismatch: expected %s, given %s", expectedTypes[0], exprType))
+		v.reportError(expr, fmt.Sprintf("Type mismatch: expected %s, given %s",
+			expectedTypes[0], getTypeString(exprType)))
 	}
 }
 
 func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
+}
+
+func getTypeString(t *symbol.TypeSymbol) string {
+	if t == nil {
+		return "nil"
+	}
+	return t.ID
 }

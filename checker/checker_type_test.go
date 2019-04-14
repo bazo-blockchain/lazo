@@ -394,7 +394,7 @@ func TestFuncNameAsDesignator(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+	tester.assertErrorAt(0, "Type mismatch: expected Type int, given nil")
 }
 
 func TestFuncNameAsLocalVar(t *testing.T) {
@@ -609,4 +609,44 @@ func TestMultiFuncCallBinary(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
+}
+
+func TestMultiFuncCallReturn(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function (int, int, bool) test() {
+        	return test2()
+		}
+
+    	function (int, int, bool) test2() {
+        	return 1, 1, true
+    	}
+	`, true)
+}
+
+func TestMultiFuncCallReturnTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, int, bool) test() {
+        	return test2()
+		}
+
+    	function (int, int, int) test2() {
+        	return 1, 1, 1
+    	}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
+}
+
+func TestMultiFuncCallReturnMixed(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, int) test() {
+        	return test2(), 1 
+		}
+
+    	function (int, int) test2() {
+        	return 1, 1
+    	}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given nil")
 }
