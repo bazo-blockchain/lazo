@@ -491,7 +491,7 @@ func TestVoidFuncCallTypeMismatch(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 0")
 }
 
 func TestIntFuncCallAsStatement(t *testing.T) {
@@ -514,6 +514,32 @@ func TestIntFuncCallAsStatement(t *testing.T) {
 // Function Calls with multiple returns
 // ------------------------------------
 
+func TestFieldWithMultipleReturnValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = test()
+
+		function (int, int) test() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 2")
+}
+
+func TestLocalVarWithMultipleReturnValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int x = test2()
+		}
+
+		function (int, int) test2() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 2")
+}
+
 func TestVoidFuncCallWithMultiVar(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
@@ -525,7 +551,7 @@ func TestVoidFuncCallWithMultiVar(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "function returns 0 value(s), but 2 variables are initialized")
+	tester.assertErrorAt(0, "expected 2 return value(s), but function returns 0")
 }
 
 func TestFuncCallWithMultiVarInvalid(t *testing.T) {
@@ -539,7 +565,7 @@ func TestFuncCallWithMultiVarInvalid(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "function returns 1 value(s), but 2 variables are initialized")
+	tester.assertErrorAt(0, "expected 2 return value(s), but function returns 1")
 }
 
 func TestFuncCallMultiVarTypeMismatch(t *testing.T) {
@@ -555,5 +581,3 @@ func TestFuncCallMultiVarTypeMismatch(t *testing.T) {
 
 	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
 }
-
-// todo fields are not allowed to have multiple returns
