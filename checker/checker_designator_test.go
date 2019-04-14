@@ -160,13 +160,29 @@ func TestDesignatorWithAssignment(t *testing.T) {
 		tester.globalScope.IntType)
 }
 
-func TestUndefinedLocalVarAssignemnt(t *testing.T) {
+func TestUndefinedLocalVarAssignment(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test(){
 			x = 3
 		}
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+func TestUndefinedMultiVarAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			x, y = test2()
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Designator x is undefined")
+	tester.assertErrorAt(1, "Designator y is undefined")
 }
 
 func TestUndefinedDesignatorAssignment(t *testing.T) {
