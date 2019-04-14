@@ -79,6 +79,29 @@ func (n *ContractNode) Accept(v Visitor) {
 // Contract Body Parts
 // --------------------------
 
+// FieldNode composes abstract node and holds the type, identifier and expression
+type FieldNode struct {
+	AbstractNode
+	Type       *TypeNode
+	Identifier string
+	Expression ExpressionNode
+}
+
+func (n *FieldNode) String() string {
+	str := fmt.Sprintf("\n [%s] FIELD %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
+	if n.Expression != nil {
+		str += fmt.Sprintf(" = %s", getNodeString(n.Expression))
+	}
+	return str
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *FieldNode) Accept(v Visitor) {
+	v.VisitFieldNode(n)
+}
+
+// --------------------------
+
 // FunctionNode composes abstract node and holds a name, return types, parameters and statements.
 type FunctionNode struct {
 	AbstractNode

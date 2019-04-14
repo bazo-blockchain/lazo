@@ -22,6 +22,14 @@ func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
 	}
 }
 
+// VisitFieldNode traverses the type node and the expression (if present).
+func (v *AbstractVisitor) VisitFieldNode(node *FieldNode) {
+	node.Type.Accept(v.ConcreteVisitor)
+	if node.Expression != nil {
+		node.Expression.Accept(v.ConcreteVisitor)
+	}
+}
+
 // VisitFunctionNode traverses the return types, parameters and finally the statement block.
 func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 	for _, returnType := range node.ReturnTypes {
