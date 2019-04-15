@@ -394,7 +394,7 @@ func TestFuncNameAsDesignator(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+	tester.assertErrorAt(0, "Type mismatch: expected Type int, given nil")
 }
 
 func TestFuncNameAsLocalVar(t *testing.T) {
@@ -491,7 +491,7 @@ func TestVoidFuncCallTypeMismatch(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given <nil>")
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 0")
 }
 
 func TestIntFuncCallAsStatement(t *testing.T) {
@@ -509,4 +509,144 @@ func TestIntFuncCallAsStatement(t *testing.T) {
 	tester.assertExpressionType(st.Call, tester.globalScope.IntType)
 
 	tester.assertErrorAt(0, "function call as statement should be void")
+}
+
+func TestFuncCallBinary(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y = test2() + 1
+		}
+
+		function int test2() {
+			return 1
+		}
+	`, true)
+
+	st := tester.getFuncStatementNode(0, 0).(*node.VariableNode)
+	tester.assertExpressionType(st.Expression, tester.globalScope.IntType)
+}
+
+// Function Calls with multiple returns
+// ------------------------------------
+
+func TestFieldWithMultipleReturnValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = test()
+
+		function (int, int) test() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 2")
+}
+
+func TestLocalVarWithMultipleReturnValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int x = test2()
+		}
+
+		function (int, int) test2() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 2")
+}
+
+func TestVoidFuncCallWithMultiVar(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y, bool b = test2()
+		}
+
+		function void test2() {
+			return
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 2 return value(s), but function returns 0")
+}
+
+func TestFuncCallWithMultiVarInvalid(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int a, bool b = test2()
+		}
+
+		function int test2() {
+			return
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected 2 return value(s), but function returns 1")
+}
+
+func TestFuncCallMultiVarTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y, bool b = test2()
+		}
+
+		function (int, int) test2() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
+}
+
+func TestMultiFuncCallBinary(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y = test2() + 1
+		}
+
+		function (int, int) test2() {
+			return 1
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
+}
+
+func TestMultiFuncCallReturn(t *testing.T) {
+	_ = newCheckerTestUtil(t, `
+		function (int, int, bool) test() {
+        	return test2()
+		}
+
+    	function (int, int, bool) test2() {
+        	return 1, 1, true
+    	}
+	`, true)
+}
+
+func TestMultiFuncCallReturnTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, int, bool) test() {
+        	return test2()
+		}
+
+    	function (int, int, int) test2() {
+        	return 1, 1, 1
+    	}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
+}
+
+func TestMultiFuncCallReturnMixed(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function (int, int) test() {
+        	return test2(), 1 
+		}
+
+    	function (int, int) test2() {
+        	return 1, 1
+    	}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given nil")
 }

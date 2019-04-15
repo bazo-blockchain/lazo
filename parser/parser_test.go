@@ -56,13 +56,13 @@ func TestContractWithVariable(t *testing.T) {
 
 	assertNoErrors(t, p)
 	assertContract(t, c, "Test", 2, 0)
-	assertVariable(t, c.Variables[0], "int", "x")
-	assertVariable(t, c.Variables[1], "int", "y")
+	assertField(t, c.Fields[0], "int", "x", "")
+	assertField(t, c.Fields[1], "int", "y", "")
 
 	// Positions
 	assert.Equal(t, c.Pos().String(), "1:1")
-	assert.Equal(t, c.Variables[0].Pos().String(), "2:3")
-	assert.Equal(t, c.Variables[1].Pos().String(), "3:3")
+	assert.Equal(t, c.Fields[0].Pos().String(), "2:3")
+	assert.Equal(t, c.Fields[1].Pos().String(), "3:3")
 }
 
 func TestContractWithFunction(t *testing.T) {
@@ -78,44 +78,29 @@ func TestContractWithFunction(t *testing.T) {
 	assertFunction(t, c.Functions[0], "test", 1, 0, 0)
 }
 
-// Variable Nodes
+// Field Nodes
 // --------------
 
-func TestVariable(t *testing.T) {
+func TestField(t *testing.T) {
 	p := newParserFromInput("int x \n")
-	v := p.parseVariableStatement()
+	f := p.parseField()
 
-	assertVariable(t, v, "int", "x")
+	assertField(t, f, "int", "x", "")
 	assertNoErrors(t, p)
 }
 
-func TestVariableDeclarationWithoutNewLine(t *testing.T) {
+func TestFieldDeclarationWithoutNewLine(t *testing.T) {
 	p := newParserFromInput("int x")
-	_ = p.parseVariableStatement()
+	_ = p.parseField()
 	assertHasError(t, p)
 }
 
-func TestCharVariableStatement(t *testing.T) {
-	p := newParserFromInput("char a = 'c'\n")
-	v := p.parseVariableStatement()
+func TestFieldAssignment(t *testing.T) {
+	p := newParserFromInput("int x = 5\n")
+	f := p.parseField()
 
-	assertVariableStatement(t, v, "char", "a", "c")
+	assertField(t, f, "int", "x", "5")
 	assertNoErrors(t, p)
-}
-
-func TestIntVariableStatement(t *testing.T) {
-	p := newParserFromInput("int a = 5\n")
-	v := p.parseVariableStatement()
-
-	assertVariableStatement(t, v, "int", "a", "5")
-	assertNoErrors(t, p)
-}
-
-func TestVariableStatementWONewline(t *testing.T) {
-	p := newParserFromInput("char a = 'c'")
-	p.parseVariableStatement()
-
-	assertHasError(t, p)
 }
 
 // Function Nodes
@@ -226,6 +211,80 @@ func TestMultipleStatementBlock(t *testing.T) {
 
 	assertStatementBlock(t, v, 2)
 	assertNoErrors(t, p)
+}
+
+// Local Variable Statements
+// -------------------------
+
+func TestCharVariableStatement(t *testing.T) {
+	p := newParserFromInput("char a = 'c'\n")
+	v := p.parseVariableStatement().(*node.VariableNode)
+
+	assertVariableStatement(t, v, "char", "a", "c")
+	assertNoErrors(t, p)
+}
+
+func TestIntVariableStatement(t *testing.T) {
+	p := newParserFromInput("int a = 5\n")
+	v := p.parseVariableStatement().(*node.VariableNode)
+
+	assertVariableStatement(t, v, "int", "a", "5")
+	assertNoErrors(t, p)
+}
+
+func TestVariableStatementWONewline(t *testing.T) {
+	p := newParserFromInput("char a = 'c'")
+	p.parseVariableStatement()
+
+	assertHasError(t, p)
+}
+
+// Multi Local Variable Statements
+// -------------------------------
+
+func TestMultiVariableStatement(t *testing.T) {
+	p := newParserFromInput("int x, bool b = call() \n")
+	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, mv.Types[0].Identifier, "int")
+	assert.Equal(t, mv.Identifiers[0], "x")
+	assert.Equal(t, mv.Types[1].Identifier, "bool")
+	assert.Equal(t, mv.Identifiers[1], "b")
+	assertFuncCall(t, mv.FuncCall, "call")
+	assertNoErrors(t, p)
+}
+
+func TestMultiVariableStatementMissingType(t *testing.T) {
+	p := newParserFromInput("int x, = call() \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiVariableStatementMissingID(t *testing.T) {
+	p := newParserFromInput("int x, bool = call() \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiVariableStatementMissingFuncCall(t *testing.T) {
+	p := newParserFromInput("int x, bool b = y, true \n")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol ( expected, but got ,")
+}
+
+func TestMultiVariableStatementMissingNewLine(t *testing.T) {
+	p := newParserFromInput("int x, bool b = call(1, 2)")
+	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
 }
 
 // Return statements
@@ -390,6 +449,36 @@ func TestAssignmentWithFuncCall(t *testing.T) {
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "x", "call([])")
 }
 
+// Multi Assignment
+// ----------------
+
+func TestMultiAssignmentStatement(t *testing.T) {
+	p := newParserFromInput("a, b = call(test(1)) \n")
+	ma, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertNoErrors(t, p)
+	assert.Equal(t, ma.Designators[0].String(), "a")
+	assert.Equal(t, ma.Designators[1].String(), "b")
+	assertFuncCall(t, ma.FuncCall, "call", "test([1])")
+}
+
+func TestMultiAssignmentStatementMissingFuncCall(t *testing.T) {
+	p := newParserFromInput("a, b = 1, 2 \n")
+	_, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestMultiAssignmentStatementInvalidDesignator(t *testing.T) {
+	p := newParserFromInput("a, int x = call() \n")
+	_, ok := p.parseStatement().(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol = expected, but got x")
+}
+
 // Statement with Fix token
 // ------------------------
 
@@ -424,7 +513,7 @@ func TestStatementWithIdentifier(t *testing.T) {
 	p := newParserFromInput("int a\n")
 	v := p.parseStatementWithIdentifier()
 
-	assertStatement(t, v, "\n [1:1] VARIABLE int a")
+	assertStatement(t, v, "\n [1:1] VAR int a")
 	assertNoErrors(t, p)
 }
 
@@ -432,7 +521,7 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 	p := newParserFromInput("int a = 5\n")
 	v := p.parseStatementWithIdentifier()
 
-	assertStatement(t, v, "\n [1:1] VARIABLE int a = 5")
+	assertStatement(t, v, "\n [1:1] VAR int a = 5")
 	assertNoErrors(t, p)
 }
 

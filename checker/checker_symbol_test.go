@@ -203,6 +203,24 @@ func TestFunctionWithLocalVars(t *testing.T) {
 	tester.assertLocalVariable(0, 1, tester.globalScope.CharType, 0)
 }
 
+func TestFunctionWithMultipleVars(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			string s
+			int x, bool y = test2()
+			char z
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, true)
+
+	tester.assertFunction(0, 0, 0, 4)
+	tester.assertMultiLocalVariable(0, 1, 0, tester.globalScope.IntType, 1)
+	tester.assertMultiLocalVariable(0, 2, 1, tester.globalScope.BoolType, 1)
+}
+
 func TestFunctionWithAssignment(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
@@ -221,6 +239,33 @@ func TestFunctionWithAssignment(t *testing.T) {
 	assignX, ok := varX.VisibleIn[2].(*node.AssignmentStatementNode)
 	assert.Assert(t, ok)
 	assert.Equal(t, assignX.Left.Value, "x")
+}
+
+func TestFunctionWithMultiAssign(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			string a
+			int x
+			bool y
+			x, y = test2()
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, true)
+
+	varX := tester.globalScope.Contract.Functions[0].LocalVariables[1]
+	varY := tester.globalScope.Contract.Functions[0].LocalVariables[2]
+
+	multiAssign, ok := varX.VisibleIn[1].(*node.MultiAssignmentStatementNode)
+	assert.Assert(t, ok)
+	multiAssignY, ok := varY.VisibleIn[0].(*node.MultiAssignmentStatementNode)
+	assert.Assert(t, ok)
+	assert.Equal(t, multiAssign, multiAssignY)
+
+	assert.Equal(t, multiAssign.Designators[0].Value, "x")
+	assert.Equal(t, multiAssign.Designators[1].Value, "y")
 }
 
 func TestFunctionWithIf(t *testing.T) {
@@ -317,6 +362,21 @@ func TestInvalidLocalVarNames(t *testing.T) {
 	tester.assertTotalErrors(3)
 }
 
+func TestInvalidMultiLocalVarNames(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int int, bool bool = test2()
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
+	tester.assertErrorAt(1, "Reserved keyword 'bool' cannot be used")
+}
+
 func TestDuplicateFieldNames(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int i
@@ -356,6 +416,21 @@ func TestDuplicateLocalVars(t *testing.T) {
 		}
 	`, false)
 	tester.assertTotalErrors(2)
+}
+
+func TestDuplicateMultiLocalVarNames(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int i, bool i = test2()
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Identifier 'i' is already declared")
 }
 
 func TestLocalVarShadowing(t *testing.T) {

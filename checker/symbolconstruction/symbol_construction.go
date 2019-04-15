@@ -79,8 +79,8 @@ func (sc *symbolConstruction) registerContract() {
 	sc.globalScope.Contract = contractSymbol
 	sc.symbolTable.MapSymbolToNode(contractSymbol, contractNode)
 
-	for _, variableNode := range contractNode.Variables {
-		sc.registerField(contractSymbol, variableNode)
+	for _, fieldNode := range contractNode.Fields {
+		sc.registerField(contractSymbol, fieldNode)
 	}
 
 	for _, functionNode := range contractNode.Functions {
@@ -88,7 +88,7 @@ func (sc *symbolConstruction) registerContract() {
 	}
 }
 
-func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.VariableNode) {
+func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbol, node *node.FieldNode) {
 	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
 	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
 	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)
@@ -107,7 +107,7 @@ func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSy
 	v.VisitStatementBlock(node.Body)
 }
 
-func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.VariableNode) {
+func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionSymbol, node *node.ParameterNode) {
 	parameterSymbol := symbol.NewParameterSymbol(functionSymbol, node.Identifier)
 	functionSymbol.Parameters = append(functionSymbol.Parameters, parameterSymbol)
 	sc.symbolTable.MapSymbolToNode(parameterSymbol, node)
@@ -150,7 +150,7 @@ func (sc *symbolConstruction) checkUniqueIdentifier(sym symbol.Symbol) {
 		for c, otherDecl := range allDecl {
 			if c > r && decl.Identifier() == otherDecl.Identifier() {
 				sc.reportError(otherDecl,
-					fmt.Sprintf("ID '%s' is already declared", otherDecl.Identifier()))
+					fmt.Sprintf("Identifier '%s' is already declared", otherDecl.Identifier()))
 				break
 			}
 		}

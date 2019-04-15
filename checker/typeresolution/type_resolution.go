@@ -33,7 +33,7 @@ func (tr *typeResolution) resolveTypesInContractSymbol() {
 }
 
 func (tr *typeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
-	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.VariableNode)
+	fieldNode := tr.symTable.GetNodeBySymbol(symbol).(*node.FieldNode)
 	symbol.Type = tr.resolveType(fieldNode.Type)
 }
 
@@ -43,13 +43,20 @@ func (tr *typeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol
 	tr.resolveReturnTypes(sym, functionNode)
 
 	for _, param := range sym.Parameters {
-		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.VariableNode)
+		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.ParameterNode)
 		param.Type = tr.resolveType(paramNode.Type)
 	}
 
-	for _, locVar := range sym.LocalVariables {
-		locVarNode := tr.symTable.GetNodeBySymbol(locVar).(*node.VariableNode)
-		locVar.Type = tr.resolveType(locVarNode.Type)
+	for _, locSym := range sym.LocalVariables {
+		locVarNode := tr.symTable.GetNodeBySymbol(locSym)
+
+		if varNode, ok := locVarNode.(*node.VariableNode); ok {
+			locSym.Type = tr.resolveType(varNode.Type)
+		} else if multiVarNode, ok := locVarNode.(*node.MultiVariableNode); ok {
+			locSym.Type = tr.resolveType(multiVarNode.GetType(locSym.ID))
+		} else {
+			tr.reportError(locVarNode, fmt.Sprintf("Unsupported local variable node type"))
+		}
 	}
 }
 

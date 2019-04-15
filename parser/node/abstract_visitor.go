@@ -14,11 +14,19 @@ func (v *AbstractVisitor) VisitProgramNode(node *ProgramNode) {
 
 // VisitContractNode traverses the variable and function nodes.
 func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 	for _, function := range node.Functions {
 		function.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitFieldNode traverses the type node and the expression (if present).
+func (v *AbstractVisitor) VisitFieldNode(node *FieldNode) {
+	node.Type.Accept(v.ConcreteVisitor)
+	if node.Expression != nil {
+		node.Expression.Accept(v.ConcreteVisitor)
 	}
 }
 
@@ -31,6 +39,11 @@ func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 		paramType.Accept(v.ConcreteVisitor)
 	}
 	v.ConcreteVisitor.VisitStatementBlock(node.Body)
+}
+
+// VisitParameterNode traverses the type node
+func (v *AbstractVisitor) VisitParameterNode(node *ParameterNode) {
+	node.Type.Accept(v.ConcreteVisitor)
 }
 
 // VisitStatementBlock traverses the statement node.
@@ -46,6 +59,14 @@ func (v *AbstractVisitor) VisitVariableNode(node *VariableNode) {
 	if node.Expression != nil {
 		node.Expression.Accept(v.ConcreteVisitor)
 	}
+}
+
+// VisitMultiVariableNode traverses multiple variables declarations and
+func (v *AbstractVisitor) VisitMultiVariableNode(node *MultiVariableNode) {
+	for _, t := range node.Types {
+		t.Accept(v.ConcreteVisitor)
+	}
+	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
 // VisitTypeNode does nothing because it is the terminal node.
@@ -71,6 +92,14 @@ func (v *AbstractVisitor) VisitReturnStatementNode(node *ReturnStatementNode) {
 func (v *AbstractVisitor) VisitAssignmentStatementNode(node *AssignmentStatementNode) {
 	node.Left.Accept(v.ConcreteVisitor)
 	node.Right.Accept(v.ConcreteVisitor)
+}
+
+// VisitMultiAssignmentStatementNode traverses the target designators and the function call
+func (v *AbstractVisitor) VisitMultiAssignmentStatementNode(node *MultiAssignmentStatementNode) {
+	for _, designator := range node.Designators {
+		designator.Accept(v.ConcreteVisitor)
+	}
+	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
 // VisitCallStatementNode traverses the function call expression

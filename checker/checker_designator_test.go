@@ -29,7 +29,7 @@ func TestFieldDesignator(t *testing.T) {
 	`, true)
 
 	tester.assertDesignator(
-		tester.syntaxTree.Contract.Variables[1].Expression,
+		tester.syntaxTree.Contract.Fields[1].Expression,
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.IntType)
 }
@@ -40,7 +40,7 @@ func TestMixedDesignatorExpression(t *testing.T) {
 		int y = 2 * x
 	`, true)
 
-	binExpr := tester.syntaxTree.Contract.Variables[1].Expression.(*node.BinaryExpressionNode)
+	binExpr := tester.syntaxTree.Contract.Fields[1].Expression.(*node.BinaryExpressionNode)
 	tester.assertDesignator(
 		binExpr.Right,
 		tester.globalScope.Contract.Fields[0],
@@ -160,13 +160,29 @@ func TestDesignatorWithAssignment(t *testing.T) {
 		tester.globalScope.IntType)
 }
 
-func TestUndefinedLocalVarAssignemnt(t *testing.T) {
+func TestUndefinedLocalVarAssignment(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test(){
 			x = 3
 		}
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+func TestUndefinedMultiVarAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test(){
+			x, y = test2()
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Designator x is undefined")
+	tester.assertErrorAt(1, "Designator y is undefined")
 }
 
 func TestUndefinedDesignatorAssignment(t *testing.T) {

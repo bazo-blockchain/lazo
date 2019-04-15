@@ -75,7 +75,7 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 	assert.Equal(ct.t, fieldSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(fieldSymbol.AllDeclarations()), 0)
 
-	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.VariableNode)
+	fieldNode, ok := ct.symbolTable.GetNodeBySymbol(fieldSymbol).(*node.FieldNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, fieldSymbol.Identifier(), fieldNode.Identifier)
 
@@ -112,7 +112,7 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	assert.Equal(ct.t, paramSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(paramSymbol.AllDeclarations()), 0)
 
-	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.VariableNode)
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(paramSymbol).(*node.ParameterNode)
 	assert.Assert(ct.t, ok)
 	assert.Equal(ct.t, paramSymbol.Identifier(), varNode.Identifier)
 }
@@ -136,6 +136,24 @@ func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
 	}
 }
 
+func (ct *CheckerTestUtil) assertMultiLocalVariable(funcIndex int, varIndex int, multiVarIndex int,
+	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
+
+	varSymbol := functionSymbol.LocalVariables[varIndex]
+	assert.Equal(ct.t, varSymbol.Scope(), functionSymbol)
+	assert.Equal(ct.t, varSymbol.Type, expectedType)
+	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
+	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)
+
+	varNode, ok := ct.symbolTable.GetNodeBySymbol(varSymbol).(*node.MultiVariableNode)
+	assert.Assert(ct.t, ok)
+	assert.Equal(ct.t, varSymbol.Identifier(), varNode.Identifiers[multiVarIndex])
+
+	calledFuncSym := ct.symbolTable.GetDeclByDesignator(varNode.FuncCall.Designator).(*symbol.FunctionSymbol)
+	assert.Equal(ct.t, calledFuncSym.ReturnTypes[multiVarIndex], expectedType)
+}
+
 func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatementNode, expectedType *symbol.TypeSymbol) {
 	ct.assertExpressionType(assignStmt.Left, expectedType)
 	ct.assertExpressionType(assignStmt.Right, expectedType)
@@ -156,8 +174,8 @@ func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expect
 // Helper Functions
 // ----------------
 
-func (ct *CheckerTestUtil) getFieldNode(index int) *node.VariableNode {
-	return ct.syntaxTree.Contract.Variables[index]
+func (ct *CheckerTestUtil) getFieldNode(index int) *node.FieldNode {
+	return ct.syntaxTree.Contract.Fields[index]
 }
 
 func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode {

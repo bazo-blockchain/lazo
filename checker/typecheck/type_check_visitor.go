@@ -26,7 +26,7 @@ func newTypeCheckVisitor(symbolTable *symbol.SymbolTable, contractSymbol *symbol
 
 // VisitContractNode visits the fields and functions of the contract
 func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
-	for _, variable := range node.Variables {
+	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
 
@@ -38,6 +38,16 @@ func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 	}
 }
 
+// VisitFieldNode checks whether the variable type and value are of the same type
+func (v *typeCheckVisitor) VisitFieldNode(node *node.FieldNode) {
+	v.AbstractVisitor.VisitFieldNode(node)
+	targetType := v.symbolTable.FindTypeByNode(node.Type)
+
+	if node.Expression != nil {
+		v.checkExpressionTypes(node.Expression, targetType)
+	}
+}
+
 // Statements
 // ----------
 
@@ -45,34 +55,52 @@ func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 func (v *typeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	v.AbstractVisitor.VisitVariableNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
-	expType := v.symbolTable.GetTypeByExpression(node.Expression)
 
-	if node.Expression != nil && targetType != expType {
-		v.reportError(node, fmt.Sprintf("Type mismatch: expected %s, given %s", targetType, expType))
+	if node.Expression != nil {
+		v.checkExpressionTypes(node.Expression, targetType)
 	}
 }
 
+// VisitMultiVariableNode checks whether the variable types matches with the function return types
+func (v *typeCheckVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) {
+	v.AbstractVisitor.VisitMultiVariableNode(node)
+	targetTypes := make([]*symbol.TypeSymbol, len(node.Types))
+
+	for i, t := range node.Types {
+		targetTypes[i] = v.symbolTable.FindTypeByNode(t)
+	}
+	v.checkExpressionTypes(node.FuncCall, targetTypes...)
+}
+
 // VisitReturnStatementNode checks whether the return types and the values are of the same type
-func (v *typeCheckVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
-	v.AbstractVisitor.VisitReturnStatementNode(node)
-	returnNodes := node.Expressions
+func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnStatementNode) {
+	v.AbstractVisitor.VisitReturnStatementNode(returnNode)
+	returnNodes := returnNode.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
+
+	// if funcCall is returned, check the return types of the called function
+	if len(returnNodes) == 1 {
+		if fc, ok := returnNodes[0].(*node.FuncCallNode); ok {
+			v.checkExpressionTypes(fc, returnSymbols...)
+			return
+		}
+	}
 
 	if len(returnSymbols) > 0 {
 		if len(returnSymbols) != len(returnNodes) {
-			v.reportError(node,
+			v.reportError(returnNode,
 				fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
 		} else {
 			for i, rtype := range returnSymbols {
 				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 				if nodeType != rtype {
-					v.reportError(node, fmt.Sprintf("Return Type mismatch: expected %s, given %s",
-						rtype.ID, nodeType.ID))
+					v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+						rtype.ID, getTypeString(nodeType)))
 				}
 			}
 		}
 	} else if len(returnNodes) > 0 {
-		v.reportError(node, "void method should not return expression")
+		v.reportError(returnNode, "void method should not return expression")
 	}
 }
 
@@ -124,7 +152,7 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 	case token.Addition, token.Subtraction, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Arithmetic operators can only be applied to expressions of type int")
+			v.reportError(node, "Arithmetic operators can only be applied to int types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Equal, token.Unequal:
@@ -191,11 +219,14 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 				v.checkType(arg, funcSym.Parameters[i].Type)
 			}
 		}
-		// Function with multiple return values are allowed only in variable & assignment statements.
-		// Therefore, it is safe to return the type of the first return value
+	}
+
+	// Function with multiple return values are allowed only in multi-variable, multi-assignment and return statements.
+	// Otherwise, the function call should have only one return type.
+	// Void function has no type.
+	if len(funcSym.ReturnTypes) == 1 {
 		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
 	}
-	// void function has no type
 }
 
 // VisitTypeNode currently does nothing
@@ -245,6 +276,51 @@ func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType *sym
 	}
 }
 
+func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expectedTypes ...*symbol.TypeSymbol) {
+	// Only function call are allowed to have multiple types
+	if fc, ok := expr.(*node.FuncCallNode); ok {
+		calledFuncSym, ok := v.symbolTable.GetDeclByDesignator(fc.Designator).(*symbol.FunctionSymbol)
+
+		if !ok {
+			v.reportError(fc, fmt.Sprintf("%s is not a function", fc.Designator))
+			return
+		}
+
+		if len(calledFuncSym.ReturnTypes) != len(expectedTypes) {
+			v.reportError(expr,
+				fmt.Sprintf("expected %d return value(s), but function returns %d",
+					len(expectedTypes), len(calledFuncSym.ReturnTypes)))
+			return
+		}
+
+		for i, returnType := range calledFuncSym.ReturnTypes {
+			if expectedTypes[i] != returnType {
+				v.reportError(expr, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+					returnType.ID, expectedTypes[i].ID))
+			}
+		}
+		return
+	}
+
+	if len(expectedTypes) > 1 {
+		v.reportError(expr, "only single type is allowed")
+		return
+	}
+
+	exprType := v.symbolTable.GetTypeByExpression(expr)
+	if exprType != expectedTypes[0] {
+		v.reportError(expr, fmt.Sprintf("Type mismatch: expected %s, given %s",
+			expectedTypes[0], getTypeString(exprType)))
+	}
+}
+
 func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
+}
+
+func getTypeString(t *symbol.TypeSymbol) string {
+	if t == nil {
+		return "nil"
+	}
+	return t.ID
 }
