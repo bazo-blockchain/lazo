@@ -143,7 +143,11 @@ func (p *Parser) parseUnaryExpression() *node.UnaryExpressionNode {
 func (p *Parser) parseOperand() node.ExpressionNode {
 	switch p.currentToken.Type() {
 	case token.IDENTIFER:
-		return p.parseDesignator()
+		designator := p.parseDesignator()
+		if p.isSymbol(token.OpenParen) {
+			return p.parseFuncCall(designator)
+		}
+		return designator
 	case token.INTEGER:
 		return p.parseInteger()
 	case token.CHARACTER:
@@ -169,6 +173,25 @@ func (p *Parser) parseDesignator() *node.DesignatorNode {
 		AbstractNode: p.newAbstractNode(),
 		Value:        p.readIdentifier(),
 	}
+}
+
+func (p *Parser) parseFuncCall(designator *node.DesignatorNode) *node.FuncCallNode {
+	funcCall := &node.FuncCallNode{
+		AbstractNode: designator.AbstractNode,
+		Designator:   designator,
+	}
+	p.nextToken() // Skip '('
+
+	isFirstArg := true
+	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
+		if !isFirstArg {
+			p.check(token.Comma)
+		}
+		funcCall.Args = append(funcCall.Args, p.parseExpression())
+		isFirstArg = false
+	}
+	p.check(token.CloseParen)
+	return funcCall
 }
 
 func (p *Parser) parseInteger() *node.IntegerLiteralNode {

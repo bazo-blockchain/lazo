@@ -47,7 +47,7 @@ func (v *typeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
 	expType := v.symbolTable.GetTypeByExpression(node.Expression)
 
-	if expType != nil && targetType != expType {
+	if node.Expression != nil && targetType != expType {
 		v.reportError(node, fmt.Sprintf("Type mismatch: expected %s, given %s", targetType, expType))
 	}
 }
@@ -94,6 +94,13 @@ func (v *typeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
 	if !v.isBool(v.symbolTable.GetTypeByExpression(node.Condition)) {
 		v.reportError(node, "condition must return boolean")
+	}
+}
+
+func (v *typeCheckVisitor) VisitCallStatementNode(node *node.CallStatementNode) {
+	v.AbstractVisitor.VisitCallStatementNode(node)
+	if v.symbolTable.GetTypeByExpression(node.Call) != nil {
+		v.reportError(node, "function call as statement should be void")
 	}
 }
 
@@ -165,6 +172,32 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 	}
 }
 
+func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
+	v.AbstractVisitor.VisitFuncCallNode(funcCallNode)
+	funcSym, ok := v.symbolTable.GetDeclByDesignator(funcCallNode.Designator).(*symbol.FunctionSymbol)
+
+	if !ok {
+		v.reportError(funcCallNode, fmt.Sprintf("%s is not a function", funcCallNode.Designator))
+		return
+	}
+
+	totalParams := len(funcSym.Parameters)
+	totalArgs := len(funcCallNode.Args)
+	if len(funcSym.ReturnTypes) > 0 {
+		if totalParams != totalArgs {
+			v.reportError(funcCallNode, fmt.Sprintf("expected %d args, got %d", totalParams, totalArgs))
+		} else {
+			for i, arg := range funcCallNode.Args {
+				v.checkType(arg, funcSym.Parameters[i].Type)
+			}
+		}
+		// Function with multiple return values are allowed only in variable & assignment statements.
+		// Therefore, it is safe to return the type of the first return value
+		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
+	}
+	// void function has no type
+}
+
 // VisitTypeNode currently does nothing
 func (v *typeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
@@ -190,6 +223,9 @@ func (v *typeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteral
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.CharType)
 }
 
+// Helper Functions
+// ----------------
+
 func (v *typeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.IntType
 }
@@ -200,6 +236,13 @@ func (v *typeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
 
 func (v *typeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
+}
+
+func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType *symbol.TypeSymbol) {
+	actualType := v.symbolTable.GetTypeByExpression(expr)
+	if expectedType != actualType {
+		v.reportError(expr, fmt.Sprintf("expected %s, got %s", expectedType, actualType))
+	}
 }
 
 func (v *typeCheckVisitor) reportError(node node.Node, msg string) {

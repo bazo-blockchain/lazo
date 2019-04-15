@@ -60,7 +60,9 @@ func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	if sym == nil || !isAllowedTarget(sym) {
 		v.reportError(node, fmt.Sprintf("Designator %s is undefined", node.Value))
 		return
-	} else if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
+	}
+
+	if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
 		if !containsStatement(local.VisibleIn, v.currentStatement) {
 			v.reportError(node, fmt.Sprintf("Local Variable %s is not visible", node.Value))
 			return
@@ -91,6 +93,9 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 		return sym.(*symbol.ParameterSymbol).Type
 	case *symbol.LocalVariableSymbol:
 		return sym.(*symbol.LocalVariableSymbol).Type
+	case *symbol.FunctionSymbol:
+		// FuncCall expression type will be resolved in type checker
+		return nil
 	default:
 		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.Identifier()))
 	}
@@ -98,7 +103,7 @@ func getType(sym symbol.Symbol) *symbol.TypeSymbol {
 
 func isAllowedTarget(sym symbol.Symbol) bool {
 	switch sym.(type) {
-	case *symbol.ContractSymbol, *symbol.FunctionSymbol:
+	case *symbol.ContractSymbol:
 		return false
 	default:
 		return true

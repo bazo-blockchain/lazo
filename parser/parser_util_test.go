@@ -26,6 +26,12 @@ func assertNoErrors(t *testing.T, p *Parser) {
 	assert.Equal(t, len(p.errors), 0)
 }
 
+func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {
+	assert.Assert(t, len(p.errors) > index)
+	err := p.errors[index].Error()
+	assert.Assert(t, strings.Contains(err, errSubStr), err)
+}
+
 func assertProgram(t *testing.T, node *node.ProgramNode, hasContract bool) {
 	assert.Equal(t, node.Contract != nil, hasContract)
 }
@@ -129,4 +135,16 @@ func assertUnaryExpression(t *testing.T, n node.ExpressionNode, expr string, op 
 	assert.Equal(t, ok, true)
 	assert.Equal(t, unExpr.Expression.String(), expr)
 	assert.Equal(t, unExpr.Operator, op)
+}
+
+func assertFuncCall(t *testing.T, n node.ExpressionNode, designator string, args ...string) {
+	funcCall, ok := n.(*node.FuncCallNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, funcCall.Designator.String(), designator)
+
+	assert.Equal(t, len(funcCall.Args), len(args))
+	for i, a := range args {
+		assert.Equal(t, funcCall.Args[i].String(), a)
+	}
 }

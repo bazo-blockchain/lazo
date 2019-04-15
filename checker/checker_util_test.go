@@ -39,7 +39,7 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 	}
 	tester.symbolTable, tester.errors = New(program).Run()
 	tester.globalScope = tester.symbolTable.GlobalScope
-	assert.Equal(t, len(tester.errors) == 0, isValidCode)
+	assert.Equal(t, len(tester.errors) == 0, isValidCode, tester.errors)
 
 	return tester
 }
@@ -49,6 +49,12 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 
 func (ct *CheckerTestUtil) assertTotalErrors(total int) {
 	assert.Equal(ct.t, len(ct.errors), total)
+}
+
+func (ct *CheckerTestUtil) assertErrorAt(index int, errSubStr string) {
+	assert.Assert(ct.t, len(ct.errors) > index)
+	err := ct.errors[index].Error()
+	assert.Assert(ct.t, strings.Contains(err, errSubStr), err)
 }
 
 func (ct *CheckerTestUtil) assertContract(totalVars int, totalFunctions int) {

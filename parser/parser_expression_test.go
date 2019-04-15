@@ -224,6 +224,36 @@ func TestInvalidDesignator(t *testing.T) {
 	assertHasError(t, p)
 }
 
+// Function Call Expressions
+// --------------------------
+
+func TestFuncCall(t *testing.T) {
+	e := parseExpressionFromInput(t, "test()")
+	assertFuncCall(t, e, "test")
+}
+
+func TestFuncCallWithParam(t *testing.T) {
+	e := parseExpressionFromInput(t, "test(1)")
+	assertFuncCall(t, e, "test", "1")
+}
+
+func TestFuncCallWithParams(t *testing.T) {
+	e := parseExpressionFromInput(t, "test(x, 2 * 3)")
+	assertFuncCall(t, e, "test", "x", "(2 * 3)")
+}
+
+func TestFuncCallMissingCloseParen(t *testing.T) {
+	p := newParserFromInput("test(")
+	_ = p.parseExpression()
+	assertErrorAt(t, p, 0, ") expected, but got EOF")
+}
+
+func TestFuncCallMissingComma(t *testing.T) {
+	p := newParserFromInput("test(1 2)")
+	_ = p.parseExpression()
+	assertErrorAt(t, p, 0, ", expected, but got 2")
+}
+
 // Literal Expressions
 // -------------------
 
