@@ -77,8 +77,9 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 		variable.Accept(v.ConcreteVisitor)
 	}
 
-	// constructor code comes here
-	v.assembler.Call(contractSymbol.Functions[0])
+	if node.Constructor != nil {
+		node.Constructor.Accept(v)
+	}
 	contractData.Instructions = v.assembler.Complete(true)
 }
 
@@ -93,6 +94,13 @@ func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
 
 	index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
 	v.assembler.StoreState(byte(index))
+}
+
+// VisitConstructorNode generates the IL Code for the constructor
+func (v *ILCodeGenerationVisitor) VisitConstructorNode(node *node.ConstructorNode) {
+	v.function = v.symbolTable.GlobalScope.Contract.Constructor
+	v.AbstractVisitor.VisitConstructorNode(node)
+	v.function = nil
 }
 
 func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,
