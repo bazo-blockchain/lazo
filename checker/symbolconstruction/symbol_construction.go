@@ -131,11 +131,19 @@ func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionS
 }
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
-	sc.checkValidIdentifier(sc.globalScope.Contract)
-	for _, field := range sc.globalScope.Contract.Fields {
+	contract := sc.globalScope.Contract
+	sc.checkValidIdentifier(contract)
+	for _, field := range contract.Fields {
 		sc.checkValidIdentifier(field)
 	}
-	for _, function := range sc.globalScope.Contract.Functions {
+
+	if contract.Constructor != nil {
+		for _, decl := range contract.Constructor.AllDeclarations() {
+			sc.checkValidIdentifier(decl)
+		}
+	}
+
+	for _, function := range contract.Functions {
 		sc.checkValidIdentifier(function)
 		for _, decl := range function.AllDeclarations() {
 			sc.checkValidIdentifier(decl)
@@ -156,6 +164,11 @@ func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
 	sc.checkUniqueIdentifier(sc.globalScope)
 	sc.checkUniqueIdentifier(sc.globalScope.Contract)
+
+	if sc.globalScope.Contract.Constructor != nil {
+		sc.checkUniqueIdentifier(sc.globalScope.Contract.Constructor)
+	}
+
 	for _, function := range sc.globalScope.Contract.Functions {
 		sc.checkUniqueIdentifier(function)
 	}

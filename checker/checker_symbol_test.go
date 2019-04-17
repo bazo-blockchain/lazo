@@ -389,6 +389,16 @@ func TestInvalidLocalVarNames(t *testing.T) {
 	tester.assertTotalErrors(3)
 }
 
+func TestInvalidIdentifiersInConstructor(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor(int this){
+			int bool
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used")
+	tester.assertErrorAt(1, "Reserved keyword 'bool' cannot be used")
+}
+
 func TestInvalidMultiLocalVarNames(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
@@ -410,6 +420,16 @@ func TestDuplicateFieldNames(t *testing.T) {
 		bool i
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+func TestDuplicateIdentifiersInConstructor(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor(){
+			int i
+			bool i
+		}
+	`, false)
+	tester.assertErrorAt(0, "Identifier 'i' is already declared")
 }
 
 func TestFieldVarShadowing(t *testing.T) {
