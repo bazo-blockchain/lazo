@@ -23,7 +23,7 @@ func assertHasError(t *testing.T, p *Parser) {
 }
 
 func assertNoErrors(t *testing.T, p *Parser) {
-	assert.Equal(t, len(p.errors), 0)
+	assert.Equal(t, len(p.errors), 0, p.errors)
 }
 
 func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {

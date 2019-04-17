@@ -83,7 +83,12 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 		case token.Function:
 			contract.Functions = append(contract.Functions, p.parseFunction())
 		case token.Constructor:
-			contract.Constructor = p.parseConstructor()
+			if contract.Constructor == nil {
+				contract.Constructor = p.parseConstructor()
+			} else {
+				p.addError(fmt.Sprintf("Only one constructor is allowed"))
+				p.nextToken()
+			}
 		default:
 			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
 			p.nextToken()

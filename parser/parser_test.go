@@ -107,27 +107,38 @@ func TestFieldAssignment(t *testing.T) {
 // -----------------
 
 func TestEmptyConstructor(t *testing.T) {
-	p := newParserFromInput("constructor() { \n }")
+	p := newParserFromInput("constructor() { \n } \n")
 	c := p.parseConstructor()
 
 	assertConstructor(t, c, 0, 0)
+	assertNoErrors(t, p)
 }
 
-func TestConstructorWithParams(t *testing.T) {
-	p := newParserFromInput("constructor(int a, bool b) { \n }")
+func TestConstructorWithParamsAndStatements(t *testing.T) {
+	p := newParserFromInput(`constructor(int a, bool b) { 
+		int x
+		int y
+		y = 2
+	}
+	`)
 	c := p.parseConstructor()
 
-	assertConstructor(t, c, 2, 0)
+	assertConstructor(t, c, 2, 3)
+	assertNoErrors(t, p)
 }
 
-func TestConstructorWithStatements(t *testing.T) {
-	p := newParserFromInput(`constructor() { 
-		int a
-		int b
+func TestMultipleConstructors(t *testing.T) {
+	p := newParserFromInput(`contract Test {
+		constructor() {
+		}
+		
+		constructor() {
+		}
 	}`)
-	c := p.parseConstructor()
+	c := p.parseContract()
 
-	assertConstructor(t, c, 0, 2)
+	assertConstructor(t, c.Constructor, 0, 0)
+	assertErrorAt(t, p, 0, "Only one constructor is allowed")
 }
 
 // Function Nodes
