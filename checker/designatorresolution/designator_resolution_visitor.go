@@ -30,6 +30,12 @@ func (v *designatorResolutionVisitor) VisitContractNode(node *node.ContractNode)
 		variable.Accept(v.ConcreteVisitor)
 	}
 
+	if node.Constructor != nil {
+		v.currentFunctionSymbol = v.contractSymbol.Constructor
+		node.Constructor.Accept(v)
+		v.currentFunctionSymbol = nil
+	}
+
 	for _, function := range v.contractSymbol.Functions {
 		v.currentFunctionSymbol = function
 		functionNode := v.symbolTable.GetNodeBySymbol(function)

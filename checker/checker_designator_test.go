@@ -69,6 +69,49 @@ func TestFieldDesignatorInFunction(t *testing.T) {
 		tester.globalScope.StringType)
 }
 
+// Constructor Designators
+// ------------------------
+
+func TestConstructorDesignators(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+
+		constructor(int a){
+			int b = a
+			int c = b
+			int d = x
+		}
+	`, true)
+
+	gs := tester.globalScope
+	constructor := gs.Contract.Constructor
+
+	tester.assertDesignator(
+		tester.getConstructorStatementNode(0).(*node.VariableNode).Expression,
+		constructor.Parameters[0],
+		gs.IntType)
+
+	tester.assertDesignator(
+		tester.getConstructorStatementNode(1).(*node.VariableNode).Expression,
+		constructor.LocalVariables[0],
+		gs.IntType)
+
+	tester.assertDesignator(
+		tester.getConstructorStatementNode(2).(*node.VariableNode).Expression,
+		gs.Contract.Fields[0],
+		gs.IntType)
+}
+
+func TestUndefinedConstructorDesignators(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor(){
+			int b = a
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Designator a is undefined")
+}
+
 // Function Parameter Designators
 // ------------------------------
 
