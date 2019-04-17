@@ -106,10 +106,12 @@ func TestUndefinedConstructorDesignators(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		constructor(){
 			int b = a
+			c = 3
 		}
 	`, false)
 
 	tester.assertErrorAt(0, "Designator a is undefined")
+	tester.assertErrorAt(1, "Designator c is undefined")
 }
 
 // Function Parameter Designators

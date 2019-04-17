@@ -66,8 +66,31 @@ func TestLocalVarTypeMismatch(t *testing.T) {
 	tester.assertTotalErrors(4)
 }
 
+func TestConstructorLocalVars(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor(int a) {
+			int b = a
+			char c = a
+		}
+	`, false)
+
+	gs := tester.globalScope
+	constructor := gs.Contract.Constructor
+	tester.assertLocalVariable(constructor.LocalVariables[0], constructor, gs.IntType, 1)
+	tester.assertErrorAt(0, "expected Type char, given int")
+}
+
 // Return Types
 // ------------
+
+func TestConstructorReturn(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			return
+		}
+	`, false)
+	tester.assertErrorAt(0, "return is not allowed in constructor")
+}
 
 func TestFunctionReturnVoid(t *testing.T) {
 	_ = newCheckerTestUtil(t, `
