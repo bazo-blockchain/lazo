@@ -98,17 +98,18 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 		}
 	}
 
+	if len(returnSymbols) != len(returnNodes) {
+		v.reportError(returnNode,
+			fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
+		return
+	}
+
 	if len(returnSymbols) > 0 {
-		if len(returnSymbols) != len(returnNodes) {
-			v.reportError(returnNode,
-				fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
-		} else {
-			for i, rtype := range returnSymbols {
-				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
-				if nodeType != rtype {
-					v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
-						rtype.ID, getTypeString(nodeType)))
-				}
+		for i, rtype := range returnSymbols {
+			nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
+			if nodeType != rtype {
+				v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+					rtype.ID, getTypeString(nodeType)))
 			}
 		}
 	} else if len(returnNodes) > 0 {
