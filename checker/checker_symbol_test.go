@@ -107,7 +107,22 @@ func TestEmptyConstructor(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertConstructor(0, 0, 0)
+	tester.assertConstructor(0, 0)
+}
+
+func TestConstructorWithParams(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+		
+		constructor(int x, bool b) {
+		}
+	`, true)
+
+	tester.assertConstructor(2, 0)
+	gs := tester.globalScope
+	constructor := gs.Contract.Constructor
+	tester.assertParam(constructor.Parameters[0], constructor, gs.IntType)
+	tester.assertParam(constructor.Parameters[1], constructor, gs.BoolType)
 }
 
 // Function Symbol with parameter and local variable symbols
