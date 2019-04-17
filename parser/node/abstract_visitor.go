@@ -17,6 +17,11 @@ func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
 	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
+
+	if node.Constructor != nil {
+		node.Constructor.Accept(v.ConcreteVisitor)
+	}
+
 	for _, function := range node.Functions {
 		function.Accept(v.ConcreteVisitor)
 	}

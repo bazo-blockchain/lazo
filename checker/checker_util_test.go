@@ -134,12 +134,17 @@ func (ct *CheckerTestUtil) assertParam(paramSymbol *symbol.ParameterSymbol, scop
 	assert.Equal(ct.t, paramSymbol.Identifier(), varNode.Identifier)
 }
 
-func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
+func (ct *CheckerTestUtil) assertFuncLocalVariable(funcIndex int, varIndex int,
 	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
 	varSymbol := functionSymbol.LocalVariables[varIndex]
-	assert.Equal(ct.t, varSymbol.Scope(), functionSymbol)
+	ct.assertLocalVariable(varSymbol, functionSymbol, expectedType, totalVisibleIn)
+}
+
+func (ct *CheckerTestUtil) assertLocalVariable(varSymbol *symbol.LocalVariableSymbol, scope symbol.Symbol,
+	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
+	assert.Equal(ct.t, varSymbol.Scope(), scope)
 	assert.Equal(ct.t, varSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
 	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)

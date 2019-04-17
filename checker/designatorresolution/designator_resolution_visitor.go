@@ -69,7 +69,12 @@ func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 		}
 	}
 	v.symbolTable.MapDesignatorToDecl(node, sym)
-	v.symbolTable.MapExpressionToType(node, getType(sym))
+	symType, err := getType(sym)
+	if err != nil {
+		v.reportError(node, err.Error())
+	} else {
+		v.symbolTable.MapExpressionToType(node, symType)
+	}
 }
 
 func (v *designatorResolutionVisitor) reportError(node node.Node, msg string) {
@@ -85,19 +90,19 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 	return false
 }
 
-func getType(sym symbol.Symbol) *symbol.TypeSymbol {
+func getType(sym symbol.Symbol) (*symbol.TypeSymbol, error) {
 	switch sym.(type) {
 	case *symbol.FieldSymbol:
-		return sym.(*symbol.FieldSymbol).Type
+		return sym.(*symbol.FieldSymbol).Type, nil
 	case *symbol.ParameterSymbol:
-		return sym.(*symbol.ParameterSymbol).Type
+		return sym.(*symbol.ParameterSymbol).Type, nil
 	case *symbol.LocalVariableSymbol:
-		return sym.(*symbol.LocalVariableSymbol).Type
+		return sym.(*symbol.LocalVariableSymbol).Type, nil
 	case *symbol.FunctionSymbol:
 		// FuncCall expression type will be resolved in type checker
-		return nil
+		return nil, nil
 	default:
-		panic(fmt.Sprintf("Unsupported designator target symbol %s", sym.Identifier()))
+		return nil, fmt.Errorf("unsupported designator target symbol %s", sym.Identifier())
 	}
 }
 

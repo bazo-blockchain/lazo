@@ -110,19 +110,23 @@ func TestEmptyConstructor(t *testing.T) {
 	tester.assertConstructor(0, 0)
 }
 
-func TestConstructorWithParams(t *testing.T) {
+func TestConstructor(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int x
 		
 		constructor(int x, bool b) {
+			char c
+			string s
 		}
 	`, true)
 
-	tester.assertConstructor(2, 0)
+	tester.assertConstructor(2, 2)
 	gs := tester.globalScope
 	constructor := gs.Contract.Constructor
 	tester.assertParam(constructor.Parameters[0], constructor, gs.IntType)
 	tester.assertParam(constructor.Parameters[1], constructor, gs.BoolType)
+	tester.assertLocalVariable(constructor.LocalVariables[0], constructor, gs.CharType, 1)
+	tester.assertLocalVariable(constructor.LocalVariables[1], constructor, gs.StringType, 0)
 }
 
 // Function Symbol with parameter and local variable symbols
@@ -226,8 +230,8 @@ func TestFunctionWithLocalVars(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 2)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 1)
-	tester.assertLocalVariable(0, 1, tester.globalScope.CharType, 0)
+	tester.assertFuncLocalVariable(0, 0, tester.globalScope.IntType, 1)
+	tester.assertFuncLocalVariable(0, 1, tester.globalScope.CharType, 0)
 }
 
 func TestFunctionWithMultipleVars(t *testing.T) {
@@ -258,9 +262,9 @@ func TestFunctionWithAssignment(t *testing.T) {
 		}
 	`, true)
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 3)
-	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 2)
-	tester.assertLocalVariable(0, 2, tester.globalScope.StringType, 1)
+	tester.assertFuncLocalVariable(0, 0, tester.globalScope.IntType, 3)
+	tester.assertFuncLocalVariable(0, 1, tester.globalScope.BoolType, 2)
+	tester.assertFuncLocalVariable(0, 2, tester.globalScope.StringType, 1)
 
 	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
 	assignX, ok := varX.VisibleIn[2].(*node.AssignmentStatementNode)
@@ -308,9 +312,9 @@ func TestFunctionWithIf(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 0, 0, 3)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 3)
-	tester.assertLocalVariable(0, 1, tester.globalScope.BoolType, 1)
-	tester.assertLocalVariable(0, 2, tester.globalScope.IntType, 0)
+	tester.assertFuncLocalVariable(0, 0, tester.globalScope.IntType, 3)
+	tester.assertFuncLocalVariable(0, 1, tester.globalScope.BoolType, 1)
+	tester.assertFuncLocalVariable(0, 2, tester.globalScope.IntType, 0)
 
 	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
 	_, ok := varX.VisibleIn[0].(*node.IfStatementNode)
@@ -338,11 +342,11 @@ func TestFunctionWithIfElse(t *testing.T) {
 	`, true)
 
 	tester.assertFunction(0, 1, 0, 5)
-	tester.assertLocalVariable(0, 0, tester.globalScope.IntType, 9)
-	tester.assertLocalVariable(0, 1, tester.globalScope.IntType, 7)
-	tester.assertLocalVariable(0, 2, tester.globalScope.CharType, 1)
-	tester.assertLocalVariable(0, 3, tester.globalScope.BoolType, 1)
-	tester.assertLocalVariable(0, 4, tester.globalScope.StringType, 1)
+	tester.assertFuncLocalVariable(0, 0, tester.globalScope.IntType, 9)
+	tester.assertFuncLocalVariable(0, 1, tester.globalScope.IntType, 7)
+	tester.assertFuncLocalVariable(0, 2, tester.globalScope.CharType, 1)
+	tester.assertFuncLocalVariable(0, 3, tester.globalScope.BoolType, 1)
+	tester.assertFuncLocalVariable(0, 4, tester.globalScope.StringType, 1)
 }
 
 // ID Checks
