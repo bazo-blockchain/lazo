@@ -30,6 +30,14 @@ func (v *AbstractVisitor) VisitFieldNode(node *FieldNode) {
 	}
 }
 
+// VisitConstructorNode traverses the parameters and the statement block
+func (v *AbstractVisitor) VisitConstructorNode(node *ConstructorNode) {
+	for _, paramType := range node.Parameters {
+		paramType.Accept(v.ConcreteVisitor)
+	}
+	v.ConcreteVisitor.VisitStatementBlock(node.Body)
+}
+
 // VisitFunctionNode traverses the return types, parameters and finally the statement block.
 func (v *AbstractVisitor) VisitFunctionNode(node *FunctionNode) {
 	for _, returnType := range node.ReturnTypes {

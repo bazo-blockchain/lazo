@@ -103,6 +103,33 @@ func TestFieldAssignment(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Constructor Nodes
+// -----------------
+
+func TestEmptyConstructor(t *testing.T) {
+	p := newParserFromInput("constructor() { \n }")
+	c := p.parseConstructor()
+
+	assertConstructor(t, c, 0, 0)
+}
+
+func TestConstructorWithParams(t *testing.T) {
+	p := newParserFromInput("constructor(int a, bool b) { \n }")
+	c := p.parseConstructor()
+
+	assertConstructor(t, c, 2, 0)
+}
+
+func TestConstructorWithStatements(t *testing.T) {
+	p := newParserFromInput(`constructor() { 
+		int a
+		int b
+	}`)
+	c := p.parseConstructor()
+
+	assertConstructor(t, c, 0, 2)
+}
+
 // Function Nodes
 // --------------
 

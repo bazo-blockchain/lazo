@@ -49,6 +49,11 @@ func assertField(t *testing.T, node *node.FieldNode, varType string, id string, 
 	}
 }
 
+func assertConstructor(t *testing.T, node *node.ConstructorNode, totalPTypes int, totalStmts int) {
+	assert.Equal(t, len(node.Parameters), totalPTypes)
+	assert.Equal(t, len(node.Body), totalStmts)
+}
+
 func assertFunction(t *testing.T, node *node.FunctionNode, name string, totalRTypes int, totalPTypes int, totalStmts int) {
 	assert.Equal(t, node.Name, name)
 	assert.Equal(t, len(node.ReturnTypes), totalRTypes)
