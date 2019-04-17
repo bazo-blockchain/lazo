@@ -208,10 +208,6 @@ func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) no
 	return ct.syntaxTree.Contract.Functions[funcIndex].Body[stmtIndex]
 }
 
-func (ct *CheckerTestUtil) getConstructorLocalVariableSymbol(varIndex int) *symbol.LocalVariableSymbol {
-	return ct.globalScope.Contract.Constructor.LocalVariables[varIndex]
-}
-
 func (ct *CheckerTestUtil) getLocalVariableSymbol(funcIndex int, varIndex int) *symbol.LocalVariableSymbol {
 	return ct.globalScope.Contract.Functions[funcIndex].LocalVariables[varIndex]
 }
