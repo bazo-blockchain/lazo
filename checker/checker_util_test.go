@@ -84,6 +84,18 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 	}
 }
 
+func (ct *CheckerTestUtil) assertConstructor(index int, totalParams int, totalVars int) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Constructor
+	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
+	assert.Equal(ct.t, len(functionSymbol.ReturnTypes), 0)
+	assert.Equal(ct.t, len(functionSymbol.Parameters), totalParams)
+	assert.Equal(ct.t, len(functionSymbol.LocalVariables), totalVars)
+	assert.Equal(ct.t, len(functionSymbol.AllDeclarations()), totalParams+totalVars)
+
+	_, ok := ct.symbolTable.GetNodeBySymbol(functionSymbol).(*node.ConstructorNode)
+	assert.Assert(ct.t, ok)
+}
+
 func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, totalParams int, totalVars int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[index]
 	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)

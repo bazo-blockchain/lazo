@@ -83,6 +83,10 @@ func (sc *symbolConstruction) registerContract() {
 		sc.registerField(contractSymbol, fieldNode)
 	}
 
+	if contractNode.Constructor != nil {
+		sc.registerConstructor(contractSymbol, contractNode.Constructor)
+	}
+
 	for _, functionNode := range contractNode.Functions {
 		sc.registerFunction(contractSymbol, functionNode)
 	}
@@ -95,15 +99,16 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 }
 
 func (sc *symbolConstruction) registerConstructor(contractSymbol *symbol.ContractSymbol, node *node.ConstructorNode) {
-	sym := symbol.NewConstructorSymbol(contractSymbol)
-	contractSymbol.Constructor = sym
-	sc.symbolTable.MapSymbolToNode(sym, node)
+	constructor := symbol.NewFunctionSymbol(contractSymbol, "constructor")
+	contractSymbol.Constructor = constructor
+	sc.symbolTable.MapSymbolToNode(constructor, node)
 
 	for _, parameter := range node.Parameters {
-		parameterSymbol := symbol.NewParameterSymbol(sym, parameter.Identifier)
-		sym.Parameters = append(sym.Parameters, parameterSymbol)
-		sc.symbolTable.MapSymbolToNode(parameterSymbol, parameter)
+		sc.registerParameter(constructor, parameter)
 	}
+
+	v := newLocalVariableVisitor(sc.symbolTable, constructor)
+	v.VisitStatementBlock(node.Body)
 }
 
 func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {

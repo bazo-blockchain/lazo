@@ -98,6 +98,18 @@ func TestUnknownFieldType(t *testing.T) {
 	tester.assertTotalErrors(1)
 }
 
+// Constructor
+//------------
+
+func TestEmptyConstructor(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+		}
+	`, true)
+
+	tester.assertConstructor(0, 0, 0)
+}
+
 // Function Symbol with parameter and local variable symbols
 //----------------------------------------------------------
 

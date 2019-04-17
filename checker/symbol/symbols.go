@@ -55,7 +55,7 @@ func (sym *AbstractSymbol) String() string {
 type ContractSymbol struct {
 	AbstractSymbol
 	Fields      []*FieldSymbol
-	Constructor *ConstructorSymbol
+	Constructor *FunctionSymbol
 	Functions   []*FunctionSymbol
 }
 
@@ -112,59 +112,6 @@ func NewFieldSymbol(scope Symbol, identifier string) *FieldSymbol {
 // String creates the string representation of the FieldSymbol
 func (sym *FieldSymbol) String() string {
 	return fmt.Sprintf("%s %s", sym.Type, sym.ID)
-}
-
-//----------------
-
-// ConstructorSymbol contains the parameters and local variables of the constructor
-type ConstructorSymbol struct {
-	AbstractSymbol
-	Parameters     []*ParameterSymbol
-	LocalVariables []*LocalVariableSymbol
-}
-
-// NewConstructorSymbol creates a new FunctionSymbol
-func NewConstructorSymbol(scope Symbol) *ConstructorSymbol {
-	return &ConstructorSymbol{
-		AbstractSymbol: NewAbstractSymbol(scope, "constructor"),
-	}
-}
-
-// AllDeclarations returns all parameter and local variable declarations
-func (sym *ConstructorSymbol) AllDeclarations() []Symbol {
-	var symbols []Symbol
-	for _, s := range sym.Parameters {
-		symbols = append(symbols, s)
-	}
-	for _, s := range sym.LocalVariables {
-		symbols = append(symbols, s)
-	}
-	return symbols
-}
-
-// GetVarIndex returns the index of a variable
-func (sym *ConstructorSymbol) GetVarIndex(id string) int {
-	for i, s := range sym.AllDeclarations() {
-		if s.Identifier() == id {
-			return i
-		}
-	}
-	return -1
-}
-
-// IsLocalVar checks whether the id is a local variable or not
-func (sym *ConstructorSymbol) IsLocalVar(id string) bool {
-	for _, s := range sym.LocalVariables {
-		if s.Identifier() == id {
-			return true
-		}
-	}
-	return false
-}
-
-// String creates the string representation for the ConstructorSymbol
-func (sym *ConstructorSymbol) String() string {
-	return fmt.Sprintf("\n %s(%s): vars: %s", sym.ID, sym.Parameters, sym.LocalVariables)
 }
 
 //----------------
