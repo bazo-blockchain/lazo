@@ -43,10 +43,11 @@ const (
 	// Keywords
 
 	Contract
-	Return
+	Constructor
 	If
 	Else
 	Function
+	Return
 	True
 	False
 )
@@ -90,24 +91,26 @@ var SymbolLexeme = map[Symbol]string{
 
 	// Keywords
 
-	Contract: "contract",
-	Return:   "return",
-	If:       "if",
-	Else:     "else",
-	Function: "function",
-	True:     "true",
-	False:    "false",
+	Contract:    "contract",
+	Constructor: "constructor",
+	If:          "if",
+	Else:        "else",
+	Function:    "function",
+	Return:      "return",
+	True:        "true",
+	False:       "false",
 }
 
 // Keywords maps reserved literal values to the Symbol type
 var Keywords = map[string]Symbol{
-	"contract": Contract,
-	"return":   Return,
-	"if":       If,
-	"else":     Else,
-	"function": Function,
-	"true":     True,
-	"false":    False,
+	"contract":    Contract,
+	"constructor": Constructor,
+	"if":          If,
+	"else":        Else,
+	"function":    Function,
+	"return":      Return,
+	"true":        True,
+	"false":       False,
 }
 
 // BooleanConstants maps Symbol type to built-in boolean value
