@@ -94,6 +94,18 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)
 }
 
+func (sc *symbolConstruction) registerConstructor(contractSymbol *symbol.ContractSymbol, node *node.ConstructorNode) {
+	sym := symbol.NewConstructorSymbol(contractSymbol)
+	contractSymbol.Constructor = sym
+	sc.symbolTable.MapSymbolToNode(sym, node)
+
+	for _, parameter := range node.Parameters {
+		parameterSymbol := symbol.NewParameterSymbol(sym, parameter.Identifier)
+		sym.Parameters = append(sym.Parameters, parameterSymbol)
+		sc.symbolTable.MapSymbolToNode(parameterSymbol, parameter)
+	}
+}
+
 func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
 	functionSymbol := symbol.NewFunctionSymbol(contractSymbol, node.Name)
 	contractSymbol.Functions = append(contractSymbol.Functions, functionSymbol)

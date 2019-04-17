@@ -129,7 +129,7 @@ func TestConstructorWithParamsAndStatements(t *testing.T) {
 
 func TestMultipleConstructors(t *testing.T) {
 	p := newParserFromInput(`contract Test {
-		constructor() {
+		constructor(int a) {
 		}
 		
 		constructor() {
@@ -137,7 +137,7 @@ func TestMultipleConstructors(t *testing.T) {
 	}`)
 	c := p.parseContract()
 
-	assertConstructor(t, c.Constructor, 0, 0)
+	assertConstructor(t, c.Constructor, 1, 0)
 	assertErrorAt(t, p, 0, "Only one constructor is allowed")
 }
 
