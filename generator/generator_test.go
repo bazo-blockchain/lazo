@@ -56,13 +56,13 @@ func TestMultipleContractFields(t *testing.T) {
 }
 
 func TestContractFieldAssignment(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		int x
 
 		function void test() {
 			x = 3
 		}
-	`)
+	`, VoidTestSig)
 
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
@@ -74,7 +74,7 @@ func TestContractFieldAssignment(t *testing.T) {
 // ----------------------------------
 
 func TestFuncCallByHash(t *testing.T) {
-	tester := newGeneratorTextUtilWithFunc(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int doNotCall() {
 			return 4
 		}
@@ -93,7 +93,7 @@ func TestFuncCallByHashWithParams(t *testing.T) {
 		2, 0, 4,
 	}
 
-	tester := newGeneratorTextUtilWithFunc(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int doNotCall() {
 			return 4
 		}
@@ -110,222 +110,222 @@ func TestFuncCallByHashWithParams(t *testing.T) {
 // ----------
 
 func TestLocalVarIntDefaultValue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x
 			return x
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(0))
 }
 
 func TestLocalVarInt(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 3
 			int y = 4
 			return x
 		}
-	`)
+	`, IntTestSig)
 	tester.assertInt(big.NewInt(3))
 
-	tester = newGeneratorTestUtil(t, `
+	tester = newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 3
 			int y = 4
 			return y
 		}
-	`)
+	`, IntTestSig)
 	tester.assertInt(big.NewInt(4))
 }
 
 func TestLocVarBoolDefaultValue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function bool test() {
 			bool x
 			return x
 		}
-	`)
+	`, BoolTestSig)
 
 	tester.assertBool(false)
 }
 
 func TestLocVarBool(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function bool test() {
 			bool x = true
 			return x
 		}
-	`)
+	`, BoolTestSig)
 
 	tester.assertBool(true)
 }
 
 func TestLocVarStringDefaultValue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function string test() {
 			string x
 			return x
 		}
-	`)
+	`, StringTestSig)
 
 	tester.assertString("")
 }
 
 func TestLocVarString(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function string test() {
 			string x = "hello"
 			return x
 		}
-	`)
+	`, StringTestSig)
 
 	tester.assertString("hello")
 }
 
 func TestLocVarCharDefaultValue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function char test() {
 			char x
 			return x
 		}
-	`)
+	`, CharTestSig)
 
 	tester.assertChar('0')
 }
 
 func TestLocVarChar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function char test() {
 			char x = 'c'
 			return x
 		}
-	`)
+	`, CharTestSig)
 
 	tester.assertChar('c')
 }
 
 func TestAssignmentInt(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x
 			int y
 			x = 3
 			return x
 		}
-	`)
+	`, IntTestSig)
 	tester.assertInt(big.NewInt(3))
 
-	tester = newGeneratorTestUtil(t, `
+	tester = newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x
 			int y
 			x = 3
 			return y
 		}
-	`)
+	`, IntTestSig)
 	tester.assertInt(big.NewInt(0))
 }
 
 func TestReAssignmentInt(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 3
 			int y = 4
 			x = y
 			return x
 		}
-	`)
+	`, IntTestSig)
 	tester.assertInt(big.NewInt(4))
 }
 
 func TestReAssignmentBool(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function bool test() {
 			bool x = true
 			bool y = false
 			x = y
 			return x
 		}
-	`)
+	`, BoolTestSig)
 	tester.assertBool(false)
 }
 
 func TestReAssignmentString(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function string test() {
 			string x = "abc"
 			string y = "def"
 			x = y
 			return x
 		}
-	`)
+	`, StringTestSig)
 	tester.assertString("def")
 }
 
 func TestReAssignmentChar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function char test() {
 			char x = 'c'
 			char y = 'd'
 			x = y
 			return x
 		}
-	`)
+	`, CharTestSig)
 	tester.assertChar('d')
 }
 
 func TestReturnMultipleValuesSameTypes(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function (int, int) test() {
 			int x = 1
 			int y = 2
 			return x, y
 		}
-	`)
+	`, "(int,int)test()")
 	tester.assertInt(big.NewInt(2))
 }
 
 func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function (int, bool) test() {
 			int x = 1
 			bool y = true
 			return x,y
 		}
-	`)
+	`, "(int,bool)test()")
 	tester.assertBool(true)
 }
 
 func TestIfStatement(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (true) {
 				return 1
 			}
 			return 0
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(1))
 }
 
 func TestSkipIfStatement(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (false) {
 				return 1
 			}
 			return 0
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(0))
 }
 
 func TestIfElseStatement(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (true) {
 				return 1
@@ -333,13 +333,13 @@ func TestIfElseStatement(t *testing.T) {
 				return 0
 			}
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(1))
 }
 
 func TestIfElseStatementAlternative(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (false) {
 				return 1
@@ -347,13 +347,13 @@ func TestIfElseStatementAlternative(t *testing.T) {
 				return 0
 			}
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(0))
 }
 
 func TestNestedIfStatement(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (true) {
 				if (true) {
@@ -362,13 +362,13 @@ func TestNestedIfStatement(t *testing.T) {
 			} 
 			return 0
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(1))
 }
 
 func TestNestedIfStatementAlternative(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			if (true) {
 				if (false) {
@@ -379,49 +379,49 @@ func TestNestedIfStatementAlternative(t *testing.T) {
 			} 
 			return 0
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(2))
 }
 
 func TestSingleReturnValue(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			return 1
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(1))
 }
 
 func TestTwoReturnValues(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function (int, int) test() {
 			return 1, 2
 		}
-	`)
+	`, "(int,int)test()")
 
 	tester.assertInt(big.NewInt(2))
 }
 
 func TestThreeReturnValues(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function (int, int, int) test() {
 			return 1, 2, 3
 		}
-	`)
+	`, "(int,int,int)test()")
 
 	tester.assertInt(big.NewInt(3))
 }
 
 func TestSetter(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		int x = 4
 	
 		function void set() {
 			x = 5
 		}
-	`)
+	`, "()set()")
 
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
@@ -437,13 +437,13 @@ func TestAddition(t *testing.T) {
 }
 
 func TestAdditionVar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 1
 			int y = 2
 			return x + y
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(3))
 }
@@ -454,12 +454,12 @@ func TestSubtraction(t *testing.T) {
 }
 
 func TestSubtractionVar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 1
 			return 2 - x
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(1))
 }
@@ -469,12 +469,12 @@ func TestMultiplication(t *testing.T) {
 }
 
 func TestMultiplicationVar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 2
 			return x * 3
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(6))
 }
@@ -489,12 +489,12 @@ func TestDivision(t *testing.T) {
 }
 
 func TestDivisionVar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 5
 			return 10 / x
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(2))
 }
@@ -514,12 +514,12 @@ func TestExponent(t *testing.T) {
 }
 
 func TestExponentVar(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
+	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
 			int x = 3
 			return 2 ** x
 		}
-	`)
+	`, IntTestSig)
 
 	tester.assertInt(big.NewInt(8))
 }

@@ -15,6 +15,14 @@ import (
 	"testing"
 )
 
+const (
+	VoidTestSig   = "()test()"
+	IntTestSig    = "(int)test()"
+	BoolTestSig   = "(bool)test()"
+	CharTestSig   = "(char)test()"
+	StringTestSig = "(string)test()"
+)
+
 type generatorTestUtil struct {
 	t        *testing.T
 	metadata *data.Metadata
@@ -35,7 +43,7 @@ func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil 
 	)
 }
 
-func newGeneratorTextUtilWithFunc(t *testing.T, contractCode string,
+func newGeneratorTestUtilWithFunc(t *testing.T, contractCode string,
 	funcSignature string, funcData ...byte) *generatorTestUtil {
 	funcHash := util.CreateFuncHash(funcSignature)
 	txData := append(funcData, 4)
@@ -123,12 +131,12 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 
 func assertBoolExpr(t *testing.T, expr string, expected bool) {
 	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtil(t, code)
+	tester := newGeneratorTestUtilWithFunc(t, code, BoolTestSig)
 	tester.assertBool(expected)
 }
 
 func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtil(t, code)
+	tester := newGeneratorTestUtilWithFunc(t, code, IntTestSig)
 	tester.assertInt(big.NewInt(expected))
 }
