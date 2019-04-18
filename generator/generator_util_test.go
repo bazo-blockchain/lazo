@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	voidTestSig   = "()test()"
 	intTestSig    = "(int)test()"
 	boolTestSig   = "(bool)test()"
 	charTestSig   = "(char)test()"
@@ -23,11 +24,12 @@ const (
 )
 
 type generatorTestUtil struct {
-	t        *testing.T
-	metadata *data.Metadata
-	context  *vm.MockContext
-	result   []byte
-	errors   []error
+	t         *testing.T
+	metadata  *data.Metadata
+	context   *vm.MockContext
+	result    []byte
+	evalStack [][]byte
+	errors    []error
 }
 
 func newGeneratorTestUtil(t *testing.T, contractCode string, funcData ...byte) *generatorTestUtil {
@@ -59,7 +61,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	assert.Equal(t, len(err), 0, "Program has syntax errors", err)
 
 	symbolTable, err := checker.New(program).Run()
-	assert.Equal(t, len(err), 0, "Program has semantic errors")
+	assert.Equal(t, len(err), 0, "Program has semantic errors", err)
 
 	tester := &generatorTestUtil{
 		t: t,
@@ -82,6 +84,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	assert.Assert(t, isSuccess, string(result))
 
 	tester.result = result
+	tester.evalStack = bazoVM.PeekEvalStack()
 	tester.errors = append(tester.errors, vmError)
 	return tester
 }
@@ -89,6 +92,12 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 func (gt *generatorTestUtil) assertInt(value *big.Int) {
 	bytes := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
 	gt.assertBytes(bytes...)
+}
+
+func (gt *generatorTestUtil) assertIntAt(index int, value *big.Int) {
+	assert.Assert(gt.t, len(gt.evalStack) > index)
+	bytes := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
+	gt.compareBytes(gt.evalStack[index], bytes)
 }
 
 // Can be deleted as soon as VM is fixed
