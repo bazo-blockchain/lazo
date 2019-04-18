@@ -139,13 +139,13 @@ func (a *ILAssembler) JmpFalse(label Label) {
 // CallFunc is a helper that adds a CALL instruction to the byte code
 // Is used to call functions
 func (a *ILAssembler) CallFunc(function *symbol.FunctionSymbol) {
-	a.addInstruction(il.Call, function, 3)
+	a.addInstruction(il.Call, function, 4)
 }
 
 // CallTrue is a helper that adds a CALLIF instruction to the byte code
 // Is used to call functions if the value at the top of the stack is 1 (true)
 func (a *ILAssembler) CallTrue(function *symbol.FunctionSymbol) {
-	a.addInstruction(il.CallTrue, function, 3)
+	a.addInstruction(il.CallTrue, function, 4)
 }
 
 // StoreLocal is a helper that adds a STORE instruction to the byte code
