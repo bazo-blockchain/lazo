@@ -43,6 +43,9 @@ func TestMultipleContractFields(t *testing.T) {
 	tester.assertVariableInt(1, big.NewInt(36))
 }
 
+// Constructor
+// -----------
+
 func TestContractFieldAssignment(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int x
@@ -57,9 +60,6 @@ func TestContractFieldAssignment(t *testing.T) {
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
 	tester.assertVariableInt(0, big.NewInt(3))
 }
-
-// Constructor
-// -----------
 
 func TestConstructorWithParam(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
