@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	VoidTestSig   = "()test()"
-	IntTestSig    = "(int)test()"
-	BoolTestSig   = "(bool)test()"
-	CharTestSig   = "(char)test()"
-	StringTestSig = "(string)test()"
+	voidTestSig   = "()test()"
+	intTestSig    = "(int)test()"
+	boolTestSig   = "(bool)test()"
+	charTestSig   = "(char)test()"
+	stringTestSig = "(string)test()"
 )
 
 type generatorTestUtil struct {
@@ -131,12 +131,12 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 
 func assertBoolExpr(t *testing.T, expr string, expected bool) {
 	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtilWithFunc(t, code, BoolTestSig)
+	tester := newGeneratorTestUtilWithFunc(t, code, boolTestSig)
 	tester.assertBool(expected)
 }
 
 func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtilWithFunc(t, code, IntTestSig)
+	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
 }
