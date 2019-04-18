@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	voidTestSig   = "()test()"
 	intTestSig    = "(int)test()"
 	boolTestSig   = "(bool)test()"
 	charTestSig   = "(char)test()"
