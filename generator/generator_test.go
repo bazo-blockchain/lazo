@@ -216,6 +216,25 @@ func TestLocVarChar(t *testing.T) {
 	tester.assertChar('c')
 }
 
+// Multi-Variables
+// ---------------
+
+func TestMultiVariables(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, bool) test() {
+			int x, bool b = test2()
+			return x, b
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, "(int,bool)test()")
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
+}
+
 // Assignments
 // -----------
 

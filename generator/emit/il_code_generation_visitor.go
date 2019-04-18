@@ -128,10 +128,15 @@ func (v *ILCodeGenerationVisitor) VisitVariableNode(node *node.VariableNode) {
 	}
 
 	index := v.function.GetVarIndex(node.Identifier)
-	isContractField := !v.function.IsLocalVar(node.Identifier)
-	if isContractField {
-		v.assembler.StoreState(byte(index))
-	} else {
+	v.assembler.StoreLocal(byte(index))
+}
+
+// VisitMultiVariableNode generates the IL Code for multi-variable initialization
+func (v *ILCodeGenerationVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) {
+	v.AbstractVisitor.VisitMultiVariableNode(node)
+
+	for i := len(node.Identifiers) - 1; i >= 0; i-- {
+		index := v.function.GetVarIndex(node.Identifiers[i])
 		v.assembler.StoreLocal(byte(index))
 	}
 }
