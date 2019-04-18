@@ -155,6 +155,22 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.Assign
 	}
 }
 
+// VisitMultiAssignmentStatementNode generates the IL Code for a multi-assignment
+func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAssignmentStatementNode) {
+	node.FuncCall.Accept(v)
+
+	for i := len(node.Designators) - 1; i >= 0; i-- {
+		decl := v.symbolTable.GetDeclByDesignator(node.Designators[i])
+		index, isContractField := v.getVarIndex(decl)
+
+		if isContractField {
+			v.assembler.StoreState(index)
+		} else {
+			v.assembler.StoreLocal(index)
+		}
+	}
+}
+
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)
