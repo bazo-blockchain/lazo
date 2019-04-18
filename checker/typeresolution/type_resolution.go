@@ -27,6 +27,10 @@ func (tr *typeResolution) resolveTypesInContractSymbol() {
 		tr.resolveTypeInFieldSymbol(field)
 	}
 
+	if contractSymbol.Constructor != nil {
+		tr.resolveTypeInFunctionSymbol(contractSymbol.Constructor)
+	}
+
 	for _, function := range contractSymbol.Functions {
 		tr.resolveTypeInFunctionSymbol(function)
 	}
@@ -38,9 +42,9 @@ func (tr *typeResolution) resolveTypeInFieldSymbol(symbol *symbol.FieldSymbol) {
 }
 
 func (tr *typeResolution) resolveTypeInFunctionSymbol(sym *symbol.FunctionSymbol) {
-	functionNode := tr.symTable.GetNodeBySymbol(sym).(*node.FunctionNode)
-
-	tr.resolveReturnTypes(sym, functionNode)
+	if functionNode, ok := tr.symTable.GetNodeBySymbol(sym).(*node.FunctionNode); ok {
+		tr.resolveReturnTypes(sym, functionNode)
+	}
 
 	for _, param := range sym.Parameters {
 		paramNode := tr.symTable.GetNodeBySymbol(param).(*node.ParameterNode)

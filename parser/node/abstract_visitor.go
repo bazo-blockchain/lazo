@@ -17,6 +17,11 @@ func (v *AbstractVisitor) VisitContractNode(node *ContractNode) {
 	for _, variable := range node.Fields {
 		variable.Accept(v.ConcreteVisitor)
 	}
+
+	if node.Constructor != nil {
+		node.Constructor.Accept(v.ConcreteVisitor)
+	}
+
 	for _, function := range node.Functions {
 		function.Accept(v.ConcreteVisitor)
 	}
@@ -28,6 +33,14 @@ func (v *AbstractVisitor) VisitFieldNode(node *FieldNode) {
 	if node.Expression != nil {
 		node.Expression.Accept(v.ConcreteVisitor)
 	}
+}
+
+// VisitConstructorNode traverses the parameters and the statement block
+func (v *AbstractVisitor) VisitConstructorNode(node *ConstructorNode) {
+	for _, paramType := range node.Parameters {
+		paramType.Accept(v.ConcreteVisitor)
+	}
+	v.ConcreteVisitor.VisitStatementBlock(node.Body)
 }
 
 // VisitFunctionNode traverses the return types, parameters and finally the statement block.

@@ -84,6 +84,18 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType *symbol.TypeSymbo
 	}
 }
 
+func (ct *CheckerTestUtil) assertConstructor(totalParams int, totalVars int) {
+	functionSymbol := ct.symbolTable.GlobalScope.Contract.Constructor
+	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
+	assert.Equal(ct.t, len(functionSymbol.ReturnTypes), 0)
+	assert.Equal(ct.t, len(functionSymbol.Parameters), totalParams)
+	assert.Equal(ct.t, len(functionSymbol.LocalVariables), totalVars)
+	assert.Equal(ct.t, len(functionSymbol.AllDeclarations()), totalParams+totalVars)
+
+	_, ok := ct.symbolTable.GetNodeBySymbol(functionSymbol).(*node.ConstructorNode)
+	assert.Assert(ct.t, ok)
+}
+
 func (ct *CheckerTestUtil) assertFunction(index int, totalReturnTypes int, totalParams int, totalVars int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[index]
 	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
@@ -108,7 +120,12 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
 	paramSymbol := functionSymbol.Parameters[paramIndex]
-	assert.Equal(ct.t, paramSymbol.Scope(), functionSymbol)
+	ct.assertParam(paramSymbol, functionSymbol, expectedType)
+}
+
+func (ct *CheckerTestUtil) assertParam(paramSymbol *symbol.ParameterSymbol, scope symbol.Symbol,
+	expectedType *symbol.TypeSymbol) {
+	assert.Equal(ct.t, paramSymbol.Scope(), scope)
 	assert.Equal(ct.t, paramSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(paramSymbol.AllDeclarations()), 0)
 
@@ -117,12 +134,17 @@ func (ct *CheckerTestUtil) assertFuncParam(funcIndex int, paramIndex int, expect
 	assert.Equal(ct.t, paramSymbol.Identifier(), varNode.Identifier)
 }
 
-func (ct *CheckerTestUtil) assertLocalVariable(funcIndex int, varIndex int,
+func (ct *CheckerTestUtil) assertFuncLocalVariable(funcIndex int, varIndex int,
 	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Functions[funcIndex]
 
 	varSymbol := functionSymbol.LocalVariables[varIndex]
-	assert.Equal(ct.t, varSymbol.Scope(), functionSymbol)
+	ct.assertLocalVariable(varSymbol, functionSymbol, expectedType, totalVisibleIn)
+}
+
+func (ct *CheckerTestUtil) assertLocalVariable(varSymbol *symbol.LocalVariableSymbol, scope symbol.Symbol,
+	expectedType *symbol.TypeSymbol, totalVisibleIn int) {
+	assert.Equal(ct.t, varSymbol.Scope(), scope)
 	assert.Equal(ct.t, varSymbol.Type, expectedType)
 	assert.Equal(ct.t, len(varSymbol.VisibleIn), totalVisibleIn)
 	assert.Equal(ct.t, len(varSymbol.AllDeclarations()), 0)
@@ -176,6 +198,10 @@ func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expect
 
 func (ct *CheckerTestUtil) getFieldNode(index int) *node.FieldNode {
 	return ct.syntaxTree.Contract.Fields[index]
+}
+
+func (ct *CheckerTestUtil) getConstructorStatementNode(stmtIndex int) node.StatementNode {
+	return ct.syntaxTree.Contract.Constructor.Body[stmtIndex]
 }
 
 func (ct *CheckerTestUtil) getFuncStatementNode(funcIndex int, stmtIndex int) node.StatementNode {

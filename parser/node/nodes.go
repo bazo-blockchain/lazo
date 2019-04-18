@@ -61,13 +61,15 @@ func (n *ProgramNode) Accept(v Visitor) {
 // ContractNode composes abstract node and holds a name, state variables and functions.
 type ContractNode struct {
 	AbstractNode
-	Name      string
-	Fields    []*FieldNode
-	Functions []*FunctionNode
+	Name        string
+	Fields      []*FieldNode
+	Constructor *ConstructorNode
+	Functions   []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
-	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n FUNCS: %s", n.Pos(), n.Name, n.Fields, n.Functions)
+	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n CONSTRUCTOR: %s \n\n FUNCS: %s",
+		n.Pos(), n.Name, n.Fields, getNodeString(n.Constructor), n.Functions)
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -98,6 +100,25 @@ func (n *FieldNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *FieldNode) Accept(v Visitor) {
 	v.VisitFieldNode(n)
+}
+
+// --------------------------
+
+// ConstructorNode composes abstract node and holds parameters and statements.
+type ConstructorNode struct {
+	AbstractNode
+	Parameters []*ParameterNode
+	Body       []StatementNode
+}
+
+func (n *ConstructorNode) String() string {
+	return fmt.Sprintf("\n [%s] CONSTRUCTOR PARAMs %s, %s",
+		n.Pos(), n.Parameters, n.Body)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *ConstructorNode) Accept(v Visitor) {
+	v.VisitConstructorNode(n)
 }
 
 // --------------------------

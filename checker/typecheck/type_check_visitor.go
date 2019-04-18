@@ -30,6 +30,12 @@ func (v *typeCheckVisitor) VisitContractNode(node *node.ContractNode) {
 		variable.Accept(v.ConcreteVisitor)
 	}
 
+	if node.Constructor != nil {
+		v.currentFunction = v.contractSymbol.Constructor
+		node.Constructor.Accept(v.ConcreteVisitor)
+		v.currentFunction = nil
+	}
+
 	for _, function := range v.contractSymbol.Functions {
 		v.currentFunction = function
 		functionNode := v.symbolTable.GetNodeBySymbol(function)
@@ -75,6 +81,12 @@ func (v *typeCheckVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) 
 // VisitReturnStatementNode checks whether the return types and the values are of the same type
 func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(returnNode)
+
+	if v.contractSymbol.Constructor == v.currentFunction {
+		v.reportError(returnNode, "return is not allowed in constructor")
+		return
+	}
+
 	returnNodes := returnNode.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
 
@@ -86,17 +98,18 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 		}
 	}
 
+	if len(returnSymbols) != len(returnNodes) {
+		v.reportError(returnNode,
+			fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
+		return
+	}
+
 	if len(returnSymbols) > 0 {
-		if len(returnSymbols) != len(returnNodes) {
-			v.reportError(returnNode,
-				fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
-		} else {
-			for i, rtype := range returnSymbols {
-				nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
-				if nodeType != rtype {
-					v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
-						rtype.ID, getTypeString(nodeType)))
-				}
+		for i, rtype := range returnSymbols {
+			nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
+			if nodeType != rtype {
+				v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
+					rtype.ID, getTypeString(nodeType)))
 			}
 		}
 	} else if len(returnNodes) > 0 {
@@ -188,13 +201,11 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 			v.reportError(node, "+ and - unary operators can only be applied to expressions of type int")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
-		break
 	case token.Not:
 		if !v.isBool(operandType) {
 			v.reportError(node, "! unary operators can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
-		break
 	default:
 		panic(fmt.Sprintf("Illegal unary operator %s", token.SymbolLexeme[node.Operator]))
 	}

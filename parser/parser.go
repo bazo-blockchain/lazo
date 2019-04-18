@@ -82,8 +82,14 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 		switch ftok.Value {
 		case token.Function:
 			contract.Functions = append(contract.Functions, p.parseFunction())
+		case token.Constructor:
+			if contract.Constructor == nil {
+				contract.Constructor = p.parseConstructor()
+			} else {
+				p.addError(fmt.Sprintf("Only one constructor is allowed"))
+				p.nextToken()
+			}
 		default:
-			// TODO Parse all types of fix tokens in a contract
 			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
 			p.nextToken()
 		}
@@ -106,6 +112,18 @@ func (p *Parser) parseField() *node.FieldNode {
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return v
+}
+
+func (p *Parser) parseConstructor() *node.ConstructorNode {
+	constructor := &node.ConstructorNode{
+		AbstractNode: p.newAbstractNode(),
+	}
+	p.nextToken() // skip constructor keyword
+
+	constructor.Parameters = p.parseParameters()
+	constructor.Body = p.parseStatementBlock()
+
+	return constructor
 }
 
 func (p *Parser) parseFunction() *node.FunctionNode {

@@ -23,7 +23,7 @@ func assertHasError(t *testing.T, p *Parser) {
 }
 
 func assertNoErrors(t *testing.T, p *Parser) {
-	assert.Equal(t, len(p.errors), 0)
+	assert.Equal(t, len(p.errors), 0, p.errors)
 }
 
 func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {
@@ -47,6 +47,11 @@ func assertField(t *testing.T, node *node.FieldNode, varType string, id string, 
 	if expr != "" {
 		assertExpression(t, node.Expression, expr)
 	}
+}
+
+func assertConstructor(t *testing.T, node *node.ConstructorNode, totalPTypes int, totalStmts int) {
+	assert.Equal(t, len(node.Parameters), totalPTypes)
+	assert.Equal(t, len(node.Body), totalStmts)
 }
 
 func assertFunction(t *testing.T, node *node.FunctionNode, name string, totalRTypes int, totalPTypes int, totalStmts int) {

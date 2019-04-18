@@ -54,8 +54,9 @@ func (sym *AbstractSymbol) String() string {
 // ContractSymbol contains fields and functions
 type ContractSymbol struct {
 	AbstractSymbol
-	Fields    []*FieldSymbol
-	Functions []*FunctionSymbol
+	Fields      []*FieldSymbol
+	Constructor *FunctionSymbol
+	Functions   []*FunctionSymbol
 }
 
 // NewContractSymbol creates a new ContractSymbol
@@ -89,7 +90,8 @@ func (sym *ContractSymbol) GetFieldIndex(id string) int {
 
 // String creates the string representation for the ContractSymbol
 func (sym *ContractSymbol) String() string {
-	return fmt.Sprintf("Contract: %s, \nFields: %s, \nFunctions %s", sym.ID, sym.Fields, sym.Functions)
+	return fmt.Sprintf("Contract: %s, \nFields: %s, \nConstructor %s \nFunctions %s",
+		sym.ID, sym.Fields, sym.Constructor, sym.Functions)
 }
 
 //----------------

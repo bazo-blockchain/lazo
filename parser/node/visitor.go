@@ -5,6 +5,7 @@ type Visitor interface {
 	VisitProgramNode(node *ProgramNode)
 	VisitContractNode(node *ContractNode)
 	VisitFieldNode(node *FieldNode)
+	VisitConstructorNode(node *ConstructorNode)
 	VisitFunctionNode(node *FunctionNode)
 	VisitParameterNode(node *ParameterNode)
 	VisitStatementBlock(stmts []StatementNode)

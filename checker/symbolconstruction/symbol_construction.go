@@ -83,6 +83,10 @@ func (sc *symbolConstruction) registerContract() {
 		sc.registerField(contractSymbol, fieldNode)
 	}
 
+	if contractNode.Constructor != nil {
+		sc.registerConstructor(contractSymbol, contractNode.Constructor)
+	}
+
 	for _, functionNode := range contractNode.Functions {
 		sc.registerFunction(contractSymbol, functionNode)
 	}
@@ -92,6 +96,19 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
 	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
 	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)
+}
+
+func (sc *symbolConstruction) registerConstructor(contractSymbol *symbol.ContractSymbol, node *node.ConstructorNode) {
+	constructor := symbol.NewFunctionSymbol(contractSymbol, "constructor")
+	contractSymbol.Constructor = constructor
+	sc.symbolTable.MapSymbolToNode(constructor, node)
+
+	for _, parameter := range node.Parameters {
+		sc.registerParameter(constructor, parameter)
+	}
+
+	v := newLocalVariableVisitor(sc.symbolTable, constructor)
+	v.VisitStatementBlock(node.Body)
 }
 
 func (sc *symbolConstruction) registerFunction(contractSymbol *symbol.ContractSymbol, node *node.FunctionNode) {
@@ -114,11 +131,19 @@ func (sc *symbolConstruction) registerParameter(functionSymbol *symbol.FunctionS
 }
 
 func (sc *symbolConstruction) checkValidIdentifiers() {
-	sc.checkValidIdentifier(sc.globalScope.Contract)
-	for _, field := range sc.globalScope.Contract.Fields {
+	contract := sc.globalScope.Contract
+	sc.checkValidIdentifier(contract)
+	for _, field := range contract.Fields {
 		sc.checkValidIdentifier(field)
 	}
-	for _, function := range sc.globalScope.Contract.Functions {
+
+	if contract.Constructor != nil {
+		for _, decl := range contract.Constructor.AllDeclarations() {
+			sc.checkValidIdentifier(decl)
+		}
+	}
+
+	for _, function := range contract.Functions {
 		sc.checkValidIdentifier(function)
 		for _, decl := range function.AllDeclarations() {
 			sc.checkValidIdentifier(decl)
@@ -139,6 +164,11 @@ func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
 	sc.checkUniqueIdentifier(sc.globalScope)
 	sc.checkUniqueIdentifier(sc.globalScope.Contract)
+
+	if sc.globalScope.Contract.Constructor != nil {
+		sc.checkUniqueIdentifier(sc.globalScope.Contract.Constructor)
+	}
+
 	for _, function := range sc.globalScope.Contract.Functions {
 		sc.checkUniqueIdentifier(function)
 	}
