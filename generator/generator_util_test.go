@@ -35,7 +35,12 @@ func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil 
 	)
 }
 
-func newGeneratorTextUtilWithTx(t *testing.T, contractCode string, txData []byte) *generatorTestUtil {
+func newGeneratorTextUtilWithFunc(t *testing.T, contractCode string,
+	funcSignature string, funcData ...byte) *generatorTestUtil {
+	funcHash := util.CreateFuncHash(funcSignature)
+	txData := append(funcData, 4)
+	txData = append(txData, funcHash[:]...)
+
 	return newGeneratorTestUtilWithRawInput(
 		t,
 		fmt.Sprintf("contract Test {\n %s \n }", contractCode),
@@ -67,7 +72,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	tester.context = context
 
 	bazoVM := vm.NewVM(context)
-	isSuccess := bazoVM.Exec(true)
+	isSuccess := bazoVM.Exec(false)
 	result, vmError := bazoVM.PeekResult()
 	assert.Assert(t, isSuccess, string(result))
 

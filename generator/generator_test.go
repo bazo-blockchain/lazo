@@ -74,12 +74,7 @@ func TestContractFieldAssignment(t *testing.T) {
 // ----------------------------------
 
 func TestFuncCallByHash(t *testing.T) {
-	txData := []byte{
-		4,
-		0x51, 0xA3, 0x52, 0xE1,
-	}
-
-	tester := newGeneratorTextUtilWithTx(t, `
+	tester := newGeneratorTextUtilWithFunc(t, `
 		function int doNotCall() {
 			return 4
 		}
@@ -87,19 +82,18 @@ func TestFuncCallByHash(t *testing.T) {
 		function int doCall() {
 			return 5
 		}
-	`, txData)
+	`, "(int)doCall()")
 
 	tester.assertInt(big.NewInt(5))
 }
 
 func TestFuncCallByHashWithParams(t *testing.T) {
-	txData := []byte{
+	funcData := []byte{
 		2, 0, 2,
 		2, 0, 4,
-		4, 0x35, 0x2E, 0x00, 0x80,
 	}
 
-	tester := newGeneratorTextUtilWithTx(t, `
+	tester := newGeneratorTextUtilWithFunc(t, `
 		function int doNotCall() {
 			return 4
 		}
@@ -107,7 +101,7 @@ func TestFuncCallByHashWithParams(t *testing.T) {
 		function int doCall(int x, int y) {
 			return x * y
 		}
-	`, txData)
+	`, "(int)doCall(int,int)", funcData...)
 
 	tester.assertInt(big.NewInt(8))
 }
