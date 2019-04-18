@@ -109,6 +109,15 @@ func (gt *generatorTestUtil) assertBool(value bool) {
 	}
 }
 
+func (gt *generatorTestUtil) assertBoolAt(index int, value bool) {
+	actual := gt.evalStack[index]
+	if value {
+		gt.compareBytes(actual, []byte{1})
+	} else {
+		gt.compareBytes(actual, []byte{0})
+	}
+}
+
 func (gt *generatorTestUtil) assertString(value string) {
 	gt.assertBytes([]byte(value)...)
 }

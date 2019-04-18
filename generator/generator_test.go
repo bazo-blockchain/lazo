@@ -309,7 +309,8 @@ func TestTwoReturnValues(t *testing.T) {
 		}
 	`, "(int,int)test()")
 
-	tester.assertInt(big.NewInt(2))
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
 }
 
 func TestThreeReturnValues(t *testing.T) {
@@ -319,7 +320,10 @@ func TestThreeReturnValues(t *testing.T) {
 		}
 	`, "(int,int,int)test()")
 
-	tester.assertInt(big.NewInt(3))
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
+	tester.assertIntAt(2, big.NewInt(3))
 }
 
 func TestReturnMultipleValuesSameTypes(t *testing.T) {
@@ -330,7 +334,9 @@ func TestReturnMultipleValuesSameTypes(t *testing.T) {
 			return x, y
 		}
 	`, "(int,int)test()")
-	tester.assertInt(big.NewInt(2))
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
 }
 
 func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
@@ -341,7 +347,9 @@ func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
 			return x,y
 		}
 	`, "(int,bool)test()")
-	tester.assertBool(true)
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
 }
 
 // If statements
