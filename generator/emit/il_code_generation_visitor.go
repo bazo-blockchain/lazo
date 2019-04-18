@@ -268,6 +268,16 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
+// VisitFuncCallNode generates the IL Code for the function call
+func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
+	for _, arg := range node.Args {
+		arg.Accept(v.ConcreteVisitor)
+	}
+
+	funcSym := v.symbolTable.GetDeclByDesignator(node.Designator).(*symbol.FunctionSymbol)
+	v.assembler.CallFunc(funcSym)
+}
+
 // VisitDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.DesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)

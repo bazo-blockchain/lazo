@@ -116,6 +116,9 @@ func TestFuncCallByHashWithParams(t *testing.T) {
 // Statements
 // ----------
 
+// Local Variables
+// ---------------
+
 func TestLocalVarIntDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
@@ -213,6 +216,9 @@ func TestLocVarChar(t *testing.T) {
 	tester.assertChar('c')
 }
 
+// Assignments
+// -----------
+
 func TestAssignmentInt(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		function int test() {
@@ -283,6 +289,43 @@ func TestReAssignmentChar(t *testing.T) {
 	tester.assertChar('d')
 }
 
+// Return statements
+// -----------------
+
+func TestSingleReturnValue(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			return 1
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestTwoReturnValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, int) test() {
+			return 1, 2
+		}
+	`, "(int,int)test()")
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
+}
+
+func TestThreeReturnValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, int, int) test() {
+			return 1, 2, 3
+		}
+	`, "(int,int,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
+	tester.assertIntAt(2, big.NewInt(3))
+}
+
 func TestReturnMultipleValuesSameTypes(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		function (int, int) test() {
@@ -291,7 +334,9 @@ func TestReturnMultipleValuesSameTypes(t *testing.T) {
 			return x, y
 		}
 	`, "(int,int)test()")
-	tester.assertInt(big.NewInt(2))
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertIntAt(1, big.NewInt(2))
 }
 
 func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
@@ -302,8 +347,13 @@ func TestReturnMultipleValuesDifferentTypes(t *testing.T) {
 			return x,y
 		}
 	`, "(int,bool)test()")
-	tester.assertBool(true)
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
 }
+
+// If statements
+// ---------------
 
 func TestIfStatement(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
@@ -391,36 +441,6 @@ func TestNestedIfStatementAlternative(t *testing.T) {
 	tester.assertInt(big.NewInt(2))
 }
 
-func TestSingleReturnValue(t *testing.T) {
-	tester := newGeneratorTestUtilWithFunc(t, `
-		function int test() {
-			return 1
-		}
-	`, intTestSig)
-
-	tester.assertInt(big.NewInt(1))
-}
-
-func TestTwoReturnValues(t *testing.T) {
-	tester := newGeneratorTestUtilWithFunc(t, `
-		function (int, int) test() {
-			return 1, 2
-		}
-	`, "(int,int)test()")
-
-	tester.assertInt(big.NewInt(2))
-}
-
-func TestThreeReturnValues(t *testing.T) {
-	tester := newGeneratorTestUtilWithFunc(t, `
-		function (int, int, int) test() {
-			return 1, 2, 3
-		}
-	`, "(int,int,int)test()")
-
-	tester.assertInt(big.NewInt(3))
-}
-
 func TestSetter(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		int x = 4
@@ -429,6 +449,57 @@ func TestSetter(t *testing.T) {
 			x = 5
 		}
 	`, "()set()")
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(5))
+}
+
+// Function Calls
+// --------------
+
+func TestFuncCall(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			return add(10, 20)
+		}
+
+		function int add(int x, int y) {
+			return x + y
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(30))
+}
+
+func TestFuncCallWithMultiReturn(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, int) test() {
+			return calc(10, 20)
+		}
+
+		function (int, int) calc(int x, int y) {
+			return x + y, x * y
+		}
+	`, "(int,int)test()")
+
+	tester.assertIntAt(0, big.NewInt(30))
+	tester.assertIntAt(1, big.NewInt(200))
+}
+
+func TestFuncCallVoid(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		int x = 4
+		
+		function void test() {
+			set()
+		}
+	
+		function void set() {
+			x = 5
+		}
+	`, voidTestSig)
 
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
