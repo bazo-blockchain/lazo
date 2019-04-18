@@ -3,7 +3,6 @@ package cli
 import (
 	"bufio"
 	"fmt"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/bazo-blockchain/lazo/checker"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator"
@@ -37,13 +36,13 @@ var compileCommand = &cobra.Command{
 		if len(args) == 0 {
 			cmd.Help()
 		} else {
-			Compile(args[0])
+			compile(args[0])
 		}
 	},
 }
 
-// Compile compiles the given Lazo source code into Bazo byte code.
-func Compile(sourceFile string) ([]byte, []protocol.ByteArray) {
+// compile compiles the given Lazo source code into Bazo byte code.
+func compile(sourceFile string) ([]byte, [][]byte) {
 	file, err := os.Open(sourceFile)
 	if err != nil {
 		panic(err)
@@ -106,7 +105,7 @@ func check(syntaxTree *node.ProgramNode) *symbol.SymbolTable {
 	return symbolTable
 }
 
-func generate(symbolTable *symbol.SymbolTable) ([]byte, []protocol.ByteArray) {
+func generate(symbolTable *symbol.SymbolTable) ([]byte, [][]byte) {
 	generator := generator.New(symbolTable)
 	metadata, errors := generator.Run()
 

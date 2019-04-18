@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/bazo-blockchain/bazo-vm/vm"
 	"github.com/bazo-blockchain/lazo/generator/il"
 )
@@ -13,7 +12,7 @@ type Metadata struct {
 }
 
 // CreateContract returns the byte code for the contract together with the contract fields
-func (d *Metadata) CreateContract() ([]byte, []protocol.ByteArray) {
+func (d *Metadata) CreateContract() ([]byte, [][]byte) {
 	return d.getByteCode(), d.getVariables()
 }
 
@@ -38,8 +37,8 @@ func (d *Metadata) getByteCode() []byte {
 	return byteCode
 }
 
-func (d *Metadata) getVariables() []protocol.ByteArray {
-	return make([]protocol.ByteArray, len(d.Contract.Fields))
+func (d *Metadata) getVariables() [][]byte {
+	return make([][]byte, len(d.Contract.Fields))
 }
 
 func generateByteCode(code *il.Instruction, bytePos int) []byte {

@@ -56,7 +56,7 @@ func (v *ILCodeGenerationVisitor) generateABI(contractSymbol *symbol.ContractSym
 		checkNextFuncLabel := v.assembler.CreateLabel()
 		v.assembler.JmpTrue(checkNextFuncLabel)
 		v.assembler.Emit(il.Pop) // Remove function hash from top of call stack
-		v.assembler.Call(contractSymbol.Functions[i])
+		v.assembler.CallFunc(contractSymbol.Functions[i])
 		v.assembler.Emit(il.Halt)
 
 		v.assembler.SetLabel(checkNextFuncLabel)
@@ -77,8 +77,13 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 		variable.Accept(v.ConcreteVisitor)
 	}
 
-	// constructor code comes here
-	v.assembler.Call(contractSymbol.Functions[0])
+	if node.Constructor != nil {
+		v.function = contractSymbol.Constructor
+		v.assembler.CallFunc(contractSymbol.Constructor)
+		v.ilBuilder.SetFunctionPos(v.function, v.bytePos)
+		node.Constructor.Accept(v)
+		v.function = nil
+	}
 	contractData.Instructions = v.assembler.Complete(true)
 }
 

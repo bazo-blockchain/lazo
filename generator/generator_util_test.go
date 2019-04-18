@@ -15,6 +15,13 @@ import (
 	"testing"
 )
 
+const (
+	intTestSig    = "(int)test()"
+	boolTestSig   = "(bool)test()"
+	charTestSig   = "(char)test()"
+	stringTestSig = "(string)test()"
+)
+
 type generatorTestUtil struct {
 	t        *testing.T
 	metadata *data.Metadata
@@ -23,10 +30,8 @@ type generatorTestUtil struct {
 	errors   []error
 }
 
-func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
-	txData := []byte{
-		1, 0, // call constructor
-	}
+func newGeneratorTestUtil(t *testing.T, contractCode string, funcData ...byte) *generatorTestUtil {
+	txData := append(funcData, 1, 0) // Call constructor with the function call data
 
 	return newGeneratorTestUtilWithRawInput(
 		t,
@@ -35,7 +40,12 @@ func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil 
 	)
 }
 
-func newGeneratorTextUtilWithTx(t *testing.T, contractCode string, txData []byte) *generatorTestUtil {
+func newGeneratorTestUtilWithFunc(t *testing.T, contractCode string,
+	funcSignature string, funcData ...byte) *generatorTestUtil {
+	funcHash := util.CreateFuncHash(funcSignature)
+	txData := append(funcData, 4)
+	txData = append(txData, funcHash[:]...)
+
 	return newGeneratorTestUtilWithRawInput(
 		t,
 		fmt.Sprintf("contract Test {\n %s \n }", contractCode),
@@ -67,7 +77,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	tester.context = context
 
 	bazoVM := vm.NewVM(context)
-	isSuccess := bazoVM.Exec(true)
+	isSuccess := bazoVM.Exec(false)
 	result, vmError := bazoVM.PeekResult()
 	assert.Assert(t, isSuccess, string(result))
 
@@ -118,12 +128,12 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 
 func assertBoolExpr(t *testing.T, expr string, expected bool) {
 	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtil(t, code)
+	tester := newGeneratorTestUtilWithFunc(t, code, boolTestSig)
 	tester.assertBool(expected)
 }
 
 func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtil(t, code)
+	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
 }

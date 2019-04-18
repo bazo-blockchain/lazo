@@ -1,12 +1,12 @@
 package emit
 
 import (
-	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/il"
+	"github.com/bazo-blockchain/lazo/generator/util"
 	"strings"
 )
 
@@ -82,7 +82,7 @@ func (b *ILBuilder) registerContract(contract *symbol.ContractSymbol) {
 func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 	functionData := &data.FunctionData{
 		Identifier: function.Identifier(),
-		Hash:       createFuncHash(createFuncSignature(function)),
+		Hash:       util.CreateFuncHash(createFuncSignature(function)),
 	}
 	b.Metadata.Contract.Functions = append(b.Metadata.Contract.Functions, functionData)
 	b.functionData[function] = functionData
@@ -133,15 +133,6 @@ func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) data.TypeData {
 
 // Helper Functions
 // ----------------
-
-func createFuncHash(funcSig string) [4]byte {
-	h := sha256.Sum256([]byte(funcSig))
-	var arr [4]byte
-	for i := 0; i < 4; i++ {
-		arr[i] = h[i]
-	}
-	return arr
-}
 
 func createFuncSignature(function *symbol.FunctionSymbol) string {
 	var sb strings.Builder
