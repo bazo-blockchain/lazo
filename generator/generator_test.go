@@ -58,7 +58,26 @@ func TestContractFieldAssignment(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(3))
 }
 
-// Call contract functions externally
+// Constructor
+// -----------
+
+func TestConstructorWithParam(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int a
+
+		constructor(int x){
+			int y = x + 1
+			a = y
+		}
+	`, 2, 0, 4)
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(5))
+}
+
+// CallFunc contract functions externally
 // ----------------------------------
 
 func TestFuncCallByHash(t *testing.T) {

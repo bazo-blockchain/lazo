@@ -31,10 +31,8 @@ type generatorTestUtil struct {
 	errors   []error
 }
 
-func newGeneratorTestUtil(t *testing.T, contractCode string) *generatorTestUtil {
-	txData := []byte{
-		1, 0, // call constructor
-	}
+func newGeneratorTestUtil(t *testing.T, contractCode string, funcData ...byte) *generatorTestUtil {
+	txData := append(funcData, 1, 0) // Call constructor with the function call data
 
 	return newGeneratorTestUtilWithRawInput(
 		t,

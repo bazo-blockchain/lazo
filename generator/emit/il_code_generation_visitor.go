@@ -56,7 +56,7 @@ func (v *ILCodeGenerationVisitor) generateABI(contractSymbol *symbol.ContractSym
 		checkNextFuncLabel := v.assembler.CreateLabel()
 		v.assembler.JmpTrue(checkNextFuncLabel)
 		v.assembler.Emit(il.Pop) // Remove function hash from top of call stack
-		v.assembler.Call(contractSymbol.Functions[i])
+		v.assembler.CallFunc(contractSymbol.Functions[i])
 		v.assembler.Emit(il.Halt)
 
 		v.assembler.SetLabel(checkNextFuncLabel)
@@ -78,7 +78,11 @@ func (v *ILCodeGenerationVisitor) generateConstructorIL(node *node.ContractNode,
 	}
 
 	if node.Constructor != nil {
+		v.function = contractSymbol.Constructor
+		v.assembler.CallFunc(contractSymbol.Constructor)
+		v.ilBuilder.SetFunctionPos(v.function, v.bytePos)
 		node.Constructor.Accept(v)
+		v.function = nil
 	}
 	contractData.Instructions = v.assembler.Complete(true)
 }
@@ -94,13 +98,6 @@ func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
 
 	index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
 	v.assembler.StoreState(byte(index))
-}
-
-// VisitConstructorNode generates the IL Code for the constructor
-func (v *ILCodeGenerationVisitor) VisitConstructorNode(node *node.ConstructorNode) {
-	v.function = v.symbolTable.GlobalScope.Contract.Constructor
-	v.AbstractVisitor.VisitConstructorNode(node)
-	v.function = nil
 }
 
 func (v *ILCodeGenerationVisitor) generateFunctionIL(node *node.ContractNode, contractSymbol *symbol.ContractSymbol,

@@ -1,6 +1,9 @@
 package util
 
-import "math/big"
+import (
+	"encoding/binary"
+	"math/big"
+)
 
 // GetSignByte returns the sign byte of a value on the stack
 func GetSignByte(value *big.Int) byte {
@@ -9,4 +12,10 @@ func GetSignByte(value *big.Int) byte {
 		sign = 1
 	}
 	return sign
+}
+
+func GetBytesFromUInt16(element uint16) []byte {
+	bytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(bytes, uint16(element))
+	return bytes
 }

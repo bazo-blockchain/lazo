@@ -31,8 +31,6 @@ func execute(sourceFile string) {
 	context.Data = []byte{
 		1, // total bytes
 		0, // Contract Init Flag
-		//3,
-		//19, 70, 101, 78, // Function hash
 	}
 
 	vm := vm.NewVM(context)

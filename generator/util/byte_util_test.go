@@ -17,3 +17,9 @@ func TestGetSignByte(t *testing.T) {
 		assert.Equal(t, GetSignByte(big.NewInt(k)), v)
 	}
 }
+
+func TestGetBytesFromUInt16(t *testing.T) {
+	bytes := GetBytesFromUInt16(uint16(0x1234))
+	assert.Equal(t, bytes[0], byte(0x12))
+	assert.Equal(t, bytes[1], byte(0x34))
+}

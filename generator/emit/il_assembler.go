@@ -55,7 +55,7 @@ func (a *ILAssembler) ResolveLabels() {
 	for _, instruction := range a.instructions {
 		operand := instruction.Operand
 		if op, ok := operand.(Label); ok {
-			instruction.Operand = []byte{0, byte(a.targets[op])}
+			instruction.Operand = util.GetBytesFromUInt16(a.targets[op])
 		}
 	}
 }
@@ -136,9 +136,9 @@ func (a *ILAssembler) JmpFalse(label Label) {
 	a.addInstruction(il.JmpFalse, label, 2)
 }
 
-// Call is a helper that adds a CALL instruction to the byte code
+// CallFunc is a helper that adds a CALL instruction to the byte code
 // Is used to call functions
-func (a *ILAssembler) Call(function *symbol.FunctionSymbol) {
+func (a *ILAssembler) CallFunc(function *symbol.FunctionSymbol) {
 	a.addInstruction(il.Call, function, 3)
 }
 
