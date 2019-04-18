@@ -12,7 +12,7 @@ func init() {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of Lazo",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("Lazo compiler v1.0")
 	},
 }

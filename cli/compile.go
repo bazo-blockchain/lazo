@@ -36,13 +36,13 @@ var compileCommand = &cobra.Command{
 		if len(args) == 0 {
 			cmd.Help()
 		} else {
-			Compile(args[0])
+			compile(args[0])
 		}
 	},
 }
 
-// Compile compiles the given Lazo source code into Bazo byte code.
-func Compile(sourceFile string) ([]byte, [][]byte) {
+// compile compiles the given Lazo source code into Bazo byte code.
+func compile(sourceFile string) ([]byte, [][]byte) {
 	file, err := os.Open(sourceFile)
 	if err != nil {
 		panic(err)
