@@ -62,9 +62,10 @@ func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 		if typeSymbol, ok := instruction.Operand.(*symbol.TypeSymbol); ok {
 			instruction.Operand = b.getTypeRef(typeSymbol)
 		} else if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
-			operand := make([]byte, 3)
+			operand := make([]byte, 4)
 			binary.BigEndian.PutUint16(operand, uint16(b.functionPositions[functionSymbol]))
 			operand[2] = byte(len(functionSymbol.Parameters))
+			operand[3] = byte(len(functionSymbol.ReturnTypes))
 			instruction.Operand = operand
 		}
 	}
