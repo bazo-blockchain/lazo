@@ -21,6 +21,8 @@ type Visitor interface {
 	VisitUnaryExpressionNode(node *UnaryExpressionNode)
 	VisitDesignatorNode(node *DesignatorNode)
 	VisitFuncCallNode(node *FuncCallNode)
+	VisitElementAccessNode(node *ElementAccessNode)
+	VisitMemberAccessNode(node *MemberAccessNode)
 	VisitIntegerLiteralNode(node *IntegerLiteralNode)
 	VisitStringLiteralNode(node *StringLiteralNode)
 	VisitCharacterLiteralNode(node *CharacterLiteralNode)

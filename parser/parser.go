@@ -292,21 +292,21 @@ func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) 
 	return mv
 }
 
-func (p *Parser) parseAssignmentStatement(left *node.DesignatorNode) *node.AssignmentStatementNode {
+func (p *Parser) parseAssignmentStatement(left node.Node) *node.AssignmentStatementNode {
 	p.nextToken() // skip '=' sign
 
 	expression := p.parseExpression()
 	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.AssignmentStatementNode{
-		AbstractNode: left.AbstractNode,
+		AbstractNode: p.newAbstractNode(),
 		Left:         left,
 		Right:        expression,
 	}
 }
 
-func (p *Parser) parseMultiAssignmentStatement(designator *node.DesignatorNode) *node.MultiAssignmentStatementNode {
-	designators := []*node.DesignatorNode{designator}
+func (p *Parser) parseMultiAssignmentStatement(designator node.Node) *node.MultiAssignmentStatementNode {
+	designators := []node.Node{designator}
 
 	if !p.isEnd() && p.isSymbol(token.Comma) {
 		p.nextToken()
@@ -314,7 +314,7 @@ func (p *Parser) parseMultiAssignmentStatement(designator *node.DesignatorNode) 
 	}
 	p.check(token.Assign)
 	ma := &node.MultiAssignmentStatementNode{
-		AbstractNode: designator.AbstractNode,
+		AbstractNode: p.newAbstractNode(),
 		Designators:  designators,
 		FuncCall:     p.parseFuncCall(p.parseDesignator()),
 	}
@@ -382,7 +382,7 @@ func (p *Parser) parseType() *node.TypeNode {
 	}
 }
 
-func (p *Parser) parseCallStatement(designator *node.DesignatorNode) *node.CallStatementNode {
+func (p *Parser) parseCallStatement(designator node.Node) *node.CallStatementNode {
 	fc := p.parseFuncCall(designator)
 	p.checkAndSkipNewLines(token.NewLine)
 

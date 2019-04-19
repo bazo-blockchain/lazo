@@ -75,7 +75,7 @@ func assertVariableStatement(t *testing.T, node *node.VariableNode, varType stri
 }
 
 func assertAssignmentStatement(t *testing.T, node *node.AssignmentStatementNode, designator string, expr string) {
-	assert.Equal(t, node.Left.Value, designator)
+	assert.Equal(t, node.Left.String(), designator)
 	assertExpression(t, node.Right, expr)
 }
 
@@ -155,4 +155,18 @@ func assertFuncCall(t *testing.T, n node.ExpressionNode, designator string, args
 	for i, a := range args {
 		assert.Equal(t, funcCall.Args[i].String(), a)
 	}
+}
+
+func assertElementAccess(t *testing.T, n node.ExpressionNode, designator string, exp string) {
+	elementAccess, ok := n.(*node.ElementAccessNode)
+	assert.Assert(t, ok)
+	assert.Equal(t, elementAccess.Designator.String(), designator)
+	assert.Equal(t, elementAccess.Expression.String(), exp)
+}
+
+func assertMemberAccess(t *testing.T, n node.ExpressionNode, designator string, id string) {
+	memberAccess, ok := n.(*node.MemberAccessNode)
+	assert.Assert(t, ok)
+	assert.Equal(t, memberAccess.Designator.String(), designator)
+	assert.Equal(t, memberAccess.Identifier, id)
 }

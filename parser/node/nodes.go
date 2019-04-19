@@ -277,7 +277,7 @@ func (n *ReturnStatementNode) Accept(v Visitor) {
 // AssignmentStatementNode composes abstract node and holds the target designator and value expression.
 type AssignmentStatementNode struct {
 	AbstractNode
-	Left  *DesignatorNode
+	Left  Node
 	Right ExpressionNode
 }
 
@@ -295,7 +295,7 @@ func (n *AssignmentStatementNode) Accept(v Visitor) {
 // MultiAssignmentStatementNode composes abstract node and holds the target designators and a function call
 type MultiAssignmentStatementNode struct {
 	AbstractNode
-	Designators []*DesignatorNode
+	Designators []Node
 	FuncCall    *FuncCallNode
 }
 
@@ -388,10 +388,10 @@ func (n *DesignatorNode) Accept(v Visitor) {
 
 // --------------------------
 
-// FuncCallNode compose abstract node and holds designator and arguments
+// FuncCallNode composes abstract node and holds designator and arguments
 type FuncCallNode struct {
 	AbstractNode
-	Designator *DesignatorNode
+	Designator Node
 	Args       []ExpressionNode
 }
 
@@ -399,9 +399,45 @@ func (n *FuncCallNode) String() string {
 	return fmt.Sprintf("%s(%s)", n.Designator, n.Args)
 }
 
-// Accept lets a visitor to traverse its node structure
+// Accept lets a visitor traverse its node structure
 func (n *FuncCallNode) Accept(v Visitor) {
 	v.VisitFuncCallNode(n)
+}
+
+// --------------------------
+
+// ElementAccessNode composes abstract node and holds designator and expression
+type ElementAccessNode struct {
+	AbstractNode
+	Designator Node
+	Expression ExpressionNode
+}
+
+func (n *ElementAccessNode) String() string {
+	return fmt.Sprintf("%s[%s]", n.Designator, n.Expression)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ElementAccessNode) Accept(v Visitor) {
+	v.VisitElementAccessNode(n)
+}
+
+// --------------------------
+
+//MemberAccessNode composes abstract node and holds designator and identifier
+type MemberAccessNode struct {
+	AbstractNode
+	Designator Node
+	Identifier string
+}
+
+func (n *MemberAccessNode) String() string {
+	return fmt.Sprintf("%s.%s", n.Designator, n.Identifier)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *MemberAccessNode) Accept(v Visitor) {
+	v.VisitMemberAccessNode(n)
 }
 
 // --------------------------

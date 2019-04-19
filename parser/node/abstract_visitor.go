@@ -139,6 +139,15 @@ func (v *AbstractVisitor) VisitFuncCallNode(node *FuncCallNode) {
 	}
 }
 
+func (v *AbstractVisitor) VisitElementAccessNode(node *ElementAccessNode) {
+	node.Designator.Accept(v.ConcreteVisitor)
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
+func (v *AbstractVisitor) VisitMemberAccessNode(node *MemberAccessNode) {
+	node.Designator.Accept(v.ConcreteVisitor)
+}
+
 // VisitDesignatorNode does nothing because it is the terminal node.
 func (v *AbstractVisitor) VisitDesignatorNode(node *DesignatorNode) {
 	// Nothing to do here
