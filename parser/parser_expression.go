@@ -168,16 +168,39 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	return p.newErrorNode(error)
 }
 
-func (p *Parser) parseDesignator() *node.DesignatorNode {
-	return &node.DesignatorNode{
+func (p *Parser) parseDesignator() node.Node {
+	var left node.Node
+	left = &node.DesignatorNode{
 		AbstractNode: p.newAbstractNode(),
 		Value:        p.readIdentifier(),
 	}
+
+	for p.isSymbol(token.Period) || p.isSymbol(token.OpenBracket) {
+		if p.isSymbol(token.Period) {
+			p.nextToken()
+			identifier := p.readIdentifier()
+			left = &node.MemberAccessNode{
+				AbstractNode: p.newAbstractNode(),
+				Designator:   left,
+				Identifier:   identifier,
+			}
+		} else {
+			p.check(token.OpenBracket)
+			exp := p.parseExpression()
+			p.check(token.CloseBracket)
+			left = &node.ElementAccessNode{
+				AbstractNode: p.newAbstractNode(),
+				Designator:   left,
+				Expression:   exp,
+			}
+		}
+	}
+	return left
 }
 
-func (p *Parser) parseFuncCall(designator *node.DesignatorNode) *node.FuncCallNode {
+func (p *Parser) parseFuncCall(designator node.Node) *node.FuncCallNode {
 	funcCall := &node.FuncCallNode{
-		AbstractNode: designator.AbstractNode,
+		AbstractNode: p.newAbstractNode(),
 		Designator:   designator,
 	}
 	p.check(token.OpenParen)

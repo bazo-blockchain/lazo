@@ -9,7 +9,7 @@ import (
 type SymbolTable struct {
 	GlobalScope            *GlobalScope
 	symbolToNode           map[Symbol]node.Node
-	designatorDeclarations map[*node.DesignatorNode]Symbol
+	designatorDeclarations map[node.Node]Symbol
 	expressionTypes        map[node.ExpressionNode]*TypeSymbol
 }
 
@@ -18,7 +18,7 @@ func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		GlobalScope:            newGlobalScope(),
 		symbolToNode:           make(map[Symbol]node.Node),
-		designatorDeclarations: make(map[*node.DesignatorNode]Symbol),
+		designatorDeclarations: make(map[node.Node]Symbol),
 		expressionTypes:        make(map[node.ExpressionNode]*TypeSymbol),
 	}
 }
@@ -71,7 +71,7 @@ func (t *SymbolTable) MapDesignatorToDecl(designatorNode *node.DesignatorNode, s
 }
 
 // GetDeclByDesignator returns the declaration for a designator
-func (t *SymbolTable) GetDeclByDesignator(designatorNode *node.DesignatorNode) Symbol {
+func (t *SymbolTable) GetDeclByDesignator(designatorNode node.Node) Symbol {
 	return t.designatorDeclarations[designatorNode]
 }
 

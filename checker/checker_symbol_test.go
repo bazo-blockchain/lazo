@@ -269,7 +269,7 @@ func TestFunctionWithAssignment(t *testing.T) {
 	varX := tester.globalScope.Contract.Functions[0].LocalVariables[0]
 	assignX, ok := varX.VisibleIn[2].(*node.AssignmentStatementNode)
 	assert.Assert(t, ok)
-	assert.Equal(t, assignX.Left.Value, "x")
+	assert.Equal(t, assignX.Left.String(), "x")
 }
 
 func TestFunctionWithMultiAssign(t *testing.T) {
@@ -295,8 +295,8 @@ func TestFunctionWithMultiAssign(t *testing.T) {
 	assert.Assert(t, ok)
 	assert.Equal(t, multiAssign, multiAssignY)
 
-	assert.Equal(t, multiAssign.Designators[0].Value, "x")
-	assert.Equal(t, multiAssign.Designators[1].Value, "y")
+	assert.Equal(t, multiAssign.Designators[0].String(), "x")
+	assert.Equal(t, multiAssign.Designators[1].String(), "y")
 }
 
 func TestFunctionWithIf(t *testing.T) {

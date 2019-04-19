@@ -200,21 +200,21 @@ func TestUnaryAssociativity(t *testing.T) {
 func TestDesignator(t *testing.T) {
 	p := newParserFromInput("test")
 	v := p.parseDesignator()
-	assertDesignator(t, v, "test")
+	assertDesignator(t, v.(*node.DesignatorNode), "test")
 	assertNoErrors(t, p)
 }
 
 func TestDesignatorWithNumbers(t *testing.T) {
 	p := newParserFromInput("test123")
 	v := p.parseDesignator()
-	assertDesignator(t, v, "test123")
+	assertDesignator(t, v.(*node.DesignatorNode), "test123")
 	assertNoErrors(t, p)
 }
 
 func TestDesignatorWithUnderscore(t *testing.T) {
 	p := newParserFromInput("_test")
 	v := p.parseDesignator()
-	assertDesignator(t, v, "_test")
+	assertDesignator(t, v.(*node.DesignatorNode), "_test")
 	assertNoErrors(t, p)
 }
 
@@ -252,6 +252,53 @@ func TestFuncCallMissingComma(t *testing.T) {
 	p := newParserFromInput("test(1 2)")
 	_ = p.parseExpression()
 	assertErrorAt(t, p, 0, ", expected, but got 2")
+}
+
+func TestFuncCallOnMember(t *testing.T) {
+	e := parseExpressionFromInput(t, "a.f()")
+	assertFuncCall(t, e, "a.f")
+}
+
+// Element Access Expression
+// -------------------------
+
+func TestElementAccess(t *testing.T) {
+	e := parseExpressionFromInput(t, "arr[0]")
+	assertElementAccess(t, e, "arr", "0")
+}
+
+func TestElementAccessWithDesignator(t *testing.T) {
+	e := parseExpressionFromInput(t, "arr[pos]")
+	assertElementAccess(t, e, "arr", "pos")
+}
+
+func TestElementAccessWithExpression(t *testing.T) {
+	e := parseExpressionFromInput(t, "arr[1 + 2]")
+	assertElementAccess(t, e, "arr", "(1 + 2)")
+}
+
+func TestElementAccessOnMember(t *testing.T) {
+	e := parseExpressionFromInput(t, "a.arr[pos]")
+	assertElementAccess(t, e, "a.arr", "pos")
+}
+
+// Member Access Expression
+// ------------------------
+
+func TestMemberAccess(t *testing.T) {
+	e := parseExpressionFromInput(t, "a.x")
+	assertMemberAccess(t, e, "a", "x")
+}
+
+func TestMultipleMemberAccess(t *testing.T) {
+	e := parseExpressionFromInput(t, "a.x.y")
+	assertMemberAccess(t, e, "a.x", "y")
+}
+
+func TestInvalidMemberAccess(t *testing.T) {
+	p := newParserFromInput("a.0")
+	p.parseExpression()
+	assertHasError(t, p)
 }
 
 // Literal Expressions
