@@ -334,7 +334,7 @@ func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.Character
 // Helper Functions
 // ----------------
 
-func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
+func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 	gs := v.symbolTable.GlobalScope
 
 	switch typeSymbol {
@@ -347,8 +347,8 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol *symbol.TypeSymbol) {
 	case gs.CharType:
 		v.assembler.PushCharacter('0')
 	default:
-		typeNode := v.symbolTable.GetNodeBySymbol(typeSymbol)
-		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.ID))
+		typeNode := v.symbolTable.GetNodeBySymbol(typeSymbol.(symbol.Symbol))
+		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.Identifier()))
 	}
 }
 

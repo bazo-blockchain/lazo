@@ -7,25 +7,26 @@ import "fmt"
 type GlobalScope struct {
 	AbstractSymbol
 	Contract         *ContractSymbol
-	Types            []*TypeSymbol
-	BuiltInTypes     []*TypeSymbol
+	Types            []*BasicTypeSymbol
+	BuiltInTypes     []*BasicTypeSymbol
 	BuiltInFunctions []*FunctionSymbol
 	Constants        []*ConstantSymbol
 
-	NullType   *TypeSymbol
-	BoolType   *TypeSymbol
-	CharType   *TypeSymbol
-	StringType *TypeSymbol
-	IntType    *TypeSymbol
+	NullType   *BasicTypeSymbol
+	BoolType   *BasicTypeSymbol
+	CharType   *BasicTypeSymbol
+	StringType *BasicTypeSymbol
+	IntType    *BasicTypeSymbol
 
 	TrueConstant  *ConstantSymbol
 	FalseConstant *ConstantSymbol
 	NullConstant  *ConstantSymbol
+	ArrayLength   *FieldSymbol
 }
 
 func newGlobalScope() *GlobalScope {
 	gs := &GlobalScope{}
-	gs.NullType = NewTypeSymbol(gs, "@NULL")
+	gs.NullType = NewBasicTypeSymbol(gs, "@NULL")
 	return gs
 }
 

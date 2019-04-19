@@ -70,7 +70,7 @@ func (v *typeCheckVisitor) VisitVariableNode(node *node.VariableNode) {
 // VisitMultiVariableNode checks whether the variable types matches with the function return types
 func (v *typeCheckVisitor) VisitMultiVariableNode(node *node.MultiVariableNode) {
 	v.AbstractVisitor.VisitMultiVariableNode(node)
-	targetTypes := make([]*symbol.TypeSymbol, len(node.Types))
+	targetTypes := make([]symbol.TypeSymbol, len(node.Types))
 
 	for i, t := range node.Types {
 		targetTypes[i] = v.symbolTable.FindTypeByNode(t)
@@ -109,7 +109,7 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 			nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
 			if nodeType != rtype {
 				v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
-					rtype.ID, getTypeString(nodeType)))
+					rtype.Identifier(), getTypeString(nodeType)))
 			}
 		}
 	} else if len(returnNodes) > 0 {
@@ -268,26 +268,26 @@ func (v *typeCheckVisitor) VisitCharacterLiteralNode(node *node.CharacterLiteral
 // Helper Functions
 // ----------------
 
-func (v *typeCheckVisitor) isInt(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isInt(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.IntType
 }
 
-func (v *typeCheckVisitor) isBool(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isBool(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.BoolType
 }
 
-func (v *typeCheckVisitor) isChar(symbol *symbol.TypeSymbol) bool {
+func (v *typeCheckVisitor) isChar(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
 }
 
-func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType *symbol.TypeSymbol) {
+func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
 	actualType := v.symbolTable.GetTypeByExpression(expr)
 	if expectedType != actualType {
 		v.reportError(expr, fmt.Sprintf("expected %s, got %s", expectedType, actualType))
 	}
 }
 
-func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expectedTypes ...*symbol.TypeSymbol) {
+func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expectedTypes ...symbol.TypeSymbol) {
 	// Only function call are allowed to have multiple types
 	if fc, ok := expr.(*node.FuncCallNode); ok {
 		calledFuncSym, ok := v.symbolTable.GetDeclByDesignator(fc.Designator).(*symbol.FunctionSymbol)
@@ -307,7 +307,7 @@ func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expect
 		for i, returnType := range calledFuncSym.ReturnTypes {
 			if expectedTypes[i] != returnType {
 				v.reportError(expr, fmt.Sprintf("Return type mismatch: expected %s, given %s",
-					returnType.ID, expectedTypes[i].ID))
+					returnType.Identifier(), expectedTypes[i].Identifier()))
 			}
 		}
 		return
@@ -329,9 +329,9 @@ func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }
 
-func getTypeString(t *symbol.TypeSymbol) string {
+func getTypeString(t symbol.TypeSymbol) string {
 	if t == nil {
 		return "nil"
 	}
-	return t.ID
+	return t.Identifier()
 }

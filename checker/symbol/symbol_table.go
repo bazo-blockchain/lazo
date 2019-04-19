@@ -10,7 +10,7 @@ type SymbolTable struct {
 	GlobalScope            *GlobalScope
 	symbolToNode           map[Symbol]node.Node
 	designatorDeclarations map[node.Node]Symbol
-	expressionTypes        map[node.ExpressionNode]*TypeSymbol
+	expressionTypes        map[node.ExpressionNode]TypeSymbol
 }
 
 // NewSymbolTable creates a new symbol table and initializes mappings
@@ -19,13 +19,13 @@ func NewSymbolTable() *SymbolTable {
 		GlobalScope:            newGlobalScope(),
 		symbolToNode:           make(map[Symbol]node.Node),
 		designatorDeclarations: make(map[node.Node]Symbol),
-		expressionTypes:        make(map[node.ExpressionNode]*TypeSymbol),
+		expressionTypes:        make(map[node.ExpressionNode]TypeSymbol),
 	}
 }
 
 // FindTypeByIdentifier searches for a type
 // Returns the type or nil
-func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
+func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
 	for _, compilationType := range t.GlobalScope.Types {
 		if compilationType.Identifier() == identifier {
 			return compilationType
@@ -37,7 +37,7 @@ func (t *SymbolTable) FindTypeByIdentifier(identifier string) *TypeSymbol {
 
 // FindTypeByNode searches for a type
 // Returns the type or nil
-func (t *SymbolTable) FindTypeByNode(node *node.TypeNode) *TypeSymbol {
+func (t *SymbolTable) FindTypeByNode(node *node.TypeNode) TypeSymbol {
 	return t.FindTypeByIdentifier(node.Identifier)
 }
 
@@ -66,7 +66,7 @@ func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 }
 
 // MapDesignatorToDecl maps a designator to a declaration
-func (t *SymbolTable) MapDesignatorToDecl(designatorNode *node.DesignatorNode, symbol Symbol) {
+func (t *SymbolTable) MapDesignatorToDecl(designatorNode node.Node, symbol Symbol) {
 	t.designatorDeclarations[designatorNode] = symbol
 }
 
@@ -76,12 +76,12 @@ func (t *SymbolTable) GetDeclByDesignator(designatorNode node.Node) Symbol {
 }
 
 // MapExpressionToType maps an expression to its type
-func (t *SymbolTable) MapExpressionToType(expressionNode node.ExpressionNode, symbol *TypeSymbol) {
+func (t *SymbolTable) MapExpressionToType(expressionNode node.ExpressionNode, symbol TypeSymbol) {
 	t.expressionTypes[expressionNode] = symbol
 }
 
 // GetTypeByExpression returns the type of the expression
-func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) *TypeSymbol {
+func (t *SymbolTable) GetTypeByExpression(expressionNode node.ExpressionNode) TypeSymbol {
 	return t.expressionTypes[expressionNode]
 }
 

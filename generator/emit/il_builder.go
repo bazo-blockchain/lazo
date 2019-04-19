@@ -59,7 +59,7 @@ func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos uint16) {
 
 func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 	for _, instruction := range code {
-		if typeSymbol, ok := instruction.Operand.(*symbol.TypeSymbol); ok {
+		if typeSymbol, ok := instruction.Operand.(*symbol.BasicTypeSymbol); ok {
 			instruction.Operand = b.getTypeRef(typeSymbol)
 		} else if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
 			operand := make([]byte, 4)
@@ -117,7 +117,7 @@ func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
 	}
 }
 
-func (b *ILBuilder) getTypeRef(sym *symbol.TypeSymbol) data.TypeData {
+func (b *ILBuilder) getTypeRef(sym symbol.TypeSymbol) data.TypeData {
 	scope := b.symbolTable.GlobalScope
 	if sym.Identifier() == scope.BoolType.Identifier() {
 		return data.BoolType
@@ -143,7 +143,7 @@ func createFuncSignature(function *symbol.FunctionSymbol) string {
 		if i > 0 {
 			sb.WriteRune(',')
 		}
-		sb.WriteString(r.ID)
+		sb.WriteString(r.Identifier())
 	}
 	sb.WriteRune(')')
 
@@ -154,7 +154,7 @@ func createFuncSignature(function *symbol.FunctionSymbol) string {
 		if i > 0 {
 			sb.WriteRune(',')
 		}
-		sb.WriteString(p.Type.ID)
+		sb.WriteString(p.Type.Identifier())
 	}
 	sb.WriteRune(')')
 

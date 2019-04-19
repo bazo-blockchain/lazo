@@ -88,7 +88,7 @@ func (sym *ContractSymbol) GetFieldIndex(id string) int {
 	return -1
 }
 
-// String creates the string representation for the ContractSymbol
+// String creates the string representation
 func (sym *ContractSymbol) String() string {
 	return fmt.Sprintf("Contract: %s, \nFields: %s, \nConstructor %s \nFunctions %s",
 		sym.ID, sym.Fields, sym.Constructor, sym.Functions)
@@ -99,7 +99,7 @@ func (sym *ContractSymbol) String() string {
 // FieldSymbol contains the type of the field
 type FieldSymbol struct {
 	AbstractSymbol
-	Type *TypeSymbol
+	Type TypeSymbol
 }
 
 // NewFieldSymbol creates a new FieldSymbol
@@ -109,7 +109,7 @@ func NewFieldSymbol(scope Symbol, identifier string) *FieldSymbol {
 	}
 }
 
-// String creates the string representation of the FieldSymbol
+// String creates the string representation
 func (sym *FieldSymbol) String() string {
 	return fmt.Sprintf("%s %s", sym.Type, sym.ID)
 }
@@ -119,7 +119,7 @@ func (sym *FieldSymbol) String() string {
 // FunctionSymbol contains the return types, parameters and local variables of a function
 type FunctionSymbol struct {
 	AbstractSymbol
-	ReturnTypes    []*TypeSymbol
+	ReturnTypes    []TypeSymbol
 	Parameters     []*ParameterSymbol
 	LocalVariables []*LocalVariableSymbol
 }
@@ -163,7 +163,7 @@ func (sym *FunctionSymbol) IsLocalVar(id string) bool {
 	return false
 }
 
-// String creates the string representation for the FunctionSymbol
+// String creates the string representation
 func (sym *FunctionSymbol) String() string {
 	return fmt.Sprintf("\n %s %s(%s): vars: %s", sym.ReturnTypes, sym.ID, sym.Parameters, sym.LocalVariables)
 }
@@ -202,7 +202,7 @@ func NewLocalVariableSymbol(scope Symbol, identifier string) *LocalVariableSymbo
 // VariableSymbol contains the variables type
 type VariableSymbol struct {
 	AbstractSymbol
-	Type *TypeSymbol
+	Type TypeSymbol
 }
 
 // NewVariableSymbol creates a new VariableSymbol
@@ -212,7 +212,7 @@ func NewVariableSymbol(scope Symbol, identifier string) *VariableSymbol {
 	}
 }
 
-// String creates the string representation of the VariableSymbol
+// String creates the string representation
 func (sym *VariableSymbol) String() string {
 	return fmt.Sprintf("%s %s", sym.Type, sym.ID)
 }
@@ -222,37 +222,75 @@ func (sym *VariableSymbol) String() string {
 // ConstantSymbol contains the type of the constant
 type ConstantSymbol struct {
 	AbstractSymbol
-	Type *TypeSymbol
+	Type TypeSymbol
 }
 
 // NewConstantSymbol creates a new ConstantSymbol
-func NewConstantSymbol(scope Symbol, identifier string, typeSymbol *TypeSymbol) *ConstantSymbol {
+func NewConstantSymbol(scope Symbol, identifier string, typeSymbol TypeSymbol) *ConstantSymbol {
 	return &ConstantSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 		Type:           typeSymbol,
 	}
 }
 
-// String creates the string representation of the ConstantSymbol
+// String creates the string representation
 func (sym *ConstantSymbol) String() string {
 	return fmt.Sprintf("Constant %s", sym.ID)
 }
 
 //----------------
 
-// TypeSymbol represents a type
-type TypeSymbol struct {
+type TypeSymbol interface {
+	GetType() string
+	Identifier() string
+}
+
+//----------------
+
+// BasicTypeSymbol represents a type
+type BasicTypeSymbol struct {
 	AbstractSymbol
 }
 
-// NewTypeSymbol creates a new TypeSymbol
-func NewTypeSymbol(scope Symbol, identifier string) *TypeSymbol {
-	return &TypeSymbol{
+// NewBasicTypeSymbol creates a new BasicTypeSymbol
+func NewBasicTypeSymbol(scope Symbol, identifier string) *BasicTypeSymbol {
+	return &BasicTypeSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 	}
 }
 
-// String creates a new string representation for TypeSymbol
-func (sym *TypeSymbol) String() string {
+// String creates a new string representation
+func (sym *BasicTypeSymbol) String() string {
 	return fmt.Sprintf("Type %s", sym.ID)
+}
+
+// GetType returns the type
+func (sym *BasicTypeSymbol) GetType() string {
+	return sym.Identifier()
+}
+
+//----------------
+
+// ArrayTypeSymbol represents a array type
+type ArrayTypeSymbol struct {
+	AbstractSymbol
+	ElementType BasicTypeSymbol
+}
+
+// NewArrayTypeSymbol creates a new ArrayTypeSymbol
+func NewArrayTypeSymbol(scope Symbol, identifier string, elementType BasicTypeSymbol) *ArrayTypeSymbol {
+	return &ArrayTypeSymbol{
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
+		ElementType:    elementType,
+	}
+}
+
+// String creates a new string representation
+func (sym *ArrayTypeSymbol) String() string {
+	return fmt.Sprintf("Array of %s", sym.ElementType)
+}
+
+// GetType returns the type
+func (sym *ArrayTypeSymbol) GetType() string {
+	return sym.ElementType.Identifier()
 }
