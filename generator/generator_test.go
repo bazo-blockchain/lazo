@@ -216,6 +216,25 @@ func TestLocVarChar(t *testing.T) {
 	tester.assertChar('c')
 }
 
+// Multi-Variables
+// ---------------
+
+func TestMultiVariables(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, bool) test() {
+			int x, bool b = test2()
+			return x, b
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, "(int,bool)test()")
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
+}
+
 // Assignments
 // -----------
 
@@ -287,6 +306,45 @@ func TestReAssignmentChar(t *testing.T) {
 		}
 	`, charTestSig)
 	tester.assertChar('d')
+}
+
+// Multi-Assignments
+// -----------------
+
+func TestMultiAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, bool) test() {
+			int x
+			bool b
+			x, b = test2()
+			return x, b
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, "(int,bool)test()")
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
+}
+
+func TestMultiAssignmentWithField(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		int x
+		function (int, bool) test() {
+			bool b
+			x, b = test2()
+			return x, b
+		}
+
+		function (int, bool) test2() {
+			return 1, true
+		}
+	`, "(int,bool)test()")
+
+	tester.assertIntAt(0, big.NewInt(1))
+	tester.assertBoolAt(1, true)
 }
 
 // Return statements
