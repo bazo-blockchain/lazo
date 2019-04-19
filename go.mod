@@ -8,5 +8,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
+	golang.org/x/crypto v0.0.0-20190418165655-df01cb2cc480 // indirect
+	golang.org/x/sys v0.0.0-20190418153312-f0ce4c0180be // indirect
 	gotest.tools v2.2.0+incompatible
 )
