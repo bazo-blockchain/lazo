@@ -81,7 +81,7 @@ func (tr *typeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functio
 	}
 }
 
-func (tr *typeResolution) resolveType(node *node.TypeNode) *symbol.TypeSymbol {
+func (tr *typeResolution) resolveType(node *node.TypeNode) symbol.TypeSymbol {
 	result := tr.symTable.FindTypeByNode(node)
 	if result == nil {
 		tr.reportError(node, fmt.Sprintf("Invalid type '%s'", node.Identifier))

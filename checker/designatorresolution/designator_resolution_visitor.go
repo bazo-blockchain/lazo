@@ -83,6 +83,45 @@ func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.DesignatorN
 	}
 }
 
+func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
+	v.AbstractVisitor.VisitElementAccessNode(node)
+	typeSymbol := v.symbolTable.GetTypeByExpression(node.Designator)
+	if array, ok := typeSymbol.(*symbol.ArrayTypeSymbol); ok {
+		v.symbolTable.MapExpressionToType(node, &array.ElementType)
+		v.symbolTable.MapDesignatorToDecl(node, &array.ElementType)
+	} else {
+		v.reportError(node, fmt.Sprintf("Designator %v does not refer to an array type", node))
+		v.symbolTable.MapExpressionToType(node, nil)
+	}
+
+}
+
+func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
+	v.AbstractVisitor.VisitMemberAccessNode(node)
+	typeSymbol := v.symbolTable.GetTypeByExpression(node)
+	var target symbol.Symbol
+	var targetType symbol.TypeSymbol
+	switch typeSymbol.(type) {
+	case *symbol.ArrayTypeSymbol:
+		arrayLength := v.symbolTable.GlobalScope.ArrayLength
+		if node.Identifier == arrayLength.Identifier() {
+			target = arrayLength
+			var err error
+			targetType, err = getType(arrayLength)
+			if err != nil {
+				v.reportError(node, err.Error())
+			}
+		} else {
+			v.reportError(node, fmt.Sprintf("Invalid member access %v on array %v", node.Identifier, node))
+		}
+
+	default:
+		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a class type", node))
+	}
+	v.symbolTable.MapDesignatorToDecl(node, target)
+	v.symbolTable.MapExpressionToType(node, targetType)
+}
+
 func (v *designatorResolutionVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }
@@ -96,7 +135,7 @@ func containsStatement(list []node.StatementNode, element node.StatementNode) bo
 	return false
 }
 
-func getType(sym symbol.Symbol) (*symbol.TypeSymbol, error) {
+func getType(sym symbol.Symbol) (symbol.TypeSymbol, error) {
 	switch sym.(type) {
 	case *symbol.FieldSymbol:
 		return sym.(*symbol.FieldSymbol).Type, nil

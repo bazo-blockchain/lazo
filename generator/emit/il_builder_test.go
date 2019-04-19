@@ -15,22 +15,22 @@ func TestVoidFuncSignature(t *testing.T) {
 
 func TestIntFuncSignature(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	f.ReturnTypes = append(f.ReturnTypes, symbol.NewTypeSymbol(f, "int"))
+	f.ReturnTypes = append(f.ReturnTypes, symbol.NewBasicTypeSymbol(f, "int"))
 
 	assert.Equal(t, createFuncSignature(f), "(int)test()")
 }
 
 func TestMultipleReturnFuncSignature(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	f.ReturnTypes = append(f.ReturnTypes, symbol.NewTypeSymbol(f, "int"))
-	f.ReturnTypes = append(f.ReturnTypes, symbol.NewTypeSymbol(f, "bool"))
+	f.ReturnTypes = append(f.ReturnTypes, symbol.NewBasicTypeSymbol(f, "int"))
+	f.ReturnTypes = append(f.ReturnTypes, symbol.NewBasicTypeSymbol(f, "bool"))
 
 	assert.Equal(t, createFuncSignature(f), "(int,bool)test()")
 }
 
 func TestFuncSigSingleParam(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	intType := symbol.NewTypeSymbol(f, "int")
+	intType := symbol.NewBasicTypeSymbol(f, "int")
 	p1 := symbol.NewParameterSymbol(nil, "x")
 	p1.Type = intType
 	f.Parameters = append(f.Parameters, p1)
@@ -40,7 +40,7 @@ func TestFuncSigSingleParam(t *testing.T) {
 
 func TestFuncSigMultipleParams(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	intType := symbol.NewTypeSymbol(f, "int")
+	intType := symbol.NewBasicTypeSymbol(f, "int")
 	p1 := symbol.NewParameterSymbol(nil, "x")
 	p2 := symbol.NewParameterSymbol(nil, "y")
 	p1.Type = intType
@@ -52,8 +52,8 @@ func TestFuncSigMultipleParams(t *testing.T) {
 
 func TestFuncSig(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	intType := symbol.NewTypeSymbol(f, "int")
-	boolType := symbol.NewTypeSymbol(f, "bool")
+	intType := symbol.NewBasicTypeSymbol(f, "int")
+	boolType := symbol.NewBasicTypeSymbol(f, "bool")
 	f.ReturnTypes = append(f.ReturnTypes, intType)
 	f.ReturnTypes = append(f.ReturnTypes, boolType)
 
@@ -68,8 +68,8 @@ func TestFuncSig(t *testing.T) {
 
 func TestFuncHashWithSymbol(t *testing.T) {
 	f := symbol.NewFunctionSymbol(nil, "test")
-	intType := symbol.NewTypeSymbol(f, "int")
-	boolType := symbol.NewTypeSymbol(f, "bool")
+	intType := symbol.NewBasicTypeSymbol(f, "int")
+	boolType := symbol.NewBasicTypeSymbol(f, "bool")
 	f.ReturnTypes = append(f.ReturnTypes, intType)
 	f.ReturnTypes = append(f.ReturnTypes, boolType)
 

@@ -39,6 +39,7 @@ func Run(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
 func (sc *symbolConstruction) registerBuiltins() {
 	sc.registerBuiltInTypes()
 	sc.registerBuiltInConstants()
+	sc.registerBuiltinField()
 }
 
 func (sc *symbolConstruction) registerBuiltInTypes() {
@@ -48,8 +49,8 @@ func (sc *symbolConstruction) registerBuiltInTypes() {
 	sc.globalScope.StringType = sc.registerBuiltInType("string")
 }
 
-func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.TypeSymbol {
-	baseType := symbol.NewTypeSymbol(sc.globalScope, name)
+func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.BasicTypeSymbol {
+	baseType := symbol.NewBasicTypeSymbol(sc.globalScope, name)
 	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
 	sc.globalScope.BuiltInTypes = append(sc.globalScope.BuiltInTypes, baseType)
 	return baseType
@@ -61,10 +62,18 @@ func (sc *symbolConstruction) registerBuiltInConstants() {
 	sc.globalScope.TrueConstant = sc.registerBuiltInConstant(sc.globalScope.BoolType, "true")
 }
 
-func (sc *symbolConstruction) registerBuiltInConstant(typeSymbol *symbol.TypeSymbol, name string) *symbol.ConstantSymbol {
+func (sc *symbolConstruction) registerBuiltInConstant(typeSymbol *symbol.BasicTypeSymbol, name string) *symbol.ConstantSymbol {
 	constant := symbol.NewConstantSymbol(sc.globalScope, name, typeSymbol)
 	sc.globalScope.Constants = append(sc.globalScope.Constants, constant)
 	return constant
+}
+
+func (sc *symbolConstruction) registerBuiltinField() {
+	arrayLength := &symbol.FieldSymbol{
+		AbstractSymbol: symbol.NewAbstractSymbol(sc.globalScope, "length"),
+		Type:           sc.symbolTable.FindTypeByIdentifier("int"),
+	}
+	sc.globalScope.ArrayLength = arrayLength
 }
 
 func (sc *symbolConstruction) registerDeclarations() {
