@@ -274,11 +274,11 @@ func (sym *BasicTypeSymbol) GetType() string {
 // ArrayTypeSymbol represents a array type
 type ArrayTypeSymbol struct {
 	AbstractSymbol
-	ElementType BasicTypeSymbol
+	ElementType *BasicTypeSymbol
 }
 
 // NewArrayTypeSymbol creates a new ArrayTypeSymbol
-func NewArrayTypeSymbol(scope Symbol, identifier string, elementType BasicTypeSymbol) *ArrayTypeSymbol {
+func NewArrayTypeSymbol(scope Symbol, identifier string, elementType *BasicTypeSymbol) *ArrayTypeSymbol {
 	return &ArrayTypeSymbol{
 		AbstractSymbol: NewAbstractSymbol(scope, identifier),
 		ElementType:    elementType,
