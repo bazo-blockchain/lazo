@@ -292,20 +292,20 @@ func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) 
 	return mv
 }
 
-func (p *Parser) parseAssignmentStatement(left node.Node) *node.AssignmentStatementNode {
+func (p *Parser) parseAssignmentStatement(left node.DesignatorNode) *node.AssignmentStatementNode {
 	p.nextToken() // skip '=' sign
 
 	expression := p.parseExpression()
 	p.checkAndSkipNewLines(token.NewLine)
 
 	return &node.AssignmentStatementNode{
-		AbstractNode: p.newAbstractNode(),
+		AbstractNode: p.newAbstractNodeWithPos(left.Pos()),
 		Left:         left,
 		Right:        expression,
 	}
 }
 
-func (p *Parser) parseMultiAssignmentStatement(designator node.Node) *node.MultiAssignmentStatementNode {
+func (p *Parser) parseMultiAssignmentStatement(designator node.DesignatorNode) *node.MultiAssignmentStatementNode {
 	designators := []node.Node{designator}
 
 	if !p.isEnd() && p.isSymbol(token.Comma) {
@@ -314,7 +314,7 @@ func (p *Parser) parseMultiAssignmentStatement(designator node.Node) *node.Multi
 	}
 	p.check(token.Assign)
 	ma := &node.MultiAssignmentStatementNode{
-		AbstractNode: p.newAbstractNode(),
+		AbstractNode: p.newAbstractNodeWithPos(designator.Pos()),
 		Designators:  designators,
 		FuncCall:     p.parseFuncCall(p.parseDesignator()),
 	}
@@ -477,6 +477,12 @@ func (p *Parser) readSymbol() token.Symbol {
 func (p *Parser) newAbstractNode() node.AbstractNode {
 	return node.AbstractNode{
 		Position: p.currentToken.Pos(),
+	}
+}
+
+func (p *Parser) newAbstractNodeWithPos(pos token.Position) node.AbstractNode {
+	return node.AbstractNode{
+		Position: pos,
 	}
 }
 

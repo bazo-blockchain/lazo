@@ -457,9 +457,10 @@ func TestFuncCallStatementWithoutNL(t *testing.T) {
 func TestAssignmentStatement(t *testing.T) {
 	p := newParserFromInput("a = 5\n")
 	d := p.parseDesignator()
-	v := p.parseAssignmentStatement(d)
+	a := p.parseAssignmentStatement(d)
 
-	assertAssignmentStatement(t, v, "a", "5")
+	assertAssignmentStatement(t, a, "a", "5")
+	assertPosition(t, a.Position, 1, 1)
 	assertNoErrors(t, p)
 }
 
@@ -496,6 +497,7 @@ func TestMultiAssignmentStatement(t *testing.T) {
 
 	assert.Assert(t, ok)
 	assertNoErrors(t, p)
+	assertPosition(t, ma.Position, 1, 1)
 	assert.Equal(t, ma.Designators[0].String(), "a")
 	assert.Equal(t, ma.Designators[1].String(), "b")
 	assertFuncCall(t, ma.FuncCall, "call", "test([1])")
