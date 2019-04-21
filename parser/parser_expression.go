@@ -198,7 +198,7 @@ func (p *Parser) parseDesignator() node.DesignatorNode {
 	return left
 }
 
-func (p *Parser) parseFuncCall(designator node.Node) *node.FuncCallNode {
+func (p *Parser) parseFuncCall(designator node.DesignatorNode) *node.FuncCallNode {
 	funcCall := &node.FuncCallNode{
 		AbstractNode: p.newAbstractNodeWithPos(designator.Pos()),
 		Designator:   designator,
