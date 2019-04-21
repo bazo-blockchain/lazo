@@ -282,7 +282,7 @@ func (n *ReturnStatementNode) Accept(v Visitor) {
 // AssignmentStatementNode composes abstract node and holds the target designator and value expression.
 type AssignmentStatementNode struct {
 	AbstractNode
-	Left  Node
+	Left  DesignatorNode
 	Right ExpressionNode
 }
 
@@ -396,7 +396,7 @@ func (n *BasicDesignatorNode) Accept(v Visitor) {
 // ElementAccessNode composes abstract node and holds designator and expression
 type ElementAccessNode struct {
 	AbstractNode
-	Designator Node
+	Designator DesignatorNode
 	Expression ExpressionNode
 }
 
@@ -414,7 +414,7 @@ func (n *ElementAccessNode) Accept(v Visitor) {
 //MemberAccessNode composes abstract node and holds designator and identifier
 type MemberAccessNode struct {
 	AbstractNode
-	Designator Node
+	Designator DesignatorNode
 	Identifier string
 }
 
@@ -432,7 +432,7 @@ func (n *MemberAccessNode) Accept(v Visitor) {
 // FuncCallNode composes abstract node and holds designator and arguments
 type FuncCallNode struct {
 	AbstractNode
-	Designator Node
+	Designator DesignatorNode
 	Args       []ExpressionNode
 }
 
