@@ -66,12 +66,12 @@ func (t *SymbolTable) GetNodeBySymbol(symbol Symbol) node.Node {
 }
 
 // MapDesignatorToDecl maps a designator to a declaration
-func (t *SymbolTable) MapDesignatorToDecl(designatorNode node.Node, symbol Symbol) {
+func (t *SymbolTable) MapDesignatorToDecl(designatorNode node.DesignatorNode, symbol Symbol) {
 	t.designatorDeclarations[designatorNode] = symbol
 }
 
 // GetDeclByDesignator returns the declaration for a designator
-func (t *SymbolTable) GetDeclByDesignator(designatorNode node.Node) Symbol {
+func (t *SymbolTable) GetDeclByDesignator(designatorNode node.DesignatorNode) Symbol {
 	return t.designatorDeclarations[designatorNode]
 }
 
