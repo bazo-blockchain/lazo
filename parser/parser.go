@@ -306,7 +306,7 @@ func (p *Parser) parseAssignmentStatement(left node.DesignatorNode) *node.Assign
 }
 
 func (p *Parser) parseMultiAssignmentStatement(designator node.DesignatorNode) *node.MultiAssignmentStatementNode {
-	designators := []node.Node{designator}
+	designators := []node.DesignatorNode{designator}
 
 	if !p.isEnd() && p.isSymbol(token.Comma) {
 		p.nextToken()
@@ -382,7 +382,7 @@ func (p *Parser) parseType() *node.TypeNode {
 	}
 }
 
-func (p *Parser) parseCallStatement(designator node.Node) *node.CallStatementNode {
+func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
 	fc := p.parseFuncCall(designator)
 	p.checkAndSkipNewLines(token.NewLine)
 
