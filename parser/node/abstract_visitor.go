@@ -149,7 +149,7 @@ func (v *AbstractVisitor) VisitMemberAccessNode(node *MemberAccessNode) {
 }
 
 // VisitDesignatorNode does nothing because it is the terminal node.
-func (v *AbstractVisitor) VisitDesignatorNode(node *DesignatorNode) {
+func (v *AbstractVisitor) VisitDesignatorNode(node *BasicDesignatorNode) {
 	// Nothing to do here
 }
 

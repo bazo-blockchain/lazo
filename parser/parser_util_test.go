@@ -96,7 +96,7 @@ func assertStatement(t *testing.T, node node.StatementNode, stmt string) {
 
 // ----------
 
-func assertDesignator(t *testing.T, node *node.DesignatorNode, value string) {
+func assertDesignator(t *testing.T, node *node.BasicDesignatorNode, value string) {
 	assert.Equal(t, node.Value, value)
 }
 
