@@ -250,7 +250,7 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 }
 
 func (p *Parser) parseStructCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
-	p.nextToken() // skip '('
+	p.nextTokenWhileNewLine() // skip '('
 
 	if ftok, ok := p.peekToken.(*token.FixToken); ok && ftok.Value == token.Assign {
 		return p.parseStructNamedCreation(abstractNode, identifier)
@@ -273,9 +273,32 @@ func (p *Parser) parseStructCreation(abstractNode node.AbstractNode, identifier 
 	return structCreation
 }
 
-func (p *Parser) parseStructNamedCreation(abstractNode node.AbstractNode,
-	identifier string) *node.StructNamedCreationNode {
-	return nil
+func (p *Parser) parseStructNamedCreation(abstractNode node.AbstractNode, identifier string) *node.StructNamedCreationNode {
+	structCreation := &node.StructNamedCreationNode{
+		AbstractNode: abstractNode,
+		Name:         identifier,
+	}
+
+	isFirstArg := true
+	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
+		if !isFirstArg {
+			p.checkAndSkipNewLines(token.Comma)
+		}
+
+		field := &node.StructFieldAssignmentNode{
+			AbstractNode: p.newAbstractNode(),
+			Name:         p.readIdentifier(),
+		}
+		p.check(token.Assign)
+		field.Expression = p.parseExpression()
+		structCreation.FieldValues = append(structCreation.FieldValues, field)
+
+		p.skipNewLines()
+		isFirstArg = false
+	}
+
+	p.check(token.CloseParen)
+	return structCreation
 }
 
 func (p *Parser) parseInteger() *node.IntegerLiteralNode {

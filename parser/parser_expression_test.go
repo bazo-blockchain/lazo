@@ -314,12 +314,37 @@ func TestInvalidMemberAccess(t *testing.T) {
 
 func TestStructCreation(t *testing.T) {
 	s := parseExpressionFromInput(t, "new Person()")
+	assertPosition(t, s.Pos(), 1, 1)
 	assertStructCreation(t, s, "Person")
 }
 
 func TestStructCreationWithValues(t *testing.T) {
 	s := parseExpressionFromInput(t, "new Person(120, 1 == 1)")
 	assertStructCreation(t, s, "Person", "120", "(1 == 1)")
+}
+
+func TestStructCreationWithNamedFieldValues(t *testing.T) {
+	s := parseExpressionFromInput(t, "new Person(x=120, y=1==1)")
+
+	expectedFieldValues := map[string]string{
+		"x": "120",
+		"y": "(1 == 1)",
+	}
+	assertPosition(t, s.Pos(), 1, 1)
+	assertStructNamedCreation(t, s, "Person", expectedFieldValues)
+}
+
+func TestStructCreationWithNewlines(t *testing.T) {
+	s := parseExpressionFromInput(t, `new Person(
+		x=120, 
+		y=1==1
+	)`)
+
+	expectedFieldValues := map[string]string{
+		"x": "120",
+		"y": "(1 == 1)",
+	}
+	assertStructNamedCreation(t, s, "Person", expectedFieldValues)
 }
 
 // Literal Expressions
