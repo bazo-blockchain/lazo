@@ -142,34 +142,72 @@ func (v *ILCodeGenerationVisitor) VisitMultiVariableNode(node *node.MultiVariabl
 }
 
 // VisitAssignmentStatementNode generates the IL Code for an assignment
-func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
-	node.Right.Accept(v)
-
-	decl := v.symbolTable.GetDeclByDesignator(node.Left)
-	index, isContractField := v.getVarIndex(decl)
-
-	if isContractField {
-		v.assembler.StoreState(index)
-	} else {
-		v.assembler.StoreLocal(index)
+func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.AssignmentStatementNode) {
+	switch assignNode.Left.(type) {
+	case *node.BasicDesignatorNode:
+		assignNode.Right.Accept(v)
+		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
+		v.storeVariable(decl)
+	//// TODO will be done when array is implemented
+	//case *node.ElementAccessNode:
+	//	elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
+	//	elementAccess.Designator.Accept(v)
+	//	elementAccess.Expression.Accept(v)
+	//	assignNode.Right.Accept(v)
+	//	v.assembler.Emit() // TODO Store Array Element
+	case *node.MemberAccessNode:
+		memberAccessNode, _ := assignNode.Left.(*node.MemberAccessNode)
+		memberAccessNode.Designator.Accept(v)
+		assignNode.Right.Accept(v)
+		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+		v.storeVariable(fieldSymbol)
+	default:
+		v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Left))
 	}
 }
 
 // VisitMultiAssignmentStatementNode generates the IL Code for a multi-assignment
-func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAssignmentStatementNode) {
-	node.FuncCall.Accept(v)
-
-	for i := len(node.Designators) - 1; i >= 0; i-- {
-		decl := v.symbolTable.GetDeclByDesignator(node.Designators[i])
-		index, isContractField := v.getVarIndex(decl)
-
-		if isContractField {
-			v.assembler.StoreState(index)
-		} else {
-			v.assembler.StoreLocal(index)
+func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *node.MultiAssignmentStatementNode) {
+	assignNode.FuncCall.Accept(v)
+	for i := len(assignNode.Designators) - 1; i >= 0; i-- {
+		switch assignNode.Designators[i].(type) {
+		case *node.BasicDesignatorNode:
+			decl := v.symbolTable.GetDeclByDesignator(assignNode.Designators[i])
+			v.storeVariable(decl)
+		//// TODO will be done when array is implemented
+		//case *node.ElementAccessNode:
+		//	elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
+		//	elementAccess.Designator.Accept(v)
+		//	elementAccess.Expression.Accept(v)
+		//	v.assembler.Emit() // TODO Store Array Element
+		case *node.MemberAccessNode:
+			memberAccessNode, _ := assignNode.Designators[i].(*node.MemberAccessNode)
+			memberAccessNode.Designator.Accept(v)
+			fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+			v.storeVariable(fieldSymbol)
+		default:
+			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
 	}
 }
+
+func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
+	node.Designator.Accept(v)
+	// TODO https://github.com/bazo-blockchain/lazo/issues/57
+	//if node.Identifier == "length" && v.isArray(node.Designator) {
+	//	v.assembler.Emit() // Load Length
+	//  }
+
+	decl := v.symbolTable.GetDeclByDesignator(node)
+	v.loadVariable(decl)
+}
+
+//// TODO Uncomment and implement as soon as arrays are implemented
+//func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode){
+//	node.Designator.Accept(v)
+//	node.Expression.Accept(v)
+//	v.assembler.Emit() // Load Array Element
+//}
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -302,13 +340,7 @@ func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
-	index, isContractField := v.getVarIndex(decl)
-
-	if isContractField {
-		v.assembler.LoadState(index)
-	} else {
-		v.assembler.LoadLocal(index)
-	}
+	v.loadVariable(decl)
 }
 
 // VisitIntegerLiteralNode pushes an integer to the stack
@@ -333,6 +365,26 @@ func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.Character
 
 // Helper Functions
 // ----------------
+
+func (v *ILCodeGenerationVisitor) loadVariable(decl symbol.Symbol) {
+	index, isContractField := v.getVarIndex(decl)
+
+	if isContractField {
+		v.assembler.LoadState(index)
+	} else {
+		v.assembler.LoadLocal(index)
+	}
+}
+
+func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
+	index, isContractField := v.getVarIndex(decl)
+
+	if isContractField {
+		v.assembler.StoreState(index)
+	} else {
+		v.assembler.StoreLocal(index)
+	}
+}
 
 func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 	gs := v.symbolTable.GlobalScope
