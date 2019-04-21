@@ -151,6 +151,25 @@ func (v *AbstractVisitor) VisitFuncCallNode(node *FuncCallNode) {
 	}
 }
 
+// VisitStructCreationNode traverses the field initialization expressions
+func (v *AbstractVisitor) VisitStructCreationNode(node *StructCreationNode) {
+	for _, expr := range node.FieldValues {
+		expr.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitStructNamedCreationNode traverses the named field initialization expressions
+func (v *AbstractVisitor) VisitStructNamedCreationNode(node *StructNamedCreationNode) {
+	for _, namedField := range node.FieldValues {
+		namedField.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitStructFieldAssignmentNode traverse the field initialization expression
+func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssignmentNode) {
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
 // VisitBasicDesignatorNode does nothing because it is the terminal node.
 func (v *AbstractVisitor) VisitBasicDesignatorNode(node *BasicDesignatorNode) {
 	// Nothing to do here
