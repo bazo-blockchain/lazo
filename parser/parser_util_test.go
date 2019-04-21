@@ -174,6 +174,7 @@ func assertFuncCall(t *testing.T, n node.ExpressionNode, designator string, args
 
 func assertElementAccess(t *testing.T, n node.ExpressionNode, designator string, exp string) {
 	elementAccess, ok := n.(*node.ElementAccessNode)
+
 	assert.Assert(t, ok)
 	assert.Equal(t, elementAccess.Designator.String(), designator)
 	assert.Equal(t, elementAccess.Expression.String(), exp)
@@ -181,7 +182,20 @@ func assertElementAccess(t *testing.T, n node.ExpressionNode, designator string,
 
 func assertMemberAccess(t *testing.T, n node.ExpressionNode, designator string, id string) {
 	memberAccess, ok := n.(*node.MemberAccessNode)
+
 	assert.Assert(t, ok)
 	assert.Equal(t, memberAccess.Designator.String(), designator)
 	assert.Equal(t, memberAccess.Identifier, id)
+}
+
+func assertStructCreation(t *testing.T, n node.ExpressionNode, name string, values ...string) {
+	structCreation, ok := n.(*node.StructCreationNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, structCreation.Name, name)
+
+	assert.Equal(t, len(structCreation.FieldValues), len(values))
+	for i, v := range values {
+		assert.Equal(t, structCreation.FieldValues[i].String(), v)
+	}
 }

@@ -104,7 +104,7 @@ func TestFieldAssignment(t *testing.T) {
 }
 
 // Struct Declaration nodes
-// --------------
+// -------------------------
 
 func TestEmptyStructDeclaration(t *testing.T) {
 	p := newParserFromInput(`

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
@@ -155,10 +156,7 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	case token.STRING:
 		return p.parseString()
 	case token.SYMBOL:
-		if p.isAnySymbol(token.True, token.False) {
-			return p.parseBoolean()
-		}
-		return p.newErrorNode("Unsupported expression symbol " + p.currentToken.Literal())
+		return p.parseOperandSymbol()
 	}
 
 	var error string
@@ -169,6 +167,23 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	}
 
 	return p.newErrorNode(error)
+}
+
+func (p *Parser) parseOperandSymbol() node.ExpressionNode {
+	tok, ok := p.currentToken.(*token.FixToken)
+
+	if !ok {
+		panic("Invalid operation")
+	}
+
+	switch tok.Value {
+	case token.True, token.False:
+		return p.parseBoolean(tok)
+	case token.New:
+		return p.parseCreation()
+	default:
+		return p.newErrorNode("Unsupported expression symbol " + p.currentToken.Literal())
+	}
 }
 
 func (p *Parser) parseDesignator() node.DesignatorNode {
@@ -220,6 +235,49 @@ func (p *Parser) parseFuncCall(designator node.DesignatorNode) *node.FuncCallNod
 	return funcCall
 }
 
+func (p *Parser) parseCreation() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	p.nextToken() // skip 'new' keyword
+
+	identifier := p.readIdentifier()
+	if p.isSymbol(token.OpenParen) {
+		return p.parseStructCreation(abstractNode, identifier)
+	} else if p.isSymbol(token.OpenBracket) {
+		// todo array creation
+	}
+
+	return p.newErrorNode(fmt.Sprintf("Unsupported creation type with %s", p.currentToken.Literal()))
+}
+
+func (p *Parser) parseStructCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
+	p.nextToken() // skip '('
+
+	if ftok, ok := p.peekToken.(*token.FixToken); ok && ftok.Value == token.Assign {
+		return p.parseStructNamedCreation(abstractNode, identifier)
+	}
+
+	structCreation := &node.StructCreationNode{
+		AbstractNode: abstractNode,
+		Name:         identifier,
+	}
+
+	isFirstArg := true
+	for !p.isEnd() && !p.isSymbol(token.CloseParen) {
+		if !isFirstArg {
+			p.check(token.Comma)
+		}
+		structCreation.FieldValues = append(structCreation.FieldValues, p.parseExpression())
+		isFirstArg = false
+	}
+	p.check(token.CloseParen)
+	return structCreation
+}
+
+func (p *Parser) parseStructNamedCreation(abstractNode node.AbstractNode,
+	identifier string) *node.StructNamedCreationNode {
+	return nil
+}
+
 func (p *Parser) parseInteger() *node.IntegerLiteralNode {
 	tok, _ := p.currentToken.(*token.IntegerToken)
 
@@ -253,9 +311,7 @@ func (p *Parser) parseString() *node.StringLiteralNode {
 	return s
 }
 
-func (p *Parser) parseBoolean() node.ExpressionNode {
-	tok, _ := p.currentToken.(*token.FixToken)
-
+func (p *Parser) parseBoolean(tok *token.FixToken) node.ExpressionNode {
 	if value, ok := token.BooleanConstants[tok.Value]; ok {
 		b := &node.BoolLiteralNode{
 			AbstractNode: p.newAbstractNode(),
