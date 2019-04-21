@@ -53,9 +53,9 @@ func (v *designatorResolutionVisitor) VisitStatementBlock(stmts []node.Statement
 	}
 }
 
-// VisitDesignatorNode visits the designator node, maps the designator to its declaration and
+// VisitBasicDesignatorNode visits the designator node, maps the designator to its declaration and
 // maps the expression to the type
-func (v *designatorResolutionVisitor) VisitDesignatorNode(node *node.BasicDesignatorNode) {
+func (v *designatorResolutionVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	var scope symbol.Symbol
 	if v.currentFunctionSymbol == nil {
 		scope = v.contractSymbol

@@ -299,8 +299,8 @@ func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
 	v.assembler.CallFunc(funcSym)
 }
 
-// VisitDesignatorNode generates the IL Code for a designator
-func (v *ILCodeGenerationVisitor) VisitDesignatorNode(node *node.BasicDesignatorNode) {
+// VisitBasicDesignatorNode generates the IL Code for a designator
+func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	index, isContractField := v.getVarIndex(decl)
 

@@ -388,25 +388,7 @@ func (n *BasicDesignatorNode) String() string {
 
 // Accept lets a visitor to traverse its node structure.
 func (n *BasicDesignatorNode) Accept(v Visitor) {
-	v.VisitDesignatorNode(n)
-}
-
-// --------------------------
-
-// FuncCallNode composes abstract node and holds designator and arguments
-type FuncCallNode struct {
-	AbstractNode
-	Designator Node
-	Args       []ExpressionNode
-}
-
-func (n *FuncCallNode) String() string {
-	return fmt.Sprintf("%s(%s)", n.Designator, n.Args)
-}
-
-// Accept lets a visitor traverse its node structure
-func (n *FuncCallNode) Accept(v Visitor) {
-	v.VisitFuncCallNode(n)
+	v.VisitBasicDesignatorNode(n)
 }
 
 // --------------------------
@@ -443,6 +425,24 @@ func (n *MemberAccessNode) String() string {
 // Accept lets a visitor traverse its node structure
 func (n *MemberAccessNode) Accept(v Visitor) {
 	v.VisitMemberAccessNode(n)
+}
+
+// --------------------------
+
+// FuncCallNode composes abstract node and holds designator and arguments
+type FuncCallNode struct {
+	AbstractNode
+	Designator Node
+	Args       []ExpressionNode
+}
+
+func (n *FuncCallNode) String() string {
+	return fmt.Sprintf("%s(%s)", n.Designator, n.Args)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *FuncCallNode) Accept(v Visitor) {
+	v.VisitFuncCallNode(n)
 }
 
 // --------------------------
