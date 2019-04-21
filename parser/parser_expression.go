@@ -155,7 +155,10 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	case token.STRING:
 		return p.parseString()
 	case token.SYMBOL:
-		return p.parseBoolean()
+		if p.isAnySymbol(token.True, token.False) {
+			return p.parseBoolean()
+		}
+		return p.newErrorNode("Unsupported expression symbol " + p.currentToken.Literal())
 	}
 
 	var error string

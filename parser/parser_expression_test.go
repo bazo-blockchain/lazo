@@ -284,6 +284,13 @@ func TestElementAccessOnMember(t *testing.T) {
 	assertElementAccess(t, e, "a.arr", "pos")
 }
 
+func TestInvalidElementAccess(t *testing.T) {
+	p := newParserFromInput("a.arr[if]")
+	p.parseExpression()
+	assertHasError(t, p)
+	assertErrorAt(t, p, 0, "Unsupported expression symbol if")
+}
+
 // Member Access Expression
 // ------------------------
 
@@ -301,6 +308,7 @@ func TestInvalidMemberAccess(t *testing.T) {
 	p := newParserFromInput("a.0")
 	p.parseExpression()
 	assertHasError(t, p)
+	assertErrorAt(t, p, 0, "Identifier expected")
 }
 
 // Literal Expressions
