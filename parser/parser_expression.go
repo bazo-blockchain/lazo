@@ -168,9 +168,10 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 	return p.newErrorNode(error)
 }
 
-func (p *Parser) parseDesignator() node.Node {
+func (p *Parser) parseDesignator() node.DesignatorNode {
+	abstractNode := p.newAbstractNode()
 	var left node.DesignatorNode = &node.BasicDesignatorNode{
-		AbstractNode: p.newAbstractNode(),
+		AbstractNode: abstractNode,
 		Value:        p.readIdentifier(),
 	}
 
@@ -179,7 +180,7 @@ func (p *Parser) parseDesignator() node.Node {
 			p.nextToken()
 			identifier := p.readIdentifier()
 			left = &node.MemberAccessNode{
-				AbstractNode: p.newAbstractNode(),
+				AbstractNode: abstractNode,
 				Designator:   left,
 				Identifier:   identifier,
 			}
@@ -188,7 +189,7 @@ func (p *Parser) parseDesignator() node.Node {
 			exp := p.parseExpression()
 			p.check(token.CloseBracket)
 			left = &node.ElementAccessNode{
-				AbstractNode: p.newAbstractNode(),
+				AbstractNode: abstractNode,
 				Designator:   left,
 				Expression:   exp,
 			}
@@ -199,7 +200,7 @@ func (p *Parser) parseDesignator() node.Node {
 
 func (p *Parser) parseFuncCall(designator node.Node) *node.FuncCallNode {
 	funcCall := &node.FuncCallNode{
-		AbstractNode: p.newAbstractNode(),
+		AbstractNode: p.newAbstractNodeWithPos(designator.Pos()),
 		Designator:   designator,
 	}
 	p.check(token.OpenParen)

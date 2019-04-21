@@ -257,6 +257,7 @@ func TestFuncCallMissingComma(t *testing.T) {
 func TestFuncCallOnMember(t *testing.T) {
 	e := parseExpressionFromInput(t, "a.f()")
 	assertFuncCall(t, e, "a.f")
+	assertPosition(t, e.Pos(), 1, 1)
 }
 
 // Element Access Expression
@@ -265,6 +266,7 @@ func TestFuncCallOnMember(t *testing.T) {
 func TestElementAccess(t *testing.T) {
 	e := parseExpressionFromInput(t, "arr[0]")
 	assertElementAccess(t, e, "arr", "0")
+	assertPosition(t, e.Pos(), 1, 1)
 }
 
 func TestElementAccessWithDesignator(t *testing.T) {

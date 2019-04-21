@@ -32,6 +32,11 @@ func assertErrorAt(t *testing.T, p *Parser, index int, errSubStr string) {
 	assert.Assert(t, strings.Contains(err, errSubStr), err)
 }
 
+func assertPosition(t *testing.T, actualPos token.Position, line int, col int) {
+	assert.Equal(t, actualPos.Line, line)
+	assert.Equal(t, actualPos.Column, col)
+}
+
 func assertProgram(t *testing.T, node *node.ProgramNode, hasContract bool) {
 	assert.Equal(t, node.Contract != nil, hasContract)
 }
