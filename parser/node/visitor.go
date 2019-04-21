@@ -19,7 +19,7 @@ type Visitor interface {
 	VisitCallStatementNode(node *CallStatementNode)
 	VisitBinaryExpressionNode(node *BinaryExpressionNode)
 	VisitUnaryExpressionNode(node *UnaryExpressionNode)
-	VisitDesignatorNode(node *DesignatorNode)
+	VisitDesignatorNode(node *BasicDesignatorNode)
 	VisitFuncCallNode(node *FuncCallNode)
 	VisitElementAccessNode(node *ElementAccessNode)
 	VisitMemberAccessNode(node *MemberAccessNode)

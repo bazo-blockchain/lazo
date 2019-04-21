@@ -200,21 +200,21 @@ func TestUnaryAssociativity(t *testing.T) {
 func TestDesignator(t *testing.T) {
 	p := newParserFromInput("test")
 	v := p.parseDesignator()
-	assertDesignator(t, v.(*node.DesignatorNode), "test")
+	assertDesignator(t, v.(*node.BasicDesignatorNode), "test")
 	assertNoErrors(t, p)
 }
 
 func TestDesignatorWithNumbers(t *testing.T) {
 	p := newParserFromInput("test123")
 	v := p.parseDesignator()
-	assertDesignator(t, v.(*node.DesignatorNode), "test123")
+	assertDesignator(t, v.(*node.BasicDesignatorNode), "test123")
 	assertNoErrors(t, p)
 }
 
 func TestDesignatorWithUnderscore(t *testing.T) {
 	p := newParserFromInput("_test")
 	v := p.parseDesignator()
-	assertDesignator(t, v.(*node.DesignatorNode), "_test")
+	assertDesignator(t, v.(*node.BasicDesignatorNode), "_test")
 	assertNoErrors(t, p)
 }
 

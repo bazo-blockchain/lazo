@@ -170,7 +170,7 @@ func (p *Parser) parseOperand() node.ExpressionNode {
 
 func (p *Parser) parseDesignator() node.Node {
 	var left node.Node
-	left = &node.DesignatorNode{
+	left = &node.BasicDesignatorNode{
 		AbstractNode: p.newAbstractNode(),
 		Value:        p.readIdentifier(),
 	}

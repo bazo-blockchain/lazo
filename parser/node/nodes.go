@@ -38,6 +38,11 @@ type ExpressionNode interface {
 	Node
 }
 
+// DesignatorNode is the interface for designators, such as identifier, member access and array access.
+type DesignatorNode interface {
+	Node
+}
+
 // Concrete Nodes
 // -------------------------
 
@@ -371,18 +376,18 @@ func (n *UnaryExpressionNode) Accept(v Visitor) {
 
 // --------------------------
 
-// DesignatorNode composes abstract node and holds the designator name.
-type DesignatorNode struct {
+// BasicDesignatorNode composes abstract node and holds the designator name.
+type BasicDesignatorNode struct {
 	AbstractNode
 	Value string
 }
 
-func (n *DesignatorNode) String() string {
+func (n *BasicDesignatorNode) String() string {
 	return fmt.Sprintf("%s", n.Value)
 }
 
 // Accept lets a visitor to traverse its node structure.
-func (n *DesignatorNode) Accept(v Visitor) {
+func (n *BasicDesignatorNode) Accept(v Visitor) {
 	v.VisitDesignatorNode(n)
 }
 

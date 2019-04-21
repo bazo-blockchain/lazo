@@ -182,7 +182,7 @@ func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatement
 }
 
 func (ct *CheckerTestUtil) assertDesignator(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
-	designator, ok := expr.(*node.DesignatorNode)
+	designator, ok := expr.(*node.BasicDesignatorNode)
 	assert.Assert(ct.t, ok)
 
 	assert.Equal(ct.t, ct.symbolTable.GetDeclByDesignator(designator), decl)
