@@ -235,6 +235,9 @@ func TestMultiVariables(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
+// Member Access
+// -------------
+
 // Assignments
 // -----------
 
@@ -307,6 +310,18 @@ func TestReAssignmentChar(t *testing.T) {
 	`, charTestSig)
 	tester.assertChar('d')
 }
+
+//func TestAssignmentMember(t *testing.T) {
+//	tester := newGeneratorTestUtilWithFunc(t, `
+//		function int test() {
+//			int x
+//			x.y = 1
+//			return x.y
+//		}
+//	`, intTestSig)
+//
+//	tester.assertInt(big.NewInt(1))
+//}
 
 // Multi-Assignments
 // -----------------
