@@ -132,6 +132,43 @@ func TestStructDeclaration(t *testing.T) {
 	assertStructField(t, s.Fields[1], "int", "balance")
 }
 
+func TestStructInvalidIdentifier(t *testing.T) {
+	p := newParserFromInput(`
+		struct if { 
+		}
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestStructMissingNewline(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person { }
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestStructMissingNewlineAfterField(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name int balance
+		}
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got int")
+}
+
+func TestStructMissingNewlineAtEnd(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name 
+			int balance
+		}`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
+}
+
 // Constructor Nodes
 // -----------------
 
