@@ -300,7 +300,7 @@ func (n *AssignmentStatementNode) Accept(v Visitor) {
 // MultiAssignmentStatementNode composes abstract node and holds the target designators and a function call
 type MultiAssignmentStatementNode struct {
 	AbstractNode
-	Designators []Node
+	Designators []DesignatorNode
 	FuncCall    *FuncCallNode
 }
 

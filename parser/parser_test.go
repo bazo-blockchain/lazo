@@ -442,6 +442,7 @@ func TestFuncCallStatement(t *testing.T) {
 	assertNoErrors(t, p)
 	assert.Assert(t, ok)
 	assertFuncCall(t, s.Call, "call")
+	assertPosition(t, s.Position, 1, 1)
 }
 
 func TestFuncCallStatementWithoutNL(t *testing.T) {
