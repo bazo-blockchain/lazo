@@ -87,13 +87,12 @@ func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementA
 	v.AbstractVisitor.VisitElementAccessNode(node)
 	typeSymbol := v.symbolTable.GetTypeByExpression(node.Designator)
 	if array, ok := typeSymbol.(*symbol.ArrayTypeSymbol); ok {
-		v.symbolTable.MapExpressionToType(node, &array.ElementType)
-		v.symbolTable.MapDesignatorToDecl(node, &array.ElementType)
+		v.symbolTable.MapExpressionToType(node, array.ElementType)
+		// todo map designator to its declaration
 	} else {
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to an array type", node))
 		v.symbolTable.MapExpressionToType(node, nil)
 	}
-
 }
 
 func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
@@ -118,6 +117,7 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 	default:
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a class type", node))
 	}
+	// todo map designator to its declaration
 	v.symbolTable.MapDesignatorToDecl(node, target)
 	v.symbolTable.MapExpressionToType(node, targetType)
 }
