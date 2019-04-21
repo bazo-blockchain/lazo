@@ -68,13 +68,14 @@ type ContractNode struct {
 	AbstractNode
 	Name        string
 	Fields      []*FieldNode
+	Structs     []*StructNode
 	Constructor *ConstructorNode
 	Functions   []*FunctionNode
 }
 
 func (n *ContractNode) String() string {
-	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n CONSTRUCTOR: %s \n\n FUNCS: %s",
-		n.Pos(), n.Name, n.Fields, getNodeString(n.Constructor), n.Functions)
+	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n STRUCTS: %s \n\n CONSTRUCTOR: %s \n\n FUNCS: %s",
+		n.Pos(), n.Name, n.Fields, n.Structs, getNodeString(n.Constructor), n.Functions)
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -105,6 +106,42 @@ func (n *FieldNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *FieldNode) Accept(v Visitor) {
 	v.VisitFieldNode(n)
+}
+
+// --------------------------
+
+// StructNode composes abstract node
+type StructNode struct {
+	AbstractNode
+	Name   string
+	Fields []*StructFieldNode
+}
+
+func (n *StructNode) String() string {
+	return fmt.Sprintf("\n [%s] STRUCT %s \n FIELDS: %s", n.Pos(), n.Name, n.Fields)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *StructNode) Accept(v Visitor) {
+	v.VisitStructNode(n)
+}
+
+// --------------------------
+
+// StructFieldNode composes abstract node and holds the type and identifier
+type StructFieldNode struct {
+	AbstractNode
+	Type       *TypeNode
+	Identifier string
+}
+
+func (n *StructFieldNode) String() string {
+	return fmt.Sprintf("\n [%s] FIELD %s %s", n.Pos(), getNodeString(n.Type), n.Identifier)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *StructFieldNode) Accept(v Visitor) {
+	v.VisitStructFieldNode(n)
 }
 
 // --------------------------

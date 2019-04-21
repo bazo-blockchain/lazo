@@ -103,6 +103,35 @@ func TestFieldAssignment(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Struct Declaration nodes
+// --------------
+
+func TestEmptyStructDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+   		}
+	`)
+	s := p.parseStruct()
+
+	assertNoErrors(t, p)
+	assertStruct(t, s, "Person", 0)
+}
+
+func TestStructDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name
+			int balance
+   	}
+	`)
+	s := p.parseStruct()
+
+	assertNoErrors(t, p)
+	assertStruct(t, s, "Person", 2)
+	assertStructField(t, s.Fields[0], "string", "name")
+	assertStructField(t, s.Fields[1], "int", "balance")
+}
+
 // Constructor Nodes
 // -----------------
 

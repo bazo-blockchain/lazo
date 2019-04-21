@@ -89,6 +89,8 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 				p.addError(fmt.Sprintf("Only one constructor is allowed"))
 				p.nextToken()
 			}
+		case token.Struct:
+			contract.Structs = append(contract.Structs, p.parseStruct())
 		default:
 			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
 			p.nextToken()
@@ -112,6 +114,32 @@ func (p *Parser) parseField() *node.FieldNode {
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return v
+}
+
+func (p *Parser) parseStruct() *node.StructNode {
+	s := &node.StructNode{
+		AbstractNode: p.newAbstractNode(),
+	}
+	p.nextToken() // skip 'struct' keyword
+
+	s.Name = p.readIdentifier()
+	p.check(token.OpenBrace)
+	p.checkAndSkipNewLines(token.NewLine)
+
+	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+		f := &node.StructFieldNode{
+			AbstractNode: p.newAbstractNode(),
+			Type:         p.parseType(),
+			Identifier:   p.readIdentifier(),
+		}
+		p.checkAndSkipNewLines(token.NewLine)
+		s.Fields = append(s.Fields, f)
+	}
+
+	p.check(token.CloseBrace)
+	p.checkAndSkipNewLines(token.NewLine)
+
+	return s
 }
 
 func (p *Parser) parseConstructor() *node.ConstructorNode {
@@ -375,7 +403,7 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 }
 
 func (p *Parser) parseType() *node.TypeNode {
-	// Later we need to distinguish between an array and a simple type
+	// TODO: Later we need to distinguish between an array and a simple type
 	return &node.TypeNode{
 		AbstractNode: p.newAbstractNode(),
 		Identifier:   p.readIdentifier(),

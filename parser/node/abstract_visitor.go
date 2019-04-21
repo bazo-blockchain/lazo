@@ -35,6 +35,18 @@ func (v *AbstractVisitor) VisitFieldNode(node *FieldNode) {
 	}
 }
 
+// VisitStructNode traverses the struct fields
+func (v *AbstractVisitor) VisitStructNode(node *StructNode) {
+	for _, field := range node.Fields {
+		field.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitStructFieldNode traverses the type node
+func (v *AbstractVisitor) VisitStructFieldNode(node *StructFieldNode) {
+	node.Type.Accept(v.ConcreteVisitor)
+}
+
 // VisitConstructorNode traverses the parameters and the statement block
 func (v *AbstractVisitor) VisitConstructorNode(node *ConstructorNode) {
 	for _, paramType := range node.Parameters {

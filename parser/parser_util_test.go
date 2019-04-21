@@ -54,6 +54,16 @@ func assertField(t *testing.T, node *node.FieldNode, varType string, id string, 
 	}
 }
 
+func assertStruct(t *testing.T, node *node.StructNode, name string, totalFields int) {
+	assert.Equal(t, node.Name, name)
+	assert.Equal(t, len(node.Fields), totalFields)
+}
+
+func assertStructField(t *testing.T, node *node.StructFieldNode, varType string, id string) {
+	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Identifier, id)
+}
+
 func assertConstructor(t *testing.T, node *node.ConstructorNode, totalPTypes int, totalStmts int) {
 	assert.Equal(t, len(node.Parameters), totalPTypes)
 	assert.Equal(t, len(node.Body), totalStmts)
