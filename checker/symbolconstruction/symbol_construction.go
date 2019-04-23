@@ -113,7 +113,7 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 
 func (sc *symbolConstruction) registerStruct(contractSymbol *symbol.ContractSymbol, node *node.StructNode) {
 	structType := symbol.NewStructTypeSymbol(contractSymbol, node.Name)
-	sc.globalScope.Structs = append(sc.globalScope.Structs, structType)
+	sc.globalScope.Structs[node.Name] = structType
 	sc.globalScope.Types = append(sc.globalScope.Types, structType)
 	sc.symbolTable.MapSymbolToNode(structType, node)
 

@@ -11,7 +11,7 @@ type GlobalScope struct {
 	BuiltInTypes     []*BasicTypeSymbol
 	BuiltInFunctions []*FunctionSymbol
 	Constants        []*ConstantSymbol
-	Structs          []*StructTypeSymbol
+	Structs          map[string]*StructTypeSymbol
 
 	NullType   *BasicTypeSymbol
 	BoolType   *BasicTypeSymbol
@@ -28,6 +28,7 @@ type GlobalScope struct {
 func newGlobalScope() *GlobalScope {
 	gs := &GlobalScope{}
 	gs.NullType = NewBasicTypeSymbol(gs, "@NULL")
+	gs.Structs = make(map[string]*StructTypeSymbol)
 	return gs
 }
 

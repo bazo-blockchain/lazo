@@ -84,10 +84,9 @@ func (ct *CheckerTestUtil) assertField(index int, expectedType symbol.TypeSymbol
 	}
 }
 
-func (ct *CheckerTestUtil) assertStruct(index int, name string, totalFields int) {
-	structType := ct.globalScope.Structs[0]
+func (ct *CheckerTestUtil) assertStruct(structName string, totalFields int) {
+	structType := ct.globalScope.Structs[structName]
 	assert.Equal(ct.t, structType.Scope(), ct.globalScope.Contract)
-	assert.Equal(ct.t, structType.Identifier(), name)
 	assert.Equal(ct.t, len(structType.Fields), 2)
 	assert.Equal(ct.t, len(structType.AllDeclarations()), totalFields)
 
@@ -96,8 +95,8 @@ func (ct *CheckerTestUtil) assertStruct(index int, name string, totalFields int)
 	assert.Equal(ct.t, structType.Identifier(), structNode.Name)
 }
 
-func (ct *CheckerTestUtil) assertStructField(structIndex int, fieldIndex int, expectedType symbol.TypeSymbol) {
-	structType := ct.symbolTable.GlobalScope.Structs[structIndex]
+func (ct *CheckerTestUtil) assertStructField(structName string, fieldIndex int, expectedType symbol.TypeSymbol) {
+	structType := ct.symbolTable.GlobalScope.Structs[structName]
 	fieldSymbol := structType.Fields[fieldIndex]
 	assert.Equal(ct.t, fieldSymbol.Scope(), structType)
 	assert.Equal(ct.t, fieldSymbol.Type, expectedType)

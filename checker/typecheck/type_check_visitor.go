@@ -211,6 +211,7 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 	}
 }
 
+// VisitFuncCallNode checks the types of passed arguments and declared return types.
 func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 	v.AbstractVisitor.VisitFuncCallNode(funcCallNode)
 	funcSym, ok := v.symbolTable.GetDeclByDesignator(funcCallNode.Designator).(*symbol.FunctionSymbol)
@@ -238,6 +239,19 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 	if len(funcSym.ReturnTypes) == 1 {
 		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
 	}
+}
+
+// VisitStructCreationNode maps the node to its struct declaration
+func (v *typeCheckVisitor) VisitStructCreationNode(node *node.StructCreationNode) {
+	v.AbstractVisitor.VisitStructCreationNode(node)
+
+	structType, ok := v.symbolTable.GlobalScope.Structs[node.Name]
+	if !ok {
+		v.reportError(node, fmt.Sprintf("Struct %s is undefined", node.Name))
+		return
+	}
+
+	v.symbolTable.MapExpressionToType(node, structType)
 }
 
 // VisitTypeNode currently does nothing

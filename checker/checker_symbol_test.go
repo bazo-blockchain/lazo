@@ -107,15 +107,20 @@ func TestStructType(t *testing.T) {
 			String name
 			int balance
 		}
+
+		Person p
 	`, true)
 
 	gs := tester.globalScope
 	assert.Equal(t, len(gs.Structs), 1)
-	assert.Equal(t, len(gs.Types), 5) // 4 built-in types + 1 struct type
+	assert.Equal(t, len(gs.Types), len(gs.BuiltInTypes)+1)
 
-	tester.assertStruct(0, "Person", 2)
-	tester.assertStructField(0, 0, gs.StringType)
-	tester.assertStructField(0, 1, gs.IntType)
+	structName := "Person"
+	tester.assertStruct(structName, 2)
+	tester.assertStructField(structName, 0, gs.StringType)
+	tester.assertStructField(structName, 1, gs.IntType)
+
+	tester.assertField(0, gs.Structs["Person"])
 }
 
 // Constructor

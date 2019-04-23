@@ -673,3 +673,20 @@ func TestMultiFuncCallReturnMixed(t *testing.T) {
 
 	tester.assertErrorAt(0, "Return type mismatch: expected int, given nil")
 }
+
+// Struct Types
+// ------------
+
+func TestStructCreationType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person()
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.Structs["Person"])
+}
