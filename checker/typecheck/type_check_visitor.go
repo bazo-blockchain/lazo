@@ -241,7 +241,7 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 	}
 }
 
-// VisitStructCreationNode maps the node to its struct declaration
+// VisitStructCreationNode maps the node to its struct declaration and checks field value types
 func (v *typeCheckVisitor) VisitStructCreationNode(node *node.StructCreationNode) {
 	v.AbstractVisitor.VisitStructCreationNode(node)
 
@@ -250,8 +250,21 @@ func (v *typeCheckVisitor) VisitStructCreationNode(node *node.StructCreationNode
 		v.reportError(node, fmt.Sprintf("Struct %s is undefined", node.Name))
 		return
 	}
-
 	v.symbolTable.MapExpressionToType(node, structType)
+
+	if len(node.FieldValues) > len(structType.Fields) {
+		v.reportError(node, fmt.Sprintf("Struct %s has only %d field(s), got %d value(s)",
+			node.Name, len(node.FieldValues), len(structType.Fields)))
+		return
+	}
+
+	for i, fieldValue := range node.FieldValues {
+		exprType := v.symbolTable.GetTypeByExpression(fieldValue)
+		expectedType := structType.Fields[i].Type
+		if exprType != expectedType {
+			v.reportError(fieldValue, fmt.Sprintf("expected %s, got %s", expectedType, exprType))
+		}
+	}
 }
 
 // VisitTypeNode currently does nothing
