@@ -374,8 +374,8 @@ func TestFunctionWithIfElse(t *testing.T) {
 	tester.assertFuncLocalVariable(0, 4, tester.globalScope.StringType, 1)
 }
 
-// ID Checks
-// -----------------
+// Identifier valid name checks
+// ----------------------------
 
 func TestInvalidFieldName(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -442,6 +442,36 @@ func TestInvalidMultiLocalVarNames(t *testing.T) {
 	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
 	tester.assertErrorAt(1, "Reserved keyword 'bool' cannot be used")
 }
+
+func TestInvalidStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct int {
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
+}
+
+func TestInvalidStructFieldName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int int
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
+}
+
+func TestIdentifierWithStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		int Person
+	`, false)
+	tester.assertErrorAt(0, "Struct name Person cannot be used")
+}
+
+// Identifier unique name checks
+// -----------------------------
 
 func TestDuplicateFieldNames(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -533,4 +563,25 @@ func TestUniqueLocalVar(t *testing.T) {
 		}
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+func TestUniqueStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		struct Person {
+		}
+	`, false)
+	tester.assertErrorAt(0, "Identifier 'Person' is already declared")
+}
+
+func TestUniqueStructFieldName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int i
+			int i
+		}
+	`, false)
+	tester.assertErrorAt(0, "Identifier 'i' is already declared")
 }

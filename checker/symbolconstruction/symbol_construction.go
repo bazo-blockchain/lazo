@@ -163,6 +163,13 @@ func (sc *symbolConstruction) checkValidIdentifiers() {
 		sc.checkValidIdentifier(field)
 	}
 
+	for _, structType := range sc.globalScope.Structs {
+		sc.checkValidIdentifier(structType)
+		for _, field := range structType.Fields {
+			sc.checkValidIdentifier(field)
+		}
+	}
+
 	if contract.Constructor != nil {
 		for _, decl := range contract.Constructor.AllDeclarations() {
 			sc.checkValidIdentifier(decl)
@@ -183,6 +190,14 @@ func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 	for _, keyword := range reservedKeywords {
 		if sym.Identifier() == keyword {
 			sc.reportError(sym, fmt.Sprintf("Reserved keyword '%s' cannot be used as an identifier", keyword))
+			return
+		}
+	}
+	for _, structType := range sc.globalScope.Structs {
+		if sym != structType && sym.Identifier() == structType.Identifier() {
+			sc.reportError(sym, fmt.Sprintf("Struct name %s cannot be used as an identifier",
+				structType.Identifier()))
+			return
 		}
 	}
 }
@@ -190,6 +205,10 @@ func (sc *symbolConstruction) checkValidIdentifier(sym symbol.Symbol) {
 func (sc *symbolConstruction) checkUniqueIdentifiers() {
 	sc.checkUniqueIdentifier(sc.globalScope)
 	sc.checkUniqueIdentifier(sc.globalScope.Contract)
+
+	for _, structType := range sc.globalScope.Structs {
+		sc.checkUniqueIdentifier(structType)
+	}
 
 	if sc.globalScope.Contract.Constructor != nil {
 		sc.checkUniqueIdentifier(sc.globalScope.Contract.Constructor)
