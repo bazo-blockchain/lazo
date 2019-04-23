@@ -7,10 +7,11 @@ import "fmt"
 type GlobalScope struct {
 	AbstractSymbol
 	Contract         *ContractSymbol
-	Types            []*BasicTypeSymbol
+	Types            []TypeSymbol
 	BuiltInTypes     []*BasicTypeSymbol
 	BuiltInFunctions []*FunctionSymbol
 	Constants        []*ConstantSymbol
+	Structs          []*StructTypeSymbol
 
 	NullType   *BasicTypeSymbol
 	BoolType   *BasicTypeSymbol

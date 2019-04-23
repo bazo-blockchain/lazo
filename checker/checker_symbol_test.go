@@ -98,6 +98,24 @@ func TestUnknownFieldType(t *testing.T) {
 	tester.assertTotalErrors(1)
 }
 
+// Struct Types
+//-------------
+
+func TestStructType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+	`, true)
+
+	gs := tester.globalScope
+	assert.Equal(t, len(gs.Structs), 1)
+	assert.Equal(t, len(gs.Types), 5) // 4 built-in types + 1 struct type
+
+	tester.assertStruct(0, "Person", 2)
+}
+
 // Constructor
 //------------
 

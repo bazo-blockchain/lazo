@@ -242,8 +242,8 @@ func (sym *ConstantSymbol) String() string {
 
 // TypeSymbol declares functions which all type symbols should implement
 type TypeSymbol interface {
+	Symbol
 	Type() string
-	Identifier() string
 }
 
 //----------------

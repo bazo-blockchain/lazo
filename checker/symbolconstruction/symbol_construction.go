@@ -92,6 +92,10 @@ func (sc *symbolConstruction) registerContract() {
 		sc.registerField(contractSymbol, fieldNode)
 	}
 
+	for _, structNode := range contractNode.Structs {
+		sc.registerStruct(contractSymbol, structNode)
+	}
+
 	if contractNode.Constructor != nil {
 		sc.registerConstructor(contractSymbol, contractNode.Constructor)
 	}
@@ -105,6 +109,19 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 	fieldSymbol := symbol.NewFieldSymbol(contractSymbol, node.Identifier)
 	contractSymbol.Fields = append(contractSymbol.Fields, fieldSymbol)
 	sc.symbolTable.MapSymbolToNode(fieldSymbol, node)
+}
+
+func (sc *symbolConstruction) registerStruct(contractSymbol *symbol.ContractSymbol, node *node.StructNode) {
+	structType := symbol.NewStructTypeSymbol(contractSymbol, node.Name)
+	sc.globalScope.Structs = append(sc.globalScope.Structs, structType)
+	sc.globalScope.Types = append(sc.globalScope.Types, structType)
+	sc.symbolTable.MapSymbolToNode(structType, node)
+
+	for _, fieldNode := range node.Fields {
+		fieldSymbol := symbol.NewFieldSymbol(structType, fieldNode.Identifier)
+		structType.Fields = append(structType.Fields, fieldSymbol)
+		sc.symbolTable.MapSymbolToNode(fieldSymbol, fieldNode)
+	}
 }
 
 func (sc *symbolConstruction) registerConstructor(contractSymbol *symbol.ContractSymbol, node *node.ConstructorNode) {
