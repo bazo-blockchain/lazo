@@ -14,11 +14,12 @@ type typeResolution struct {
 // Run performs type resolution
 // Returns errors that occurred during type resolution
 func Run(symTable *symbol.SymbolTable) []error {
-	resolution := typeResolution{
+	tr := typeResolution{
 		symTable: symTable,
 	}
-	resolution.resolveTypesInContractSymbol()
-	return resolution.errors
+	tr.resolveTypesInContractSymbol()
+	tr.resolveTypesInStruct()
+	return tr.errors
 }
 
 func (tr *typeResolution) resolveTypesInContractSymbol() {
@@ -33,6 +34,15 @@ func (tr *typeResolution) resolveTypesInContractSymbol() {
 
 	for _, function := range contractSymbol.Functions {
 		tr.resolveTypeInFunctionSymbol(function)
+	}
+}
+
+func (tr *typeResolution) resolveTypesInStruct() {
+	for _, structType := range tr.symTable.GlobalScope.Structs {
+		for _, fieldSym := range structType.Fields {
+			fieldNode := tr.symTable.GetNodeBySymbol(fieldSym).(*node.StructFieldNode)
+			fieldSym.Type = tr.resolveType(fieldNode.Type)
+		}
 	}
 }
 

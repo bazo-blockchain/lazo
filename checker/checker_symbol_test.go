@@ -114,6 +114,8 @@ func TestStructType(t *testing.T) {
 	assert.Equal(t, len(gs.Types), 5) // 4 built-in types + 1 struct type
 
 	tester.assertStruct(0, "Person", 2)
+	tester.assertStructField(0, 0, gs.StringType)
+	tester.assertStructField(0, 1, gs.IntType)
 }
 
 // Constructor
