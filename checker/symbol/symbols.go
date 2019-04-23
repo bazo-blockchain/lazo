@@ -329,3 +329,13 @@ func (sym *StructTypeSymbol) String() string {
 func (sym *StructTypeSymbol) Type() string {
 	return sym.Identifier()
 }
+
+// GetField returns the field symbol by identifier
+func (sym *StructTypeSymbol) GetField(identifier string) *FieldSymbol {
+	for _, f := range sym.Fields {
+		if f.Identifier() == identifier {
+			return f
+		}
+	}
+	return nil
+}

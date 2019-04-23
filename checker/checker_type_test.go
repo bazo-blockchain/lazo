@@ -712,6 +712,19 @@ func TestStructCreationUndefinedType2(t *testing.T) {
 	tester.assertErrorAt(0, "Struct Person2 is undefined")
 }
 
+func TestStructCreationUndefinedType3(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person2(name="test")
+	`, false)
+
+	tester.assertErrorAt(0, "Struct Person2 is undefined")
+}
+
 func TestStructCreationFieldType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		struct Person {
@@ -748,5 +761,45 @@ func TestStructCreationFieldTypeMisMatch(t *testing.T) {
 	tester.assertTotalErrors(3)
 	tester.assertErrorAt(0, "expected Type String, got Type int")
 	tester.assertErrorAt(1, "expected Type int, got Type String")
+	tester.assertErrorAt(2, "Struct Person has only 3 field(s), got 2 value(s)")
+}
+
+func TestStructCreationWithNamedField(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person(balance=120)
+		Person p2 = new Person(balance=120, name="hello")
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.Structs["Person"])
+
+	sc := tester.getFieldNode(0).Expression.(*node.StructNamedCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.IntType)
+
+	sc = tester.getFieldNode(1).Expression.(*node.StructNamedCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.IntType)
+	tester.assertExpressionType(sc.FieldValues[1], gs.StringType)
+}
+
+func TestStructCreationWithNamedFieldTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person(balance="120")
+		Person p2 = new Person(age=18)
+		Person p3 = new Person(balance=120, name="hello", age=18)
+	`, false)
+
+	tester.assertTotalErrors(3)
+	tester.assertErrorAt(0, "expected Type int, got Type String")
+	tester.assertErrorAt(1, "Field age not found")
 	tester.assertErrorAt(2, "Struct Person has only 3 field(s), got 2 value(s)")
 }

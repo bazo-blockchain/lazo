@@ -267,6 +267,40 @@ func (v *typeCheckVisitor) VisitStructCreationNode(node *node.StructCreationNode
 	}
 }
 
+func (v *typeCheckVisitor) VisitStructNamedCreationNode(node *node.StructNamedCreationNode) {
+	v.AbstractVisitor.VisitStructNamedCreationNode(node)
+
+	structType, ok := v.symbolTable.GlobalScope.Structs[node.Name]
+	if !ok {
+		v.reportError(node, fmt.Sprintf("Struct %s is undefined", node.Name))
+		return
+	}
+	v.symbolTable.MapExpressionToType(node, structType)
+
+	if len(node.FieldValues) > len(structType.Fields) {
+		v.reportError(node, fmt.Sprintf("Struct %s has only %d field(s), got %d value(s)",
+			node.Name, len(node.FieldValues), len(structType.Fields)))
+		return
+	}
+
+	for _, fieldValue := range node.FieldValues {
+		exprType := v.symbolTable.GetTypeByExpression(fieldValue)
+		fieldSymbol := structType.GetField(fieldValue.Name)
+		if fieldSymbol == nil {
+			v.reportError(fieldValue, fmt.Sprintf("Field %s not found", fieldValue.Name))
+		} else if exprType != fieldSymbol.Type {
+			v.reportError(fieldValue, fmt.Sprintf("expected %s, got %s", fieldSymbol.Type, exprType))
+		}
+	}
+}
+
+// VisitStructFieldAssignmentNode traverse the field initialization expression
+func (v *typeCheckVisitor) VisitStructFieldAssignmentNode(node *node.StructFieldAssignmentNode) {
+	v.AbstractVisitor.VisitStructFieldAssignmentNode(node)
+	exprType := v.symbolTable.GetTypeByExpression(node.Expression)
+	v.symbolTable.MapExpressionToType(node, exprType)
+}
+
 // VisitTypeNode currently does nothing
 func (v *typeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
 	// To be done as soon as own types are introduced
