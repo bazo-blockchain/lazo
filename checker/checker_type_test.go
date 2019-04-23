@@ -16,7 +16,7 @@ func TestFieldBuiltInType(t *testing.T) {
 		bool b = true
 		int x = 2
 		char c = 'c'
-		string s = "test"
+		String s = "test"
 	`, true)
 
 	gs := tester.globalScope
@@ -31,7 +31,7 @@ func TestFieldTypeMismatch(t *testing.T) {
 		bool b = 2
 		int x = 'c'
 		char c = "test"
-		string s = true
+		String s = true
 	`, false)
 	tester.assertTotalErrors(4)
 }
@@ -41,11 +41,11 @@ func TestFieldTypeMismatch(t *testing.T) {
 
 func TestLocalVarBuiltInType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function void test(bool b1, int x1, char c1, string s1) {
+		function void test(bool b1, int x1, char c1, String s1) {
 			bool b = b1
 			int x = x1
 			char c = c1
-			string s = s1
+			String s = s1
 		}`, true)
 
 	gs := tester.globalScope
@@ -57,11 +57,11 @@ func TestLocalVarBuiltInType(t *testing.T) {
 
 func TestLocalVarTypeMismatch(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function void test(bool b1, int x1, char c1, string s1) {
+		function void test(bool b1, int x1, char c1, String s1) {
 			bool b = x1
 			int x = c1
 			char c = s1
-			string s = b1
+			String s = b1
 		}`, false)
 	tester.assertTotalErrors(4)
 }
@@ -134,8 +134,8 @@ func TestFunctionReturnInt(t *testing.T) {
 
 func TestFunctionReturnString(t *testing.T) {
 	_ = newCheckerTestUtil(t, `
-		function string test() {
-			string s = "test"
+		function String test() {
+			String s = "test"
 			return s
 		}`, true)
 }
@@ -458,7 +458,7 @@ func TestFuncCallArgsType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		bool y = test(1, true, "string")
 
-		function bool test(int i, bool b, string s) {
+		function bool test(int i, bool b, String s) {
 			return true
 		}
 	`, true)

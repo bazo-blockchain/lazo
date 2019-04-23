@@ -33,7 +33,7 @@ func TestGlobalScope(t *testing.T) {
 	assert.Equal(t, gs.NullType.Identifier(), "@NULL")
 	assert.Equal(t, gs.BoolType.Identifier(), "bool")
 	assert.Equal(t, gs.CharType.Identifier(), "char")
-	assert.Equal(t, gs.StringType.Identifier(), "string")
+	assert.Equal(t, gs.StringType.Identifier(), "String")
 	assert.Equal(t, gs.IntType.Identifier(), "int")
 
 	// Constants
@@ -51,7 +51,7 @@ func TestValidContract(t *testing.T) {
 			int x
 			bool b = true
 			char c = 'c'
-			string s = "hello"
+			String s = "hello"
 
 			function void test() {
 				int x = 2
@@ -81,7 +81,7 @@ func TestContractFields(t *testing.T) {
 		bool b
 		int x = 2
 		char c
-		string s
+		String s
 	`, true)
 
 	gs := tester.globalScope
@@ -116,7 +116,7 @@ func TestConstructor(t *testing.T) {
 		
 		constructor(int x, bool b) {
 			char c
-			string s
+			String s
 		}
 	`, true)
 
@@ -195,7 +195,7 @@ func TestFunctionMultipleReturn(t *testing.T) {
 
 func TestFunctionMaximumReturnTypes(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function (int, char, bool, string) test() {
+		function (int, char, bool, String) test() {
 		}
 	`, false)
 
@@ -237,7 +237,7 @@ func TestFunctionWithLocalVars(t *testing.T) {
 func TestFunctionWithMultipleVars(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
-			string s
+			String s
 			int x, bool y = test2()
 			char z
 		}
@@ -257,7 +257,7 @@ func TestFunctionWithAssignment(t *testing.T) {
 		function void test() {
 			int x
 			bool b
-			string s
+			String s
 			x = 2
 		}
 	`, true)
@@ -275,7 +275,7 @@ func TestFunctionWithAssignment(t *testing.T) {
 func TestFunctionWithMultiAssign(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
-			string a
+			String a
 			int x
 			bool y
 			x, y = test2()
@@ -336,7 +336,7 @@ func TestFunctionWithIfElse(t *testing.T) {
 				a = true
 			}
 			
-			string s
+			String s
 			return x
 		}
 	`, true)

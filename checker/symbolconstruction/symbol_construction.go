@@ -46,7 +46,7 @@ func (sc *symbolConstruction) registerBuiltInTypes() {
 	sc.globalScope.BoolType = sc.registerBuiltInType("bool")
 	sc.globalScope.CharType = sc.registerBuiltInType("char")
 	sc.globalScope.IntType = sc.registerBuiltInType("int")
-	sc.globalScope.StringType = sc.registerBuiltInType("string")
+	sc.globalScope.StringType = sc.registerBuiltInType("String")
 }
 
 func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.BasicTypeSymbol {

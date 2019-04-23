@@ -56,10 +56,10 @@ func TestUndefinedFieldDesignator(t *testing.T) {
 
 func TestFieldDesignatorInFunction(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		string s
+		String s
 
 		function void test() {
-			string t = s
+			String t = s
 		}
 	`, true)
 

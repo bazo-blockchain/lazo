@@ -20,7 +20,7 @@ const (
 	intTestSig    = "(int)test()"
 	boolTestSig   = "(bool)test()"
 	charTestSig   = "(char)test()"
-	stringTestSig = "(string)test()"
+	stringTestSig = "(String)test()"
 )
 
 type generatorTestUtil struct {
