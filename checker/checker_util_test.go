@@ -204,12 +204,21 @@ func (ct *CheckerTestUtil) assertAssignment(assignStmt *node.AssignmentStatement
 	ct.assertExpressionType(assignStmt.Right, expectedType)
 }
 
-func (ct *CheckerTestUtil) assertDesignator(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+func (ct *CheckerTestUtil) assertBasicDesignator(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.BasicDesignatorNode)
 	assert.Assert(ct.t, ok)
+	ct.assertDesignator(designator, decl, expectedType)
+}
 
+func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+	designator, ok := expr.(*node.MemberAccessNode)
+	assert.Assert(ct.t, ok)
+	ct.assertDesignator(designator, decl, expectedType)
+}
+
+func (ct *CheckerTestUtil) assertDesignator(designator node.DesignatorNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
 	assert.Equal(ct.t, ct.symbolTable.GetDeclByDesignator(designator), decl)
-	ct.assertExpressionType(expr, expectedType)
+	ct.assertExpressionType(designator, expectedType)
 }
 
 func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {

@@ -28,7 +28,7 @@ func TestFieldDesignator(t *testing.T) {
 		int y = x
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.syntaxTree.Contract.Fields[1].Expression,
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.IntType)
@@ -41,7 +41,7 @@ func TestMixedDesignatorExpression(t *testing.T) {
 	`, true)
 
 	binExpr := tester.syntaxTree.Contract.Fields[1].Expression.(*node.BinaryExpressionNode)
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		binExpr.Right,
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.IntType)
@@ -63,7 +63,7 @@ func TestFieldDesignatorInFunction(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getFuncStatementNode(0, 0).(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Fields[0],
 		tester.globalScope.StringType)
@@ -86,17 +86,17 @@ func TestConstructorDesignators(t *testing.T) {
 	gs := tester.globalScope
 	constructor := gs.Contract.Constructor
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getConstructorStatementNode(0).(*node.VariableNode).Expression,
 		constructor.Parameters[0],
 		gs.IntType)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getConstructorStatementNode(1).(*node.VariableNode).Expression,
 		constructor.LocalVariables[0],
 		gs.IntType)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getConstructorStatementNode(2).(*node.VariableNode).Expression,
 		gs.Contract.Fields[0],
 		gs.IntType)
@@ -124,7 +124,7 @@ func TestFuncParamDesignator(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getFuncStatementNode(0, 0).(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
 		tester.globalScope.BoolType)
@@ -140,12 +140,12 @@ func TestFuncParamInsideIf(t *testing.T) {
 	`, true)
 
 	ifStmt := tester.getFuncStatementNode(0, 0).(*node.IfStatementNode)
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		ifStmt.Condition,
 		tester.globalScope.Contract.Functions[0].Parameters[0],
 		tester.globalScope.BoolType)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		ifStmt.Then[0].(*node.VariableNode).Expression,
 		tester.globalScope.Contract.Functions[0].Parameters[1],
 		tester.globalScope.CharType)
@@ -162,7 +162,7 @@ func TestLocalVarDesignator(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getFuncStatementNode(0, 1).(*node.VariableNode).Expression,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
@@ -176,7 +176,7 @@ func TestFuncNameAsLocalVarName(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getFuncStatementNode(0, 1).(*node.VariableNode).Expression,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
@@ -199,7 +199,7 @@ func TestDesignatorWithAssignment(t *testing.T) {
 		}
 	`, true)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		tester.getFuncStatementNode(0, 1).(*node.AssignmentStatementNode).Left,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
@@ -273,12 +273,12 @@ func TestLocalVarAccessFromSubScope(t *testing.T) {
 	`, true)
 
 	ifStmt := tester.getFuncStatementNode(0, 2).(*node.IfStatementNode)
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		ifStmt.Condition,
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.BoolType)
 
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		ifStmt.Then[0].(*node.AssignmentStatementNode).Left,
 		tester.getLocalVariableSymbol(0, 1),
 		tester.globalScope.IntType)
@@ -318,7 +318,7 @@ func TestLocalVarWithReturn(t *testing.T) {
 	`, true)
 
 	returnStmt := tester.getFuncStatementNode(0, 1).(*node.ReturnStatementNode)
-	tester.assertDesignator(
+	tester.assertBasicDesignator(
 		returnStmt.Expressions[0],
 		tester.getLocalVariableSymbol(0, 0),
 		tester.globalScope.IntType)
@@ -368,4 +368,44 @@ func TestUndefinedDesignatorWithFuncCall(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "Designator x is undefined")
+}
+
+// Struct
+// ------
+
+func TestStructAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		Person p = new Person()
+		Person p2 = p
+	`, true)
+
+	tester.assertBasicDesignator(
+		tester.getFieldNode(1).Expression,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.Structs["Person"])
+}
+
+func TestStructFieldAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int balance
+		}
+
+		Person p = new Person(1000)
+		int i = p.balance
+	`, true)
+
+	memberAccess := tester.getFieldNode(1).Expression.(*node.MemberAccessNode)
+	tester.assertMemberAccess(
+		memberAccess,
+		tester.globalScope.Structs["Person"].Fields[0],
+		tester.globalScope.IntType)
+
+	tester.assertBasicDesignator(
+		memberAccess.Designator,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.Structs["Person"])
 }
