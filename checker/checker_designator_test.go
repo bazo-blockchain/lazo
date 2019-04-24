@@ -456,3 +456,15 @@ func TestStructNestedField(t *testing.T) {
 	tester.assertBasicDesignator(target.Designator.(*node.MemberAccessNode).Designator,
 		tester.globalScope.Contract.Fields[0], structType)
 }
+
+func TestStructUndefinedFieldAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		Person p = new Person()
+		int i = p.balance
+	`, false)
+
+	tester.assertErrorAt(0, "Member balance does not exist on struct Person")
+}

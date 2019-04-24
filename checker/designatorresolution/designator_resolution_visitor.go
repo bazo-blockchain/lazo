@@ -118,7 +118,7 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 		structType := designatorType.(*symbol.StructTypeSymbol)
 		target = structType.GetField(node.Identifier)
 
-		if target == nil {
+		if target == (*symbol.FieldSymbol)(nil) {
 			v.reportError(node, fmt.Sprintf("Member %s does not exist on struct %s",
 				node.Identifier, structType.Identifier()))
 		} else {
