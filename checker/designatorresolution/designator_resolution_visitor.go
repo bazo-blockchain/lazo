@@ -97,10 +97,11 @@ func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementA
 
 func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
 	v.AbstractVisitor.VisitMemberAccessNode(node)
-	typeSymbol := v.symbolTable.GetTypeByExpression(node)
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
 	var target symbol.Symbol
 	var targetType symbol.TypeSymbol
-	switch typeSymbol.(type) {
+
+	switch designatorType.(type) {
 	case *symbol.ArrayTypeSymbol:
 		arrayLength := v.symbolTable.GlobalScope.ArrayLength
 		if node.Identifier == arrayLength.Identifier() {
@@ -113,11 +114,24 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 		} else {
 			v.reportError(node, fmt.Sprintf("Invalid member access %v on array %v", node.Identifier, node))
 		}
+	case *symbol.StructTypeSymbol:
+		structType := designatorType.(*symbol.StructTypeSymbol)
+		target = structType.GetField(node.Identifier)
 
+		if target == (*symbol.FieldSymbol)(nil) {
+			v.reportError(node, fmt.Sprintf("Member %s does not exist on struct %s",
+				node.Identifier, structType.Identifier()))
+		} else {
+			var err error
+			targetType, err = getType(target)
+
+			if err != nil {
+				v.reportError(node, err.Error())
+			}
+		}
 	default:
-		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a class type", node))
+		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a composite type", node))
 	}
-	// todo map designator to its declaration
 	v.symbolTable.MapDesignatorToDecl(node, target)
 	v.symbolTable.MapExpressionToType(node, targetType)
 }

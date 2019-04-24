@@ -174,8 +174,8 @@ func TestLocVarBool(t *testing.T) {
 
 func TestLocVarStringDefaultValue(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
-		function string test() {
-			string x
+		function String test() {
+			String x
 			return x
 		}
 	`, stringTestSig)
@@ -185,8 +185,8 @@ func TestLocVarStringDefaultValue(t *testing.T) {
 
 func TestLocVarString(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
-		function string test() {
-			string x = "hello"
+		function String test() {
+			String x = "hello"
 			return x
 		}
 	`, stringTestSig)
@@ -286,9 +286,9 @@ func TestReAssignmentBool(t *testing.T) {
 
 func TestReAssignmentString(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
-		function string test() {
-			string x = "abc"
-			string y = "def"
+		function String test() {
+			String x = "abc"
+			String y = "def"
 			x = y
 			return x
 		}

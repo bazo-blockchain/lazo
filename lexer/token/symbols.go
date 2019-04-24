@@ -43,6 +43,8 @@ const (
 	// Keywords
 
 	Contract
+	Struct
+	New
 	Constructor
 	If
 	Else
@@ -92,6 +94,8 @@ var SymbolLexeme = map[Symbol]string{
 	// Keywords
 
 	Contract:    "contract",
+	Struct:      "struct",
+	New:         "new",
 	Constructor: "constructor",
 	If:          "if",
 	Else:        "else",
@@ -104,6 +108,8 @@ var SymbolLexeme = map[Symbol]string{
 // Keywords maps reserved literal values to the Symbol type
 var Keywords = map[string]Symbol{
 	"contract":    Contract,
+	"struct":      Struct,
+	"new":         New,
 	"constructor": Constructor,
 	"if":          If,
 	"else":        Else,
