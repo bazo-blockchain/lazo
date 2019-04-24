@@ -126,7 +126,8 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 
 	if leftType != rightType {
 		v.reportError(node,
-			fmt.Sprintf("assignment of %s is not compatible with target %s", rightType, leftType))
+			fmt.Sprintf("assignment of %s is not compatible with target %s",
+				getTypeString(rightType), getTypeString(leftType)))
 	}
 }
 
@@ -382,7 +383,7 @@ func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expect
 	exprType := v.symbolTable.GetTypeByExpression(expr)
 	if exprType != expectedTypes[0] {
 		v.reportError(expr, fmt.Sprintf("Type mismatch: expected %s, given %s",
-			expectedTypes[0], getTypeString(exprType)))
+			expectedTypes[0].Identifier(), getTypeString(exprType)))
 	}
 }
 

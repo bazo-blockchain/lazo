@@ -77,7 +77,7 @@ func TestConstructorLocalVars(t *testing.T) {
 	gs := tester.globalScope
 	constructor := gs.Contract.Constructor
 	tester.assertLocalVariable(constructor.LocalVariables[0], constructor, gs.IntType, 1)
-	tester.assertErrorAt(0, "expected Type char, given int")
+	tester.assertErrorAt(0, "expected char, given int")
 }
 
 // Return Types
@@ -417,7 +417,7 @@ func TestFuncNameAsDesignator(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given nil")
+	tester.assertErrorAt(0, "Type mismatch: expected int, given nil")
 }
 
 func TestFuncNameAsLocalVar(t *testing.T) {
@@ -725,6 +725,20 @@ func TestStructCreationUndefinedType3(t *testing.T) {
 	tester.assertErrorAt(0, "Struct Person2 is undefined")
 }
 
+func TestStructCreationTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		struct Person2 {
+		}
+
+		Person p = new Person2()
+	`, false)
+
+	tester.assertErrorAt(0, "expected Person, given Person2")
+}
+
 func TestStructCreationFieldType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		struct Person {
@@ -802,4 +816,22 @@ func TestStructCreationWithNamedFieldTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(0, "expected Type int, got Type String")
 	tester.assertErrorAt(1, "Field age not found")
 	tester.assertErrorAt(2, "Struct Person has only 3 field(s), got 2 value(s)")
+}
+
+func TestStructFieldTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int balance
+		}
+		
+		constructor() {
+			Person p = new Person()
+			p.balance = true
+			bool b = p.balance
+		}
+		
+	`, false)
+
+	tester.assertErrorAt(0, "assignment of bool is not compatible with target int")
+	tester.assertErrorAt(1, "expected bool, given int")
 }
