@@ -16,7 +16,7 @@ func TestFieldBuiltInType(t *testing.T) {
 		bool b = true
 		int x = 2
 		char c = 'c'
-		string s = "test"
+		String s = "test"
 	`, true)
 
 	gs := tester.globalScope
@@ -31,7 +31,7 @@ func TestFieldTypeMismatch(t *testing.T) {
 		bool b = 2
 		int x = 'c'
 		char c = "test"
-		string s = true
+		String s = true
 	`, false)
 	tester.assertTotalErrors(4)
 }
@@ -41,11 +41,11 @@ func TestFieldTypeMismatch(t *testing.T) {
 
 func TestLocalVarBuiltInType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function void test(bool b1, int x1, char c1, string s1) {
+		function void test(bool b1, int x1, char c1, String s1) {
 			bool b = b1
 			int x = x1
 			char c = c1
-			string s = s1
+			String s = s1
 		}`, true)
 
 	gs := tester.globalScope
@@ -57,11 +57,11 @@ func TestLocalVarBuiltInType(t *testing.T) {
 
 func TestLocalVarTypeMismatch(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function void test(bool b1, int x1, char c1, string s1) {
+		function void test(bool b1, int x1, char c1, String s1) {
 			bool b = x1
 			int x = c1
 			char c = s1
-			string s = b1
+			String s = b1
 		}`, false)
 	tester.assertTotalErrors(4)
 }
@@ -77,7 +77,7 @@ func TestConstructorLocalVars(t *testing.T) {
 	gs := tester.globalScope
 	constructor := gs.Contract.Constructor
 	tester.assertLocalVariable(constructor.LocalVariables[0], constructor, gs.IntType, 1)
-	tester.assertErrorAt(0, "expected Type char, given int")
+	tester.assertErrorAt(0, "expected char, given int")
 }
 
 // Return Types
@@ -134,8 +134,8 @@ func TestFunctionReturnInt(t *testing.T) {
 
 func TestFunctionReturnString(t *testing.T) {
 	_ = newCheckerTestUtil(t, `
-		function string test() {
-			string s = "test"
+		function String test() {
+			String s = "test"
 			return s
 		}`, true)
 }
@@ -417,7 +417,7 @@ func TestFuncNameAsDesignator(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Type mismatch: expected Type int, given nil")
+	tester.assertErrorAt(0, "Type mismatch: expected int, given nil")
 }
 
 func TestFuncNameAsLocalVar(t *testing.T) {
@@ -458,7 +458,7 @@ func TestFuncCallArgsType(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		bool y = test(1, true, "string")
 
-		function bool test(int i, bool b, string s) {
+		function bool test(int i, bool b, String s) {
 			return true
 		}
 	`, true)
@@ -672,4 +672,166 @@ func TestMultiFuncCallReturnMixed(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "Return type mismatch: expected int, given nil")
+}
+
+// Struct Types
+// ------------
+
+func TestStructCreationType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person()
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.Structs["Person"])
+}
+
+func TestStructCreationUndefinedType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Person p = new Person()
+	`, false)
+
+	tester.assertErrorAt(0, "Invalid type 'Person'")
+}
+
+func TestStructCreationUndefinedType2(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person2()
+	`, false)
+
+	tester.assertErrorAt(0, "Struct Person2 is undefined")
+}
+
+func TestStructCreationUndefinedType3(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person2(name="test")
+	`, false)
+
+	tester.assertErrorAt(0, "Struct Person2 is undefined")
+}
+
+func TestStructCreationTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		struct Person2 {
+		}
+
+		Person p = new Person2()
+	`, false)
+
+	tester.assertErrorAt(0, "expected Person, given Person2")
+}
+
+func TestStructCreationFieldType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person("hello")
+		Person p2 = new Person("hello", 120)
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.Structs["Person"])
+
+	sc := tester.getFieldNode(0).Expression.(*node.StructCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.StringType)
+
+	sc = tester.getFieldNode(1).Expression.(*node.StructCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.StringType)
+	tester.assertExpressionType(sc.FieldValues[1], gs.IntType)
+}
+
+func TestStructCreationFieldTypeMisMatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person(120, "hello")
+		Person p2 = new Person("hello", 120, true)
+	`, false)
+
+	tester.assertTotalErrors(3)
+	tester.assertErrorAt(0, "expected Type String, got Type int")
+	tester.assertErrorAt(1, "expected Type int, got Type String")
+	tester.assertErrorAt(2, "Struct Person has only 3 field(s), got 2 value(s)")
+}
+
+func TestStructCreationWithNamedField(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person(balance=120)
+		Person p2 = new Person(balance=120, name="hello")
+	`, true)
+
+	gs := tester.globalScope
+	tester.assertField(0, gs.Structs["Person"])
+
+	sc := tester.getFieldNode(0).Expression.(*node.StructNamedCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.IntType)
+
+	sc = tester.getFieldNode(1).Expression.(*node.StructNamedCreationNode)
+	tester.assertExpressionType(sc.FieldValues[0], gs.IntType)
+	tester.assertExpressionType(sc.FieldValues[1], gs.StringType)
+}
+
+func TestStructCreationWithNamedFieldTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p = new Person(balance="120")
+		Person p2 = new Person(age=18)
+		Person p3 = new Person(balance=120, name="hello", age=18)
+	`, false)
+
+	tester.assertTotalErrors(3)
+	tester.assertErrorAt(0, "expected Type int, got Type String")
+	tester.assertErrorAt(1, "Field age not found")
+	tester.assertErrorAt(2, "Struct Person has only 3 field(s), got 2 value(s)")
+}
+
+func TestStructFieldTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int balance
+		}
+		
+		constructor() {
+			Person p = new Person()
+			p.balance = true
+			bool b = p.balance
+		}
+		
+	`, false)
+
+	tester.assertErrorAt(0, "assignment of bool is not compatible with target int")
+	tester.assertErrorAt(1, "expected bool, given int")
 }

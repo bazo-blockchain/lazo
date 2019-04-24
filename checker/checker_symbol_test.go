@@ -33,7 +33,7 @@ func TestGlobalScope(t *testing.T) {
 	assert.Equal(t, gs.NullType.Identifier(), "@NULL")
 	assert.Equal(t, gs.BoolType.Identifier(), "bool")
 	assert.Equal(t, gs.CharType.Identifier(), "char")
-	assert.Equal(t, gs.StringType.Identifier(), "string")
+	assert.Equal(t, gs.StringType.Identifier(), "String")
 	assert.Equal(t, gs.IntType.Identifier(), "int")
 
 	// Constants
@@ -51,7 +51,7 @@ func TestValidContract(t *testing.T) {
 			int x
 			bool b = true
 			char c = 'c'
-			string s = "hello"
+			String s = "hello"
 
 			function void test() {
 				int x = 2
@@ -81,7 +81,7 @@ func TestContractFields(t *testing.T) {
 		bool b
 		int x = 2
 		char c
-		string s
+		String s
 	`, true)
 
 	gs := tester.globalScope
@@ -96,6 +96,31 @@ func TestUnknownFieldType(t *testing.T) {
 		Integer l
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+// Struct Types
+//-------------
+
+func TestStructType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		Person p
+	`, true)
+
+	gs := tester.globalScope
+	assert.Equal(t, len(gs.Structs), 1)
+	assert.Equal(t, len(gs.Types), len(gs.BuiltInTypes)+1)
+
+	structName := "Person"
+	tester.assertStruct(structName, 2)
+	tester.assertStructField(structName, 0, gs.StringType)
+	tester.assertStructField(structName, 1, gs.IntType)
+
+	tester.assertField(0, gs.Structs["Person"])
 }
 
 // Constructor
@@ -116,7 +141,7 @@ func TestConstructor(t *testing.T) {
 		
 		constructor(int x, bool b) {
 			char c
-			string s
+			String s
 		}
 	`, true)
 
@@ -195,7 +220,7 @@ func TestFunctionMultipleReturn(t *testing.T) {
 
 func TestFunctionMaximumReturnTypes(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		function (int, char, bool, string) test() {
+		function (int, char, bool, String) test() {
 		}
 	`, false)
 
@@ -237,7 +262,7 @@ func TestFunctionWithLocalVars(t *testing.T) {
 func TestFunctionWithMultipleVars(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
-			string s
+			String s
 			int x, bool y = test2()
 			char z
 		}
@@ -257,7 +282,7 @@ func TestFunctionWithAssignment(t *testing.T) {
 		function void test() {
 			int x
 			bool b
-			string s
+			String s
 			x = 2
 		}
 	`, true)
@@ -275,7 +300,7 @@ func TestFunctionWithAssignment(t *testing.T) {
 func TestFunctionWithMultiAssign(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
-			string a
+			String a
 			int x
 			bool y
 			x, y = test2()
@@ -336,7 +361,7 @@ func TestFunctionWithIfElse(t *testing.T) {
 				a = true
 			}
 			
-			string s
+			String s
 			return x
 		}
 	`, true)
@@ -349,8 +374,8 @@ func TestFunctionWithIfElse(t *testing.T) {
 	tester.assertFuncLocalVariable(0, 4, tester.globalScope.StringType, 1)
 }
 
-// ID Checks
-// -----------------
+// Identifier valid name checks
+// ----------------------------
 
 func TestInvalidFieldName(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -417,6 +442,36 @@ func TestInvalidMultiLocalVarNames(t *testing.T) {
 	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
 	tester.assertErrorAt(1, "Reserved keyword 'bool' cannot be used")
 }
+
+func TestInvalidStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct int {
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
+}
+
+func TestInvalidStructFieldName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int int
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'int' cannot be used")
+}
+
+func TestIdentifierWithStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		int Person
+	`, false)
+	tester.assertErrorAt(0, "Struct name Person cannot be used")
+}
+
+// Identifier unique name checks
+// -----------------------------
 
 func TestDuplicateFieldNames(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
@@ -508,4 +563,25 @@ func TestUniqueLocalVar(t *testing.T) {
 		}
 	`, false)
 	tester.assertTotalErrors(1)
+}
+
+func TestUniqueStructName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+
+		struct Person {
+		}
+	`, false)
+	tester.assertErrorAt(0, "Identifier 'Person' is already declared")
+}
+
+func TestUniqueStructFieldName(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int i
+			int i
+		}
+	`, false)
+	tester.assertErrorAt(0, "Identifier 'i' is already declared")
 }

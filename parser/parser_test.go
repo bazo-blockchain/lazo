@@ -103,6 +103,72 @@ func TestFieldAssignment(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Struct Declaration nodes
+// -------------------------
+
+func TestEmptyStructDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+   		}
+	`)
+	s := p.parseStruct()
+
+	assertNoErrors(t, p)
+	assertStruct(t, s, "Person", 0)
+}
+
+func TestStructDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name
+			int balance
+   	}
+	`)
+	s := p.parseStruct()
+
+	assertNoErrors(t, p)
+	assertStruct(t, s, "Person", 2)
+	assertStructField(t, s.Fields[0], "string", "name")
+	assertStructField(t, s.Fields[1], "int", "balance")
+}
+
+func TestStructInvalidIdentifier(t *testing.T) {
+	p := newParserFromInput(`
+		struct if { 
+		}
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Identifier expected")
+}
+
+func TestStructMissingNewline(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person { }
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestStructMissingNewlineAfterField(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name int balance
+		}
+	`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got int")
+}
+
+func TestStructMissingNewlineAtEnd(t *testing.T) {
+	p := newParserFromInput(`
+		struct Person {
+			string name 
+			int balance
+		}`)
+	_ = p.parseStruct()
+	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
+}
+
 // Constructor Nodes
 // -----------------
 
@@ -487,6 +553,14 @@ func TestAssignmentWithFuncCall(t *testing.T) {
 
 	assertNoErrors(t, p)
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "x", "call([])")
+}
+
+func TestStructFieldAssignment(t *testing.T) {
+	p := newParserFromInput("p.balance = 1000 \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "p.balance", "1000")
 }
 
 // Multi Assignment

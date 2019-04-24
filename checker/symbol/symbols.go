@@ -240,9 +240,10 @@ func (sym *ConstantSymbol) String() string {
 
 //----------------
 
+// TypeSymbol declares functions which all type symbols should implement
 type TypeSymbol interface {
-	GetType() string
-	Identifier() string
+	Symbol
+	Type() string
 }
 
 //----------------
@@ -264,8 +265,8 @@ func (sym *BasicTypeSymbol) String() string {
 	return fmt.Sprintf("Type %s", sym.ID)
 }
 
-// GetType returns the type
-func (sym *BasicTypeSymbol) GetType() string {
+// Type returns the type
+func (sym *BasicTypeSymbol) Type() string {
 	return sym.Identifier()
 }
 
@@ -290,7 +291,51 @@ func (sym *ArrayTypeSymbol) String() string {
 	return fmt.Sprintf("Array of %s", sym.ElementType)
 }
 
-// GetType returns the type
-func (sym *ArrayTypeSymbol) GetType() string {
+// Type returns the type
+func (sym *ArrayTypeSymbol) Type() string {
 	return sym.ElementType.Identifier()
+}
+
+//----------------
+
+// StructTypeSymbol represents a struct type
+type StructTypeSymbol struct {
+	AbstractSymbol
+	Fields []*FieldSymbol
+}
+
+// NewStructTypeSymbol creates a new StructTypeSymbol
+func NewStructTypeSymbol(scope Symbol, identifier string) *StructTypeSymbol {
+	return &StructTypeSymbol{
+		AbstractSymbol: NewAbstractSymbol(scope, identifier),
+	}
+}
+
+// AllDeclarations returns all field declarations
+func (sym *StructTypeSymbol) AllDeclarations() []Symbol {
+	symbols := make([]Symbol, len(sym.Fields))
+	for i, s := range sym.Fields {
+		symbols[i] = s
+	}
+	return symbols
+}
+
+// String creates the string representation
+func (sym *StructTypeSymbol) String() string {
+	return fmt.Sprintf("Struct: %s, \nFields: %s", sym.Identifier(), sym.Fields)
+}
+
+// Type returns the struct type
+func (sym *StructTypeSymbol) Type() string {
+	return sym.Identifier()
+}
+
+// GetField returns the field symbol by identifier
+func (sym *StructTypeSymbol) GetField(identifier string) *FieldSymbol {
+	for _, f := range sym.Fields {
+		if f.Identifier() == identifier {
+			return f
+		}
+	}
+	return nil
 }

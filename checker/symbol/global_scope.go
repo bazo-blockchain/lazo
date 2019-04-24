@@ -7,10 +7,11 @@ import "fmt"
 type GlobalScope struct {
 	AbstractSymbol
 	Contract         *ContractSymbol
-	Types            []*BasicTypeSymbol
+	Types            []TypeSymbol
 	BuiltInTypes     []*BasicTypeSymbol
 	BuiltInFunctions []*FunctionSymbol
 	Constants        []*ConstantSymbol
+	Structs          map[string]*StructTypeSymbol
 
 	NullType   *BasicTypeSymbol
 	BoolType   *BasicTypeSymbol
@@ -27,6 +28,7 @@ type GlobalScope struct {
 func newGlobalScope() *GlobalScope {
 	gs := &GlobalScope{}
 	gs.NullType = NewBasicTypeSymbol(gs, "@NULL")
+	gs.Structs = make(map[string]*StructTypeSymbol)
 	return gs
 }
 

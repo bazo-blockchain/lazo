@@ -54,6 +54,16 @@ func assertField(t *testing.T, node *node.FieldNode, varType string, id string, 
 	}
 }
 
+func assertStruct(t *testing.T, node *node.StructNode, name string, totalFields int) {
+	assert.Equal(t, node.Name, name)
+	assert.Equal(t, len(node.Fields), totalFields)
+}
+
+func assertStructField(t *testing.T, node *node.StructFieldNode, varType string, id string) {
+	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Identifier, id)
+}
+
 func assertConstructor(t *testing.T, node *node.ConstructorNode, totalPTypes int, totalStmts int) {
 	assert.Equal(t, len(node.Parameters), totalPTypes)
 	assert.Equal(t, len(node.Body), totalStmts)
@@ -164,6 +174,7 @@ func assertFuncCall(t *testing.T, n node.ExpressionNode, designator string, args
 
 func assertElementAccess(t *testing.T, n node.ExpressionNode, designator string, exp string) {
 	elementAccess, ok := n.(*node.ElementAccessNode)
+
 	assert.Assert(t, ok)
 	assert.Equal(t, elementAccess.Designator.String(), designator)
 	assert.Equal(t, elementAccess.Expression.String(), exp)
@@ -171,7 +182,36 @@ func assertElementAccess(t *testing.T, n node.ExpressionNode, designator string,
 
 func assertMemberAccess(t *testing.T, n node.ExpressionNode, designator string, id string) {
 	memberAccess, ok := n.(*node.MemberAccessNode)
+
 	assert.Assert(t, ok)
 	assert.Equal(t, memberAccess.Designator.String(), designator)
 	assert.Equal(t, memberAccess.Identifier, id)
+}
+
+func assertStructCreation(t *testing.T, n node.ExpressionNode, name string, values ...string) {
+	structCreation, ok := n.(*node.StructCreationNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, structCreation.Name, name)
+
+	assert.Equal(t, len(structCreation.FieldValues), len(values))
+	for i, v := range values {
+		assert.Equal(t, structCreation.FieldValues[i].String(), v)
+	}
+}
+
+func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string, values map[string]string) {
+	structCreation, ok := n.(*node.StructNamedCreationNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, structCreation.Name, name)
+
+	assert.Equal(t, len(structCreation.FieldValues), len(values))
+	i := 0
+	for key, value := range values {
+		field := structCreation.FieldValues[i]
+		assert.Equal(t, field.Name, key)
+		assert.Equal(t, field.Expression.String(), value)
+		i++
+	}
 }
