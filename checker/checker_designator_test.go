@@ -394,18 +394,65 @@ func TestStructFieldAccess(t *testing.T) {
 			int balance
 		}
 
-		Person p = new Person(1000)
+		Person p = new Person()
 		int i = p.balance
 	`, true)
 
 	memberAccess := tester.getFieldNode(1).Expression.(*node.MemberAccessNode)
-	tester.assertMemberAccess(
-		memberAccess,
-		tester.globalScope.Structs["Person"].Fields[0],
-		tester.globalScope.IntType)
+	structType := tester.globalScope.Structs["Person"]
 
-	tester.assertBasicDesignator(
-		memberAccess.Designator,
-		tester.globalScope.Contract.Fields[0],
-		tester.globalScope.Structs["Person"])
+	tester.assertMemberAccess(memberAccess, structType.Fields[0], tester.globalScope.IntType)
+	tester.assertBasicDesignator(memberAccess.Designator, tester.globalScope.Contract.Fields[0], structType)
+}
+
+func TestStructFieldAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int balance
+		}
+
+		constructor() {
+			Person p = new Person()
+			p.balance = 1000
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(1).(*node.AssignmentStatementNode)
+	structType := tester.globalScope.Structs["Person"]
+
+	tester.assertMemberAccess(assignment.Left, structType.Fields[0], tester.globalScope.IntType)
+	tester.assertBasicDesignator(assignment.Left.(*node.MemberAccessNode).Designator,
+		tester.globalScope.Contract.Constructor.LocalVariables[0], structType)
+}
+
+func TestStructNestedField(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			int balance
+			Person friend
+		}
+
+		Person p = new Person()
+
+		constructor() {
+			p.friend.balance = 1000
+			int i = p.friend.balance
+		}
+	`, true)
+
+	structType := tester.globalScope.Structs["Person"]
+
+	// nested field assignment
+	target := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.MemberAccessNode)
+	tester.assertMemberAccess(target, structType.Fields[0], tester.globalScope.IntType)
+	tester.assertMemberAccess(target.Designator, structType.Fields[1], structType)
+	tester.assertBasicDesignator(target.Designator.(*node.MemberAccessNode).Designator,
+		tester.globalScope.Contract.Fields[0], structType)
+
+	// nested field access
+	target = tester.getConstructorStatementNode(1).(*node.VariableNode).Expression.(*node.MemberAccessNode)
+	tester.assertMemberAccess(target, structType.Fields[0], tester.globalScope.IntType)
+	tester.assertMemberAccess(target.Designator, structType.Fields[1], structType)
+	tester.assertBasicDesignator(target.Designator.(*node.MemberAccessNode).Designator,
+		tester.globalScope.Contract.Fields[0], structType)
 }

@@ -555,6 +555,14 @@ func TestAssignmentWithFuncCall(t *testing.T) {
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "x", "call([])")
 }
 
+func TestStructFieldAssignment(t *testing.T) {
+	p := newParserFromInput("p.balance = 1000 \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "p.balance", "1000")
+}
+
 // Multi Assignment
 // ----------------
 
