@@ -299,13 +299,26 @@ func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
 	v.assembler.CallFunc(funcSym)
 }
 
+// VisitMemberAccessNode visit the designator.
+func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
+	if node.Designator.String() == symbol.This {
+		decl := v.symbolTable.GetDeclByDesignator(node)
+		index, _ := v.getVarIndex(decl)
+		v.assembler.LoadState(index)
+		return
+	}
+	node.Designator.Accept(v.ConcreteVisitor)
+}
+
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	index, isContractField := v.getVarIndex(decl)
 
 	if isContractField {
+
 		v.assembler.LoadState(index)
+
 	} else {
 		v.assembler.LoadLocal(index)
 	}
