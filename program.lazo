@@ -1,7 +1,14 @@
 contract Test {
-    function int test() {
-        int x
-        int y = 5
-        return x * y
+    int one
+    int result
+
+    constructor() {
+        this.one = 1
+        int x = calc(5)
     }
+
+    function int calc(int a) {
+        return this.one + a
+    }
+
 }

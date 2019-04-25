@@ -121,6 +121,16 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
 
+	if node.Left.String() == symbol.This {
+		v.reportError(node, "Assigning to 'this' is not allowed!")
+		return
+	}
+
+	if node.Right.String() == symbol.This {
+		v.reportError(node, "'this' cannot be assigned!")
+		return
+	}
+
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 

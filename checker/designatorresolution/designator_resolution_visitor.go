@@ -63,7 +63,7 @@ func (v *designatorResolutionVisitor) VisitBasicDesignatorNode(node *node.BasicD
 		scope = v.currentFunctionSymbol
 	}
 	sym := v.symbolTable.Find(scope, node.Value)
-	if sym == nil || !isAllowedTarget(sym) {
+	if sym == nil || !isAllowedTarget(sym) && node.Value != symbol.This {
 		v.reportError(node, fmt.Sprintf("Designator %s is undefined", node.Value))
 		return
 	}
@@ -100,13 +100,18 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
 	var target symbol.Symbol
 	var targetType symbol.TypeSymbol
+	var err error
+
+	if node.Identifier == symbol.This {
+		v.reportError(node, "Invalid member designator 'this'")
+		return
+	}
 
 	switch designatorType.(type) {
 	case *symbol.ArrayTypeSymbol:
 		arrayLength := v.symbolTable.GlobalScope.ArrayLength
 		if node.Identifier == arrayLength.Identifier() {
 			target = arrayLength
-			var err error
 			targetType, err = getType(arrayLength)
 			if err != nil {
 				v.reportError(node, err.Error())
@@ -121,15 +126,32 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 		if target == (*symbol.FieldSymbol)(nil) {
 			v.reportError(node, fmt.Sprintf("Member %s does not exist on struct %s",
 				node.Identifier, structType.Identifier()))
-		} else {
-			var err error
-			targetType, err = getType(target)
+			return
+		}
 
-			if err != nil {
-				v.reportError(node, err.Error())
-			}
+		targetType, err = getType(target)
+
+		if err != nil {
+			v.reportError(node, err.Error())
+		}
+	case *symbol.ContractSymbol:
+		contractType := designatorType.(*symbol.ContractSymbol)
+		targetIndex := contractType.GetFieldIndex(node.Identifier)
+
+		if targetIndex < 0 {
+			v.reportError(node, fmt.Sprintf("Member %s does not exist on contract %v", node.Identifier, contractType.Identifier()))
+			return
+		}
+
+		target = contractType.Fields[targetIndex]
+
+		targetType, err = getType(target)
+
+		if err != nil {
+			v.reportError(node, err.Error())
 		}
 	default:
+
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a composite type", node))
 	}
 	v.symbolTable.MapDesignatorToDecl(node, target)
@@ -160,6 +182,8 @@ func getType(sym symbol.Symbol) (symbol.TypeSymbol, error) {
 	case *symbol.FunctionSymbol:
 		// FuncCall expression type will be resolved in type checker
 		return nil, nil
+	case *symbol.ContractSymbol:
+		return sym.(*symbol.ContractSymbol), nil
 	default:
 		return nil, fmt.Errorf("unsupported designator target symbol %s", sym.Identifier())
 	}
