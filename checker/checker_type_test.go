@@ -2,7 +2,6 @@ package checker
 
 import (
 	"github.com/bazo-blockchain/lazo/parser/node"
-	"gotest.tools/assert"
 	"testing"
 )
 
@@ -862,8 +861,7 @@ func TestAssignToThisMember(t *testing.T) {
 	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
 
 	tester.assertAssignment(assignment, tester.globalScope.IntType)
-	fieldNode := tester.getFieldNode(0)
-	assert.Equal(t, fieldNode.Expression, "5")
+	tester.assertTotalErrors(0)
 
 }
 
@@ -889,8 +887,7 @@ func TestAssignThisMemberToVar(t *testing.T) {
 	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
 
 	tester.assertAssignment(assignment, tester.globalScope.IntType)
-	fieldNode := tester.getFieldNode(1)
-	assert.Equal(t, fieldNode.Expression, "5")
+	tester.assertTotalErrors(0)
 }
 
 func TestAssignThisToVar(t *testing.T) {
