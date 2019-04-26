@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"gotest.tools/assert"
 	"testing"
 )
 
@@ -836,4 +837,98 @@ func TestStructFieldTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(1, "expected bool, given int")
 }
 
-// TODO Test return statement, assignment, variable declaration, field declaration memberaccess?
+func TestThisReturnStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x = test()
+		}
+
+		function Test test() {
+			return this
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Invalid type 'Test'")
+}
+
+func TestAssignToThisMember(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = 0
+		constructor() {
+			this.x = 5
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
+
+	tester.assertAssignment(assignment, tester.globalScope.IntType)
+	fieldNode := tester.getFieldNode(0)
+	assert.Equal(t, fieldNode.Expression, "5")
+
+}
+
+func TestAssignToThis(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			this = this
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Assigning to 'this' is not allowed!")
+}
+
+func TestAssignThisMemberToVar(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+	int x = 5
+	int y = 0
+	constructor() {
+		y = this.x
+	}
+`, true)
+
+	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
+
+	tester.assertAssignment(assignment, tester.globalScope.IntType)
+	fieldNode := tester.getFieldNode(1)
+	assert.Equal(t, fieldNode.Expression, "5")
+}
+
+func TestAssignThisToVar(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+		constructor() {
+			x = this
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "'this' cannot be assigned!")
+}
+
+func TestThisVariableDeclaration(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int this = 0
+		}
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used as an identifier")
+}
+
+func TestThisFieldDeclaration(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int this
+	`, false)
+	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used as an identifier")
+}
+
+func TestThisParameter(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x = test(this)
+		}
+
+		function int test(int x) {
+			return x
+		}
+	`, false)
+	tester.assertErrorAt(0, "'this' cannot be used as an argument")
+}
