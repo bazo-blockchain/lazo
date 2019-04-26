@@ -42,11 +42,9 @@ func (v *AbstractVisitor) VisitStructNode(node *StructNode) {
 	}
 }
 
-// VisitArrayNode traverses all the array elements
+// VisitArrayNode traverses the type node
 func (v *AbstractVisitor) VisitArrayNode(node *ArrayNode) {
-	for _, element := range node.Elements {
-		node.Accept(v.ConcreteVisitor)
-	}
+	node.Type.Accept(v.ConcreteVisitor)
 }
 
 // VisitStructFieldNode traverses the type node
