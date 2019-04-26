@@ -151,6 +151,24 @@ func (n *StructFieldNode) Accept(v Visitor) {
 
 // --------------------------
 
+// ArrayNode composes abstract node
+type ArrayNode struct {
+	AbstractNode
+	Type     *TypeNode
+	Elements []*ExpressionNode
+}
+
+func (n *ArrayNode) String() string {
+	return fmt.Sprintf("\n Array of %s: [%v]", n.Type, n.Elements)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayNode) Accept(v Visitor) {
+	v.VisitArrayNode(n)
+}
+
+// --------------------------
+
 // ConstructorNode composes abstract node and holds parameters and statements.
 type ConstructorNode struct {
 	AbstractNode
@@ -540,6 +558,59 @@ func (n *StructFieldAssignmentNode) String() string {
 func (n *StructFieldAssignmentNode) Accept(v Visitor) {
 	v.VisitStructFieldAssignmentNode(n)
 }
+
+// ArrayCreationNode composes abstract node and holds the target struct and field arguments.
+type ArrayCreationNode struct {
+	AbstractNode
+	Type          string
+	ElementValues []ExpressionNode
+}
+
+func (n *ArrayCreationNode) String() string {
+	return fmt.Sprintf("%s[%s]", n.Type, n.ElementValues)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayCreationNode) Accept(v Visitor) {
+	v.VisitArrayCreationNode(n)
+}
+
+// --------------------------
+
+// ArrayElementAccessNode composes abstract node and holds the index and the expression
+type ArrayElementAccessNode struct {
+	AbstractNode
+	Index *big.Int
+}
+
+func (n *ArrayElementAccessNode) String() string {
+	return fmt.Sprintf("[%s]", n.Index)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayElementAccessNode) Accept(v Visitor) {
+	v.VisitArrayElementAccessNode(n)
+}
+
+// --------------------------
+
+// ArrayElementAssignmentNode composes abstract node and holds the index and the expression
+type ArrayElementAssignmentNode struct {
+	AbstractNode
+	Index      *big.Int
+	Expression ExpressionNode
+}
+
+func (n *ArrayElementAssignmentNode) String() string {
+	return fmt.Sprintf("[%s]=%s", n.Index, n.Expression)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayElementAssignmentNode) Accept(v Visitor) {
+	v.VisitArrayElementAssignmentNode(n)
+}
+
+// --------------------------
 
 // --------------------------
 // Literal Nodes

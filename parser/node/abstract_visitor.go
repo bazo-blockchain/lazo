@@ -42,6 +42,13 @@ func (v *AbstractVisitor) VisitStructNode(node *StructNode) {
 	}
 }
 
+// VisitArrayNode traverses all the array elements
+func (v *AbstractVisitor) VisitArrayNode(node *ArrayNode) {
+	for _, element := range node.Elements {
+		node.Accept(v.ConcreteVisitor)
+	}
+}
+
 // VisitStructFieldNode traverses the type node
 func (v *AbstractVisitor) VisitStructFieldNode(node *StructFieldNode) {
 	node.Type.Accept(v.ConcreteVisitor)
@@ -167,6 +174,23 @@ func (v *AbstractVisitor) VisitStructNamedCreationNode(node *StructNamedCreation
 
 // VisitStructFieldAssignmentNode traverse the field initialization expression
 func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssignmentNode) {
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
+// VisitArrayCreationNode traverses the element expression nodes
+func (v *AbstractVisitor) VisitArrayCreationNode(node *ArrayCreationNode) {
+	for _, elementValue := range node.ElementValues {
+		elementValue.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitArrayElementAccessNode does not need to traverse anything
+func (v *AbstractVisitor) VisitArrayElementAccessNode(node *ArrayElementAccessNode) {
+	return
+}
+
+// VisitArrayElementAssignmentNode traverse the array element assignment node
+func (v *AbstractVisitor) VisitArrayElementAssignmentNode(node *ArrayElementAssignmentNode) {
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
