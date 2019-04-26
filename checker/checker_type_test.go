@@ -835,3 +835,5 @@ func TestStructFieldTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(0, "assignment of bool is not compatible with target int")
 	tester.assertErrorAt(1, "expected bool, given int")
 }
+
+// TODO Test return statement, assignment, variable declaration, field declaration memberaccess?
