@@ -177,6 +177,7 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 // VisitMultiAssignmentStatementNode generates the IL Code for a multi-assignment
 func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *node.MultiAssignmentStatementNode) {
 	assignNode.FuncCall.Accept(v)
+
 	for i := len(assignNode.Designators) - 1; i >= 0; i-- {
 		switch assignNode.Designators[i].(type) {
 		case *node.BasicDesignatorNode:
