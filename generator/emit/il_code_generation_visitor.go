@@ -365,6 +365,28 @@ func (v *ILCodeGenerationVisitor) VisitStructCreationNode(node *node.StructCreat
 	}
 }
 
+// VisitStructCreationNode traverses the field initialization expressions
+func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.StructNamedCreationNode) {
+	structType := v.symbolTable.GetTypeByExpression(node).(*symbol.StructTypeSymbol)
+	v.assembler.NewStruct(uint16(len(structType.Fields)))
+
+	initializedFields := make([]bool, len(structType.Fields))
+	for _, namedField := range node.FieldValues {
+		namedField.Accept(v.ConcreteVisitor)
+		fieldIndex := structType.GetFieldIndex(namedField.Name)
+		v.assembler.StoreField(uint16(fieldIndex))
+		initializedFields[fieldIndex] = true
+	}
+
+	// Set default value when field is not initialized
+	for i := 0; i < len(structType.Fields); i++ {
+		if !initializedFields[i] {
+			v.pushDefault(structType.Fields[i].Type)
+			v.assembler.StoreField(uint16(i))
+		}
+	}
+}
+
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)

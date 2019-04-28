@@ -703,6 +703,46 @@ func TestStructNewCreationWithInitialValues(t *testing.T) {
 	tester.assertIntAt(1, big.NewInt(200))
 }
 
+func TestStructCreationWithNamedFieldValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+			bool valid
+		}
+
+		function (String, int, bool) test() {
+			Person p = new Person(balance=300)
+			return p.name, p.balance, p.valid
+		}
+	`, "(String,int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertBytesAt(0)
+	tester.assertIntAt(1, big.NewInt(300))
+	tester.assertBoolAt(2, false)
+}
+
+func TestStructCreationWithNamedFieldValues2(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+			bool valid
+		}
+
+		function (String, int, bool) test() {
+			Person p = new Person(valid=true, name="a", balance=400)
+			return p.name, p.balance, p.valid
+		}
+	`, "(String,int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(400))
+	tester.assertBoolAt(2, true)
+}
+
 // Arithmetic Expressions
 // ----------------------
 
