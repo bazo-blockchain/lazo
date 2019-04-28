@@ -148,6 +148,7 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		assignNode.Right.Accept(v)
 		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
 		v.storeVariable(decl)
+
 	//// TODO will be done when array is implemented
 	//case *node.ElementAccessNode:
 	//	elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
@@ -155,8 +156,9 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 	//	elementAccess.Expression.Accept(v)
 	//	assignNode.Right.Accept(v)
 	//	v.assembler.Emit() // TODO Store Array Element
+
 	case *node.MemberAccessNode:
-		memberAccessNode, _ := assignNode.Left.(*node.MemberAccessNode)
+		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
 		assignNode.Right.Accept(v)
 		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
@@ -174,14 +176,16 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 		case *node.BasicDesignatorNode:
 			decl := v.symbolTable.GetDeclByDesignator(assignNode.Designators[i])
 			v.storeVariable(decl)
+
 		//// TODO will be done when array is implemented
 		//case *node.ElementAccessNode:
 		//	elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
 		//	elementAccess.Designator.Accept(v)
 		//	elementAccess.Expression.Accept(v)
 		//	v.assembler.Emit() // TODO Store Array Element
+
 		case *node.MemberAccessNode:
-			memberAccessNode, _ := assignNode.Designators[i].(*node.MemberAccessNode)
+			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
 			memberAccessNode.Designator.Accept(v)
 			fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
 			v.storeVariable(fieldSymbol)
@@ -191,6 +195,7 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 	}
 }
 
+// VisitMemberAccessNode generates the IL Code for a member access node
 func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
 	node.Designator.Accept(v)
 	// TODO https://github.com/bazo-blockchain/lazo/issues/57
@@ -367,22 +372,28 @@ func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.Character
 // ----------------
 
 func (v *ILCodeGenerationVisitor) loadVariable(decl symbol.Symbol) {
-	index, isContractField := v.getVarIndex(decl)
+	index := v.getVarIndex(decl)
 
-	if isContractField {
-		v.assembler.LoadState(index)
-	} else {
-		v.assembler.LoadLocal(index)
+	switch decl.Scope().(type) {
+	case *symbol.ContractSymbol:
+		v.assembler.LoadState(byte(index))
+	case *symbol.FunctionSymbol:
+		v.assembler.LoadLocal(byte(index))
+	case *symbol.StructTypeSymbol:
+		v.assembler.LoadField(uint16(index))
 	}
 }
 
 func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
-	index, isContractField := v.getVarIndex(decl)
+	index := v.getVarIndex(decl)
 
-	if isContractField {
-		v.assembler.StoreState(index)
-	} else {
-		v.assembler.StoreLocal(index)
+	switch decl.Scope().(type) {
+	case *symbol.ContractSymbol:
+		v.assembler.StoreState(byte(index))
+	case *symbol.FunctionSymbol:
+		v.assembler.StoreLocal(byte(index))
+	case *symbol.StructTypeSymbol:
+		v.assembler.StoreField(uint16(index))
 	}
 }
 
@@ -419,23 +430,31 @@ func (v *ILCodeGenerationVisitor) pushDefaultStruct(structType *symbol.StructTyp
 }
 
 // Returns: variable index and isContractField
-func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
+func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	switch decl.(type) {
 	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol:
 		index := v.function.GetVarIndex(decl.Identifier())
 		if index == -1 {
 			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
-		return byte(index), false
+		return index
 	case *symbol.FieldSymbol:
-		contract := decl.Scope().(*symbol.ContractSymbol)
-		index := contract.GetFieldIndex(decl.Identifier())
+		scope := decl.Scope()
+		index := -1
+		if contract, ok := scope.(*symbol.ContractSymbol); ok {
+			index = contract.GetFieldIndex(decl.Identifier())
+		} else if structType, ok := scope.(*symbol.StructTypeSymbol); ok {
+			index = structType.GetFieldIndex(decl.Identifier())
+		} else {
+			panic(fmt.Sprintf("Unsupported field scope %s", scope.Identifier()))
+		}
+
 		if index == -1 {
 			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
-		return byte(index), true
+		return index
 	default:
-		panic("Not implemented")
+		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
 }
 

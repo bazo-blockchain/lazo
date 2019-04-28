@@ -130,6 +130,10 @@ func (gt *generatorTestUtil) assertBytes(bytes ...byte) {
 	gt.compareBytes(gt.result, bytes)
 }
 
+func (gt *generatorTestUtil) assertBytesAt(index int, bytes ...byte) {
+	gt.compareBytes(gt.evalStack[index], bytes)
+}
+
 func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
 	bytes := gt.context.ContractVariables[index]
 	expected := append([]byte{util.GetSignByte(value)}, value.Bytes()...)

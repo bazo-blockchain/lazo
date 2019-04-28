@@ -339,3 +339,13 @@ func (sym *StructTypeSymbol) GetField(identifier string) *FieldSymbol {
 	}
 	return nil
 }
+
+// GetFieldIndex returns the index of the field
+func (sym *StructTypeSymbol) GetFieldIndex(identifier string) int {
+	for i, s := range sym.Fields {
+		if s.Identifier() == identifier {
+			return i
+		}
+	}
+	return -1
+}
