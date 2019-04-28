@@ -649,6 +649,60 @@ func TestStructFieldAssignment(t *testing.T) {
 	tester.assertIntAt(1, big.NewInt(100))
 }
 
+func TestStructNewCreation(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person()
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0)
+	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructNewCreationWithInitialValue(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person("a")
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructNewCreationWithInitialValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person("a", 200)
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(200))
+}
+
 // Arithmetic Expressions
 // ----------------------
 
