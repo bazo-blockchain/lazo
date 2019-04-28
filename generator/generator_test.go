@@ -582,6 +582,30 @@ func TestEmptyStruct(t *testing.T) {
 	tester.assertBytes(0x02, 0x00, 0x00)
 }
 
+func TestDefaultStructValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function Person test() {
+			Person p
+			return p
+		}
+	`, "(Person)test()")
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x02, // array length = 2
+		0x00, 0x00, // index 0: empty string size = 0
+		0x00, 0x01, // index 1: int size = 1
+		0x00, // int 0
+	}
+
+	tester.assertBytes(expected...)
+}
+
 // Arithmetic Expressions
 // ----------------------
 

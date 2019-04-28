@@ -411,6 +411,11 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 
 func (v *ILCodeGenerationVisitor) pushDefaultStruct(structType *symbol.StructTypeSymbol) {
 	v.assembler.NewStruct(uint16(len(structType.Fields)))
+
+	for i, field := range structType.Fields {
+		v.pushDefault(field.Type)
+		v.assembler.StoreField(uint16(i))
+	}
 }
 
 // Returns: variable index and isContractField

@@ -137,7 +137,7 @@ func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
 }
 
 func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
-	assert.Equal(gt.t, len(actual), len(expected))
+	assert.Equal(gt.t, len(actual), len(expected), fmt.Sprintf("actual bytes: %v", actual))
 
 	for i, b := range actual {
 		assert.Equal(gt.t, b, expected[i])

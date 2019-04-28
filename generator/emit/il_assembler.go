@@ -177,6 +177,11 @@ func (a *ILAssembler) NewStruct(totalFields uint16) {
 	a.addInstruction(il.NewStr, util.GetBytesFromUInt16(totalFields), 2)
 }
 
+// StoreField pops element and struct from evaluation stack and stores the element at the given field index.
+func (a *ILAssembler) StoreField(index uint16) {
+	a.addInstruction(il.StoreFld, util.GetBytesFromUInt16(index), 2)
+}
+
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,
