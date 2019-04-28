@@ -163,6 +163,12 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		assignNode.Right.Accept(v)
 		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
 		v.storeVariable(fieldSymbol)
+
+		// Struct is a value type in VM. Therefore, struct variable should be updated explicitly.
+		targetType := v.symbolTable.GetTypeByExpression(memberAccessNode.Designator)
+		if _, ok := targetType.(*symbol.StructTypeSymbol); ok {
+			v.storeVariable(v.symbolTable.GetDeclByDesignator(memberAccessNode.Designator))
+		}
 	default:
 		v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Left))
 	}

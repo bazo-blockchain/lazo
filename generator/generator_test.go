@@ -611,7 +611,7 @@ func TestDefaultStructValues(t *testing.T) {
 	tester.assertBytes(expected...)
 }
 
-func TestStructLoadField(t *testing.T) {
+func TestStructFieldAccess(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		struct Person {
 			String name
@@ -627,6 +627,26 @@ func TestStructLoadField(t *testing.T) {
 	assert.Equal(t, len(tester.evalStack), 2)
 	tester.assertBytesAt(0)
 	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p
+			p.name = "a"
+			p.balance = 100
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(100))
 }
 
 // Arithmetic Expressions
