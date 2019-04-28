@@ -235,9 +235,6 @@ func TestMultiVariables(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
-// Member Access
-// -------------
-
 // Assignments
 // -----------
 
@@ -310,18 +307,6 @@ func TestReAssignmentChar(t *testing.T) {
 	`, charTestSig)
 	tester.assertChar('d')
 }
-
-//func TestAssignmentMember(t *testing.T) {
-//	tester := newGeneratorTestUtilWithFunc(t, `
-//		function int test() {
-//			int x
-//			x.y = 1
-//			return x.y
-//		}
-//	`, intTestSig)
-//
-//	tester.assertInt(big.NewInt(1))
-//}
 
 // Multi-Assignments
 // -----------------
@@ -578,6 +563,23 @@ func TestFuncCallVoid(t *testing.T) {
 	tester.context.PersistChanges()
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
 	tester.assertVariableInt(0, big.NewInt(5))
+}
+
+// Struct
+// ------
+
+func TestEmptyStruct(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+		}
+
+		function Person test() {
+			Person p
+			return p
+		}
+	`, "(Person)test()")
+
+	tester.assertBytes(0x02, 0x00, 0x00)
 }
 
 // Arithmetic Expressions

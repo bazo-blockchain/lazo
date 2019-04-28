@@ -2,7 +2,6 @@ package emit
 
 import (
 	"encoding/binary"
-	"fmt"
 	"github.com/bazo-blockchain/lazo/checker/symbol"
 	"github.com/bazo-blockchain/lazo/generator/data"
 	"github.com/bazo-blockchain/lazo/generator/il"
@@ -59,9 +58,7 @@ func (b *ILBuilder) SetFunctionPos(symbol *symbol.FunctionSymbol, pos uint16) {
 
 func (b *ILBuilder) fixOperands(code []*il.Instruction) {
 	for _, instruction := range code {
-		if typeSymbol, ok := instruction.Operand.(*symbol.BasicTypeSymbol); ok {
-			instruction.Operand = b.getTypeRef(typeSymbol)
-		} else if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
+		if functionSymbol, ok := instruction.Operand.(*symbol.FunctionSymbol); ok {
 			operand := make([]byte, 4)
 			binary.BigEndian.PutUint16(operand, uint16(b.functionPositions[functionSymbol]))
 			operand[2] = byte(len(functionSymbol.Parameters))
@@ -91,45 +88,7 @@ func (b *ILBuilder) registerFunction(function *symbol.FunctionSymbol) {
 
 func (b *ILBuilder) fixContract(contract *symbol.ContractSymbol) {
 	contractData := b.Metadata.Contract
-
-	for _, field := range contract.Fields {
-		contractData.Fields = append(contractData.Fields, b.getTypeRef(field.Type))
-	}
-
-	for _, function := range contract.Functions {
-		b.fixFunction(function)
-	}
-}
-
-func (b *ILBuilder) fixFunction(function *symbol.FunctionSymbol) {
-	functionData := b.GetFunctionData(function)
-
-	for _, rtype := range function.ReturnTypes {
-		functionData.ReturnTypes = append(functionData.ReturnTypes, b.getTypeRef(rtype))
-	}
-
-	for _, param := range function.Parameters {
-		functionData.ParamTypes = append(functionData.ParamTypes, b.getTypeRef(param.Type))
-	}
-
-	for _, local := range function.LocalVariables {
-		functionData.LocalTypes = append(functionData.LocalTypes, b.getTypeRef(local.Type))
-	}
-}
-
-func (b *ILBuilder) getTypeRef(sym symbol.TypeSymbol) data.TypeData {
-	scope := b.symbolTable.GlobalScope
-	if sym.Identifier() == scope.BoolType.Identifier() {
-		return data.BoolType
-	} else if sym.Identifier() == scope.CharType.Identifier() {
-		return data.CharType
-	} else if sym.Identifier() == scope.StringType.Identifier() {
-		return data.StringType
-	} else if sym.Identifier() == scope.IntType.Identifier() {
-		return data.IntType
-	} else {
-		panic(fmt.Sprintf("Error: Unsupported Type %s", sym.Identifier()))
-	}
+	contractData.TotalFields = uint16(len(contract.Fields))
 }
 
 // Helper Functions

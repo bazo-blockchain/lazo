@@ -172,6 +172,11 @@ func (a *ILAssembler) LoadState(index byte) {
 	a.addInstruction(il.LoadSt, []byte{index}, 1)
 }
 
+// NewStruct creates a new struct with the given number of fields
+func (a *ILAssembler) NewStruct(totalFields uint16) {
+	a.addInstruction(il.NewStr, util.GetBytesFromUInt16(totalFields), 2)
+}
+
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,

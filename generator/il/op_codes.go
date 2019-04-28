@@ -59,6 +59,9 @@ const (
 	ArrInsert
 	ArrRemove
 	ArrAt
+	NewStr
+	StoreFld
+	LoadFld
 	SHA3
 	CheckSig
 	ErrHalt

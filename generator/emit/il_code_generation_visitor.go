@@ -387,6 +387,11 @@ func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
 }
 
 func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
+	if structType, ok := typeSymbol.(*symbol.StructTypeSymbol); ok {
+		v.pushDefaultStruct(structType)
+		return
+	}
+
 	gs := v.symbolTable.GlobalScope
 
 	switch typeSymbol {
@@ -402,6 +407,10 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 		typeNode := v.symbolTable.GetNodeBySymbol(typeSymbol.(symbol.Symbol))
 		v.reportError(typeNode, fmt.Sprintf("%s not supported", typeSymbol.Identifier()))
 	}
+}
+
+func (v *ILCodeGenerationVisitor) pushDefaultStruct(structType *symbol.StructTypeSymbol) {
+	v.assembler.NewStruct(uint16(len(structType.Fields)))
 }
 
 // Returns: variable index and isContractField
