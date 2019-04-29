@@ -316,9 +316,7 @@ func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesig
 	index, isContractField := v.getVarIndex(decl)
 
 	if isContractField {
-
 		v.assembler.LoadState(index)
-
 	} else {
 		v.assembler.LoadLocal(index)
 	}
