@@ -347,6 +347,27 @@ func TestStructCreationWithNewlines(t *testing.T) {
 	assertStructNamedCreation(t, s, "Person", expectedFieldValues...)
 }
 
+// Array Nodes
+// -----------
+
+//func TestArrayCreation1(t *testing.T) {
+//	s := parseExpressionFromInput(t, `
+//		new int[2]
+//	`)
+//	expectedValues := []int{0, 0}
+//
+//	assertArrayCreation(t, s, "int", expectedValues)
+//}
+//
+//func TestArrayCreation2(t *testing.T) {
+//	s := parseExpressionFromInput(t, `
+//		new int[]{1, 2}
+//	`)
+//	expectedValues := []int{1, 2}
+//
+//	assertArrayCreation(t, s, "int", expectedValues)
+//}
+
 // Literal Expressions
 // -------------------
 

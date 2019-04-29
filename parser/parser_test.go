@@ -207,6 +207,143 @@ func TestMultipleConstructors(t *testing.T) {
 	assertErrorAt(t, p, 0, "Only one constructor is allowed")
 }
 
+// Array Nodes
+// -----------
+
+func TestParseArrayType(t *testing.T) {
+	p := newParserFromInput(`int[] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "int[]")
+}
+
+func TestParseNestedArrayType(t *testing.T) {
+	p := newParserFromInput(`int[][] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "int[][]")
+}
+
+func TestParseStructArrayType(t *testing.T) {
+	p := newParserFromInput(`Person[] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "Person[]")
+}
+
+func TestParseInvalidArrayType(t *testing.T) {
+	p := newParserFromInput(`int[1] a`)
+	p.parseType()
+
+	assertErrorAt(t, p, 0, "ERROR: Symbol ] expected, but got 1")
+}
+
+func TestArrayVariableAssignment(t *testing.T) {
+	p := newParserFromInput(`int[] a = b`)
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "b")
+	assertNoErrors(t, p)
+}
+
+func TestArrayNewArrayAssignment1(t *testing.T) {
+	p := newParserFromInput(`int[] a = new int[2]`)
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[2]")
+	assertNoErrors(t, p)
+}
+
+func TestArrayNewArrayAssignment2(t *testing.T) {
+	p := newParserFromInput(`int[] a = new int[]{1,2}`)
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[]{1,2}")
+	assertNoErrors(t, p)
+}
+
+func TestNestedArrayNewArrayAssignment1(t *testing.T) {
+	p := newParserFromInput(`int[][] a = new int[2][2]`)
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "ew int[2][2]")
+	assertNoErrors(t, p)
+}
+
+func TestNestedArrayNewArrayAssignment2(t *testing.T) {
+	p := newParserFromInput(`int[][] a = new int[][]{[1, 2],[3, 4]}`)
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "new int[][]{[1, 2],[3, 4]}")
+	assertNoErrors(t, p)
+}
+
+func TestNestedArrayNewArrayAssignment3(t *testing.T) {
+	p := newParserFromInput(`int[][] a = new int[][]{[1, 2], [3]}`)
+	p.parseVariableStatement()
+
+	assertErrorAt(t, p, 0, "Nested array initialization vectors need to be of the same size")
+}
+
+func TestInvalidLengthArrayNewArrayAssignment1(t *testing.T) {
+	p := newParserFromInput(`int[] a = new int[0]`)
+	assertErrorAt(t, p, 0, "Invalid array length")
+}
+
+func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
+	p := newParserFromInput(`int[] a = new int[]`)
+	assertErrorAt(t, p, 0, "Invalid array length")
+}
+
+func TestInvalidLengthArrayNewArrayAssignment3(t *testing.T) {
+	p := newParserFromInput(`int[] a = new int[-1]`)
+	assertErrorAt(t, p, 0, "Invalid array length")
+}
+
+func TestArrayValueAssignment(t *testing.T) {
+	p := newParserFromInput(`a[0] = 1`)
+
+	stmt := p.parseStatementWithIdentifier()
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[0]", "1")
+	assertNoErrors(t, p)
+}
+
+func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
+	p := newParserFromInput(`a[-1] = 1`)
+
+	stmt := p.parseStatementWithIdentifier()
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[-1]", "1")
+	assertNoErrors(t, p)
+}
+
+func TestFieldArrayDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		contract Test {
+			int[] a
+		}
+	`)
+	c := p.parseContract()
+	assertContract(t, c, "Test", 1, 0)
+	assertField(t, c.Fields[0], "int[]", "a", "")
+	assertNoErrors(t, p)
+}
+
+func TestLocalArrayDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		constructor() {
+			int[] a
+		}
+	`)
+	c := p.parseConstructor()
+	assertStatement(t, c.Body[0], "int[] a")
+	assertNoErrors(t, p)
+}
+
 // Function Nodes
 // --------------
 
@@ -351,9 +488,9 @@ func TestMultiVariableStatement(t *testing.T) {
 	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
 
 	assert.Assert(t, ok)
-	assert.Equal(t, mv.Types[0].Identifier, "int")
+	assert.Equal(t, mv.Types[0].String(), "int")
 	assert.Equal(t, mv.Identifiers[0], "x")
-	assert.Equal(t, mv.Types[1].Identifier, "bool")
+	assert.Equal(t, mv.Types[1].String, "bool")
 	assert.Equal(t, mv.Identifiers[1], "b")
 	assertFuncCall(t, mv.FuncCall, "call")
 	assertNoErrors(t, p)

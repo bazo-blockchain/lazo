@@ -47,7 +47,7 @@ func assertContract(t *testing.T, node *node.ContractNode, name string, totalVar
 }
 
 func assertField(t *testing.T, node *node.FieldNode, varType string, id string, expr string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 	if expr != "" {
 		assertExpression(t, node.Expression, expr)
@@ -60,7 +60,7 @@ func assertStruct(t *testing.T, node *node.StructNode, name string, totalFields 
 }
 
 func assertStructField(t *testing.T, node *node.StructFieldNode, varType string, id string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 }
 
@@ -84,7 +84,7 @@ func assertStatementBlock(t *testing.T, node []node.StatementNode, totalStmt int
 }
 
 func assertVariableStatement(t *testing.T, node *node.VariableNode, varType string, id string, expr string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 	assertExpression(t, node.Expression, expr)
 }
@@ -135,8 +135,8 @@ func assertError(t *testing.T, node *node.ErrorNode, message string) {
 	assert.Equal(t, node.Message, message)
 }
 
-func assertType(t *testing.T, typeNode *node.TypeNode, varType string) {
-	assert.Equal(t, typeNode.Identifier, varType)
+func assertType(t *testing.T, typeNode node.TypeNode, varType string) {
+	assert.Equal(t, typeNode.String(), varType)
 }
 
 func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {

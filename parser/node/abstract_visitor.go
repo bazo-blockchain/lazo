@@ -99,9 +99,14 @@ func (v *AbstractVisitor) VisitMultiVariableNode(node *MultiVariableNode) {
 	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
-// VisitTypeNode does nothing because it is the terminal node.
-func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
+// VisitBasicTypeNode does nothing because it is the terminal node.
+func (v *AbstractVisitor) VisitBasicTypeNode(node *BasicTypeNode) {
 	// Nothing to do here
+}
+
+// VisitArrayTypeNode visits the type node
+func (v *AbstractVisitor) VisitArrayTypeNode(node *ArrayTypeNode) {
+	node.ElementType.Accept(v.ConcreteVisitor)
 }
 
 // VisitIfStatementNode traverses the condition, then-block and finally else-block.
