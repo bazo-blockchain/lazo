@@ -168,8 +168,8 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	return function
 }
 
-func (p *Parser) parseReturnTypes() []*node.TypeNode {
-	var returnTypes []*node.TypeNode
+func (p *Parser) parseReturnTypes() []node.TypeNode {
+	var returnTypes []node.TypeNode
 
 	if p.isSymbol(token.OpenParen) {
 		p.nextToken() // skip '('
@@ -288,9 +288,11 @@ func (p *Parser) parseVariableStatement() node.StatementNode {
 	}
 
 	v := &node.VariableNode{
-		AbstractNode: varType.AbstractNode,
-		Type:         varType,
-		Identifier:   id,
+		AbstractNode: node.AbstractNode{
+			Position: varType.Pos(),
+		},
+		Type:       varType,
+		Identifier: id,
 	}
 	if p.isSymbol(token.Assign) {
 		p.nextToken()
@@ -300,8 +302,8 @@ func (p *Parser) parseVariableStatement() node.StatementNode {
 	return v
 }
 
-func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) *node.MultiVariableNode {
-	types := []*node.TypeNode{varType}
+func (p *Parser) parseMultiVariableStatement(varType node.TypeNode, id string) *node.MultiVariableNode {
+	types := []node.TypeNode{varType}
 	ids := []string{id}
 
 	if !p.isEnd() && p.isSymbol(token.Comma) {
@@ -311,10 +313,12 @@ func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) 
 	}
 	p.check(token.Assign)
 	mv := &node.MultiVariableNode{
-		AbstractNode: varType.AbstractNode,
-		Types:        types,
-		Identifiers:  ids,
-		FuncCall:     p.parseFuncCall(p.parseDesignator()),
+		AbstractNode: node.AbstractNode{
+			Position: varType.Pos(),
+		},
+		Types:       types,
+		Identifiers: ids,
+		FuncCall:    p.parseFuncCall(p.parseDesignator()),
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return mv
@@ -402,12 +406,33 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
-func (p *Parser) parseType() *node.TypeNode {
-	// TODO: Later we need to distinguish between an array and a simple type
-	return &node.TypeNode{
+func (p *Parser) parseType() node.TypeNode {
+	typeNode := &node.BasicTypeNode{
 		AbstractNode: p.newAbstractNode(),
 		Identifier:   p.readIdentifier(),
 	}
+
+	if p.isSymbol(token.OpenBracket) {
+		return p.parseArrayType(typeNode)
+	}
+
+	return typeNode
+}
+
+func (p *Parser) parseArrayType(arrayType node.TypeNode) *node.ArrayTypeNode {
+	p.nextToken() // Skip '[' symbol
+	p.check(token.CloseBracket)
+	arrayTypeNode := &node.ArrayTypeNode{
+		AbstractNode: node.AbstractNode{
+			Position: arrayType.Pos(),
+		},
+		ElementType: arrayType,
+	}
+	if p.isSymbol(token.OpenBracket) {
+		return p.parseArrayType(arrayTypeNode)
+	}
+	return arrayTypeNode
+
 }
 
 func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {

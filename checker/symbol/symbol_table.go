@@ -37,8 +37,8 @@ func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
 
 // FindTypeByNode searches for a type
 // Returns the type or nil
-func (t *SymbolTable) FindTypeByNode(node *node.TypeNode) TypeSymbol {
-	return t.FindTypeByIdentifier(node.Identifier)
+func (t *SymbolTable) FindTypeByNode(node node.TypeNode) TypeSymbol {
+	return t.FindTypeByIdentifier(node.String())
 }
 
 // Find recursively searches for a symbol within a specific scope
