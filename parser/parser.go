@@ -242,7 +242,7 @@ func (p *Parser) parseStatement() node.StatementNode {
 }
 
 func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
-	if p.peekToken.Type() == token.IDENTIFER {
+	if p.peekToken.Type() == token.IDENTIFER || p.peekIsSymbol(token.OpenBracket) {
 		return p.parseVariableStatement()
 	}
 
@@ -478,6 +478,11 @@ func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 		}
 	}
 	return false
+}
+
+func (p *Parser) peekIsSymbol(symbol token.Symbol) bool {
+	tok, ok := p.peekToken.(*token.FixToken)
+	return ok && tok.Value == symbol
 }
 
 func (p *Parser) check(symbol token.Symbol) {

@@ -593,43 +593,6 @@ func (n *ArrayCreationNode) Accept(v Visitor) {
 }
 
 // --------------------------
-
-// ArrayElementAccessNode composes abstract node and holds the index and the expression
-type ArrayElementAccessNode struct {
-	AbstractNode
-	Index *big.Int
-}
-
-func (n *ArrayElementAccessNode) String() string {
-	return fmt.Sprintf("[%s]", n.Index)
-}
-
-// Accept lets a visitor traverse its node structure
-func (n *ArrayElementAccessNode) Accept(v Visitor) {
-	v.VisitArrayElementAccessNode(n)
-}
-
-// --------------------------
-
-// ArrayElementAssignmentNode composes abstract node and holds the index and the expression
-type ArrayElementAssignmentNode struct {
-	AbstractNode
-	Index      *big.Int
-	Expression ExpressionNode
-}
-
-func (n *ArrayElementAssignmentNode) String() string {
-	return fmt.Sprintf("[%s]=%s", n.Index, n.Expression)
-}
-
-// Accept lets a visitor traverse its node structure
-func (n *ArrayElementAssignmentNode) Accept(v Visitor) {
-	v.VisitArrayElementAssignmentNode(n)
-}
-
-// --------------------------
-
-// --------------------------
 // Literal Nodes
 // --------------------------
 

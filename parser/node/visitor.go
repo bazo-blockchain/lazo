@@ -31,8 +31,6 @@ type Visitor interface {
 	VisitStructNamedCreationNode(node *StructNamedCreationNode)
 	VisitStructFieldAssignmentNode(node *StructFieldAssignmentNode)
 	VisitArrayCreationNode(node *ArrayCreationNode)
-	VisitArrayElementAccessNode(node *ArrayElementAccessNode)
-	VisitArrayElementAssignmentNode(node *ArrayElementAssignmentNode)
 	VisitIntegerLiteralNode(node *IntegerLiteralNode)
 	VisitStringLiteralNode(node *StringLiteralNode)
 	VisitCharacterLiteralNode(node *CharacterLiteralNode)
