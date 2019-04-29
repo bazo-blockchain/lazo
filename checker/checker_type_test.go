@@ -861,7 +861,6 @@ func TestAssignToThisMember(t *testing.T) {
 	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
 
 	tester.assertAssignment(assignment, tester.globalScope.IntType)
-	tester.assertTotalErrors(0)
 
 }
 
@@ -887,7 +886,6 @@ func TestAssignThisMemberToVar(t *testing.T) {
 	assignment := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode)
 
 	tester.assertAssignment(assignment, tester.globalScope.IntType)
-	tester.assertTotalErrors(0)
 }
 
 func TestAssignThisToVar(t *testing.T) {

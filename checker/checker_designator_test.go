@@ -480,7 +480,7 @@ func TestInvalidVariableDeclarationThis(t *testing.T) {
 func TestStructMemberThis(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		struct Person {
-			int this
+  			int i
 		}
 
 		constructor() {
@@ -489,19 +489,19 @@ func TestStructMemberThis(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used")
+	tester.assertErrorAt(0, "Invalid member designator 'this'")
 }
 
 func TestNestedThisIsInvalid(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		int this
+		int i
 
 		constructor() {
 			this.this = 1
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used")
+	tester.assertErrorAt(0, "Invalid member designator 'this'")
 }
 
 func TestThisDesignatorResolvesToContractSymbol(t *testing.T) {
@@ -513,6 +513,5 @@ func TestThisDesignatorResolvesToContractSymbol(t *testing.T) {
 	`, true)
 	memberAccessNode := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.MemberAccessNode)
 	thisDesignatorNode := memberAccessNode.Designator
-	thisDesignatorSymbol := tester.symbolTable.GetDeclByDesignator(thisDesignatorNode)
-	tester.assertBasicDesignator(thisDesignatorNode, thisDesignatorSymbol, tester.globalScope.Contract)
+	tester.assertBasicDesignator(thisDesignatorNode, tester.globalScope.Contract, tester.globalScope.Contract)
 }
