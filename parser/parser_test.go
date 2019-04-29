@@ -241,8 +241,16 @@ func TestParseInvalidArrayType(t *testing.T) {
 	assertErrorAt(t, p, 0, "ERROR: Symbol ] expected, but got 1")
 }
 
-func TestArrayVariableAssignment(t *testing.T) {
-	p := newParserFromInput(`int[] a = b`)
+func TestArrayVariableAssignment1(t *testing.T) {
+	p := newParserFromInput("int[] a = 1\n")
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "1")
+	assertNoErrors(t, p)
+}
+
+func TestArrayVariableAssignment2(t *testing.T) {
+	p := newParserFromInput("int[] a = b\n")
 	variable := p.parseVariableStatement()
 
 	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "b")
@@ -250,7 +258,7 @@ func TestArrayVariableAssignment(t *testing.T) {
 }
 
 func TestArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput(`int[] a = new int[2]`)
+	p := newParserFromInput("int[] a = new int[2]\n")
 	variable := p.parseVariableStatement()
 
 	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[2]")
@@ -258,7 +266,7 @@ func TestArrayNewArrayAssignment1(t *testing.T) {
 }
 
 func TestArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput(`int[] a = new int[]{1,2}`)
+	p := newParserFromInput("int[] a = new int[]{1,2}\n")
 	variable := p.parseVariableStatement()
 
 	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[]{1,2}")
@@ -266,15 +274,15 @@ func TestArrayNewArrayAssignment2(t *testing.T) {
 }
 
 func TestNestedArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput(`int[][] a = new int[2][2]`)
+	p := newParserFromInput("int[][] a = new int[2][2]\n")
 	variable := p.parseVariableStatement()
 
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "ew int[2][2]")
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "new int[2][2]")
 	assertNoErrors(t, p)
 }
 
 func TestNestedArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput(`int[][] a = new int[][]{[1, 2],[3, 4]}`)
+	p := newParserFromInput("int[][] a = new int[][]{[1, 2],[3, 4]}\n")
 	variable := p.parseVariableStatement()
 
 	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "new int[][]{[1, 2],[3, 4]}")
@@ -282,29 +290,29 @@ func TestNestedArrayNewArrayAssignment2(t *testing.T) {
 }
 
 func TestNestedArrayNewArrayAssignment3(t *testing.T) {
-	p := newParserFromInput(`int[][] a = new int[][]{[1, 2], [3]}`)
+	p := newParserFromInput("int[][] a = new int[][]{[1, 2], [3]}\n")
 	p.parseVariableStatement()
 
 	assertErrorAt(t, p, 0, "Nested array initialization vectors need to be of the same size")
 }
 
 func TestInvalidLengthArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput(`int[] a = new int[0]`)
+	p := newParserFromInput("int[] a = new int[0]\n")
 	assertErrorAt(t, p, 0, "Invalid array length")
 }
 
 func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput(`int[] a = new int[]`)
+	p := newParserFromInput("int[] a = new int[]\n")
 	assertErrorAt(t, p, 0, "Invalid array length")
 }
 
 func TestInvalidLengthArrayNewArrayAssignment3(t *testing.T) {
-	p := newParserFromInput(`int[] a = new int[-1]`)
+	p := newParserFromInput("int[] a = new int[-1]\n")
 	assertErrorAt(t, p, 0, "Invalid array length")
 }
 
 func TestArrayValueAssignment(t *testing.T) {
-	p := newParserFromInput(`a[0] = 1`)
+	p := newParserFromInput("a[0] = 1\n")
 
 	stmt := p.parseStatementWithIdentifier()
 	assignment := stmt.(*node.AssignmentStatementNode)
@@ -313,7 +321,7 @@ func TestArrayValueAssignment(t *testing.T) {
 }
 
 func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
-	p := newParserFromInput(`a[-1] = 1`)
+	p := newParserFromInput("a[-1] = 1\n")
 
 	stmt := p.parseStatementWithIdentifier()
 	assignment := stmt.(*node.AssignmentStatementNode)
@@ -340,7 +348,7 @@ func TestLocalArrayDeclaration(t *testing.T) {
 		}
 	`)
 	c := p.parseConstructor()
-	assertStatement(t, c.Body[0], "int[] a")
+	assertStatement(t, c.Body[0], "\n [3:4] VAR int[] a")
 	assertNoErrors(t, p)
 }
 

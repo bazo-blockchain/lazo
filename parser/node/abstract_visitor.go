@@ -187,16 +187,6 @@ func (v *AbstractVisitor) VisitArrayCreationNode(node *ArrayCreationNode) {
 	}
 }
 
-// VisitArrayElementAccessNode does not need to traverse anything
-func (v *AbstractVisitor) VisitArrayElementAccessNode(node *ArrayElementAccessNode) {
-	return
-}
-
-// VisitArrayElementAssignmentNode traverse the array element assignment node
-func (v *AbstractVisitor) VisitArrayElementAssignmentNode(node *ArrayElementAssignmentNode) {
-	node.Expression.Accept(v.ConcreteVisitor)
-}
-
 // VisitBasicDesignatorNode does nothing because it is the terminal node.
 func (v *AbstractVisitor) VisitBasicDesignatorNode(node *BasicDesignatorNode) {
 	// Nothing to do here
