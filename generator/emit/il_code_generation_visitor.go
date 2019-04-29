@@ -196,6 +196,8 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			memberAccessNode.Designator.Accept(v)
 			fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
 			v.storeVariable(fieldSymbol)
+
+			// TODO: handle struct field assignments
 		default:
 			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
@@ -349,7 +351,7 @@ func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
 	v.assembler.CallFunc(funcSym)
 }
 
-// VisitStructCreationNode traverses the field initialization expressions
+// VisitStructCreationNode generates the IL code for creating a new struct.
 func (v *ILCodeGenerationVisitor) VisitStructCreationNode(node *node.StructCreationNode) {
 	structType := v.symbolTable.GetTypeByExpression(node).(*symbol.StructTypeSymbol)
 	v.assembler.NewStruct(uint16(len(structType.Fields)))
@@ -366,7 +368,7 @@ func (v *ILCodeGenerationVisitor) VisitStructCreationNode(node *node.StructCreat
 	}
 }
 
-// VisitStructCreationNode traverses the field initialization expressions
+// VisitStructNamedCreationNode generates the IL code for creating a new struct with named field initialization.
 func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.StructNamedCreationNode) {
 	structType := v.symbolTable.GetTypeByExpression(node).(*symbol.StructTypeSymbol)
 	v.assembler.NewStruct(uint16(len(structType.Fields)))
