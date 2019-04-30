@@ -87,32 +87,36 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 		return
 	}
 
-	returnNodes := returnNode.Expressions
+	returnNodeExpressions := returnNode.Expressions
 	returnSymbols := v.currentFunction.ReturnTypes
 
 	// if funcCall is returned, check the return types of the called function
-	if len(returnNodes) == 1 {
-		if fc, ok := returnNodes[0].(*node.FuncCallNode); ok {
+	if len(returnNodeExpressions) == 1 {
+		if fc, ok := returnNodeExpressions[0].(*node.FuncCallNode); ok {
 			v.checkExpressionTypes(fc, returnSymbols...)
 			return
 		}
 	}
 
-	if len(returnSymbols) != len(returnNodes) {
+	if len(returnSymbols) != len(returnNodeExpressions) {
 		v.reportError(returnNode,
-			fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodes)))
+			fmt.Sprintf("Expected %d return values, given %d", len(returnSymbols), len(returnNodeExpressions)))
 		return
 	}
 
 	if len(returnSymbols) > 0 {
 		for i, rtype := range returnSymbols {
-			nodeType := v.symbolTable.GetTypeByExpression(returnNodes[i])
+			if returnNodeExpressions[i].String() == symbol.This {
+				v.reportError(returnNode, "'this' cannot be returned")
+				return
+			}
+			nodeType := v.symbolTable.GetTypeByExpression(returnNodeExpressions[i])
 			if nodeType != rtype {
 				v.reportError(returnNode, fmt.Sprintf("Return type mismatch: expected %s, given %s",
 					rtype.Identifier(), getTypeString(nodeType)))
 			}
 		}
-	} else if len(returnNodes) > 0 {
+	} else if len(returnNodeExpressions) > 0 {
 		v.reportError(returnNode, "void method should not return expression")
 	}
 }
@@ -120,6 +124,16 @@ func (v *typeCheckVisitor) VisitReturnStatementNode(returnNode *node.ReturnState
 // VisitAssignmentStatementNode checks whether the left and right part of the assignment are of the same type
 func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
 	v.AbstractVisitor.VisitAssignmentStatementNode(node)
+
+	if node.Left.String() == symbol.This {
+		v.reportError(node, "Assigning to 'this' is not allowed!")
+		return
+	}
+
+	if node.Right.String() == symbol.This {
+		v.reportError(node, "'this' cannot be assigned!")
+		return
+	}
 
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
@@ -229,6 +243,10 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 			v.reportError(funcCallNode, fmt.Sprintf("expected %d args, got %d", totalParams, totalArgs))
 		} else {
 			for i, arg := range funcCallNode.Args {
+				if arg.String() == symbol.This {
+					v.reportError(funcCallNode, "'this' cannot be used as an argument")
+					return
+				}
 				v.checkType(arg, funcSym.Parameters[i].Type)
 			}
 		}

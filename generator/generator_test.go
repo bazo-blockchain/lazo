@@ -972,3 +972,21 @@ func TestCharGreaterEqual(t *testing.T) {
 	assertBoolExpr(t, "'b' >= 'b'", true)
 	assertBoolExpr(t, "'b' >= 'a'", true)
 }
+
+// This Keyword
+// ------------
+
+func TestThisMemberAccess(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+
+		constructor(){
+			this.x = 3
+		}
+	`)
+
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
+	tester.context.PersistChanges()
+	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
+	tester.assertVariableInt(0, big.NewInt(3))
+}

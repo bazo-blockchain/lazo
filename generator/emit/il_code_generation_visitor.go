@@ -206,6 +206,13 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 
 // VisitMemberAccessNode generates the IL Code for a member access node
 func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
+	if node.Designator.String() == symbol.This {
+		decl := v.symbolTable.GetDeclByDesignator(node).(*symbol.ContractSymbol)
+		index := v.getVarIndex(decl)
+		v.assembler.LoadState(byte(index))
+		return
+	}
+
 	node.Designator.Accept(v)
 	// TODO https://github.com/bazo-blockchain/lazo/issues/57
 	//if node.Identifier == "length" && v.isArray(node.Designator) {
@@ -393,7 +400,9 @@ func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.Struct
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
-	v.loadVariable(decl)
+	if node.String() != symbol.This {
+		v.loadVariable(decl)
+	}
 }
 
 // VisitIntegerLiteralNode pushes an integer to the stack
