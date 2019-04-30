@@ -207,8 +207,7 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 // VisitMemberAccessNode generates the IL Code for a member access node
 func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
 	if node.Designator.String() == symbol.This {
-		decl := v.symbolTable.GetDeclByDesignator(node).(*symbol.ContractSymbol)
-		index := v.getVarIndex(decl)
+		index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
 		v.assembler.LoadState(byte(index))
 		return
 	}
