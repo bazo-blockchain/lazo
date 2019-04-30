@@ -241,91 +241,11 @@ func TestParseInvalidArrayType(t *testing.T) {
 	assertErrorAt(t, p, 0, "ERROR: Symbol ] expected, but got 1")
 }
 
-func TestArrayVariableAssignment1(t *testing.T) {
-	p := newParserFromInput("int[] a = 1\n")
-	variable := p.parseVariableStatement()
-
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "1")
-	assertNoErrors(t, p)
-}
-
-func TestArrayVariableAssignment2(t *testing.T) {
+func TestArrayVariableAssignment(t *testing.T) {
 	p := newParserFromInput("int[] a = b\n")
 	variable := p.parseVariableStatement()
 
 	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "b")
-	assertNoErrors(t, p)
-}
-
-func TestArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput("int[] a = new int[2]\n")
-	variable := p.parseVariableStatement()
-
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[2]")
-	assertNoErrors(t, p)
-}
-
-func TestArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput("int[] a = new int[]{1,2}\n")
-	variable := p.parseVariableStatement()
-
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "new int[]{1,2}")
-	assertNoErrors(t, p)
-}
-
-func TestNestedArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput("int[][] a = new int[2][2]\n")
-	variable := p.parseVariableStatement()
-
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "new int[2][2]")
-	assertNoErrors(t, p)
-}
-
-func TestNestedArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput("int[][] a = new int[][]{[1, 2],[3, 4]}\n")
-	variable := p.parseVariableStatement()
-
-	assertVariableStatement(t, variable.(*node.VariableNode), "int[][]", "a", "new int[][]{[1, 2],[3, 4]}")
-	assertNoErrors(t, p)
-}
-
-func TestNestedArrayNewArrayAssignment3(t *testing.T) {
-	p := newParserFromInput("int[][] a = new int[][]{[1, 2], [3]}\n")
-	p.parseVariableStatement()
-
-	assertErrorAt(t, p, 0, "Nested array initialization vectors need to be of the same size")
-}
-
-func TestInvalidLengthArrayNewArrayAssignment1(t *testing.T) {
-	p := newParserFromInput("int[] a = new int[0]\n")
-	assertErrorAt(t, p, 0, "Invalid array length")
-}
-
-func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
-	p := newParserFromInput("int[] a = new int[]\n")
-	assertErrorAt(t, p, 0, "Invalid array length")
-}
-
-func TestInvalidLengthArrayNewArrayAssignment3(t *testing.T) {
-	p := newParserFromInput("int[] a = new int[-1]\n")
-	assertErrorAt(t, p, 0, "Invalid array length")
-}
-
-func TestArrayValueAssignment(t *testing.T) {
-	p := newParserFromInput("a[0] = 1\n")
-
-	stmt := p.parseStatementWithIdentifier()
-	assignment := stmt.(*node.AssignmentStatementNode)
-	assertAssignmentStatement(t, assignment, "a[0]", "1")
-	assertNoErrors(t, p)
-}
-
-func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
-	p := newParserFromInput("a[-1] = 1\n")
-
-	stmt := p.parseStatementWithIdentifier()
-	assignment := stmt.(*node.AssignmentStatementNode)
-	assertAssignmentStatement(t, assignment, "a[-1]", "1")
 	assertNoErrors(t, p)
 }
 

@@ -243,10 +243,40 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 	if p.isSymbol(token.OpenParen) {
 		return p.parseStructCreation(abstractNode, identifier)
 	} else if p.isSymbol(token.OpenBracket) {
-		// todo array creation
+		return p.parseArrayCreation(abstractNode, identifier)
 	}
 
 	return p.newErrorNode(fmt.Sprintf("Unsupported creation type with %s", p.currentToken.Literal()))
+}
+
+func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
+	p.nextToken() // skip '['
+	if p.isSymbol(token.CloseBracket) {
+		p.nextToken() // skip ']'
+		p.checkAndSkipNewLines(token.OpenBrace)
+		var expressions []node.ExpressionNode
+		if !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+			p.nextToken()                                          // skip ']'
+			expressions = append(expressions, p.parseExpression()) // Parse first expression
+			for !p.isSymbol(token.CloseBrace) {                    // Parse further expressions
+				p.check(token.Comma) // Check that comma seperates the expressions
+				expressions = append(expressions, p.parseExpression())
+			}
+		}
+		return &node.ArrayValueCreationNode{
+			AbstractNode:  abstractNode,
+			Type:          identifier,
+			ElementValues: expressions,
+		}
+	} else {
+		expression := p.parseExpression() // Read length expression
+		p.checkAndSkipNewLines(token.CloseBracket)
+		return &node.ArrayLengthCreationNode{
+			AbstractNode: abstractNode,
+			Type:         identifier,
+			Length:       expression,
+		}
+	}
 }
 
 func (p *Parser) parseStructCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {

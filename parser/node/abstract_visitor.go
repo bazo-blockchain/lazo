@@ -180,8 +180,13 @@ func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssign
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
-// VisitArrayCreationNode traverses the element expression nodes
-func (v *AbstractVisitor) VisitArrayCreationNode(node *ArrayCreationNode) {
+// VisitArrayLengthCreationNode traverses the size expression nodes
+func (v *AbstractVisitor) VisitArrayLengthCreationNode(node *ArrayLengthCreationNode) {
+	node.Length.Accept(v.ConcreteVisitor)
+}
+
+// VisitArrayValueCreationNode traverses the element expression nodes
+func (v *AbstractVisitor) VisitArrayValueCreationNode(node *ArrayValueCreationNode) {
 	for _, elementValue := range node.ElementValues {
 		elementValue.Accept(v.ConcreteVisitor)
 	}
