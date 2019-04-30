@@ -38,7 +38,7 @@ func (d *Metadata) getByteCode() []byte {
 }
 
 func (d *Metadata) getVariables() [][]byte {
-	return make([][]byte, len(d.Contract.Fields))
+	return make([][]byte, d.Contract.TotalFields)
 }
 
 func generateByteCode(code *il.Instruction, bytePos int) []byte {

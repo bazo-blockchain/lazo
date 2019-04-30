@@ -565,6 +565,184 @@ func TestFuncCallVoid(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(5))
 }
 
+// Struct
+// ------
+
+func TestEmptyStruct(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+		}
+
+		function Person test() {
+			Person p
+			return p
+		}
+	`, "(Person)test()")
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x00, // array length = 2
+	}
+
+	tester.assertBytes(expected...)
+}
+
+func TestDefaultStructValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function Person test() {
+			Person p
+			return p
+		}
+	`, "(Person)test()")
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x02, // array length = 2
+		0x00, 0x00, // index 0: empty string size = 0
+		0x00, 0x01, // index 1: int size = 1
+		0x00, // int 0
+	}
+
+	tester.assertBytes(expected...)
+}
+
+func TestStructFieldAccess(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0)
+	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p
+			p.name = "a"
+			p.balance = 100
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(100))
+}
+
+func TestStructNewCreation(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person()
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0)
+	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructNewCreationWithInitialValue(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person("a")
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(0))
+}
+
+func TestStructNewCreationWithInitialValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+		}
+
+		function (String, int) test() {
+			Person p = new Person("a", 200)
+			return p.name, p.balance
+		}
+	`, "(String,int)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(200))
+}
+
+func TestStructCreationWithNamedFieldValues(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+			bool valid
+		}
+
+		function (String, int, bool) test() {
+			Person p = new Person(balance=300)
+			return p.name, p.balance, p.valid
+		}
+	`, "(String,int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertBytesAt(0)
+	tester.assertIntAt(1, big.NewInt(300))
+	tester.assertBoolAt(2, false)
+}
+
+func TestStructCreationWithNamedFieldValues2(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			String name
+			int balance
+			bool valid
+		}
+
+		function (String, int, bool) test() {
+			Person p = new Person(valid=true, name="a", balance=400)
+			return p.name, p.balance, p.valid
+		}
+	`, "(String,int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 3)
+	tester.assertBytesAt(0, 97)
+	tester.assertIntAt(1, big.NewInt(400))
+	tester.assertBoolAt(2, true)
+}
+
 // Arithmetic Expressions
 // ----------------------
 

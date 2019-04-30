@@ -172,6 +172,21 @@ func (a *ILAssembler) LoadState(index byte) {
 	a.addInstruction(il.LoadSt, []byte{index}, 1)
 }
 
+// NewStruct creates a new struct with the given number of fields
+func (a *ILAssembler) NewStruct(totalFields uint16) {
+	a.addInstruction(il.NewStr, util.GetBytesFromUInt16(totalFields), 2)
+}
+
+// StoreField pops element and struct from evaluation stack and stores the element at the given field index.
+func (a *ILAssembler) StoreField(index uint16) {
+	a.addInstruction(il.StoreFld, util.GetBytesFromUInt16(index), 2)
+}
+
+// LoadField pops struct from evaluation stack and pushes the value of the given field index.
+func (a *ILAssembler) LoadField(index uint16) {
+	a.addInstruction(il.LoadFld, util.GetBytesFromUInt16(index), 2)
+}
+
 func (a *ILAssembler) addInstruction(opCode il.OpCode, operand interface{}, operandSize byte) {
 	a.instructions = append(a.instructions, &il.Instruction{
 		OpCode:  opCode,

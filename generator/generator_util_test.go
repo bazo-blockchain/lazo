@@ -130,6 +130,10 @@ func (gt *generatorTestUtil) assertBytes(bytes ...byte) {
 	gt.compareBytes(gt.result, bytes)
 }
 
+func (gt *generatorTestUtil) assertBytesAt(index int, bytes ...byte) {
+	gt.compareBytes(gt.evalStack[index], bytes)
+}
+
 func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
 	bytes := gt.context.ContractVariables[index]
 	expected := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
@@ -137,7 +141,7 @@ func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
 }
 
 func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
-	assert.Equal(gt.t, len(actual), len(expected))
+	assert.Equal(gt.t, len(actual), len(expected), fmt.Sprintf("actual bytes: %v", actual))
 
 	for i, b := range actual {
 		assert.Equal(gt.t, b, expected[i])
