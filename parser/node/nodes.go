@@ -581,20 +581,36 @@ func (n *StructFieldAssignmentNode) Accept(v Visitor) {
 	v.VisitStructFieldAssignmentNode(n)
 }
 
-// ArrayCreationNode composes abstract node and holds the target struct and field arguments.
-type ArrayCreationNode struct {
+// ArrayLengthCreationNode composes abstract node and holds the target struct and field arguments.
+type ArrayLengthCreationNode struct {
+	AbstractNode
+	Type   string
+	Length ExpressionNode
+}
+
+func (n *ArrayLengthCreationNode) String() string {
+	return fmt.Sprintf("%s[%s]", n.Type, n.Length)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayLengthCreationNode) Accept(v Visitor) {
+	v.VisitArrayLengthCreationNode(n)
+}
+
+// ArrayValueCreationNode composes abstract node and holds the target struct and field arguments.
+type ArrayValueCreationNode struct {
 	AbstractNode
 	Type          string
 	ElementValues []ExpressionNode
 }
 
-func (n *ArrayCreationNode) String() string {
+func (n *ArrayValueCreationNode) String() string {
 	return fmt.Sprintf("%s[%s]", n.Type, n.ElementValues)
 }
 
 // Accept lets a visitor traverse its node structure
-func (n *ArrayCreationNode) Accept(v Visitor) {
-	v.VisitArrayCreationNode(n)
+func (n *ArrayValueCreationNode) Accept(v Visitor) {
+	v.VisitArrayValueCreationNode(n)
 }
 
 // --------------------------

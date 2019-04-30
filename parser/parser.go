@@ -242,10 +242,14 @@ func (p *Parser) parseStatement() node.StatementNode {
 }
 
 func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
-	if p.peekToken.Type() == token.IDENTIFER || p.peekIsSymbol(token.OpenBracket) {
+	abstractNode := p.newAbstractNode()
+	identifier := p.readIdentifier()
+
+	if p.currentToken.Type() == token.IDENTIFER || p.isSymbol(token.OpenBracket) && p.peekIsSymbol(token.CloseBracket) {
 		return p.parseVariableStatement()
 	}
 
+	// TODO Manually create designator
 	designator := p.parseDesignator()
 	if p.isType(token.SYMBOL) {
 		tok := p.currentToken.(*token.FixToken)

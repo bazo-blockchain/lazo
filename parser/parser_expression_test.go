@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"math/big"
@@ -350,23 +351,60 @@ func TestStructCreationWithNewlines(t *testing.T) {
 // Array Nodes
 // -----------
 
-//func TestArrayCreation1(t *testing.T) {
-//	s := parseExpressionFromInput(t, `
-//		new int[2]
-//	`)
-//	expectedValues := []int{0, 0}
-//
-//	assertArrayCreation(t, s, "int", expectedValues)
-//}
-//
-//func TestArrayCreation2(t *testing.T) {
-//	s := parseExpressionFromInput(t, `
-//		new int[]{1, 2}
-//	`)
-//	expectedValues := []int{1, 2}
-//
-//	assertArrayCreation(t, s, "int", expectedValues)
-//}
+func TestArrayNewArrayAssignment1(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[2]")
+
+	assertArrayLengthCreation(t, p, "int", "2")
+}
+
+func TestArrayNewArrayAssignment2(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[]{1,2}")
+
+	assertArrayValueCreation(t, p, "int", "1", "2")
+}
+
+func TestNestedArrayNewArrayAssignment1(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[1][2]")
+
+	assertArrayLengthCreation(t, p, "int[1]", "2")
+}
+
+func TestNestedArrayNewArrayAssignment2(t *testing.T) {
+	p := parseExpressionFromInput(t, "int[][] a = new int[][]{new int[]{1, 2}, new int[]{3, 4}}")
+
+	assertArrayValueCreation(t, p, "int[]", "new int[]{1, 2}", "new int[]{3, 4}")
+}
+
+func TestNestedArrayNewArrayAssignment3(t *testing.T) {
+	p := newParserFromInput("int[][] a = new int[][]{[1, 2], [3]}\n")
+	p.parseVariableStatement()
+
+	assertErrorAt(t, p, 0, "Nested array initialization vectors need to be of the same size")
+}
+
+func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
+	p := newParserFromInput("new int[]")
+	p.parseCreation()
+	assertErrorAt(t, p, 0, "Symbol { expected, but got EOF")
+}
+
+func TestArrayValueAssignment(t *testing.T) {
+	p := newParserFromInput("a[0] = 1")
+
+	stmt := p.parseStatementWithIdentifier()
+	variable := stmt.(*node.VariableNode)
+	fmt.Println(variable)
+	assertNoErrors(t, p)
+}
+
+func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
+	p := newParserFromInput("a[-1] = 1\n")
+
+	stmt := p.parseStatementWithIdentifier()
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[-1]", "1")
+	assertNoErrors(t, p)
+}
 
 // Literal Expressions
 // -------------------
