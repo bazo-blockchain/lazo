@@ -7,7 +7,6 @@ type Visitor interface {
 	VisitFieldNode(node *FieldNode)
 	VisitStructNode(node *StructNode)
 	VisitStructFieldNode(node *StructFieldNode)
-	VisitArrayNode(node *ArrayNode)
 	VisitConstructorNode(node *ConstructorNode)
 	VisitFunctionNode(node *FunctionNode)
 	VisitParameterNode(node *ParameterNode)

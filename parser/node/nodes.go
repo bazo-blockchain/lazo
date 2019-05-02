@@ -156,24 +156,6 @@ func (n *StructFieldNode) Accept(v Visitor) {
 
 // --------------------------
 
-// ArrayNode composes abstract node
-type ArrayNode struct {
-	AbstractNode
-	Type     TypeNode
-	Elements []*ExpressionNode
-}
-
-func (n *ArrayNode) String() string {
-	return fmt.Sprintf("\n Array of %s: [%v]", n.Type, n.Elements)
-}
-
-// Accept lets a visitor traverse its node structure
-func (n *ArrayNode) Accept(v Visitor) {
-	v.VisitArrayNode(n)
-}
-
-// --------------------------
-
 // ConstructorNode composes abstract node and holds parameters and statements.
 type ConstructorNode struct {
 	AbstractNode
