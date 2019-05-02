@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"math/big"
@@ -379,7 +378,6 @@ func TestNestedArrayNewArrayAssignment3(t *testing.T) {
 	p := parseExpressionFromInput(t, "new int[][]{new int[]{1, 2}, new int[]{3}}")
 
 	assertArrayValueCreation(t, p, "int[][]", "int[][[1 2]]", "int[][[3]]")
-
 }
 
 func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
@@ -389,11 +387,11 @@ func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
 }
 
 func TestArrayValueAssignment(t *testing.T) {
-	p := newParserFromInput("a[0] = 1")
+	p := newParserFromInput("a[0] = 1\n")
 
 	stmt := p.parseStatementWithIdentifier()
-	variable := stmt.(*node.VariableNode)
-	fmt.Println(variable)
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[0]", "1")
 	assertNoErrors(t, p)
 }
 
@@ -402,7 +400,7 @@ func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
 
 	stmt := p.parseStatementWithIdentifier()
 	assignment := stmt.(*node.AssignmentStatementNode)
-	assertAssignmentStatement(t, assignment, "a[-1]", "1")
+	assertAssignmentStatement(t, assignment, "a[(-1)]", "1")
 	assertNoErrors(t, p)
 }
 
