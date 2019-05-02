@@ -246,11 +246,10 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	identifier := p.readIdentifier()
 
 	if p.currentToken.Type() == token.IDENTIFER || p.isSymbol(token.OpenBracket) && p.peekIsSymbol(token.CloseBracket) {
-		return p.parseVariableStatement()
+		return p.parseVariableStatementWithIdentifier(abstractNode, identifier)
 	}
 
-	// TODO Manually create designator
-	designator := p.parseDesignator()
+	designator := p.parseDesignatorWithIdentifier(abstractNode, identifier)
 	if p.isType(token.SYMBOL) {
 		tok := p.currentToken.(*token.FixToken)
 		switch tok.Value {
@@ -284,7 +283,11 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 }
 
 func (p *Parser) parseVariableStatement() node.StatementNode {
-	varType := p.parseType()
+	return p.parseVariableStatementWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+}
+
+func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.AbstractNode, identifier string) node.StatementNode {
+	varType := p.parseTypeWithIdentifier(abstractNode, identifier)
 	id := p.readIdentifier()
 
 	if p.isSymbol(token.Comma) {
@@ -410,10 +413,10 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
-func (p *Parser) parseType() node.TypeNode {
+func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {
 	typeNode := &node.BasicTypeNode{
-		AbstractNode: p.newAbstractNode(),
-		Identifier:   p.readIdentifier(),
+		AbstractNode: abstractNode,
+		Identifier:   identifier,
 	}
 
 	if p.isSymbol(token.OpenBracket) {
@@ -421,6 +424,10 @@ func (p *Parser) parseType() node.TypeNode {
 	}
 
 	return typeNode
+}
+
+func (p *Parser) parseType() node.TypeNode {
+	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
 }
 
 func (p *Parser) parseArrayType(arrayType node.TypeNode) *node.ArrayTypeNode {
