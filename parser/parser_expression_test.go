@@ -384,6 +384,7 @@ func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
 	p := newParserFromInput("new int[]")
 	p.parseCreation()
 	assertErrorAt(t, p, 0, "Symbol { expected, but got EOF")
+	assertErrorAt(t, p, 1, "Invalid array initialization")
 }
 
 func TestArrayValueAssignment(t *testing.T) {

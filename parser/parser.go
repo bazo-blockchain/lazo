@@ -248,7 +248,6 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 	if p.currentToken.Type() == token.IDENTIFER || p.isSymbol(token.OpenBracket) && p.peekIsSymbol(token.CloseBracket) {
 		return p.parseVariableStatementWithIdentifier(abstractNode, identifier)
 	}
-
 	designator := p.parseDesignatorWithIdentifier(abstractNode, identifier)
 	if p.isType(token.SYMBOL) {
 		tok := p.currentToken.(*token.FixToken)
@@ -259,7 +258,15 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 			return p.parseMultiAssignmentStatement(designator)
 		case token.OpenParen:
 			return p.parseCallStatement(designator)
+		default:
+			p.addError(fmt.Sprintf("Unsupported symbol %s", tok.Lexeme))
+			return nil
 		}
+	}
+
+	if p.isType(token.IDENTIFER) {
+		p.addError("Invalid Array declaration")
+		return nil
 	}
 
 	p.addError("%s not yet implemented" + p.currentToken.Literal())
