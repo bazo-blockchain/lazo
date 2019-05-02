@@ -42,11 +42,6 @@ func (v *AbstractVisitor) VisitStructNode(node *StructNode) {
 	}
 }
 
-// VisitArrayNode traverses the type node
-func (v *AbstractVisitor) VisitArrayNode(node *ArrayNode) {
-	node.Type.Accept(v.ConcreteVisitor)
-}
-
 // VisitStructFieldNode traverses the type node
 func (v *AbstractVisitor) VisitStructFieldNode(node *StructFieldNode) {
 	node.Type.Accept(v.ConcreteVisitor)
