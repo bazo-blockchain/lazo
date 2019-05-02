@@ -26,6 +26,7 @@ type Visitor interface {
 	VisitBasicDesignatorNode(node *BasicDesignatorNode)
 	VisitElementAccessNode(node *ElementAccessNode)
 	VisitMemberAccessNode(node *MemberAccessNode)
+	VisitArrayInitializationNode(node *ArrayInitializationNode)
 	VisitFuncCallNode(node *FuncCallNode)
 	VisitStructCreationNode(node *StructCreationNode)
 	VisitStructNamedCreationNode(node *StructNamedCreationNode)

@@ -180,6 +180,10 @@ func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssign
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
+func (v *AbstractVisitor) VisitArrayInitializationNode(node *ArrayInitializationNode) {
+
+}
+
 // VisitArrayLengthCreationNode traverses the size expression nodes
 func (v *AbstractVisitor) VisitArrayLengthCreationNode(node *ArrayLengthCreationNode) {
 	for _, exp := range node.Lengths {
@@ -189,9 +193,7 @@ func (v *AbstractVisitor) VisitArrayLengthCreationNode(node *ArrayLengthCreation
 
 // VisitArrayValueCreationNode traverses the element expression nodes
 func (v *AbstractVisitor) VisitArrayValueCreationNode(node *ArrayValueCreationNode) {
-	for _, elementValue := range node.ElementValues {
-		elementValue.Accept(v.ConcreteVisitor)
-	}
+	node.Elements.Accept(v.ConcreteVisitor)
 }
 
 // VisitBasicDesignatorNode does nothing because it is the terminal node.

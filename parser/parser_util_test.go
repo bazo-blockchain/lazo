@@ -215,9 +215,9 @@ func assertArrayValueCreation(t *testing.T, n node.ExpressionNode, name string, 
 	assert.Assert(t, ok)
 	assert.Equal(t, arrayCreation.Type.String(), name)
 
-	assert.Equal(t, len(arrayCreation.ElementValues), len(values))
+	assert.Equal(t, len(arrayCreation.Elements.Values), len(values))
 	for i, v := range values {
-		assert.Equal(t, arrayCreation.ElementValues[i].String(), v)
+		assert.Equal(t, arrayCreation.Elements.Values[i].String(), v)
 	}
 }
 

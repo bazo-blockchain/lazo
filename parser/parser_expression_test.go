@@ -369,15 +369,15 @@ func TestNestedArrayNewArrayAssignment1(t *testing.T) {
 }
 
 func TestNestedArrayNewArrayAssignment2(t *testing.T) {
-	p := parseExpressionFromInput(t, "new int[][]{new int[]{1, 2}, new int[]{3, 4}}")
+	p := parseExpressionFromInput(t, "new int[][]{{1, 2}, {3, 4}}")
 
-	assertArrayValueCreation(t, p, "int[][]", "int[][[1 2]]", "int[][[3 4]]")
+	assertArrayValueCreation(t, p, "int[][]", "[[1 2]]", "[[3 4]]")
 }
 
 func TestNestedArrayNewArrayAssignment3(t *testing.T) {
-	p := parseExpressionFromInput(t, "new int[][]{new int[]{1, 2}, new int[]{3}}")
+	p := parseExpressionFromInput(t, "new int[][]{{1, 2}, {3}}")
 
-	assertArrayValueCreation(t, p, "int[][]", "int[][[1 2]]", "int[][[3]]")
+	assertArrayValueCreation(t, p, "int[][]", "[[1 2]]", "[[3]]")
 }
 
 func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
