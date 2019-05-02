@@ -579,12 +579,17 @@ func (n *StructFieldAssignmentNode) Accept(v Visitor) {
 // ArrayLengthCreationNode composes abstract node and holds the target struct and field arguments.
 type ArrayLengthCreationNode struct {
 	AbstractNode
-	Type   string
-	Length ExpressionNode
+	Type    string
+	Lengths []ExpressionNode
 }
 
 func (n *ArrayLengthCreationNode) String() string {
-	return fmt.Sprintf("%s[%s]", n.Type, n.Length)
+	line := fmt.Sprintf("%s[%s]", n.Type, n.Lengths[0])
+	for i := 1; i < len(n.Lengths); i++ {
+		line = line + fmt.Sprintf("[%s]", n.Lengths[i])
+	}
+
+	return line
 }
 
 // Accept lets a visitor traverse its node structure

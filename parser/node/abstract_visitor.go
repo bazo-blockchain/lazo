@@ -182,7 +182,9 @@ func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssign
 
 // VisitArrayLengthCreationNode traverses the size expression nodes
 func (v *AbstractVisitor) VisitArrayLengthCreationNode(node *ArrayLengthCreationNode) {
-	node.Length.Accept(v.ConcreteVisitor)
+	for _, exp := range node.Lengths {
+		exp.Accept(v.ConcreteVisitor)
+	}
 }
 
 // VisitArrayValueCreationNode traverses the element expression nodes
