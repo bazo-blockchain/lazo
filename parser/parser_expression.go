@@ -272,12 +272,22 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 			ElementValues: expressions,
 		}
 	}
+
+	var expressions []node.ExpressionNode
 	expression := p.parseExpression() // Read length expression
+	expressions = append(expressions, expression)
 	p.checkAndSkipNewLines(token.CloseBracket)
+
+	for !p.isEnd() && !p.isSymbol(token.NewLine) {
+		p.check(token.OpenBracket)
+		expressions = append(expressions, p.parseExpression())
+		p.check(token.CloseBracket)
+	}
+
 	return &node.ArrayLengthCreationNode{
 		AbstractNode: abstractNode,
 		Type:         identifier,
-		Length:       expression,
+		Lengths:      expressions,
 	}
 }
 

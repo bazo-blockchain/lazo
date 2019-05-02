@@ -188,13 +188,25 @@ func assertMemberAccess(t *testing.T, n node.ExpressionNode, designator string, 
 	assert.Equal(t, memberAccess.Identifier, id)
 }
 
-func assertArrayLengthCreation(t *testing.T, n node.ExpressionNode, name string, size string) {
+// assertArrayLengthCreation should receive the string lengths in the following format: "1,2,3,..."
+func assertArrayLengthCreation(t *testing.T, n node.ExpressionNode, name string, lengths string) {
 	arrayCreation, ok := n.(*node.ArrayLengthCreationNode)
 
 	assert.Assert(t, ok)
 	assert.Equal(t, arrayCreation.Type, name)
 
-	assert.Equal(t, arrayCreation.Length.String(), size)
+	assertArrayLengths(t, arrayCreation, lengths)
+}
+
+func assertArrayLengths(t *testing.T, n *node.ArrayLengthCreationNode, lengths string) {
+	var lengthStrings []string
+	for _, length := range n.Lengths {
+		lengthStrings = append(lengthStrings, length.String())
+	}
+
+	result := strings.Join(lengthStrings, ",")
+
+	assert.Equal(t, result, lengths)
 }
 
 func assertArrayValueCreation(t *testing.T, n node.ExpressionNode, name string, values ...string) {
