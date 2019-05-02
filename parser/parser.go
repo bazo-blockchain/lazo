@@ -430,8 +430,18 @@ func (p *Parser) parseType() node.TypeNode {
 	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
 }
 
-func (p *Parser) parseArrayType(arrayType node.TypeNode) *node.ArrayTypeNode {
+func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
 	p.nextToken() // Skip '[' symbol
+	// DO NOT REMOVE THIS SECTION
+	// Is required during parsing of ArrayCreation due to the following issue:
+	// ArrayValueCreation looks like: new int[]{1, 2}
+	// ArrayLengthCreation looks like: new int[2]
+	// The problem during parsing is that when parsing the type, we recognize that it's an array type in both cases.
+	// In the case of value creation this is ok, but in the case of length creation we need to return only the "int" type
+	// because we still need to parse the length later during the creation parsing process.
+	if !p.isSymbol(token.CloseBracket) {
+		return arrayType
+	}
 	p.check(token.CloseBracket)
 	arrayTypeNode := &node.ArrayTypeNode{
 		AbstractNode: node.AbstractNode{

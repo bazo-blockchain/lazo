@@ -584,7 +584,7 @@ func (n *StructFieldAssignmentNode) Accept(v Visitor) {
 // ArrayLengthCreationNode composes abstract node and holds the target struct and field arguments.
 type ArrayLengthCreationNode struct {
 	AbstractNode
-	Type    string
+	Type    TypeNode
 	Lengths []ExpressionNode
 }
 
@@ -605,7 +605,7 @@ func (n *ArrayLengthCreationNode) Accept(v Visitor) {
 // ArrayValueCreationNode composes abstract node and holds the target struct and field arguments.
 type ArrayValueCreationNode struct {
 	AbstractNode
-	Type          string
+	Type          TypeNode
 	ElementValues []ExpressionNode
 }
 
