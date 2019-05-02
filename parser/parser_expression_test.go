@@ -380,6 +380,34 @@ func TestNestedArrayNewArrayAssignment3(t *testing.T) {
 	assertArrayValueCreation(t, p, "int[][]", "[[1 2]]", "[[3]]")
 }
 
+func TestNestedArrayNewArrayAssignment4(t *testing.T) {
+	p := newParserFromInput("new int[]{}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment5(t *testing.T) {
+	p := newParserFromInput("new int[][]{}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment6(t *testing.T) {
+	p := newParserFromInput("new int[][]{{},{}}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment7(t *testing.T) {
+	p := newParserFromInput("new int[][]{{1},{}}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
 func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
 	p := newParserFromInput("new int[]")
 	p.parseCreation()
