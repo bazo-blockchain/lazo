@@ -13,6 +13,7 @@ const (
 	Push
 	Dup
 	Roll
+	Swap
 	Pop
 	Add
 	Sub

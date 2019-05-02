@@ -194,10 +194,18 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
 			memberAccessNode.Designator.Accept(v)
+
 			fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+			_, isStructField := fieldSymbol.Scope().(*symbol.StructTypeSymbol)
+			if isStructField {
+				v.assembler.Emit(il.Swap) // Swap field value and struct to match the StoreFld opcode
+			}
 			v.storeVariable(fieldSymbol)
 
-			// TODO: handle struct field assignments
+			// Struct is a value type in VM. Therefore, struct variable should be updated explicitly.
+			if isStructField {
+				v.storeVariable(v.symbolTable.GetDeclByDesignator(memberAccessNode.Designator))
+			}
 		default:
 			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
