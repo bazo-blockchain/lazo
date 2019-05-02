@@ -252,25 +252,53 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 	return p.newErrorNode(fmt.Sprintf("Unsupported creation type with %s", p.currentToken.Literal()))
 }
 
+func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
+	abstractNode := p.newAbstractNode()
+	p.checkAndSkipNewLines(token.OpenBrace) // skip '{'
+	if !p.isEnd() && !p.isSymbol(token.OpenBrace) {
+		var expressions []node.ExpressionNode
+		expressions = append(expressions, p.parseExpression())
+		for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+			p.checkAndSkipNewLines(token.Comma)
+			expressions = append(expressions, p.parseExpression())
+		}
+		p.checkAndSkipNewLines(token.CloseBrace)
+
+		return &node.ArrayInitializationNode{
+			AbstractNode: abstractNode,
+			Values:       expressions,
+		}
+	}
+
+	arrayInitialization := &node.ArrayInitializationNode{
+		AbstractNode: abstractNode,
+	}
+
+	var expressions []node.ExpressionNode
+
+	expressions = append(expressions, p.parseArrayInitialization())
+
+	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+		p.checkAndSkipNewLines(token.Comma)
+		expressions = append(expressions, p.parseArrayInitialization())
+	}
+
+	p.checkAndSkipNewLines(token.CloseBrace)
+
+	arrayInitialization.Values = expressions
+
+	return arrayInitialization
+}
+
 func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
 	arrayType := p.parseTypeWithIdentifier(abstractNode, identifier)
 
 	// Initialization using values
 	if valueCreationNode, ok := arrayType.(*node.ArrayTypeNode); ok {
-		p.checkAndSkipNewLines(token.OpenBrace)
-		var expressions []node.ExpressionNode
-		if !p.isEnd() && !p.isSymbol(token.CloseBrace) {
-			expressions = append(expressions, p.parseExpression()) // Parse first expression
-			for !p.isEnd() && !p.isSymbol(token.CloseBrace) {      // Parse further expressions
-				p.check(token.Comma) // Check that comma seperates the expressions
-				expressions = append(expressions, p.parseExpression())
-			}
-			p.check(token.CloseBrace)
-		}
 		return &node.ArrayValueCreationNode{
-			AbstractNode:  abstractNode,
-			Type:          valueCreationNode,
-			ElementValues: expressions,
+			AbstractNode: abstractNode,
+			Type:         valueCreationNode,
+			Elements:     p.parseArrayInitialization(),
 		}
 	}
 

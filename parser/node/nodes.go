@@ -600,17 +600,32 @@ func (n *ArrayLengthCreationNode) Accept(v Visitor) {
 // ArrayValueCreationNode composes abstract node and holds the target struct and field arguments.
 type ArrayValueCreationNode struct {
 	AbstractNode
-	Type          TypeNode
-	ElementValues []ExpressionNode
+	Type     TypeNode
+	Elements *ArrayInitializationNode
 }
 
 func (n *ArrayValueCreationNode) String() string {
-	return fmt.Sprintf("%s[%s]", n.Type, n.ElementValues)
+	return fmt.Sprintf("%s[%s]", n.Type, n.Elements)
 }
 
 // Accept lets a visitor traverse its node structure
 func (n *ArrayValueCreationNode) Accept(v Visitor) {
 	v.VisitArrayValueCreationNode(n)
+}
+
+// ArrayInitializationNode composes abstract node and holds the target struct and field arguments.
+type ArrayInitializationNode struct {
+	AbstractNode
+	Values []ExpressionNode
+}
+
+func (n *ArrayInitializationNode) String() string {
+	return fmt.Sprintf("[%s]", n.Values)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayInitializationNode) Accept(v Visitor) {
+	v.VisitArrayInitializationNode(n)
 }
 
 // --------------------------
