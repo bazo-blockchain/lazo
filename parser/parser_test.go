@@ -250,6 +250,19 @@ func TestArrayVariableAssignment(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+func TestArrayMultiAssignment(t *testing.T) {
+	p := newParserFromInput("a[0], a[1] = this.getArrayData()\n")
+	stmt := p.parseStatement()
+	ma, ok := stmt.(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertNoErrors(t, p)
+	assertPosition(t, ma.Position, 1, 1)
+	assert.Equal(t, ma.Designators[0].String(), "a[0]")
+	assert.Equal(t, ma.Designators[1].String(), "a[1]")
+	assertFuncCall(t, ma.FuncCall, "this.getArrayData")
+}
+
 func TestFieldArrayDeclaration(t *testing.T) {
 	p := newParserFromInput(`
 		contract Test {
