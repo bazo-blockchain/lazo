@@ -743,6 +743,30 @@ func TestStructCreationWithNamedFieldValues2(t *testing.T) {
 	tester.assertBoolAt(2, true)
 }
 
+func TestStructMultiFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+			bool isValid
+		}
+
+		function (int, bool) test() {
+			Person p
+			p.balance, p.isValid = test2()
+			
+			return p.balance, p.isValid
+		}
+
+		function (int, bool) test2() {
+			return 100, true
+		}
+	`, "(int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertIntAt(0, big.NewInt(100))
+	tester.assertBoolAt(1, true)
+}
+
 // Arithmetic Expressions
 // ----------------------
 
