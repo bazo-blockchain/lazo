@@ -767,6 +767,23 @@ func TestStructMultiFieldAssignment(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
+func TestStructNestedFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+			Person friend
+		}
+
+		function int test() {
+			Person p = new Person()
+			p.friend.balance = 1000
+			return p.friend.balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1000))
+}
+
 // Arithmetic Expressions
 // ----------------------
 
