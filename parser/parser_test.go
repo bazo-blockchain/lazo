@@ -236,9 +236,10 @@ func TestParseStructArrayType(t *testing.T) {
 
 func TestParseInvalidArrayType(t *testing.T) {
 	p := newParserFromInput(`int[1] a`)
-	p.parseType()
+	p.parseStatementWithIdentifier()
 
-	assertErrorAt(t, p, 0, "ERROR: Symbol ] expected, but got 1")
+	assertErrorAt(t, p, 0, "Invalid Array declaration")
+	assert.Equal(t, len(p.errors), 1)
 }
 
 func TestArrayVariableAssignment(t *testing.T) {
@@ -418,7 +419,7 @@ func TestMultiVariableStatement(t *testing.T) {
 	assert.Assert(t, ok)
 	assert.Equal(t, mv.Types[0].String(), "int")
 	assert.Equal(t, mv.Identifiers[0], "x")
-	assert.Equal(t, mv.Types[1].String, "bool")
+	assert.Equal(t, mv.Types[1].String(), "bool")
 	assert.Equal(t, mv.Identifiers[1], "b")
 	assertFuncCall(t, mv.FuncCall, "call")
 	assertNoErrors(t, p)

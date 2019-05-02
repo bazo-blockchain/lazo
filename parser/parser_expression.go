@@ -274,18 +274,22 @@ func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
 		AbstractNode: abstractNode,
 	}
 
-	var expressions []node.ExpressionNode
+	if !p.isEnd() {
+		var expressions []node.ExpressionNode
 
-	expressions = append(expressions, p.parseArrayInitialization())
-
-	for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
-		p.checkAndSkipNewLines(token.Comma)
 		expressions = append(expressions, p.parseArrayInitialization())
+
+		for !p.isEnd() && !p.isSymbol(token.CloseBrace) {
+			p.checkAndSkipNewLines(token.Comma)
+			expressions = append(expressions, p.parseArrayInitialization())
+		}
+
+		p.checkAndSkipNewLines(token.CloseBrace)
+
+		arrayInitialization.Values = expressions
+	} else {
+		p.addError("Invalid array initialization")
 	}
-
-	p.checkAndSkipNewLines(token.CloseBrace)
-
-	arrayInitialization.Values = expressions
 
 	return arrayInitialization
 }
