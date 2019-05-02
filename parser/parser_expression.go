@@ -310,10 +310,10 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 	var expressions []node.ExpressionNode
 	expression := p.parseExpression() // Read length expression
 	expressions = append(expressions, expression)
-	p.checkAndSkipNewLines(token.CloseBracket)
+	p.check(token.CloseBracket)
 
-	for !p.isEnd() && !p.isSymbol(token.NewLine) {
-		p.check(token.OpenBracket)
+	for !p.isEnd() && p.isSymbol(token.OpenBracket) {
+		p.nextToken()
 		expressions = append(expressions, p.parseExpression())
 		p.check(token.CloseBracket)
 	}
