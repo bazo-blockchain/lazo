@@ -265,6 +265,7 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 				p.check(token.Comma) // Check that comma seperates the expressions
 				expressions = append(expressions, p.parseExpression())
 			}
+			p.check(token.CloseBrace)
 		}
 		return &node.ArrayValueCreationNode{
 			AbstractNode:  abstractNode,
