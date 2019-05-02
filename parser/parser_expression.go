@@ -186,21 +186,20 @@ func (p *Parser) parseOperandSymbol() node.ExpressionNode {
 	}
 }
 
-func (p *Parser) parseDesignator() node.DesignatorNode {
-	abstractNode := p.newAbstractNode()
+func (p *Parser) parseDesignatorWithIdentifier(abstractNode node.AbstractNode, identifier string) node.DesignatorNode {
 	var left node.DesignatorNode = &node.BasicDesignatorNode{
 		AbstractNode: abstractNode,
-		Value:        p.readIdentifier(),
+		Value:        identifier,
 	}
 
 	for p.isSymbol(token.Period) || p.isSymbol(token.OpenBracket) {
 		if p.isSymbol(token.Period) {
 			p.nextToken()
-			identifier := p.readIdentifier()
+			memberIdentifier := p.readIdentifier()
 			left = &node.MemberAccessNode{
 				AbstractNode: abstractNode,
 				Designator:   left,
-				Identifier:   identifier,
+				Identifier:   memberIdentifier,
 			}
 		} else {
 			p.check(token.OpenBracket)
@@ -214,6 +213,10 @@ func (p *Parser) parseDesignator() node.DesignatorNode {
 		}
 	}
 	return left
+}
+
+func (p *Parser) parseDesignator() node.DesignatorNode {
+	return p.parseDesignatorWithIdentifier(p.newAbstractNode(), p.readIdentifier())
 }
 
 func (p *Parser) parseFuncCall(designator node.DesignatorNode) *node.FuncCallNode {
@@ -250,15 +253,15 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 }
 
 func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
+	// TODO Support Nested Array
 	p.nextToken() // skip '['
 	if p.isSymbol(token.CloseBracket) {
 		p.nextToken() // skip ']'
 		p.checkAndSkipNewLines(token.OpenBrace)
 		var expressions []node.ExpressionNode
 		if !p.isEnd() && !p.isSymbol(token.CloseBrace) {
-			p.nextToken()                                          // skip ']'
 			expressions = append(expressions, p.parseExpression()) // Parse first expression
-			for !p.isSymbol(token.CloseBrace) {                    // Parse further expressions
+			for !p.isEnd() && !p.isSymbol(token.CloseBrace) {      // Parse further expressions
 				p.check(token.Comma) // Check that comma seperates the expressions
 				expressions = append(expressions, p.parseExpression())
 			}
@@ -268,14 +271,13 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 			Type:          identifier,
 			ElementValues: expressions,
 		}
-	} else {
-		expression := p.parseExpression() // Read length expression
-		p.checkAndSkipNewLines(token.CloseBracket)
-		return &node.ArrayLengthCreationNode{
-			AbstractNode: abstractNode,
-			Type:         identifier,
-			Length:       expression,
-		}
+	}
+	expression := p.parseExpression() // Read length expression
+	p.checkAndSkipNewLines(token.CloseBracket)
+	return &node.ArrayLengthCreationNode{
+		AbstractNode: abstractNode,
+		Type:         identifier,
+		Length:       expression,
 	}
 }
 
