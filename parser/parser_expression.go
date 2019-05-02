@@ -253,10 +253,10 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 }
 
 func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
-	// TODO Support Nested Array
-	p.nextToken() // skip '['
-	if p.isSymbol(token.CloseBracket) {
-		p.nextToken() // skip ']'
+	arrayType := p.parseTypeWithIdentifier(abstractNode, identifier)
+
+	// Initialization using values
+	if valueCreationNode, ok := arrayType.(*node.ArrayTypeNode); ok {
 		p.checkAndSkipNewLines(token.OpenBrace)
 		var expressions []node.ExpressionNode
 		if !p.isEnd() && !p.isSymbol(token.CloseBrace) {
@@ -268,11 +268,12 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 		}
 		return &node.ArrayValueCreationNode{
 			AbstractNode:  abstractNode,
-			Type:          identifier,
+			Type:          valueCreationNode,
 			ElementValues: expressions,
 		}
 	}
 
+	// Initialization using Length
 	var expressions []node.ExpressionNode
 	expression := p.parseExpression() // Read length expression
 	expressions = append(expressions, expression)
@@ -286,7 +287,7 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 
 	return &node.ArrayLengthCreationNode{
 		AbstractNode: abstractNode,
-		Type:         identifier,
+		Type:         arrayType,
 		Lengths:      expressions,
 	}
 }

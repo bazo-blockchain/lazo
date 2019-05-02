@@ -360,7 +360,7 @@ func TestArrayNewArrayAssignment1(t *testing.T) {
 func TestArrayNewArrayAssignment2(t *testing.T) {
 	p := parseExpressionFromInput(t, "new int[]{1,2}")
 
-	assertArrayValueCreation(t, p, "int", "1", "2")
+	assertArrayValueCreation(t, p, "int[]", "1", "2")
 }
 
 func TestNestedArrayNewArrayAssignment1(t *testing.T) {
@@ -370,13 +370,13 @@ func TestNestedArrayNewArrayAssignment1(t *testing.T) {
 }
 
 func TestNestedArrayNewArrayAssignment2(t *testing.T) {
-	p := parseExpressionFromInput(t, "int[][] a = new int[][]{new int[]{1, 2}, new int[]{3, 4}}")
+	p := parseExpressionFromInput(t, "new int[][]{new int[]{1, 2}, new int[]{3, 4}}")
 
-	assertArrayValueCreation(t, p, "int[]", "new int[]{1, 2}", "new int[]{3, 4}")
+	assertArrayValueCreation(t, p, "int[][]", "new int[]{1, 2}", "new int[]{3, 4}")
 }
 
 func TestNestedArrayNewArrayAssignment3(t *testing.T) {
-	p := newParserFromInput("int[][] a = new int[][]{[1, 2], [3]}\n")
+	p := newParserFromInput("new int[][]{[1, 2], [3]}\n")
 	p.parseVariableStatement()
 
 	assertErrorAt(t, p, 0, "Nested array initialization vectors need to be of the same size")
