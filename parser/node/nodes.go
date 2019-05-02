@@ -74,8 +74,13 @@ type ContractNode struct {
 }
 
 func (n *ContractNode) String() string {
+	var strConstructor string
+	if n.Constructor != (*ConstructorNode)(nil) {
+		strConstructor = n.Constructor.String()
+	}
+
 	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n STRUCTS: %s \n\n CONSTRUCTOR: %s \n\n FUNCS: %s",
-		n.Pos(), n.Name, n.Fields, n.Structs, getNodeString(n.Constructor), n.Functions)
+		n.Pos(), n.Name, n.Fields, n.Structs, strConstructor, n.Functions)
 }
 
 // Accept lets a visitor to traverse its node structure
