@@ -9,7 +9,9 @@ import (
 func TestContractNode_String(t *testing.T) {
 	contract := &ContractNode{
 		AbstractNode: AbstractNode{
-			Position: token.Position{1, 1},
+			Position: token.Position{
+				Line:   1,
+				Column: 1},
 		},
 		Name: "Test",
 	}
