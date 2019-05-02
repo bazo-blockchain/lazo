@@ -27,7 +27,7 @@ func execute(sourceFile string) {
 	code, variables := compile(sourceFile)
 	context := vm.NewMockContext(code)
 	context.ContractVariables = variables
-	context.Fee += (uint64(len(variables))) * 1000
+	context.Fee += (uint64(len(variables))) * 1000 * 10
 	context.Data = []byte{
 		1, // total bytes
 		0, // Contract Init Flag

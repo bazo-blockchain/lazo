@@ -233,18 +233,22 @@ func assertStructCreation(t *testing.T, n node.ExpressionNode, name string, valu
 	}
 }
 
-func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string, values map[string]string) {
+func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string, values ...pair) {
 	structCreation, ok := n.(*node.StructNamedCreationNode)
 
 	assert.Assert(t, ok)
 	assert.Equal(t, structCreation.Name, name)
 
 	assert.Equal(t, len(structCreation.FieldValues), len(values))
-	i := 0
-	for key, value := range values {
+	for i, pair := range values {
 		field := structCreation.FieldValues[i]
-		assert.Equal(t, field.Name, key)
-		assert.Equal(t, field.Expression.String(), value)
+		assert.Equal(t, field.Name, pair.key)
+		assert.Equal(t, field.Expression.String(), pair.value)
 		i++
 	}
+}
+
+type pair struct {
+	key   string
+	value string
 }

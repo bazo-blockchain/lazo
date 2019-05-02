@@ -3,25 +3,10 @@ package data
 
 import "github.com/bazo-blockchain/lazo/generator/il"
 
-// TypeData is an alias for int and used for type representation
-type TypeData int
-
-const (
-	_ = iota
-	// BoolType represents the boolean type
-	BoolType TypeData = iota * -1
-	// IntType represents the integer type
-	IntType
-	// CharType represents the character type
-	CharType
-	// StringType represents the string type
-	StringType
-)
-
-// ContractData contains the identifier, fields, functions and instructions
+// ContractData contains the identifier, total fields, functions and instructions
 type ContractData struct {
 	Identifier   string
-	Fields       []TypeData
+	TotalFields  uint16
 	Functions    []*FunctionData
 	Instructions []*il.Instruction
 }
@@ -30,9 +15,6 @@ type ContractData struct {
 // function hash
 type FunctionData struct {
 	Identifier   string
-	ReturnTypes  []TypeData
-	ParamTypes   []TypeData
-	LocalTypes   []TypeData
 	Instructions []*il.Instruction
 	Hash         [4]byte
 }

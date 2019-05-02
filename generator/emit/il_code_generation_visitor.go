@@ -142,34 +142,92 @@ func (v *ILCodeGenerationVisitor) VisitMultiVariableNode(node *node.MultiVariabl
 }
 
 // VisitAssignmentStatementNode generates the IL Code for an assignment
-func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(node *node.AssignmentStatementNode) {
-	node.Right.Accept(v)
+func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.AssignmentStatementNode) {
+	switch assignNode.Left.(type) {
+	case *node.BasicDesignatorNode:
+		assignNode.Right.Accept(v)
+		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
+		v.storeVariable(decl)
 
-	decl := v.symbolTable.GetDeclByDesignator(node.Left)
-	index, isContractField := v.getVarIndex(decl)
+	//// TODO will be done when array is implemented
+	//case *node.ElementAccessNode:
+	//	elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
+	//	elementAccess.Designator.Accept(v)
+	//	elementAccess.Expression.Accept(v)
+	//	assignNode.Right.Accept(v)
+	//	v.assembler.Emit() // TODO Store Array Element
 
-	if isContractField {
-		v.assembler.StoreState(index)
-	} else {
-		v.assembler.StoreLocal(index)
+	case *node.MemberAccessNode:
+		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
+		memberAccessNode.Designator.Accept(v)
+		assignNode.Right.Accept(v)
+		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+		v.storeVariable(fieldSymbol)
+
+		// Struct is a value type in VM. Therefore, struct variable should be updated explicitly.
+		targetType := v.symbolTable.GetTypeByExpression(memberAccessNode.Designator)
+		if _, ok := targetType.(*symbol.StructTypeSymbol); ok {
+			v.storeVariable(v.symbolTable.GetDeclByDesignator(memberAccessNode.Designator))
+		}
+	default:
+		v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Left))
 	}
 }
 
 // VisitMultiAssignmentStatementNode generates the IL Code for a multi-assignment
-func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAssignmentStatementNode) {
-	node.FuncCall.Accept(v)
+func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *node.MultiAssignmentStatementNode) {
+	assignNode.FuncCall.Accept(v)
 
-	for i := len(node.Designators) - 1; i >= 0; i-- {
-		decl := v.symbolTable.GetDeclByDesignator(node.Designators[i])
-		index, isContractField := v.getVarIndex(decl)
+	for i := len(assignNode.Designators) - 1; i >= 0; i-- {
+		switch assignNode.Designators[i].(type) {
+		case *node.BasicDesignatorNode:
+			decl := v.symbolTable.GetDeclByDesignator(assignNode.Designators[i])
+			v.storeVariable(decl)
 
-		if isContractField {
-			v.assembler.StoreState(index)
-		} else {
-			v.assembler.StoreLocal(index)
+		//// TODO will be done when array is implemented
+		//case *node.ElementAccessNode:
+		//	elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
+		//	elementAccess.Designator.Accept(v)
+		//	elementAccess.Expression.Accept(v)
+		//	v.assembler.Emit() // TODO Store Array Element
+
+		case *node.MemberAccessNode:
+			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
+			memberAccessNode.Designator.Accept(v)
+			fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+			v.storeVariable(fieldSymbol)
+
+			// TODO: handle struct field assignments
+		default:
+			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
 	}
 }
+
+// VisitMemberAccessNode generates the IL Code for a member access node
+func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
+	if node.Designator.String() == symbol.This {
+		index := v.symbolTable.GlobalScope.Contract.GetFieldIndex(node.Identifier)
+		v.assembler.LoadState(byte(index))
+		return
+	}
+
+	node.Designator.Accept(v)
+	// TODO https://github.com/bazo-blockchain/lazo/issues/57
+	//if node.Identifier == "length" && v.isArray(node.Designator) {
+	//	v.assembler.Emit() // Load Length
+	//  }
+
+	decl := v.symbolTable.GetDeclByDesignator(node)
+	v.loadVariable(decl)
+}
+
+//// TODO Uncomment and implement as soon as arrays are implemented
+//func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode){
+//	node.Designator.Accept(v)
+//	node.Expression.Accept(v)
+//	v.assembler.Emit() // Load Array Element
+//}
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -299,15 +357,50 @@ func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
 	v.assembler.CallFunc(funcSym)
 }
 
+// VisitStructCreationNode generates the IL code for creating a new struct.
+func (v *ILCodeGenerationVisitor) VisitStructCreationNode(node *node.StructCreationNode) {
+	structType := v.symbolTable.GetTypeByExpression(node).(*symbol.StructTypeSymbol)
+	v.assembler.NewStruct(uint16(len(structType.Fields)))
+
+	for i, expr := range node.FieldValues {
+		expr.Accept(v.ConcreteVisitor)
+		v.assembler.StoreField(uint16(i))
+	}
+
+	// Set default value when field is not initialized
+	for i := len(node.FieldValues); i < len(structType.Fields); i++ {
+		v.pushDefault(structType.Fields[i].Type)
+		v.assembler.StoreField(uint16(i))
+	}
+}
+
+// VisitStructNamedCreationNode generates the IL code for creating a new struct with named field initialization.
+func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.StructNamedCreationNode) {
+	structType := v.symbolTable.GetTypeByExpression(node).(*symbol.StructTypeSymbol)
+	v.assembler.NewStruct(uint16(len(structType.Fields)))
+
+	initializedFields := make([]bool, len(structType.Fields))
+	for _, namedField := range node.FieldValues {
+		namedField.Accept(v.ConcreteVisitor)
+		fieldIndex := structType.GetFieldIndex(namedField.Name)
+		v.assembler.StoreField(uint16(fieldIndex))
+		initializedFields[fieldIndex] = true
+	}
+
+	// Set default value when field is not initialized
+	for i := 0; i < len(structType.Fields); i++ {
+		if !initializedFields[i] {
+			v.pushDefault(structType.Fields[i].Type)
+			v.assembler.StoreField(uint16(i))
+		}
+	}
+}
+
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
-	index, isContractField := v.getVarIndex(decl)
-
-	if isContractField {
-		v.assembler.LoadState(index)
-	} else {
-		v.assembler.LoadLocal(index)
+	if node.String() != symbol.This {
+		v.loadVariable(decl)
 	}
 }
 
@@ -334,7 +427,38 @@ func (v *ILCodeGenerationVisitor) VisitCharacterLiteralNode(node *node.Character
 // Helper Functions
 // ----------------
 
+func (v *ILCodeGenerationVisitor) loadVariable(decl symbol.Symbol) {
+	index := v.getVarIndex(decl)
+
+	switch decl.Scope().(type) {
+	case *symbol.ContractSymbol:
+		v.assembler.LoadState(byte(index))
+	case *symbol.FunctionSymbol:
+		v.assembler.LoadLocal(byte(index))
+	case *symbol.StructTypeSymbol:
+		v.assembler.LoadField(uint16(index))
+	}
+}
+
+func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
+	index := v.getVarIndex(decl)
+
+	switch decl.Scope().(type) {
+	case *symbol.ContractSymbol:
+		v.assembler.StoreState(byte(index))
+	case *symbol.FunctionSymbol:
+		v.assembler.StoreLocal(byte(index))
+	case *symbol.StructTypeSymbol:
+		v.assembler.StoreField(uint16(index))
+	}
+}
+
 func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
+	if structType, ok := typeSymbol.(*symbol.StructTypeSymbol); ok {
+		v.pushDefaultStruct(structType)
+		return
+	}
+
 	gs := v.symbolTable.GlobalScope
 
 	switch typeSymbol {
@@ -352,24 +476,41 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 	}
 }
 
+func (v *ILCodeGenerationVisitor) pushDefaultStruct(structType *symbol.StructTypeSymbol) {
+	v.assembler.NewStruct(uint16(len(structType.Fields)))
+
+	for i, field := range structType.Fields {
+		v.pushDefault(field.Type)
+		v.assembler.StoreField(uint16(i))
+	}
+}
+
 // Returns: variable index and isContractField
-func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) (byte, bool) {
+func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	switch decl.(type) {
 	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol:
 		index := v.function.GetVarIndex(decl.Identifier())
 		if index == -1 {
 			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
-		return byte(index), false
+		return index
 	case *symbol.FieldSymbol:
-		contract := decl.Scope().(*symbol.ContractSymbol)
-		index := contract.GetFieldIndex(decl.Identifier())
+		scope := decl.Scope()
+		index := -1
+		if contract, ok := scope.(*symbol.ContractSymbol); ok {
+			index = contract.GetFieldIndex(decl.Identifier())
+		} else if structType, ok := scope.(*symbol.StructTypeSymbol); ok {
+			index = structType.GetFieldIndex(decl.Identifier())
+		} else {
+			panic(fmt.Sprintf("Unsupported field scope %s", scope.Identifier()))
+		}
+
 		if index == -1 {
 			panic(fmt.Sprintf("Variable not found %s", decl.Identifier()))
 		}
-		return byte(index), true
+		return index
 	default:
-		panic("Not implemented")
+		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
 }
 

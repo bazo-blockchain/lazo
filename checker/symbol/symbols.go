@@ -6,6 +6,9 @@ import (
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
+// This is a constant for the this keyword
+const This = "this"
+
 // Symbol declares functions which symbols have to implement
 type Symbol interface {
 	Scope() Symbol
@@ -92,6 +95,11 @@ func (sym *ContractSymbol) GetFieldIndex(id string) int {
 func (sym *ContractSymbol) String() string {
 	return fmt.Sprintf("Contract: %s, \nFields: %s, \nConstructor %s \nFunctions %s",
 		sym.ID, sym.Fields, sym.Constructor, sym.Functions)
+}
+
+// Type returns the type
+func (sym *ContractSymbol) Type() string {
+	return sym.Identifier()
 }
 
 //----------------
@@ -338,4 +346,14 @@ func (sym *StructTypeSymbol) GetField(identifier string) *FieldSymbol {
 		}
 	}
 	return nil
+}
+
+// GetFieldIndex returns the index of the field
+func (sym *StructTypeSymbol) GetFieldIndex(identifier string) int {
+	for i, s := range sym.Fields {
+		if s.Identifier() == identifier {
+			return i
+		}
+	}
+	return -1
 }

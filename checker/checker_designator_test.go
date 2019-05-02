@@ -468,3 +468,50 @@ func TestStructUndefinedFieldAccess(t *testing.T) {
 
 	tester.assertErrorAt(0, "Member balance does not exist on struct Person")
 }
+
+func TestInvalidVariableDeclarationThis(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int this
+	`, false)
+
+	tester.assertErrorAt(0, "Reserved keyword 'this' cannot be used")
+}
+
+func TestStructMemberThis(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+  			int i
+		}
+
+		constructor() {
+			Person p = new Person()
+			p.this = 5
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Invalid member designator 'this'")
+}
+
+func TestNestedThisIsInvalid(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i
+
+		constructor() {
+			this.this = 1
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Invalid member designator 'this'")
+}
+
+func TestThisDesignatorResolvesToContractSymbol(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x
+		constructor() {
+			this.x = 1
+		}
+	`, true)
+	memberAccessNode := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.MemberAccessNode)
+	thisDesignatorNode := memberAccessNode.Designator
+	tester.assertBasicDesignator(thisDesignatorNode, tester.globalScope.Contract, tester.globalScope.Contract)
+}

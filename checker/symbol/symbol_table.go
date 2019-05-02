@@ -47,7 +47,13 @@ func (t *SymbolTable) Find(scope Symbol, identifier string) Symbol {
 	if scope == nil {
 		return nil
 	}
+
+	if identifier == This && scope == t.GlobalScope {
+		return t.GlobalScope.Contract
+	}
+
 	for _, declaration := range scope.AllDeclarations() {
+
 		if declaration.Identifier() == identifier {
 			return declaration
 		}
