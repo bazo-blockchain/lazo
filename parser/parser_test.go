@@ -258,6 +258,14 @@ func TestArrayInitialization(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+func TestArrayValueInitialization(t *testing.T) {
+	p := newParserFromInput("int[] a = new int[]{1, 2}\n")
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "int[]{[[1 2]]}")
+	assertNoErrors(t, p)
+}
+
 func TestArrayMultiAssignment(t *testing.T) {
 	p := newParserFromInput("a[0], a[1] = this.getArrayData()\n")
 	stmt := p.parseStatement()

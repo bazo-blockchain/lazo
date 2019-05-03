@@ -296,7 +296,7 @@ func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
 			p.checkAndSkipNewLines(token.Comma)
 			expressions = append(expressions, p.parseExpression())
 		}
-		p.checkAndSkipNewLines(token.CloseBrace)
+		p.check(token.CloseBrace)
 
 		return &node.ArrayInitializationNode{
 			AbstractNode: abstractNode,
