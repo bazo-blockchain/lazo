@@ -592,7 +592,7 @@ type ArrayValueCreationNode struct {
 }
 
 func (n *ArrayValueCreationNode) String() string {
-	return fmt.Sprintf("%s[%s]", n.Type, n.Elements)
+	return fmt.Sprintf("%s{%s}", n.Type, n.Elements)
 }
 
 // Accept lets a visitor traverse its node structure
