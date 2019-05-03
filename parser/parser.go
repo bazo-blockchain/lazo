@@ -302,11 +302,9 @@ func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.Abstract
 	}
 
 	v := &node.VariableNode{
-		AbstractNode: node.AbstractNode{
-			Position: varType.Pos(),
-		},
-		Type:       varType,
-		Identifier: id,
+		AbstractNode: abstractNode,
+		Type:         varType,
+		Identifier:   id,
 	}
 	if p.isSymbol(token.Assign) {
 		p.nextToken()
@@ -327,12 +325,10 @@ func (p *Parser) parseMultiVariableStatement(varType node.TypeNode, id string) *
 	}
 	p.check(token.Assign)
 	mv := &node.MultiVariableNode{
-		AbstractNode: node.AbstractNode{
-			Position: varType.Pos(),
-		},
-		Types:       types,
-		Identifiers: ids,
-		FuncCall:    p.parseFuncCall(p.parseDesignator()),
+		AbstractNode: p.newAbstractNodeWithPos(varType.Pos()),
+		Types:        types,
+		Identifiers:  ids,
+		FuncCall:     p.parseFuncCall(p.parseDesignator()),
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return mv
@@ -420,6 +416,10 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
+func (p *Parser) parseType() node.TypeNode {
+	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+}
+
 func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {
 	typeNode := &node.BasicTypeNode{
 		AbstractNode: abstractNode,
@@ -431,10 +431,6 @@ func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identif
 	}
 
 	return typeNode
-}
-
-func (p *Parser) parseType() node.TypeNode {
-	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
 }
 
 func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
@@ -451,10 +447,8 @@ func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
 	}
 	p.check(token.CloseBracket)
 	arrayTypeNode := &node.ArrayTypeNode{
-		AbstractNode: node.AbstractNode{
-			Position: arrayType.Pos(),
-		},
-		ElementType: arrayType,
+		AbstractNode: p.newAbstractNodeWithPos(arrayType.Pos()),
+		ElementType:  arrayType,
 	}
 	if p.isSymbol(token.OpenBracket) {
 		return p.parseArrayType(arrayTypeNode)

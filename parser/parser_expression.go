@@ -186,6 +186,10 @@ func (p *Parser) parseOperandSymbol() node.ExpressionNode {
 	}
 }
 
+func (p *Parser) parseDesignator() node.DesignatorNode {
+	return p.parseDesignatorWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+}
+
 func (p *Parser) parseDesignatorWithIdentifier(abstractNode node.AbstractNode, identifier string) node.DesignatorNode {
 	var left node.DesignatorNode = &node.BasicDesignatorNode{
 		AbstractNode: abstractNode,
@@ -213,10 +217,6 @@ func (p *Parser) parseDesignatorWithIdentifier(abstractNode node.AbstractNode, i
 		}
 	}
 	return left
-}
-
-func (p *Parser) parseDesignator() node.DesignatorNode {
-	return p.parseDesignatorWithIdentifier(p.newAbstractNode(), p.readIdentifier())
 }
 
 func (p *Parser) parseFuncCall(designator node.DesignatorNode) *node.FuncCallNode {
@@ -250,6 +250,40 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 	}
 
 	return p.newErrorNode(fmt.Sprintf("Unsupported creation type with %s", p.currentToken.Literal()))
+}
+
+func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
+	arrayType := p.parseTypeWithIdentifier(abstractNode, identifier)
+
+	// Initialization using values
+	// If arrayType is of Type *node.ArrayTypeNode we know that it's a value creation
+	// because only a value creation returns an ArrayTypeNode. If it was a length creation
+	// it would have only returned a basic type.
+	if valueCreationNode, ok := arrayType.(*node.ArrayTypeNode); ok {
+		return &node.ArrayValueCreationNode{
+			AbstractNode: abstractNode,
+			Type:         valueCreationNode,
+			Elements:     p.parseArrayInitialization(),
+		}
+	}
+
+	// Initialization using Length
+	var expressions []node.ExpressionNode
+	expression := p.parseExpression() // Read length expression
+	expressions = append(expressions, expression)
+	p.check(token.CloseBracket)
+
+	for !p.isEnd() && p.isSymbol(token.OpenBracket) {
+		p.nextToken()
+		expressions = append(expressions, p.parseExpression())
+		p.check(token.CloseBracket)
+	}
+
+	return &node.ArrayLengthCreationNode{
+		AbstractNode: abstractNode,
+		Type:         arrayType,
+		Lengths:      expressions,
+	}
 }
 
 func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
@@ -292,37 +326,6 @@ func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
 	}
 
 	return arrayInitialization
-}
-
-func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
-	arrayType := p.parseTypeWithIdentifier(abstractNode, identifier)
-
-	// Initialization using values
-	if valueCreationNode, ok := arrayType.(*node.ArrayTypeNode); ok {
-		return &node.ArrayValueCreationNode{
-			AbstractNode: abstractNode,
-			Type:         valueCreationNode,
-			Elements:     p.parseArrayInitialization(),
-		}
-	}
-
-	// Initialization using Length
-	var expressions []node.ExpressionNode
-	expression := p.parseExpression() // Read length expression
-	expressions = append(expressions, expression)
-	p.check(token.CloseBracket)
-
-	for !p.isEnd() && p.isSymbol(token.OpenBracket) {
-		p.nextToken()
-		expressions = append(expressions, p.parseExpression())
-		p.check(token.CloseBracket)
-	}
-
-	return &node.ArrayLengthCreationNode{
-		AbstractNode: abstractNode,
-		Type:         arrayType,
-		Lengths:      expressions,
-	}
 }
 
 func (p *Parser) parseStructCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
