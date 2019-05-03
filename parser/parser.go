@@ -235,7 +235,7 @@ func (p *Parser) parseStatement() node.StatementNode {
 	case token.SYMBOL:
 		return p.parseStatementWithFixToken()
 	default:
-		p.addError("Unsupported statement starting with" + p.currentToken.Literal())
+		p.addError("Unsupported statement starting with " + p.currentToken.Literal())
 		p.nextToken()
 		return nil
 	}
@@ -269,7 +269,7 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 		return nil
 	}
 
-	p.addError("%s not yet implemented" + p.currentToken.Literal())
+	p.addError("not yet implemented " + p.currentToken.Literal())
 	p.nextToken()
 	return nil
 }
@@ -283,7 +283,7 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
-		p.addError("Unsupported statement starting with" + ftok.Literal())
+		p.addError("Unsupported statement starting with " + ftok.Literal())
 		p.nextToken()
 		return nil
 	}
