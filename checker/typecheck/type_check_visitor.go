@@ -320,17 +320,6 @@ func (v *typeCheckVisitor) VisitStructFieldAssignmentNode(node *node.StructField
 	v.symbolTable.MapExpressionToType(node, exprType)
 }
 
-// VisitBasicTypeNode currently does nothing
-func (v *typeCheckVisitor) VisitBasicTypeNode(node *node.BasicTypeNode) {
-	// To be done as soon as own types are introduced
-}
-
-// VisitArrayTypeNode visits the type node
-func (v *typeCheckVisitor) VisitArrayTypeNode(node *node.ArrayTypeNode) {
-	// TODO ARRAY: Check whether this is correct
-	v.AbstractVisitor.VisitArrayTypeNode(node)
-}
-
 // VisitIntegerLiteralNode maps the integer literal node to its type
 func (v *typeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
