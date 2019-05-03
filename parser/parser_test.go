@@ -283,6 +283,14 @@ func TestFieldArrayDeclaration(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+func TestUnsupportedContractPart(t *testing.T) {
+	p := newParserFromInput("£")
+
+	p.parseContractBody(nil)
+	assertErrorAt(t, p, 0, "Unsupported contract part: £")
+	assert.Equal(t, len(p.errors), 1)
+}
+
 func TestLocalArrayDeclaration(t *testing.T) {
 	p := newParserFromInput(`
 		constructor() {
@@ -292,6 +300,42 @@ func TestLocalArrayDeclaration(t *testing.T) {
 	c := p.parseConstructor()
 	assertStatement(t, c.Body[0], "\n [3:4] VAR int[] a")
 	assertNoErrors(t, p)
+}
+
+func TestParseStatementDefaultCase(t *testing.T) {
+	p := newParserFromInput("£ = a")
+
+	stmt := p.parseStatement()
+	assertErrorAt(t, p, 0, "Unsupported statement starting with £")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithFixTokenDefaultCase(t *testing.T) {
+	p := newParserFromInput("+ a b")
+
+	stmt := p.parseStatementWithFixToken()
+	assertErrorAt(t, p, 0, "Unsupported statement starting with +")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithIdentifierNotYetImplemented(t *testing.T) {
+	p := newParserFromInput("a £ 1")
+
+	stmt := p.parseStatementWithIdentifier()
+	assertErrorAt(t, p, 0, "not yet implemented £")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithIdentifierDefaultCase(t *testing.T) {
+	p := newParserFromInput("a ! 1")
+
+	stmt := p.parseStatementWithIdentifier()
+	assertErrorAt(t, p, 0, "Unsupported symbol !")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
 }
 
 // Function Nodes

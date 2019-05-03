@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"gotest.tools/assert"
 	"math/big"
 	"testing"
 )
@@ -311,6 +312,14 @@ func TestInvalidMemberAccess(t *testing.T) {
 
 // Struct Creation Expressions
 // ---------------------------
+
+func TestUnsupportedCreation(t *testing.T) {
+	p := newParserFromInput("new Person{}")
+	p.parseCreation()
+
+	assertErrorAt(t, p, 0, "Unsupported creation type with {")
+	assert.Equal(t, len(p.errors), 1)
+}
 
 func TestStructCreation(t *testing.T) {
 	s := parseExpressionFromInput(t, "new Person()")
