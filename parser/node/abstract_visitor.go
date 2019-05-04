@@ -94,9 +94,14 @@ func (v *AbstractVisitor) VisitMultiVariableNode(node *MultiVariableNode) {
 	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
-// VisitTypeNode does nothing because it is the terminal node.
-func (v *AbstractVisitor) VisitTypeNode(node *TypeNode) {
+// VisitBasicTypeNode does nothing because it is the terminal node.
+func (v *AbstractVisitor) VisitBasicTypeNode(node *BasicTypeNode) {
 	// Nothing to do here
+}
+
+// VisitArrayTypeNode visits the type node
+func (v *AbstractVisitor) VisitArrayTypeNode(node *ArrayTypeNode) {
+	node.ElementType.Accept(v.ConcreteVisitor)
 }
 
 // VisitIfStatementNode traverses the condition, then-block and finally else-block.
@@ -168,6 +173,22 @@ func (v *AbstractVisitor) VisitStructNamedCreationNode(node *StructNamedCreation
 // VisitStructFieldAssignmentNode traverse the field initialization expression
 func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssignmentNode) {
 	node.Expression.Accept(v.ConcreteVisitor)
+}
+
+func (v *AbstractVisitor) VisitArrayInitializationNode(node *ArrayInitializationNode) {
+
+}
+
+// VisitArrayLengthCreationNode traverses the size expression nodes
+func (v *AbstractVisitor) VisitArrayLengthCreationNode(node *ArrayLengthCreationNode) {
+	for _, exp := range node.Lengths {
+		exp.Accept(v.ConcreteVisitor)
+	}
+}
+
+// VisitArrayValueCreationNode traverses the element expression nodes
+func (v *AbstractVisitor) VisitArrayValueCreationNode(node *ArrayValueCreationNode) {
+	node.Elements.Accept(v.ConcreteVisitor)
 }
 
 // VisitBasicDesignatorNode does nothing because it is the terminal node.

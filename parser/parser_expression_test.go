@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"gotest.tools/assert"
 	"math/big"
 	"testing"
 )
@@ -312,6 +313,14 @@ func TestInvalidMemberAccess(t *testing.T) {
 // Struct Creation Expressions
 // ---------------------------
 
+func TestUnsupportedCreation(t *testing.T) {
+	p := newParserFromInput("new Person{}")
+	p.parseCreation()
+
+	assertErrorAt(t, p, 0, "Unsupported creation type with {")
+	assert.Equal(t, len(p.errors), 1)
+}
+
 func TestStructCreation(t *testing.T) {
 	s := parseExpressionFromInput(t, "new Person()")
 	assertPosition(t, s.Pos(), 1, 1)
@@ -345,6 +354,92 @@ func TestStructCreationWithNewlines(t *testing.T) {
 		{"y", "(1 == 1)"},
 	}
 	assertStructNamedCreation(t, s, "Person", expectedFieldValues...)
+}
+
+// Array Nodes
+// -----------
+
+func TestArrayNewArrayAssignment1(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[2]")
+
+	assertArrayLengthCreation(t, p, "int", "2")
+}
+
+func TestArrayNewArrayAssignment2(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[]{1,2}")
+
+	assertArrayValueCreation(t, p, "int[]", "1", "2")
+}
+
+func TestNestedArrayNewArrayAssignment1(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[1][2]")
+
+	assertArrayLengthCreation(t, p, "int", "1,2")
+}
+
+func TestNestedArrayNewArrayAssignment2(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[][]{{1, 2}, {3, 4}}")
+
+	assertArrayValueCreation(t, p, "int[][]", "[[1 2]]", "[[3 4]]")
+}
+
+func TestNestedArrayNewArrayAssignment3(t *testing.T) {
+	p := parseExpressionFromInput(t, "new int[][]{{1, 2}, {3}}")
+
+	assertArrayValueCreation(t, p, "int[][]", "[[1 2]]", "[[3]]")
+}
+
+func TestNestedArrayNewArrayAssignment4(t *testing.T) {
+	p := newParserFromInput("new int[]{}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment5(t *testing.T) {
+	p := newParserFromInput("new int[][]{}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment6(t *testing.T) {
+	p := newParserFromInput("new int[][]{{},{}}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestNestedArrayNewArrayAssignment7(t *testing.T) {
+	p := newParserFromInput("new int[][]{{1},{}}")
+	p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Unsupported expression symbol }")
+}
+
+func TestInvalidLengthArrayNewArrayAssignment2(t *testing.T) {
+	p := newParserFromInput("new int[]")
+	p.parseCreation()
+	assertErrorAt(t, p, 0, "Symbol { expected, but got EOF")
+	assertErrorAt(t, p, 1, "Invalid array initialization")
+}
+
+func TestArrayValueAssignment(t *testing.T) {
+	p := newParserFromInput("a[0] = 1\n")
+
+	stmt := p.parseStatementWithIdentifier()
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[0]", "1")
+	assertNoErrors(t, p)
+}
+
+func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
+	p := newParserFromInput("a[-1] = 1\n")
+
+	stmt := p.parseStatementWithIdentifier()
+	assignment := stmt.(*node.AssignmentStatementNode)
+	assertAssignmentStatement(t, assignment, "a[(-1)]", "1")
+	assertNoErrors(t, p)
 }
 
 // Literal Expressions

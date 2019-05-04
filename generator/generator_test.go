@@ -14,10 +14,10 @@ func TestContractFieldDefault(t *testing.T) {
 		int x
 	`)
 
+	tester.assertVariableInt(0, big.NewInt(0))
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
-	tester.assertVariableInt(0, big.NewInt(0))
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0})
 }
 
 func TestContractFieldExpression(t *testing.T) {
@@ -25,10 +25,9 @@ func TestContractFieldExpression(t *testing.T) {
 		int x = 4 * 12
 	`)
 
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
-	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
 	tester.assertVariableInt(0, big.NewInt(48))
+	tester.context.PersistChanges()
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 48})
 }
 
 func TestMultipleContractFields(t *testing.T) {
@@ -37,10 +36,10 @@ func TestMultipleContractFields(t *testing.T) {
 		int y = 3 * 12
 	`)
 
+	tester.assertVariableInt(1, big.NewInt(36))
 	assert.Equal(t, tester.context.ContractVariables[1] == nil, true)
 	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[1] == nil, false)
-	tester.assertVariableInt(1, big.NewInt(36))
+	tester.compareBytes(tester.context.ContractVariables[1], []byte{0, 36})
 }
 
 // Constructor
@@ -55,9 +54,6 @@ func TestContractFieldAssignment(t *testing.T) {
 		}
 	`)
 
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
-	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
 	tester.assertVariableInt(0, big.NewInt(3))
 }
 
@@ -71,10 +67,10 @@ func TestConstructorWithParam(t *testing.T) {
 		}
 	`, 2, 0, 4)
 
+	tester.assertVariableInt(0, big.NewInt(5))
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
-	tester.assertVariableInt(0, big.NewInt(5))
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 5})
 }
 
 // CallFunc contract functions externally
@@ -508,10 +504,10 @@ func TestSetter(t *testing.T) {
 		}
 	`, "()set()")
 
+	tester.assertVariableInt(0, big.NewInt(5))
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
-	tester.assertVariableInt(0, big.NewInt(5))
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 5})
 }
 
 // Function Calls
@@ -559,10 +555,10 @@ func TestFuncCallVoid(t *testing.T) {
 		}
 	`, voidTestSig)
 
+	tester.assertVariableInt(0, big.NewInt(5))
 	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
 	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
-	tester.assertVariableInt(0, big.NewInt(5))
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 5})
 }
 
 // Struct
@@ -1026,8 +1022,7 @@ func TestThisMemberAccess(t *testing.T) {
 		}
 	`)
 
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, true)
-	tester.context.PersistChanges()
-	assert.Equal(t, tester.context.ContractVariables[0] == nil, false)
 	tester.assertVariableInt(0, big.NewInt(3))
+	tester.context.PersistChanges()
+	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 3})
 }

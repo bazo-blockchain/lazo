@@ -168,8 +168,8 @@ func (p *Parser) parseFunction() *node.FunctionNode {
 	return function
 }
 
-func (p *Parser) parseReturnTypes() []*node.TypeNode {
-	var returnTypes []*node.TypeNode
+func (p *Parser) parseReturnTypes() []node.TypeNode {
+	var returnTypes []node.TypeNode
 
 	if p.isSymbol(token.OpenParen) {
 		p.nextToken() // skip '('
@@ -235,18 +235,20 @@ func (p *Parser) parseStatement() node.StatementNode {
 	case token.SYMBOL:
 		return p.parseStatementWithFixToken()
 	default:
-		p.addError("Unsupported statement starting with" + p.currentToken.Literal())
+		p.addError("Unsupported statement starting with " + p.currentToken.Literal())
 		p.nextToken()
 		return nil
 	}
 }
 
 func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
-	if p.peekToken.Type() == token.IDENTIFER {
-		return p.parseVariableStatement()
-	}
+	abstractNode := p.newAbstractNode()
+	identifier := p.readIdentifier()
 
-	designator := p.parseDesignator()
+	if p.currentToken.Type() == token.IDENTIFER || p.isSymbol(token.OpenBracket) && p.peekIsSymbol(token.CloseBracket) {
+		return p.parseVariableStatementWithIdentifier(abstractNode, identifier)
+	}
+	designator := p.parseDesignatorWithIdentifier(abstractNode, identifier)
 	if p.isType(token.SYMBOL) {
 		tok := p.currentToken.(*token.FixToken)
 		switch tok.Value {
@@ -256,10 +258,18 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 			return p.parseMultiAssignmentStatement(designator)
 		case token.OpenParen:
 			return p.parseCallStatement(designator)
+		default:
+			p.addError(fmt.Sprintf("Unsupported symbol %s", tok.Lexeme))
+			return nil
 		}
 	}
 
-	p.addError("%s not yet implemented" + p.currentToken.Literal())
+	if p.isType(token.IDENTIFER) {
+		p.addError("Invalid Array declaration")
+		return nil
+	}
+
+	p.addError("not yet implemented " + p.currentToken.Literal())
 	p.nextToken()
 	return nil
 }
@@ -273,14 +283,18 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
-		p.addError("Unsupported statement starting with" + ftok.Literal())
+		p.addError("Unsupported statement starting with " + ftok.Literal())
 		p.nextToken()
 		return nil
 	}
 }
 
 func (p *Parser) parseVariableStatement() node.StatementNode {
-	varType := p.parseType()
+	return p.parseVariableStatementWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+}
+
+func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.AbstractNode, identifier string) node.StatementNode {
+	varType := p.parseTypeWithIdentifier(abstractNode, identifier)
 	id := p.readIdentifier()
 
 	if p.isSymbol(token.Comma) {
@@ -288,7 +302,7 @@ func (p *Parser) parseVariableStatement() node.StatementNode {
 	}
 
 	v := &node.VariableNode{
-		AbstractNode: varType.AbstractNode,
+		AbstractNode: abstractNode,
 		Type:         varType,
 		Identifier:   id,
 	}
@@ -300,8 +314,8 @@ func (p *Parser) parseVariableStatement() node.StatementNode {
 	return v
 }
 
-func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) *node.MultiVariableNode {
-	types := []*node.TypeNode{varType}
+func (p *Parser) parseMultiVariableStatement(varType node.TypeNode, id string) *node.MultiVariableNode {
+	types := []node.TypeNode{varType}
 	ids := []string{id}
 
 	if !p.isEnd() && p.isSymbol(token.Comma) {
@@ -311,7 +325,7 @@ func (p *Parser) parseMultiVariableStatement(varType *node.TypeNode, id string) 
 	}
 	p.check(token.Assign)
 	mv := &node.MultiVariableNode{
-		AbstractNode: varType.AbstractNode,
+		AbstractNode: p.newAbstractNodeWithPos(varType.Pos()),
 		Types:        types,
 		Identifiers:  ids,
 		FuncCall:     p.parseFuncCall(p.parseDesignator()),
@@ -402,12 +416,35 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
-func (p *Parser) parseType() *node.TypeNode {
-	// TODO: Later we need to distinguish between an array and a simple type
-	return &node.TypeNode{
-		AbstractNode: p.newAbstractNode(),
-		Identifier:   p.readIdentifier(),
+func (p *Parser) parseType() node.TypeNode {
+	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+}
+
+func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {
+	typeNode := &node.BasicTypeNode{
+		AbstractNode: abstractNode,
+		Identifier:   identifier,
 	}
+
+	if p.isSymbol(token.OpenBracket) {
+		return p.parseArrayType(typeNode)
+	}
+
+	return typeNode
+}
+
+func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
+	p.nextToken() // Skip '[' symbol
+	p.check(token.CloseBracket)
+
+	arrayTypeNode := &node.ArrayTypeNode{
+		AbstractNode: p.newAbstractNodeWithPos(arrayType.Pos()),
+		ElementType:  arrayType,
+	}
+	if p.isSymbol(token.OpenBracket) {
+		return p.parseArrayType(arrayTypeNode)
+	}
+	return arrayTypeNode
 }
 
 func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
@@ -453,6 +490,11 @@ func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 		}
 	}
 	return false
+}
+
+func (p *Parser) peekIsSymbol(symbol token.Symbol) bool {
+	tok, ok := p.peekToken.(*token.FixToken)
+	return ok && tok.Value == symbol
 }
 
 func (p *Parser) check(symbol token.Symbol) {

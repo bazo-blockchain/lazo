@@ -320,11 +320,6 @@ func (v *typeCheckVisitor) VisitStructFieldAssignmentNode(node *node.StructField
 	v.symbolTable.MapExpressionToType(node, exprType)
 }
 
-// VisitTypeNode currently does nothing
-func (v *typeCheckVisitor) VisitTypeNode(node *node.TypeNode) {
-	// To be done as soon as own types are introduced
-}
-
 // VisitIntegerLiteralNode maps the integer literal node to its type
 func (v *typeCheckVisitor) VisitIntegerLiteralNode(node *node.IntegerLiteralNode) {
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)

@@ -81,7 +81,7 @@ func (tr *typeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functio
 	}
 
 	for _, rtype := range functionNode.ReturnTypes {
-		if rtype.Identifier == "void" {
+		if rtype.String() == "void" {
 			if total > 1 {
 				tr.reportError(rtype, "'void' is invalid with multiple return types")
 			}
@@ -91,10 +91,10 @@ func (tr *typeResolution) resolveReturnTypes(sym *symbol.FunctionSymbol, functio
 	}
 }
 
-func (tr *typeResolution) resolveType(node *node.TypeNode) symbol.TypeSymbol {
+func (tr *typeResolution) resolveType(node node.TypeNode) symbol.TypeSymbol {
 	result := tr.symTable.FindTypeByNode(node)
 	if result == nil {
-		tr.reportError(node, fmt.Sprintf("Invalid type '%s'", node.Identifier))
+		tr.reportError(node, fmt.Sprintf("Invalid type '%s'", node.String()))
 	}
 	return result
 }

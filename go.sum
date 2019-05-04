@@ -2,6 +2,8 @@ github.com/bazo-blockchain/bazo-miner v0.0.0-20190411120411-4ccce5c0a1c0 h1:LRJG
 github.com/bazo-blockchain/bazo-miner v0.0.0-20190411120411-4ccce5c0a1c0/go.mod h1:xnPO3uP6OVnQDBxm+3R8VWQRFAVBUO4eqFNcok0/vCk=
 github.com/bazo-blockchain/bazo-miner v0.0.0-20190416182631-de8b4c07084f h1:XDauRcYcdEjaozrUWBxJVtbRbBD3qHa6PVnKVyE65WQ=
 github.com/bazo-blockchain/bazo-miner v0.0.0-20190416182631-de8b4c07084f/go.mod h1:QTPNfwP8zE730NzQ4I+tbdG0y8M1TNP6puPOjRnCROk=
+github.com/bazo-blockchain/bazo-miner v0.0.0-20190502054340-f23cd0593a79 h1:pcdtnV2sQ3Z0bHHGgRDbdP+7/hVp6T7riPIsXUbZS6E=
+github.com/bazo-blockchain/bazo-miner v0.0.0-20190502054340-f23cd0593a79/go.mod h1:QTPNfwP8zE730NzQ4I+tbdG0y8M1TNP6puPOjRnCROk=
 github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190417194710-d7596764ed65 h1:rF1UWBY040MaUZd8PE6/oe8heJ7BrFJkIBHCzRuk318=
 github.com/bazo-blockchain/bazo-vm v1.0.1-0.20190417194710-d7596764ed65/go.mod h1:E0dMZR3XVzEA0/3ZIxEthpwJAtQE1JP5eNl7nNIGVBI=
 github.com/bazo-blockchain/bazo-vm v1.0.1 h1:WEwqZZ3ogDbH1hmNnhpePe8CkIBoE+h9yaiY07Ytyo0=
@@ -14,6 +16,8 @@ github.com/bazo-blockchain/bazo-vm v1.1.2 h1:LnQytbdXMMwm9C5sU5uycz2spWij21mDL5W
 github.com/bazo-blockchain/bazo-vm v1.1.2/go.mod h1:0T8XGbRiu1wNyuGaNHW/TrxSEzRjxFttlyWEaex0z3c=
 github.com/bazo-blockchain/bazo-vm v1.1.3 h1:vfJkS2KYVpuDBzvtVdn+K8gVjkLtDk4LZmQFw7Qb2/s=
 github.com/bazo-blockchain/bazo-vm v1.1.3/go.mod h1:0T8XGbRiu1wNyuGaNHW/TrxSEzRjxFttlyWEaex0z3c=
+github.com/bazo-blockchain/bazo-vm v1.1.4 h1:jdE8wWh0zESG5Ph44Y+5KBXG+ftj87z76lvtOA1FT8I=
+github.com/bazo-blockchain/bazo-vm v1.1.4/go.mod h1:3QXvDH1ORfI6kptEjjb6Rr21rkl6ySh2fllxFYWB9l4=
 github.com/boltdb/bolt v1.3.1 h1:JQmyP4ZBrce+ZQu0dY660FMfatumYDLun9hBCUVIkF4=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/google/go-cmp v0.2.0 h1:+dTQ8DZQJz0Mb/HjFlkptS1FeQ4cWSnN941F8aEG4SQ=
@@ -50,6 +54,7 @@ golang.org/x/net v0.0.0-20190311183353-d8887717615a/go.mod h1:t9HGtf8HONx5eT2rtn
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
 golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
 golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190403152447-81d4e9dc473e h1:nFYrTHrdrAOpShe27kaFHjsqYSEQ0KWqdWLu3xuZJts=
@@ -63,10 +68,12 @@ golang.org/x/sys v0.0.0-20190418153312-f0ce4c0180be h1:mI+jhqkn68ybP0ORJqunXn+fq
 golang.org/x/sys v0.0.0-20190418153312-f0ce4c0180be/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190428183149-804c0c7841b5/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20190502175342-a43fa875dd82/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190428024724-550556f78a90/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
 golang.org/x/tools v0.0.0-20190501045030-23463209683d/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
+golang.org/x/tools v0.0.0-20190503185657-3b6f9c0030f7/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
 gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
 gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=

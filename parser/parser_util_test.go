@@ -47,7 +47,7 @@ func assertContract(t *testing.T, node *node.ContractNode, name string, totalVar
 }
 
 func assertField(t *testing.T, node *node.FieldNode, varType string, id string, expr string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 	if expr != "" {
 		assertExpression(t, node.Expression, expr)
@@ -60,7 +60,7 @@ func assertStruct(t *testing.T, node *node.StructNode, name string, totalFields 
 }
 
 func assertStructField(t *testing.T, node *node.StructFieldNode, varType string, id string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 }
 
@@ -84,7 +84,7 @@ func assertStatementBlock(t *testing.T, node []node.StatementNode, totalStmt int
 }
 
 func assertVariableStatement(t *testing.T, node *node.VariableNode, varType string, id string, expr string) {
-	assert.Equal(t, node.Type.Identifier, varType)
+	assert.Equal(t, node.Type.String(), varType)
 	assert.Equal(t, node.Identifier, id)
 	assertExpression(t, node.Expression, expr)
 }
@@ -135,8 +135,8 @@ func assertError(t *testing.T, node *node.ErrorNode, message string) {
 	assert.Equal(t, node.Message, message)
 }
 
-func assertType(t *testing.T, typeNode *node.TypeNode, varType string) {
-	assert.Equal(t, typeNode.Identifier, varType)
+func assertType(t *testing.T, typeNode node.TypeNode, varType string) {
+	assert.Equal(t, typeNode.String(), varType)
 }
 
 func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {
@@ -186,6 +186,39 @@ func assertMemberAccess(t *testing.T, n node.ExpressionNode, designator string, 
 	assert.Assert(t, ok)
 	assert.Equal(t, memberAccess.Designator.String(), designator)
 	assert.Equal(t, memberAccess.Identifier, id)
+}
+
+// assertArrayLengthCreation should receive the string lengths in the following format: "1,2,3,..."
+func assertArrayLengthCreation(t *testing.T, n node.ExpressionNode, name string, lengths string) {
+	arrayCreation, ok := n.(*node.ArrayLengthCreationNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, arrayCreation.Type.String(), name)
+
+	assertArrayLengths(t, arrayCreation, lengths)
+}
+
+func assertArrayLengths(t *testing.T, n *node.ArrayLengthCreationNode, lengths string) {
+	var lengthStrings []string
+	for _, length := range n.Lengths {
+		lengthStrings = append(lengthStrings, length.String())
+	}
+
+	result := strings.Join(lengthStrings, ",")
+
+	assert.Equal(t, result, lengths)
+}
+
+func assertArrayValueCreation(t *testing.T, n node.ExpressionNode, name string, values ...string) {
+	arrayCreation, ok := n.(*node.ArrayValueCreationNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, arrayCreation.Type.String(), name)
+
+	assert.Equal(t, len(arrayCreation.Elements.Values), len(values))
+	for i, v := range values {
+		assert.Equal(t, arrayCreation.Elements.Values[i].String(), v)
+	}
 }
 
 func assertStructCreation(t *testing.T, n node.ExpressionNode, name string, values ...string) {

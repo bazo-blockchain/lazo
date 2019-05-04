@@ -207,6 +207,145 @@ func TestMultipleConstructors(t *testing.T) {
 	assertErrorAt(t, p, 0, "Only one constructor is allowed")
 }
 
+// Array Nodes
+// -----------
+
+func TestParseArrayType(t *testing.T) {
+	p := newParserFromInput(`int[] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "int[]")
+}
+
+func TestParseNestedArrayType(t *testing.T) {
+	p := newParserFromInput(`int[][] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "int[][]")
+}
+
+func TestParseStructArrayType(t *testing.T) {
+	p := newParserFromInput(`Person[] a`)
+	typeNode := p.parseType()
+
+	assertNoErrors(t, p)
+	assertType(t, typeNode, "Person[]")
+}
+
+func TestParseInvalidArrayType(t *testing.T) {
+	p := newParserFromInput(`int[1] a`)
+	p.parseStatementWithIdentifier()
+
+	assertErrorAt(t, p, 0, "Invalid Array declaration")
+	assert.Equal(t, len(p.errors), 1)
+}
+
+func TestArrayVariableAssignment(t *testing.T) {
+	p := newParserFromInput("int[] a = b\n")
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "b")
+	assertNoErrors(t, p)
+}
+
+func TestArrayInitialization(t *testing.T) {
+	p := newParserFromInput("int[] a = new int[5]\n")
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "int[5]")
+	assertNoErrors(t, p)
+}
+
+func TestArrayValueInitialization(t *testing.T) {
+	p := newParserFromInput("int[] a = new int[]{1, 2}\n")
+	variable := p.parseVariableStatement()
+
+	assertVariableStatement(t, variable.(*node.VariableNode), "int[]", "a", "int[]{[[1 2]]}")
+	assertNoErrors(t, p)
+}
+
+func TestArrayMultiAssignment(t *testing.T) {
+	p := newParserFromInput("a[0], a[1] = this.getArrayData()\n")
+	stmt := p.parseStatement()
+	ma, ok := stmt.(*node.MultiAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertNoErrors(t, p)
+	assertPosition(t, ma.Position, 1, 1)
+	assert.Equal(t, ma.Designators[0].String(), "a[0]")
+	assert.Equal(t, ma.Designators[1].String(), "a[1]")
+	assertFuncCall(t, ma.FuncCall, "this.getArrayData")
+}
+
+func TestFieldArrayDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		contract Test {
+			int[] a
+		}
+	`)
+	c := p.parseContract()
+	assertContract(t, c, "Test", 1, 0)
+	assertField(t, c.Fields[0], "int[]", "a", "")
+	assertNoErrors(t, p)
+}
+
+func TestUnsupportedContractPart(t *testing.T) {
+	p := newParserFromInput("£")
+
+	p.parseContractBody(nil)
+	assertErrorAt(t, p, 0, "Unsupported contract part: £")
+	assert.Equal(t, len(p.errors), 1)
+}
+
+func TestLocalArrayDeclaration(t *testing.T) {
+	p := newParserFromInput(`
+		constructor() {
+			int[] a
+		}
+	`)
+	c := p.parseConstructor()
+	assertStatement(t, c.Body[0], "\n [3:4] VAR int[] a")
+	assertNoErrors(t, p)
+}
+
+func TestParseStatementDefaultCase(t *testing.T) {
+	p := newParserFromInput("£ = a")
+
+	stmt := p.parseStatement()
+	assertErrorAt(t, p, 0, "Unsupported statement starting with £")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithFixTokenDefaultCase(t *testing.T) {
+	p := newParserFromInput("+ a b")
+
+	stmt := p.parseStatementWithFixToken()
+	assertErrorAt(t, p, 0, "Unsupported statement starting with +")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithIdentifierNotYetImplemented(t *testing.T) {
+	p := newParserFromInput("a £ 1")
+
+	stmt := p.parseStatementWithIdentifier()
+	assertErrorAt(t, p, 0, "not yet implemented £")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
+func TestParseStatementWithIdentifierDefaultCase(t *testing.T) {
+	p := newParserFromInput("a ! 1")
+
+	stmt := p.parseStatementWithIdentifier()
+	assertErrorAt(t, p, 0, "Unsupported symbol !")
+	assert.Equal(t, len(p.errors), 1)
+	assert.Equal(t, stmt, nil)
+}
+
 // Function Nodes
 // --------------
 
@@ -351,9 +490,9 @@ func TestMultiVariableStatement(t *testing.T) {
 	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
 
 	assert.Assert(t, ok)
-	assert.Equal(t, mv.Types[0].Identifier, "int")
+	assert.Equal(t, mv.Types[0].String(), "int")
 	assert.Equal(t, mv.Identifiers[0], "x")
-	assert.Equal(t, mv.Types[1].Identifier, "bool")
+	assert.Equal(t, mv.Types[1].String(), "bool")
 	assert.Equal(t, mv.Identifiers[1], "b")
 	assertFuncCall(t, mv.FuncCall, "call")
 	assertNoErrors(t, p)

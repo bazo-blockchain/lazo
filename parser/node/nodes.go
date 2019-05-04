@@ -43,6 +43,11 @@ type DesignatorNode interface {
 	Node
 }
 
+// TypeNode is the interface for types, such as array types or basic types
+type TypeNode interface {
+	Node
+}
+
 // Concrete Nodes
 // -------------------------
 
@@ -74,8 +79,13 @@ type ContractNode struct {
 }
 
 func (n *ContractNode) String() string {
+	var strConstructor string
+	if n.Constructor != (*ConstructorNode)(nil) {
+		strConstructor = n.Constructor.String()
+	}
+
 	return fmt.Sprintf("[%s] CONTRACT %s \n FIELDS: %s \n\n STRUCTS: %s \n\n CONSTRUCTOR: %s \n\n FUNCS: %s",
-		n.Pos(), n.Name, n.Fields, n.Structs, getNodeString(n.Constructor), n.Functions)
+		n.Pos(), n.Name, n.Fields, n.Structs, strConstructor, n.Functions)
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -90,7 +100,7 @@ func (n *ContractNode) Accept(v Visitor) {
 // FieldNode composes abstract node and holds the type, identifier and expression
 type FieldNode struct {
 	AbstractNode
-	Type       *TypeNode
+	Type       TypeNode
 	Identifier string
 	Expression ExpressionNode
 }
@@ -131,7 +141,7 @@ func (n *StructNode) Accept(v Visitor) {
 // StructFieldNode composes abstract node and holds the type and identifier
 type StructFieldNode struct {
 	AbstractNode
-	Type       *TypeNode
+	Type       TypeNode
 	Identifier string
 }
 
@@ -169,7 +179,7 @@ func (n *ConstructorNode) Accept(v Visitor) {
 type FunctionNode struct {
 	AbstractNode
 	Name        string
-	ReturnTypes []*TypeNode
+	ReturnTypes []TypeNode
 	Parameters  []*ParameterNode
 	Body        []StatementNode
 }
@@ -189,7 +199,7 @@ func (n *FunctionNode) Accept(v Visitor) {
 // ParameterNode composes abstract node and holds the type and identifier
 type ParameterNode struct {
 	AbstractNode
-	Type       *TypeNode
+	Type       TypeNode
 	Identifier string
 }
 
@@ -209,7 +219,7 @@ func (n *ParameterNode) Accept(v Visitor) {
 // VariableNode composes abstract node and holds the type, identifier and expression
 type VariableNode struct {
 	AbstractNode
-	Type       *TypeNode
+	Type       TypeNode
 	Identifier string
 	Expression ExpressionNode
 }
@@ -232,7 +242,7 @@ func (n *VariableNode) Accept(v Visitor) {
 // MultiVariableNode composes abstract node and holds multiple variables and a function call
 type MultiVariableNode struct {
 	AbstractNode
-	Types       []*TypeNode
+	Types       []TypeNode
 	Identifiers []string
 	FuncCall    *FuncCallNode
 }
@@ -247,7 +257,7 @@ func (n *MultiVariableNode) String() string {
 }
 
 // GetType returns the type of the given variable identifier
-func (n *MultiVariableNode) GetType(id string) *TypeNode {
+func (n *MultiVariableNode) GetType(id string) TypeNode {
 	for i, varID := range n.Identifiers {
 		if id == varID {
 			return n.Types[i]
@@ -263,19 +273,36 @@ func (n *MultiVariableNode) Accept(v Visitor) {
 
 // --------------------------
 
-// TypeNode composes abstract node and holds the type identifier.
-type TypeNode struct {
+// BasicTypeNode composes abstract node and holds the type identifier.
+type BasicTypeNode struct {
 	AbstractNode
 	Identifier string
 }
 
-func (n *TypeNode) String() string {
+func (n *BasicTypeNode) String() string {
 	return fmt.Sprintf("%s", n.Identifier)
 }
 
 // Accept lets a visitor to traverse its node structure
-func (n *TypeNode) Accept(v Visitor) {
-	v.VisitTypeNode(n)
+func (n *BasicTypeNode) Accept(v Visitor) {
+	v.VisitBasicTypeNode(n)
+}
+
+// --------------------------
+
+// ArrayTypeNode composes abstract node and holds the type identifier.
+type ArrayTypeNode struct {
+	AbstractNode
+	ElementType TypeNode
+}
+
+func (n *ArrayTypeNode) String() string {
+	return fmt.Sprintf("%s[]", n.ElementType)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *ArrayTypeNode) Accept(v Visitor) {
+	v.VisitArrayTypeNode(n)
 }
 
 // --------------------------
@@ -534,6 +561,58 @@ func (n *StructFieldAssignmentNode) String() string {
 // Accept lets a visitor traverse its node structure
 func (n *StructFieldAssignmentNode) Accept(v Visitor) {
 	v.VisitStructFieldAssignmentNode(n)
+}
+
+// ArrayLengthCreationNode composes abstract node and holds the target struct and field arguments.
+type ArrayLengthCreationNode struct {
+	AbstractNode
+	Type    TypeNode
+	Lengths []ExpressionNode
+}
+
+func (n *ArrayLengthCreationNode) String() string {
+	line := fmt.Sprintf("%s[%s]", n.Type, n.Lengths[0])
+	for i := 1; i < len(n.Lengths); i++ {
+		line = line + fmt.Sprintf("[%s]", n.Lengths[i])
+	}
+
+	return line
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayLengthCreationNode) Accept(v Visitor) {
+	v.VisitArrayLengthCreationNode(n)
+}
+
+// ArrayValueCreationNode composes abstract node and holds the target struct and field arguments.
+type ArrayValueCreationNode struct {
+	AbstractNode
+	Type     TypeNode
+	Elements *ArrayInitializationNode
+}
+
+func (n *ArrayValueCreationNode) String() string {
+	return fmt.Sprintf("%s{%s}", n.Type, n.Elements)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayValueCreationNode) Accept(v Visitor) {
+	v.VisitArrayValueCreationNode(n)
+}
+
+// ArrayInitializationNode composes abstract node and holds the target struct and field arguments.
+type ArrayInitializationNode struct {
+	AbstractNode
+	Values []ExpressionNode
+}
+
+func (n *ArrayInitializationNode) String() string {
+	return fmt.Sprintf("[%s]", n.Values)
+}
+
+// Accept lets a visitor traverse its node structure
+func (n *ArrayInitializationNode) Accept(v Visitor) {
+	v.VisitArrayInitializationNode(n)
 }
 
 // --------------------------
