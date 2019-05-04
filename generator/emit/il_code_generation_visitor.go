@@ -157,38 +157,19 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 	//	assignNode.Right.Accept(v)
 	//	v.assembler.Emit() // TODO Store Array Element
 
-	case *node.MemberAccessNode:
+	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
 		assignNode.Right.Accept(v)
+		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
+		v.storeVariable(fieldSymbol)
 
-		v.updateMemberAccessField(memberAccessNode)
+		// Struct is a value type, therefore update struct explicitly.
+		if _, ok := fieldSymbol.Scope().(*symbol.StructTypeSymbol); ok {
+			v.updateStruct(memberAccessNode.Designator)
+		}
 	default:
 		v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Left))
-	}
-}
-
-func (v *ILCodeGenerationVisitor) updateMemberAccessField(memberFieldNode *node.MemberAccessNode) {
-	// Store value on member field (e.g. this.field / struct.field)
-	fieldSymbol := v.symbolTable.GetDeclByDesignator(memberFieldNode)
-	v.storeVariable(fieldSymbol)
-
-	parent := memberFieldNode.Designator
-	parentType := v.symbolTable.GetTypeByExpression(parent)
-
-	// Struct is a value type in VM.
-	// Therefore, every struct field assignment should update its parent explicitly (e.g. struct.field = x)
-	if _, ok := parentType.(*symbol.StructTypeSymbol); ok {
-		// If parent is also a member access designator, call the method recursively (e.g. grandParent.struct.field)
-		if parentMemberAccessNode, ok := parent.(*node.MemberAccessNode); ok {
-			if parentMemberAccessNode.Designator.String() != symbol.This {
-				parentMemberAccessNode.Designator.Accept(v) // load grand parent on stack
-				v.assembler.Emit(il.Swap)                   // Move value to top
-			}
-			v.updateMemberAccessField(parentMemberAccessNode)
-		} else {
-			v.storeVariable(v.symbolTable.GetDeclByDesignator(parent))
-		}
 	}
 }
 
@@ -222,12 +203,36 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 
 			// Struct is a value type in VM. Therefore, struct variable should be updated explicitly.
 			if isStructField {
-				v.storeVariable(v.symbolTable.GetDeclByDesignator(memberAccessNode.Designator))
+				v.updateStruct(memberAccessNode.Designator)
 			}
 		default:
 			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
 	}
+}
+
+// Struct is a value type in VM.
+// Therefore, every struct field assignment should update its parent explicitly (e.g. struct.field = x)
+func (v *ILCodeGenerationVisitor) updateStruct(targetStruct node.DesignatorNode) {
+	// e.g. this.targetStruct.field or grandParent.targetStruct.field
+	if targetStructMemberAccessNode, ok := targetStruct.(*node.MemberAccessNode); ok {
+		if targetStructMemberAccessNode.Designator.String() != symbol.This {
+			targetStructMemberAccessNode.Designator.Accept(v) // load grand parent struct on stack
+			v.assembler.Emit(il.Swap)                         // Swap grand parent struct and element value
+		}
+
+		targetStructFieldSymbol := v.symbolTable.GetDeclByDesignator(targetStructMemberAccessNode)
+		v.storeVariable(targetStructFieldSymbol)
+
+		// Struct is a value type, therefore update struct explicitly.
+		if _, ok := targetStructFieldSymbol.Scope().(*symbol.StructTypeSymbol); ok {
+			v.updateStruct(targetStructMemberAccessNode.Designator)
+		}
+		return
+	}
+
+	// targetStruct.field = x
+	v.storeVariable(v.symbolTable.GetDeclByDesignator(targetStruct))
 }
 
 // VisitMemberAccessNode generates the IL Code for a member access node

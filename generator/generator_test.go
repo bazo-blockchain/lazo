@@ -817,6 +817,34 @@ func TestThisStructNestedFieldAssignment(t *testing.T) {
 	tester.assertInt(big.NewInt(100))
 }
 
+func TestStructNestedMultiFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+			bool isValid
+			Person friend
+		}
+
+		Person p
+
+		function (int, bool) test() {
+			this.p = new Person()
+			this.p.friend = new Person()
+			this.p.friend.balance, p.friend.isValid = test2()
+			
+			return this.p.friend.balance, p.friend.isValid
+		}
+
+		function (int, bool) test2() {
+			return 100, true
+		}
+	`, "(int,bool)test()")
+
+	assert.Equal(t, len(tester.evalStack), 2)
+	tester.assertIntAt(0, big.NewInt(100))
+	tester.assertBoolAt(1, true)
+}
+
 // Arithmetic Expressions
 // ----------------------
 
