@@ -161,16 +161,34 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
 		assignNode.Right.Accept(v)
-		fieldSymbol := v.symbolTable.GetDeclByDesignator(memberAccessNode)
-		v.storeVariable(fieldSymbol)
 
-		// Struct is a value type in VM. Therefore, struct variable should be updated explicitly.
-		targetType := v.symbolTable.GetTypeByExpression(memberAccessNode.Designator)
-		if _, ok := targetType.(*symbol.StructTypeSymbol); ok {
-			v.storeVariable(v.symbolTable.GetDeclByDesignator(memberAccessNode.Designator))
-		}
+		v.updateMemberAccessField(memberAccessNode)
 	default:
 		v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Left))
+	}
+}
+
+func (v *ILCodeGenerationVisitor) updateMemberAccessField(memberFieldNode *node.MemberAccessNode) {
+	// Store value on member field (e.g. this.field / struct.field)
+	fieldSymbol := v.symbolTable.GetDeclByDesignator(memberFieldNode)
+	v.storeVariable(fieldSymbol)
+
+	parent := memberFieldNode.Designator
+	parentType := v.symbolTable.GetTypeByExpression(parent)
+
+	// Struct is a value type in VM.
+	// Therefore, every struct field assignment should update its parent explicitly (e.g. struct.field = x)
+	if _, ok := parentType.(*symbol.StructTypeSymbol); ok {
+		// If parent is also a member access designator, call the method recursively (e.g. grandParent.struct.field)
+		if parentMemberAccessNode, ok := parent.(*node.MemberAccessNode); ok {
+			if parentMemberAccessNode.Designator.String() != symbol.This {
+				parentMemberAccessNode.Designator.Accept(v) // load grand parent on stack
+				v.assembler.Emit(il.Swap)                   // Move value to top
+			}
+			v.updateMemberAccessField(parentMemberAccessNode)
+		} else {
+			v.storeVariable(v.symbolTable.GetDeclByDesignator(parent))
+		}
 	}
 }
 
@@ -488,7 +506,11 @@ func (v *ILCodeGenerationVisitor) pushDefaultStruct(structType *symbol.StructTyp
 	v.assembler.NewStruct(uint16(len(structType.Fields)))
 
 	for i, field := range structType.Fields {
-		v.pushDefault(field.Type)
+		if _, ok := field.Type.(*symbol.StructTypeSymbol); ok {
+			v.assembler.PushNil()
+		} else {
+			v.pushDefault(field.Type)
+		}
 		v.assembler.StoreField(uint16(i))
 	}
 }

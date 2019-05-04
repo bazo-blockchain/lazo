@@ -109,6 +109,11 @@ func (a *ILAssembler) PushCharacter(value rune) {
 	a.addInstruction(il.PushChar, operand, 1)
 }
 
+// PushNil pushes empty bytes slice
+func (a *ILAssembler) PushNil() {
+	a.addInstruction(il.Push, []byte{0}, 1)
+}
+
 // PushFuncHash is a helper that emits byte code to push a function hash to the stack
 func (a *ILAssembler) PushFuncHash(hash [4]byte) {
 	var operand = make([]byte, 5)

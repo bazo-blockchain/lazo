@@ -763,6 +763,23 @@ func TestStructMultiFieldAssignment(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
+func TestStructNestedFieldAccess(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+			Person friend
+		}
+
+		function int test() {
+			Person p
+			p.friend = new Person()
+			return p.friend.balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(0))
+}
+
 func TestStructNestedFieldAssignment(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		struct Person {
@@ -771,13 +788,33 @@ func TestStructNestedFieldAssignment(t *testing.T) {
 		}
 
 		function int test() {
-			Person p = new Person()
-			p.friend.balance = 1000
+			Person p = new Person(friend = new Person())
+			p.friend.balance = 100
 			return p.friend.balance
 		}
 	`, intTestSig)
 
-	tester.assertInt(big.NewInt(1000))
+	tester.assertInt(big.NewInt(100))
+}
+
+func TestThisStructNestedFieldAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+			Person friend
+		}
+
+		Person p
+
+		function int test() {
+			this.p = new Person()
+			this.p.friend = new Person()
+			this.p.friend.balance = 100
+			return this.p.friend.balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(100))
 }
 
 // Arithmetic Expressions
