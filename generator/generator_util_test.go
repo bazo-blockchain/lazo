@@ -135,7 +135,8 @@ func (gt *generatorTestUtil) assertBytesAt(index int, bytes ...byte) {
 }
 
 func (gt *generatorTestUtil) assertVariableInt(index int, value *big.Int) {
-	bytes := gt.context.ContractVariables[index]
+	bytes, err := gt.context.GetContractVariable(index)
+	assert.NilError(gt.t, err)
 	expected := append([]byte{util.GetSignByte(value)}, value.Bytes()...)
 	gt.compareBytes(bytes, expected)
 }
