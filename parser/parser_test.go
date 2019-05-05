@@ -503,6 +503,13 @@ func TestVariableStatementWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
+func TestMapVariableStatement(t *testing.T) {
+	p := newParserFromInput("Map<int, int> m \n")
+	v := p.parseStatement().(*node.VariableNode)
+
+	assertVariableStatement(t, v, "Map<int, int>", "m", "")
+}
+
 // Multi Local Variable Statements
 // -------------------------------
 

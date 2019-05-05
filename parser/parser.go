@@ -284,6 +284,8 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 		return p.parseIfStatement()
 	case token.Return:
 		return p.parseReturnStatement()
+	case token.Map:
+		return p.parseVariableStatement()
 	default:
 		p.addError("Unsupported statement starting with " + ftok.Literal())
 		p.nextToken()
@@ -292,11 +294,16 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 }
 
 func (p *Parser) parseVariableStatement() node.StatementNode {
-	return p.parseVariableStatementWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	varType := p.parseType()
+	return p.parseVariableStatementWithType(varType)
 }
 
 func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.AbstractNode, identifier string) node.StatementNode {
 	varType := p.parseTypeWithIdentifier(abstractNode, identifier)
+	return p.parseVariableStatementWithType(varType)
+}
+
+func (p *Parser) parseVariableStatementWithType(varType node.TypeNode) node.StatementNode {
 	id := p.readIdentifier()
 
 	if p.isSymbol(token.Comma) {
@@ -304,7 +311,7 @@ func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.Abstract
 	}
 
 	v := &node.VariableNode{
-		AbstractNode: abstractNode,
+		AbstractNode: p.newAbstractNodeWithPos(varType.Pos()),
 		Type:         varType,
 		Identifier:   id,
 	}

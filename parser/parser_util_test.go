@@ -140,7 +140,11 @@ func assertType(t *testing.T, typeNode node.TypeNode, varType string) {
 }
 
 func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {
-	assert.Equal(t, node.String(), expr)
+	if expr == "" {
+		assert.Equal(t, node, nil)
+	} else {
+		assert.Equal(t, node.String(), expr)
+	}
 }
 
 func assertBinaryExpression(t *testing.T, n node.ExpressionNode, left string, right string, op token.Symbol) {
