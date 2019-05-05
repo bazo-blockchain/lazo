@@ -558,6 +558,19 @@ func TestMultiVariableStatementMissingNewLine(t *testing.T) {
 	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
 }
 
+func TestMultiMapVariableStatement(t *testing.T) {
+	p := newParserFromInput("Map<int, int> m, Map<int, int[]> n = call() \n")
+	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, mv.Types[0].String(), "Map<int, int>")
+	assert.Equal(t, mv.Identifiers[0], "m")
+	assert.Equal(t, mv.Types[1].String(), "Map<int, int[]>")
+	assert.Equal(t, mv.Identifiers[1], "n")
+	assertFuncCall(t, mv.FuncCall, "call")
+	assertNoErrors(t, p)
+}
+
 // Return statements
 // ------------------
 
@@ -730,6 +743,14 @@ func TestStructFieldAssignment(t *testing.T) {
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "p.balance", "1000")
 }
 
+func TestMapElementAssignment(t *testing.T) {
+	p := newParserFromInput("m[\"key\"] = 5 \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), `m[key]`, "5")
+}
+
 // Multi Assignment
 // ----------------
 
@@ -805,6 +826,26 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 
 	assertStatement(t, v, "\n [1:1] VAR int a = 5")
 	assertNoErrors(t, p)
+}
+
+// Delete Statement
+// ----------------
+
+func TestDeleteStatement(t *testing.T) {
+	p := newParserFromInput("delete map[5] \n")
+	d, ok := p.parseStatement().(*node.DeleteStatementNode)
+
+	assert.Assert(t, ok)
+	assertElementAccess(t, d.Element, "map", "5")
+	assertNoErrors(t, p)
+}
+
+func TestInvalidDeleteStatement(t *testing.T) {
+	p := newParserFromInput("delete map.key \n")
+	_, ok := p.parseStatement().(*node.DeleteStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "delete requires element access expression")
 }
 
 // Type Nodes

@@ -104,6 +104,12 @@ func (v *AbstractVisitor) VisitArrayTypeNode(node *ArrayTypeNode) {
 	node.ElementType.Accept(v.ConcreteVisitor)
 }
 
+// VisitMapTypeNode visits the key and value type nodes
+func (v *AbstractVisitor) VisitMapTypeNode(node *MapTypeNode) {
+	node.KeyType.Accept(v.ConcreteVisitor)
+	node.ValueType.Accept(v.ConcreteVisitor)
+}
+
 // VisitIfStatementNode traverses the condition, then-block and finally else-block.
 func (v *AbstractVisitor) VisitIfStatementNode(node *IfStatementNode) {
 	node.Condition.Accept(v.ConcreteVisitor)
@@ -135,6 +141,11 @@ func (v *AbstractVisitor) VisitMultiAssignmentStatementNode(node *MultiAssignmen
 // VisitCallStatementNode traverses the function call expression
 func (v *AbstractVisitor) VisitCallStatementNode(node *CallStatementNode) {
 	node.Call.Accept(v.ConcreteVisitor)
+}
+
+// VisitDeleteStatementNode traverses the map element
+func (v *AbstractVisitor) VisitDeleteStatementNode(node *DeleteStatementNode) {
+	node.Element.Accept(v.ConcreteVisitor)
 }
 
 // VisitBinaryExpressionNode traverses the left and right expressions.
@@ -175,8 +186,11 @@ func (v *AbstractVisitor) VisitStructFieldAssignmentNode(node *StructFieldAssign
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
+// VisitArrayInitializationNode traverses the value expressions
 func (v *AbstractVisitor) VisitArrayInitializationNode(node *ArrayInitializationNode) {
-
+	for _, expr := range node.Values {
+		expr.Accept(v.ConcreteVisitor)
+	}
 }
 
 // VisitArrayLengthCreationNode traverses the size expression nodes

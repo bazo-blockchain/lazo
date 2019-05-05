@@ -320,7 +320,7 @@ func (n *MapTypeNode) String() string {
 
 // Accept lets a visitor to traverse its node structure
 func (n *MapTypeNode) Accept(v Visitor) {
-
+	v.VisitMapTypeNode(n)
 }
 
 // --------------------------
@@ -415,6 +415,23 @@ func (n *CallStatementNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *CallStatementNode) Accept(v Visitor) {
 	v.VisitCallStatementNode(n)
+}
+
+// --------------------------
+
+// DeleteStatementNode composes abstract node and holds the map element to be deleted
+type DeleteStatementNode struct {
+	AbstractNode
+	Element *ElementAccessNode
+}
+
+func (n *DeleteStatementNode) String() string {
+	return fmt.Sprintf("\n delete %s", n.Element)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *DeleteStatementNode) Accept(v Visitor) {
+	v.VisitDeleteStatementNode(n)
 }
 
 // --------------------------

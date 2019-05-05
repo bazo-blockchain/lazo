@@ -291,6 +291,12 @@ func TestInvalidElementAccess(t *testing.T) {
 	assertErrorAt(t, p, 0, "Unsupported expression symbol if")
 }
 
+func TestMapElementAccess(t *testing.T) {
+	e := parseExpressionFromInput(t, `map["key"]`)
+	assertElementAccess(t, e, "map", "key")
+	assertPosition(t, e.Pos(), 1, 1)
+}
+
 // Member Access Expression
 // ------------------------
 

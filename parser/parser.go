@@ -286,6 +286,8 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 		return p.parseReturnStatement()
 	case token.Map:
 		return p.parseVariableStatement()
+	case token.Delete:
+		return p.parseDeleteStatement()
 	default:
 		p.addError("Unsupported statement starting with " + ftok.Literal())
 		p.nextToken()
@@ -425,6 +427,34 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
+func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
+	fc := p.parseFuncCall(designator)
+	p.checkAndSkipNewLines(token.NewLine)
+
+	return &node.CallStatementNode{
+		AbstractNode: fc.AbstractNode,
+		Call:         fc,
+	}
+}
+
+func (p *Parser) parseDeleteStatement() *node.DeleteStatementNode {
+	d := &node.DeleteStatementNode{
+		AbstractNode: p.newAbstractNode(),
+	}
+
+	p.check(token.Delete)
+	designator := p.parseDesignator()
+	if elementAccess, ok := designator.(*node.ElementAccessNode); ok {
+		d.Element = elementAccess
+	} else {
+		p.addError("delete requires element access expression")
+	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return d
+}
+
+// ----------------------------------------- End of Statements
+
 func (p *Parser) parseType() node.TypeNode {
 	if p.isType(token.IDENTIFER) {
 		return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
@@ -475,16 +505,6 @@ func (p *Parser) parseMapType() node.TypeNode {
 	p.check(token.Greater)
 
 	return mapType
-}
-
-func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
-	fc := p.parseFuncCall(designator)
-	p.checkAndSkipNewLines(token.NewLine)
-
-	return &node.CallStatementNode{
-		AbstractNode: fc.AbstractNode,
-		Call:         fc,
-	}
 }
 
 // Helper functions

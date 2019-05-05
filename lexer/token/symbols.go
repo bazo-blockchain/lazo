@@ -45,6 +45,7 @@ const (
 	Contract
 	Struct
 	Map
+	Delete
 	New
 	Constructor
 	If
@@ -97,6 +98,7 @@ var SymbolLexeme = map[Symbol]string{
 	Contract:    "contract",
 	Struct:      "struct",
 	Map:         "Map",
+	Delete:      "delete",
 	New:         "new",
 	Constructor: "constructor",
 	If:          "if",
@@ -112,6 +114,7 @@ var Keywords = map[string]Symbol{
 	"contract":    Contract,
 	"struct":      Struct,
 	"Map":         Map,
+	"delete":      Delete,
 	"new":         New,
 	"constructor": Constructor,
 	"if":          If,
