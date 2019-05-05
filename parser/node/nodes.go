@@ -307,6 +307,24 @@ func (n *ArrayTypeNode) Accept(v Visitor) {
 
 // --------------------------
 
+// MapTypeNode composes abstract node and holds the types of key and value.
+type MapTypeNode struct {
+	AbstractNode
+	KeyType   TypeNode
+	ValueType TypeNode
+}
+
+func (n *MapTypeNode) String() string {
+	return fmt.Sprintf("Map<%s, %s>", n.KeyType, n.ValueType)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *MapTypeNode) Accept(v Visitor) {
+
+}
+
+// --------------------------
+
 // IfStatementNode composes abstract node and holds the condition, then and else statement block.
 type IfStatementNode struct {
 	AbstractNode

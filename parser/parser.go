@@ -91,6 +91,8 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 			}
 		case token.Struct:
 			contract.Structs = append(contract.Structs, p.parseStruct())
+		case token.Map:
+			contract.Fields = append(contract.Fields, p.parseField())
 		default:
 			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
 			p.nextToken()
@@ -417,7 +419,14 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 }
 
 func (p *Parser) parseType() node.TypeNode {
-	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	if p.isType(token.IDENTIFER) {
+		return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	}
+
+	if p.isSymbol(token.Map) {
+		return p.parseMapType()
+	}
+	return p.newErrorNode("Invalid type")
 }
 
 func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {
@@ -445,6 +454,20 @@ func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
 		return p.parseArrayType(arrayTypeNode)
 	}
 	return arrayTypeNode
+}
+
+func (p *Parser) parseMapType() node.TypeNode {
+	mapType := &node.MapTypeNode{
+		AbstractNode: p.newAbstractNode(),
+	}
+	p.check(token.Map)
+	p.check(token.Less)
+	mapType.KeyType = p.parseType()
+	p.check(token.Comma)
+	mapType.ValueType = p.parseType()
+	p.check(token.Greater)
+
+	return mapType
 }
 
 func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
