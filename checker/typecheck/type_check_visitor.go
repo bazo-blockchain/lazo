@@ -265,19 +265,50 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 func (v *typeCheckVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
 	v.AbstractVisitor.VisitArrayLengthCreationNode(node)
 
-	// Lengths must be of type int
-	for _, length := range node.Lengths {
-		v.checkExpressionTypes(length, v.symbolTable.GlobalScope.IntType)
+	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
+	if typeSymbol == nil {
+		v.reportError(node, "Array type is not defined")
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
+	} else {
+		for i, length := range node.Lengths {
+			exprType := v.symbolTable.GetTypeByExpression(length)
+			if exprType != v.symbolTable.GlobalScope.IntType {
+				v.reportError(node.Lengths[i], "Only integer expressions are allowed as array length argument")
+			}
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
 	}
 }
 
 // VisitArrayValueCreationNode checks that each value of
 func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCreationNode) {
 	v.AbstractVisitor.VisitArrayValueCreationNode(node)
-	arrayType := v.symbolTable.GetTypeByExpression(node)
-	// Elements must be of the same type as the array
-	for _, element := range node.Elements.Values {
-		v.checkExpressionTypes(element, arrayType)
+
+	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
+
+	if typeSymbol == nil {
+		v.reportError(node, "Array type is not defined")
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
+	} else {
+		for i, element := range node.Elements.Values {
+			exprType := v.symbolTable.GetTypeByExpression(element)
+
+			if exprType.Type() != typeSymbol.Type() {
+				v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
+			}
+		}
+
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
+	}
+
+}
+
+// VisitElementAccessNode checks that the expression is of type integer
+func (v *typeCheckVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
+	v.AbstractVisitor.VisitElementAccessNode(node)
+
+	if v.symbolTable.GetTypeByExpression(node.Expression) != v.symbolTable.GlobalScope.IntType {
+		v.reportError(node, "Array index must be of type int")
 	}
 }
 

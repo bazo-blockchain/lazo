@@ -56,18 +56,23 @@ func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
 
 // FindArrayType searches for the array type
 // If the array type does not exist, it adds it to the declarations
-func (t *SymbolTable) FindArrayType(typeSymbol TypeSymbol) *ArrayTypeSymbol {
-	typeSymbolFromIdentifier := t.FindTypeByIdentifier(typeSymbol.Identifier() + "[]")
+func (t *SymbolTable) FindArrayType(ts TypeSymbol) *ArrayTypeSymbol {
+	var typeSymbolFromIdentifier TypeSymbol
+	if _, ok := ts.(*ArrayTypeSymbol); ok {
+		typeSymbolFromIdentifier = t.FindTypeByIdentifier(ts.Identifier())
+	} else {
+		typeSymbolFromIdentifier = t.FindTypeByIdentifier(ts.Identifier() + "[]")
+	}
 
 	if arrayTypeSymbol, ok := typeSymbolFromIdentifier.(*ArrayTypeSymbol); ok {
 		return arrayTypeSymbol
 	} else {
 		result := &ArrayTypeSymbol{
 			AbstractSymbol: AbstractSymbol{
-				Parent: typeSymbol.Scope(),
-				ID:     typeSymbol.Identifier(),
+				Parent: ts.Scope(),
+				ID:     ts.Identifier() + "[]",
 			},
-			ElementType: typeSymbol.(*BasicTypeSymbol),
+			ElementType: ts,
 		}
 		t.GlobalScope.Types = append(t.GlobalScope.Types, result)
 		return result

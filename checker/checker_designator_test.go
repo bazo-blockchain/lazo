@@ -528,14 +528,14 @@ func TestArrayElementAccess(t *testing.T) {
 	`, true)
 
 	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
-	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0].Type, tester.globalScope.IntType)
 }
 
 func TestInvalidArrayElementAccess(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int[] a = new int[1]
 		constructor() {
-			a[1] = 1
+			a[true] = 1
 		}
 	`, false)
 
@@ -552,6 +552,6 @@ func TestArrayElementAccessByDesignator(t *testing.T) {
 	`, true)
 
 	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
-	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[1].Type, tester.globalScope.IntType)
 	tester.assertBasicDesignator(elementAccess.Expression, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
 }

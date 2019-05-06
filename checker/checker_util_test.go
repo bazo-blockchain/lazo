@@ -240,12 +240,12 @@ func (ct *CheckerTestUtil) assertArrayLengthCreation(expr node.ExpressionNode, e
 	}
 }
 
-func (ct *CheckerTestUtil) assertArrayValueCreation(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
+func (ct *CheckerTestUtil) assertArrayValueCreation(expr node.ExpressionNode, expectedType symbol.TypeSymbol, expectedValueType symbol.TypeSymbol) {
 	creation, ok := expr.(*node.ArrayValueCreationNode)
 	assert.Assert(ct.t, ok)
 	ct.assertExpressionType(creation, expectedType)
 	for _, element := range creation.Elements.Values {
-		ct.assertExpressionType(element, expectedType)
+		ct.assertExpressionType(element, expectedValueType)
 	}
 }
 

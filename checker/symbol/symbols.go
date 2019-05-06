@@ -283,7 +283,7 @@ func (sym *BasicTypeSymbol) Type() string {
 // ArrayTypeSymbol represents a array type
 type ArrayTypeSymbol struct {
 	AbstractSymbol
-	ElementType *BasicTypeSymbol
+	ElementType TypeSymbol
 }
 
 // NewArrayTypeSymbol creates a new ArrayTypeSymbol
