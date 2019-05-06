@@ -91,6 +91,8 @@ func (p *Parser) parseContractBody(contract *node.ContractNode) {
 			}
 		case token.Struct:
 			contract.Structs = append(contract.Structs, p.parseStruct())
+		case token.Map:
+			contract.Fields = append(contract.Fields, p.parseField())
 		default:
 			p.addError(fmt.Sprintf("Unsupported symbol %s in contract", ftok.Lexeme))
 			p.nextToken()
@@ -282,6 +284,10 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 		return p.parseIfStatement()
 	case token.Return:
 		return p.parseReturnStatement()
+	case token.Map:
+		return p.parseVariableStatement()
+	case token.Delete:
+		return p.parseDeleteStatement()
 	default:
 		p.addError("Unsupported statement starting with " + ftok.Literal())
 		p.nextToken()
@@ -290,11 +296,16 @@ func (p *Parser) parseStatementWithFixToken() node.StatementNode {
 }
 
 func (p *Parser) parseVariableStatement() node.StatementNode {
-	return p.parseVariableStatementWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	varType := p.parseType()
+	return p.parseVariableStatementWithType(varType)
 }
 
 func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.AbstractNode, identifier string) node.StatementNode {
 	varType := p.parseTypeWithIdentifier(abstractNode, identifier)
+	return p.parseVariableStatementWithType(varType)
+}
+
+func (p *Parser) parseVariableStatementWithType(varType node.TypeNode) node.StatementNode {
 	id := p.readIdentifier()
 
 	if p.isSymbol(token.Comma) {
@@ -302,7 +313,7 @@ func (p *Parser) parseVariableStatementWithIdentifier(abstractNode node.Abstract
 	}
 
 	v := &node.VariableNode{
-		AbstractNode: abstractNode,
+		AbstractNode: p.newAbstractNodeWithPos(varType.Pos()),
 		Type:         varType,
 		Identifier:   id,
 	}
@@ -416,8 +427,43 @@ func (p *Parser) parseReturnStatement() *node.ReturnStatementNode {
 	}
 }
 
+func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
+	fc := p.parseFuncCall(designator)
+	p.checkAndSkipNewLines(token.NewLine)
+
+	return &node.CallStatementNode{
+		AbstractNode: fc.AbstractNode,
+		Call:         fc,
+	}
+}
+
+func (p *Parser) parseDeleteStatement() *node.DeleteStatementNode {
+	d := &node.DeleteStatementNode{
+		AbstractNode: p.newAbstractNode(),
+	}
+
+	p.check(token.Delete)
+	designator := p.parseDesignator()
+	if elementAccess, ok := designator.(*node.ElementAccessNode); ok {
+		d.Element = elementAccess
+	} else {
+		p.addError("delete requires element access expression")
+	}
+	p.checkAndSkipNewLines(token.NewLine)
+	return d
+}
+
+// ----------------------------------------- End of Statements
+
 func (p *Parser) parseType() node.TypeNode {
-	return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	if p.isType(token.IDENTIFER) {
+		return p.parseTypeWithIdentifier(p.newAbstractNode(), p.readIdentifier())
+	}
+
+	if p.isSymbol(token.Map) {
+		return p.parseMapType()
+	}
+	return p.newErrorNode("Invalid type")
 }
 
 func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {
@@ -447,14 +493,18 @@ func (p *Parser) parseArrayType(arrayType node.TypeNode) node.TypeNode {
 	return arrayTypeNode
 }
 
-func (p *Parser) parseCallStatement(designator node.DesignatorNode) *node.CallStatementNode {
-	fc := p.parseFuncCall(designator)
-	p.checkAndSkipNewLines(token.NewLine)
-
-	return &node.CallStatementNode{
-		AbstractNode: fc.AbstractNode,
-		Call:         fc,
+func (p *Parser) parseMapType() node.TypeNode {
+	mapType := &node.MapTypeNode{
+		AbstractNode: p.newAbstractNode(),
 	}
+	p.check(token.Map)
+	p.check(token.Less)
+	mapType.KeyType = p.parseType()
+	p.check(token.Comma)
+	mapType.ValueType = p.parseType()
+	p.check(token.Greater)
+
+	return mapType
 }
 
 // Helper functions

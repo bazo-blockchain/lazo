@@ -169,44 +169,6 @@ func TestStructMissingNewlineAtEnd(t *testing.T) {
 	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
 }
 
-// Constructor Nodes
-// -----------------
-
-func TestEmptyConstructor(t *testing.T) {
-	p := newParserFromInput("constructor() { \n } \n")
-	c := p.parseConstructor()
-
-	assertConstructor(t, c, 0, 0)
-	assertNoErrors(t, p)
-}
-
-func TestConstructorWithParamsAndStatements(t *testing.T) {
-	p := newParserFromInput(`constructor(int a, bool b) { 
-		int x
-		int y
-		y = 2
-	}
-	`)
-	c := p.parseConstructor()
-
-	assertConstructor(t, c, 2, 3)
-	assertNoErrors(t, p)
-}
-
-func TestMultipleConstructors(t *testing.T) {
-	p := newParserFromInput(`contract Test {
-		constructor(int a) {
-		}
-		
-		constructor() {
-		}
-	}`)
-	c := p.parseContract()
-
-	assertConstructor(t, c.Constructor, 1, 0)
-	assertErrorAt(t, p, 0, "Only one constructor is allowed")
-}
-
 // Array Nodes
 // -----------
 
@@ -291,14 +253,6 @@ func TestFieldArrayDeclaration(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
-func TestUnsupportedContractPart(t *testing.T) {
-	p := newParserFromInput("£")
-
-	p.parseContractBody(nil)
-	assertErrorAt(t, p, 0, "Unsupported contract part: £")
-	assert.Equal(t, len(p.errors), 1)
-}
-
 func TestLocalArrayDeclaration(t *testing.T) {
 	p := newParserFromInput(`
 		constructor() {
@@ -308,6 +262,35 @@ func TestLocalArrayDeclaration(t *testing.T) {
 	c := p.parseConstructor()
 	assertStatement(t, c.Body[0], "\n [3:4] VAR int[] a")
 	assertNoErrors(t, p)
+}
+
+// Map Nodes
+// ---------
+
+func TestMapDeclaration(t *testing.T) {
+	p := newParserFromInput("Map<String, int> map \n")
+	f := p.parseField()
+
+	assertField(t, f, "Map<String, int>", "map", "")
+	assertNoErrors(t, p)
+}
+
+func TestInvalidMapDeclaration(t *testing.T) {
+	p := newParserFromInput("Map String, int> map \n")
+	_ = p.parseMapType()
+
+	assertErrorAt(t, p, 0, "Symbol < expected")
+}
+
+// Unsupported Contract Parts
+// ---------------------------
+
+func TestUnsupportedContractPart(t *testing.T) {
+	p := newParserFromInput("£")
+
+	p.parseContractBody(nil)
+	assertErrorAt(t, p, 0, "Unsupported contract part: £")
+	assert.Equal(t, len(p.errors), 1)
 }
 
 func TestParseStatementDefaultCase(t *testing.T) {
@@ -344,6 +327,44 @@ func TestParseStatementWithIdentifierDefaultCase(t *testing.T) {
 	assertErrorAt(t, p, 0, "Unsupported symbol !")
 	assert.Equal(t, len(p.errors), 1)
 	assert.Equal(t, stmt, nil)
+}
+
+// Constructor Nodes
+// -----------------
+
+func TestEmptyConstructor(t *testing.T) {
+	p := newParserFromInput("constructor() { \n } \n")
+	c := p.parseConstructor()
+
+	assertConstructor(t, c, 0, 0)
+	assertNoErrors(t, p)
+}
+
+func TestConstructorWithParamsAndStatements(t *testing.T) {
+	p := newParserFromInput(`constructor(int a, bool b) { 
+		int x
+		int y
+		y = 2
+	}
+	`)
+	c := p.parseConstructor()
+
+	assertConstructor(t, c, 2, 3)
+	assertNoErrors(t, p)
+}
+
+func TestMultipleConstructors(t *testing.T) {
+	p := newParserFromInput(`contract Test {
+		constructor(int a) {
+		}
+		
+		constructor() {
+		}
+	}`)
+	c := p.parseContract()
+
+	assertConstructor(t, c.Constructor, 1, 0)
+	assertErrorAt(t, p, 0, "Only one constructor is allowed")
 }
 
 // Function Nodes
@@ -482,6 +503,13 @@ func TestVariableStatementWONewline(t *testing.T) {
 	assertHasError(t, p)
 }
 
+func TestMapVariableStatement(t *testing.T) {
+	p := newParserFromInput("Map<int, int> m \n")
+	v := p.parseStatement().(*node.VariableNode)
+
+	assertVariableStatement(t, v, "Map<int, int>", "m", "")
+}
+
 // Multi Local Variable Statements
 // -------------------------------
 
@@ -503,7 +531,7 @@ func TestMultiVariableStatementMissingType(t *testing.T) {
 	_, ok := p.parseVariableStatement().(*node.MultiVariableNode)
 
 	assert.Assert(t, ok)
-	assertErrorAt(t, p, 0, "Identifier expected")
+	assertErrorAt(t, p, 0, "Invalid type")
 }
 
 func TestMultiVariableStatementMissingID(t *testing.T) {
@@ -528,6 +556,19 @@ func TestMultiVariableStatementMissingNewLine(t *testing.T) {
 
 	assert.Assert(t, ok)
 	assertErrorAt(t, p, 0, "Symbol \\n expected, but got EOF")
+}
+
+func TestMultiMapVariableStatement(t *testing.T) {
+	p := newParserFromInput("Map<int, int> m, Map<int, int[]> n = call() \n")
+	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, mv.Types[0].String(), "Map<int, int>")
+	assert.Equal(t, mv.Identifiers[0], "m")
+	assert.Equal(t, mv.Types[1].String(), "Map<int, int[]>")
+	assert.Equal(t, mv.Identifiers[1], "n")
+	assertFuncCall(t, mv.FuncCall, "call")
+	assertNoErrors(t, p)
 }
 
 // Return statements
@@ -702,6 +743,14 @@ func TestStructFieldAssignment(t *testing.T) {
 	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), "p.balance", "1000")
 }
 
+func TestMapElementAssignment(t *testing.T) {
+	p := newParserFromInput("m[\"key\"] = 5 \n")
+	s := p.parseStatement()
+
+	assertNoErrors(t, p)
+	assertAssignmentStatement(t, s.(*node.AssignmentStatementNode), `m[key]`, "5")
+}
+
 // Multi Assignment
 // ----------------
 
@@ -777,6 +826,26 @@ func TestStatementWithIdentifierAssignment(t *testing.T) {
 
 	assertStatement(t, v, "\n [1:1] VAR int a = 5")
 	assertNoErrors(t, p)
+}
+
+// Delete Statement
+// ----------------
+
+func TestDeleteStatement(t *testing.T) {
+	p := newParserFromInput("delete map[5] \n")
+	d, ok := p.parseStatement().(*node.DeleteStatementNode)
+
+	assert.Assert(t, ok)
+	assertElementAccess(t, d.Element, "map", "5")
+	assertNoErrors(t, p)
+}
+
+func TestInvalidDeleteStatement(t *testing.T) {
+	p := newParserFromInput("delete map.key \n")
+	_, ok := p.parseStatement().(*node.DeleteStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "delete requires element access expression")
 }
 
 // Type Nodes
