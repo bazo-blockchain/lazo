@@ -88,7 +88,7 @@ func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementA
 	typeSymbol := v.symbolTable.GetTypeByExpression(node.Designator)
 	if array, ok := typeSymbol.(*symbol.ArrayTypeSymbol); ok {
 		v.symbolTable.MapExpressionToType(node, array.ElementType)
-		// todo map designator to its declaration
+		v.symbolTable.MapDesignatorToDecl(node, array)
 	} else {
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to an array type", node))
 		v.symbolTable.MapExpressionToType(node, nil)
