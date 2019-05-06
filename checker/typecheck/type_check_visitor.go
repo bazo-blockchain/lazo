@@ -135,6 +135,7 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 		return
 	}
 
+	// TODO In case of arrays we most likely must differentiate between length and value initialization
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
@@ -257,6 +258,26 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 	// Void function has no type.
 	if len(funcSym.ReturnTypes) == 1 {
 		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
+	}
+}
+
+// VisitArrayLengthCreationNode checks that the lengths are of type int
+func (v *typeCheckVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
+	v.AbstractVisitor.VisitArrayLengthCreationNode(node)
+
+	// Lengths must be of type int
+	for _, length := range node.Lengths {
+		v.checkExpressionTypes(length, v.symbolTable.GlobalScope.IntType)
+	}
+}
+
+// VisitArrayValueCreationNode checks that each value of
+func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCreationNode) {
+	v.AbstractVisitor.VisitArrayValueCreationNode(node)
+	arrayType := v.symbolTable.GetTypeByExpression(node)
+	// Elements must be of the same type as the array
+	for _, element := range node.Elements.Values {
+		v.checkExpressionTypes(element, arrayType)
 	}
 }
 
