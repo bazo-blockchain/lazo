@@ -515,3 +515,43 @@ func TestThisDesignatorResolvesToContractSymbol(t *testing.T) {
 	thisDesignatorNode := memberAccessNode.Designator
 	tester.assertBasicDesignator(thisDesignatorNode, tester.globalScope.Contract, tester.globalScope.Contract)
 }
+
+// Arrays
+// ------
+
+func TestArrayElementAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[1]
+		constructor() {
+			a[0] = 1
+		}
+	`, true)
+
+	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
+	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+}
+
+func TestInvalidArrayElementAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[1]
+		constructor() {
+			a[1] = 1
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+}
+
+func TestArrayElementAccessByDesignator(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = 0
+		int[] a = new int[1]
+		constructor() {
+			a[x] = 1
+		}
+	`, true)
+
+	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
+	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+	tester.assertBasicDesignator(elementAccess.Expression, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+}
