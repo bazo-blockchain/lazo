@@ -23,6 +23,25 @@ func NewSymbolTable() *SymbolTable {
 	}
 }
 
+// FindTypeByNode searches for a type
+// Returns the type or nil
+func (t *SymbolTable) FindTypeByNode(n node.TypeNode) TypeSymbol {
+	var result TypeSymbol
+	if basicTypeNode, ok := n.(*node.BasicTypeNode); ok {
+		return t.FindTypeByIdentifier(basicTypeNode.String())
+	} else {
+		elementTypeNode := n.(*node.ArrayTypeNode).ElementType
+		elementType := t.FindTypeByNode(elementTypeNode)
+		if elementType != nil {
+			result = t.FindArrayType(elementType)
+		} else {
+			result = nil
+		}
+
+	}
+	return result
+}
+
 // FindTypeByIdentifier searches for a type
 // Returns the type or nil
 func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
@@ -35,10 +54,24 @@ func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
 	return nil
 }
 
-// FindTypeByNode searches for a type
-// Returns the type or nil
-func (t *SymbolTable) FindTypeByNode(node node.TypeNode) TypeSymbol {
-	return t.FindTypeByIdentifier(node.String())
+// FindArrayType searches for the array type
+// If the array type does not exist, it adds it to the declarations
+func (t *SymbolTable) FindArrayType(typeSymbol TypeSymbol) *ArrayTypeSymbol {
+	typeSymbolFromIdentifier := t.FindTypeByIdentifier(typeSymbol.Identifier() + "[]")
+
+	if arrayTypeSymbol, ok := typeSymbolFromIdentifier.(*ArrayTypeSymbol); ok {
+		return arrayTypeSymbol
+	} else {
+		result := &ArrayTypeSymbol{
+			AbstractSymbol: AbstractSymbol{
+				Parent: typeSymbol.Scope(),
+				ID:     typeSymbol.Identifier(),
+			},
+			ElementType: typeSymbol.(*BasicTypeSymbol),
+		}
+		t.GlobalScope.Types = append(t.GlobalScope.Types, result)
+		return result
+	}
 }
 
 // Find recursively searches for a symbol within a specific scope
