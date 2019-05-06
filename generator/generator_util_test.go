@@ -79,7 +79,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	tester.context = context
 
 	bazoVM := vm.NewVM(context)
-	isSuccess := bazoVM.Exec(false)
+	isSuccess := bazoVM.Exec(true)
 	result, vmError := bazoVM.PeekResult()
 	assert.Assert(t, isSuccess, string(result))
 
