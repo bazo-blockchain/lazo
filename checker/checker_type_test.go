@@ -927,3 +927,74 @@ func TestThisParameter(t *testing.T) {
 	`, false)
 	tester.assertErrorAt(0, "'this' cannot be used as an argument")
 }
+
+// Arrays
+// ------
+
+func TestArrayInitialization(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[1]
+	`, true)
+
+	tester.assertField(0, tester.globalScope.IntType)
+}
+
+func TestArrayInitializationWithValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[]{1, 2, 3}
+	`, true)
+
+	tester.assertField(0, tester.globalScope.IntType)
+	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestArrayInitializationWithVariableLength(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int x = 2
+		int[] a = new int[x]
+	`, true)
+
+	creation := tester.getFieldNode(1).Expression.(*node.ArrayLengthCreationNode)
+	tester.assertArrayLengthCreation(creation, tester.globalScope.IntType)
+}
+
+func TestInvalidArrayInitialization(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new char[1]
+	`, false)
+
+	tester.assertTotalErrors(1)
+}
+
+func TestInvalidArrayInitializationWithValues(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new char[]{'a', 'b', 'c'}
+	`, false)
+
+	tester.assertField(0, tester.globalScope.IntType)
+}
+
+func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[]{'a', 2, 3}
+	`, false)
+
+	tester.assertTotalErrors(1)
+}
+
+//func TestArrayNestedLengthInitialization(t *testing.T) {
+//	tester := newCheckerTestUtil(t, `
+//		int[][] a = new int[1][2]
+//	`, true)
+//
+//	tester.assertField(0, tester.globalScope.IntType)
+//}
+//
+//func TestArrayNestedValueInitialization(t *testing.T) {
+//	tester := newCheckerTestUtil(t, `
+//		int[] a = new int[]{1, 2, 3}
+//	`, true)
+//
+//	tester.assertField(0, tester.globalScope.IntType)
+//	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+//}

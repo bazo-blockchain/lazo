@@ -210,6 +210,12 @@ func (ct *CheckerTestUtil) assertBasicDesignator(expr node.ExpressionNode, decl 
 	ct.assertDesignator(designator, decl, expectedType)
 }
 
+func (ct *CheckerTestUtil) assertElementAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+	designator, ok := expr.(*node.ElementAccessNode)
+	assert.Assert(ct.t, ok)
+	ct.assertDesignator(designator, decl, expectedType)
+}
+
 func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.MemberAccessNode)
 	assert.Assert(ct.t, ok)
@@ -223,6 +229,24 @@ func (ct *CheckerTestUtil) assertDesignator(designator node.DesignatorNode, decl
 
 func (ct *CheckerTestUtil) assertExpressionType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
 	assert.Equal(ct.t, ct.symbolTable.GetTypeByExpression(expr), expectedType)
+}
+
+func (ct *CheckerTestUtil) assertArrayLengthCreation(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
+	creation, ok := expr.(*node.ArrayLengthCreationNode)
+	assert.Assert(ct.t, ok)
+	ct.assertExpressionType(creation, expectedType)
+	for _, length := range creation.Lengths {
+		ct.assertExpressionType(length, ct.globalScope.IntType)
+	}
+}
+
+func (ct *CheckerTestUtil) assertArrayValueCreation(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
+	creation, ok := expr.(*node.ArrayValueCreationNode)
+	assert.Assert(ct.t, ok)
+	ct.assertExpressionType(creation, expectedType)
+	for _, element := range creation.Elements.Values {
+		ct.assertExpressionType(element, expectedType)
+	}
 }
 
 // Helper Functions
