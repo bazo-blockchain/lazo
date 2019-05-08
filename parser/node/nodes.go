@@ -494,6 +494,24 @@ func (n *UnaryExpressionNode) Accept(v Visitor) {
 
 // --------------------------
 
+// TypeCastNode composes abstract node and holds the type and the designator
+type TypeCastNode struct {
+	AbstractNode
+	Type       *BasicTypeNode
+	Expression ExpressionNode
+}
+
+func (n *TypeCastNode) String() string {
+	return fmt.Sprintf("(%s) %s", n.Type, n.Expression)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *TypeCastNode) Accept(v Visitor) {
+	v.VisitTypeCastNode(n)
+}
+
+// --------------------------
+
 // BasicDesignatorNode composes abstract node and holds the designator name.
 type BasicDesignatorNode struct {
 	AbstractNode

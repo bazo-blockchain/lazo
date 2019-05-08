@@ -165,6 +165,12 @@ func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpressionNode) {
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 
+// VisitTypeCastNode traverses the type and the designator.
+func (v *AbstractVisitor) VisitTypeCastNode(node *TypeCastNode) {
+	node.Type.Accept(v.ConcreteVisitor)
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
 // VisitFuncCallNode traverses the funcCall expression
 func (v *AbstractVisitor) VisitFuncCallNode(node *FuncCallNode) {
 	node.Designator.Accept(v.ConcreteVisitor)

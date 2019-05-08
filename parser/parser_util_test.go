@@ -259,6 +259,14 @@ func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string,
 	}
 }
 
+func assertTypeCast(t *testing.T, n node.ExpressionNode, typeName string, expr string) {
+	typeCast, ok := n.(*node.TypeCastNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, typeCast.Type.String(), typeName)
+	assertExpression(t, typeCast.Expression, expr)
+}
+
 type pair struct {
 	key   string
 	value string

@@ -131,9 +131,21 @@ func (p *Parser) parseExpressionRest() node.ExpressionNode {
 	}
 
 	if p.isSymbol(token.OpenParen) {
+		abstractNode := p.newAbstractNode()
 		p.nextToken()
 		expr := p.parseExpression()
 		p.check(token.OpenParen)
+
+		switch p.currentToken.Type() {
+		case token.IDENTIFER, token.CHARACTER, token.INTEGER:
+			// (String) x.y.z, (String) 'c', (String) 5
+			return p.parseTypeCast(abstractNode, expr)
+		case token.SYMBOL:
+			// (String) true
+			if p.isAnySymbol(token.True, token.False) {
+				return p.parseTypeCast(abstractNode, expr)
+			}
+		}
 		return expr
 	}
 
@@ -146,6 +158,23 @@ func (p *Parser) parseUnaryExpression() *node.UnaryExpressionNode {
 		Operator:     p.readSymbol(),
 		Expression:   p.parseFactor(),
 	}
+}
+
+func (p *Parser) parseTypeCast(abstractNode node.AbstractNode, expr node.ExpressionNode) *node.TypeCastNode {
+	typeCast := &node.TypeCastNode{
+		AbstractNode: abstractNode,
+		Expression:   p.parseOperand(),
+	}
+
+	if basicDesignator, ok := expr.(*node.BasicDesignatorNode); ok {
+		typeCast.Type = &node.BasicTypeNode{
+			AbstractNode: p.newAbstractNodeWithPos(expr.Pos()),
+			Identifier:   basicDesignator.Value,
+		}
+	} else {
+		p.addError(fmt.Sprintf("Invalid type %s", expr))
+	}
+	return typeCast
 }
 
 func (p *Parser) parseOperand() node.ExpressionNode {

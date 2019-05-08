@@ -25,6 +25,7 @@ type Visitor interface {
 	VisitDeleteStatementNode(node *DeleteStatementNode)
 	VisitBinaryExpressionNode(node *BinaryExpressionNode)
 	VisitUnaryExpressionNode(node *UnaryExpressionNode)
+	VisitTypeCastNode(node *TypeCastNode)
 	VisitBasicDesignatorNode(node *BasicDesignatorNode)
 	VisitElementAccessNode(node *ElementAccessNode)
 	VisitMemberAccessNode(node *MemberAccessNode)

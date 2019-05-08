@@ -159,6 +159,44 @@ func TestFactorWithExponent(t *testing.T) {
 	assertBinaryExpression(t, e, "2", "(3 ** 4)", token.Division)
 }
 
+// Type Cast Expressions
+// ---------------------
+
+func TestIntTypeCast(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) 5")
+	assertTypeCast(t, e, "String", "5")
+}
+
+func TestCharTypeCast(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) 'c'")
+	assertTypeCast(t, e, "String", "c")
+}
+
+func TestBoolTypeCast(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) true")
+	assertTypeCast(t, e, "String", "true")
+}
+
+func TestDesignatorTypeCast(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) x")
+	assertTypeCast(t, e, "String", "x")
+}
+
+func TestTypeCastRightAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) x.y.z")
+	assertTypeCast(t, e, "String", "x.y.z")
+}
+
+func TestTypeCastPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) x + y")
+	assertBinaryExpression(t, e, "(String) x", "y", token.Plus)
+}
+
+func TestTypeCastStringConcat(t *testing.T) {
+	e := parseExpressionFromInput(t, `"Hello " + (String) 5 + (String) true`)
+	assertBinaryExpression(t, e, "(Hello  + (String) 5)", "(String) true", token.Plus)
+}
+
 // Unary Expressions
 // -----------------
 
