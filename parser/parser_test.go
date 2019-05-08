@@ -865,6 +865,15 @@ func TestShorthandAssignmentExp(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+func TestShorthandAssignmentBitwiseOp(t *testing.T) {
+	p := newParserFromInput("x &= 3 \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "3", token.BitwiseAnd)
+	assertNoErrors(t, p)
+}
+
 func TestShorthandAssignmentMissingNewline(t *testing.T) {
 	p := newParserFromInput("x /= 3")
 	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
@@ -872,6 +881,14 @@ func TestShorthandAssignmentMissingNewline(t *testing.T) {
 	assert.Assert(t, ok)
 	assertShorthandAssignmentStatement(t, sa, "x", "3", token.Division)
 	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestShorthandAssignmentInvalid(t *testing.T) {
+	p := newParserFromInput("x ~= 3 \n")
+	_, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, !ok)
+	assertErrorAt(t, p, 0, "Unsupported symbol ~")
 }
 
 // Statement with Fix token

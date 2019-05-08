@@ -382,6 +382,11 @@ var allowedShorthandOperators = []token.Symbol{
 	token.Division,
 	token.Modulo,
 	token.Exponent,
+	token.ShiftLeft,
+	token.ShiftRight,
+	token.BitwiseAnd,
+	token.BitwiseOr,
+	token.BitwiseXor,
 }
 
 func (p *Parser) parseShorthandAssignmentStatement(designator node.DesignatorNode, operator token.Symbol) node.StatementNode {
