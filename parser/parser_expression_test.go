@@ -8,6 +8,26 @@ import (
 	"testing"
 )
 
+// Ternary Expressions
+// ==============================
+
+func TestTernaryExpression(t *testing.T) {
+	e := parseExpressionFromInput(t, "x == y ? true : false")
+	assertTernaryExpression(t, e, "(x == y)", "true", "false")
+}
+
+func TestTernaryExpressionPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "x == y ? x + 1 : 2 * 3 + 4")
+	assertTernaryExpression(t, e, "(x == y)", "(x + 1)", "((2 * 3) + 4)")
+}
+
+func TestNestedTernary(t *testing.T) {
+	p := newParserFromInput("x ? y ? 1 : 2 : z")
+	_ = p.parseExpression()
+
+	assertErrorAt(t, p, 0, "Symbol : expected, but got ?")
+}
+
 // Binary Expressions
 // ==============================
 
@@ -630,6 +650,7 @@ func TestInvalidBoolLiteral(t *testing.T) {
 
 func parseExpressionFromInput(t *testing.T, input string) node.ExpressionNode {
 	p := newParserFromInput(input)
+	expr := p.parseExpression()
 	assertNoErrors(t, p)
-	return p.parseExpression()
+	return expr
 }

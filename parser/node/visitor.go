@@ -23,6 +23,7 @@ type Visitor interface {
 	VisitShorthandAssignmentNode(node *ShorthandAssignmentStatementNode)
 	VisitCallStatementNode(node *CallStatementNode)
 	VisitDeleteStatementNode(node *DeleteStatementNode)
+	VisitTernaryExpressionNode(node *TernaryExpression)
 	VisitBinaryExpressionNode(node *BinaryExpressionNode)
 	VisitUnaryExpressionNode(node *UnaryExpressionNode)
 	VisitTypeCastNode(node *TypeCastNode)

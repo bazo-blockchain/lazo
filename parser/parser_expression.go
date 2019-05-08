@@ -10,7 +10,25 @@ import (
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
-	return p.parseOr()
+	return p.parseTernaryExpression()
+}
+
+func (p *Parser) parseTernaryExpression() node.ExpressionNode {
+	expr := p.parseOr()
+
+	if p.isSymbol(token.QuestionMark) {
+		p.nextToken()
+
+		ternary := &node.TernaryExpression{
+			AbstractNode: p.newAbstractNodeWithPos(expr.Pos()),
+			Condition:    expr,
+			True:         p.parseOr(),
+		}
+		p.check(token.Colon)
+		ternary.False = p.parseOr()
+		return ternary
+	}
+	return expr
 }
 
 func (p *Parser) parseOr() node.ExpressionNode {
@@ -198,7 +216,7 @@ func (p *Parser) parseExpressionRest() node.ExpressionNode {
 		abstractNode := p.newAbstractNode()
 		p.nextToken()
 		expr := p.parseExpression()
-		p.check(token.OpenParen)
+		p.check(token.CloseParen)
 
 		switch p.currentToken.Type() {
 		case token.IDENTIFER, token.CHARACTER, token.INTEGER:

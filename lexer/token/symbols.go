@@ -36,6 +36,7 @@ const (
 	Colon
 	Comma
 	Period
+	QuestionMark
 
 	Not
 	And
@@ -94,9 +95,10 @@ var SymbolLexeme = map[Symbol]string{
 	OpenParen:    "(",
 	CloseParen:   ")",
 
-	Colon:  ":",
-	Comma:  ",",
-	Period: ".",
+	Colon:        ":",
+	Comma:        ",",
+	Period:       ".",
+	QuestionMark: "?",
 
 	Not: "!",
 	And: "&&",
@@ -152,6 +154,7 @@ var SingleCharOperators = map[rune]Symbol{
 	':': Colon,
 	',': Comma,
 	'.': Period,
+	'?': QuestionMark,
 	'{': OpenBrace,
 	'}': CloseBrace,
 	'[': OpenBracket,

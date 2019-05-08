@@ -457,6 +457,25 @@ func (n *DeleteStatementNode) Accept(v Visitor) {
 // Expression Nodes
 // --------------------------
 
+// TernaryExpression composes abstract node and holds the binary operator and left & right expressions.
+type TernaryExpression struct {
+	AbstractNode
+	Condition ExpressionNode
+	True      ExpressionNode
+	False     ExpressionNode
+}
+
+func (n *TernaryExpression) String() string {
+	return fmt.Sprintf("%s ? %s : %s", n.Condition, n.True, n.False)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *TernaryExpression) Accept(v Visitor) {
+	v.VisitTernaryExpressionNode(n)
+}
+
+// --------------------------
+
 // BinaryExpressionNode composes abstract node and holds the binary operator and left & right expressions.
 type BinaryExpressionNode struct {
 	AbstractNode
