@@ -85,6 +85,30 @@ func TestRelationalComparisonAssociativity(t *testing.T) {
 	assertBinaryExpression(t, e, "(((1 < 2) <= 3) > 4)", "5", token.GreaterEqual)
 }
 
+// Bitwise Shift Operators
+// -----------------------
+
+func TestShiftLeft(t *testing.T) {
+	e := parseExpressionFromInput(t, "13 << 2")
+	assertBinaryExpression(t, e, "13", "2", token.ShiftLeft)
+}
+
+func TestShiftRight(t *testing.T) {
+	e := parseExpressionFromInput(t, "13 >> 2")
+	assertBinaryExpression(t, e, "13", "2", token.ShiftRight)
+}
+
+func TestShiftAssociativity(t *testing.T) {
+	e := parseExpressionFromInput(t, "13 << 3 >> 1")
+	assertBinaryExpression(t, e, "(13 << 3)", "1", token.ShiftRight)
+}
+
+func TestShiftPrecedence(t *testing.T) {
+	// precedence order: +, <<, <
+	e := parseExpressionFromInput(t, "2 < 3 << 3 + 4")
+	assertBinaryExpression(t, e, "2", "(3 << (3 + 4))", token.Less)
+}
+
 // Term Expressions
 // --------------------
 

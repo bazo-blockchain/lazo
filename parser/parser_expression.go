@@ -63,9 +63,25 @@ func (p *Parser) parseEquality() node.ExpressionNode {
 
 func (p *Parser) parseRelationalComparison() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseTerm()
+	leftExpr := p.parseBitwiseShift()
 
 	for p.isAnySymbol(token.Less, token.LessEqual, token.GreaterEqual, token.Greater) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseShift(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseShift() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseTerm()
+
+	for p.isAnySymbol(token.ShiftLeft, token.ShiftRight) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
