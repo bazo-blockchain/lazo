@@ -34,6 +34,34 @@ func TestMixedLogicOperatorOrAnd(t *testing.T) {
 	assertBinaryExpression(t, e, "x", "(y && z)", token.Or)
 }
 
+// Bitwise Logic operators
+// -----------------------
+
+func TestBitwiseOr(t *testing.T) {
+	e := parseExpressionFromInput(t, "x | y | z")
+	assertBinaryExpression(t, e, "(x | y)", "z", token.BitwiseOr)
+}
+
+func TestBitwiseXOr(t *testing.T) {
+	e := parseExpressionFromInput(t, "x ^ y ^ z")
+	assertBinaryExpression(t, e, "(x ^ y)", "z", token.BitwiseXOr)
+}
+
+func TestBitwiseAnd(t *testing.T) {
+	e := parseExpressionFromInput(t, "x & y & z")
+	assertBinaryExpression(t, e, "(x & y)", "z", token.BitwiseAnd)
+}
+
+func TestMixedBitwiseLogicOperatorsAndOrXor(t *testing.T) {
+	e := parseExpressionFromInput(t, "w | x ^ y & z")
+	assertBinaryExpression(t, e, "w", "(x ^ (y & z))", token.BitwiseOr)
+}
+
+func TestMixedBitwiseLogicOperatorsAndOrXor2(t *testing.T) {
+	e := parseExpressionFromInput(t, "w & x | y ^ z")
+	assertBinaryExpression(t, e, "(w & x)", "(y ^ z)", token.BitwiseOr)
+}
+
 // Equality operators
 // ------------------
 

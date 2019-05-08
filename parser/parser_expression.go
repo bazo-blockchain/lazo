@@ -31,9 +31,57 @@ func (p *Parser) parseOr() node.ExpressionNode {
 
 func (p *Parser) parseAnd() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseEquality()
+	leftExpr := p.parseBitwiseOr()
 
 	for p.isAnySymbol(token.And) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseOr(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseBitwiseXOr()
+
+	for p.isAnySymbol(token.BitwiseOr) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseXOr(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseXOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseBitwiseAnd()
+
+	for p.isAnySymbol(token.BitwiseXOr) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseAnd(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseAnd() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseEquality()
+
+	for p.isAnySymbol(token.BitwiseAnd) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
