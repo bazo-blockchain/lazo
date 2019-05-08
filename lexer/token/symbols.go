@@ -8,8 +8,8 @@ const (
 	EOF Symbol = iota
 	NewLine
 
-	Addition
-	Subtraction
+	Plus
+	Minus
 	Division
 	Multiplication
 	Modulo
@@ -61,8 +61,8 @@ var SymbolLexeme = map[Symbol]string{
 	EOF:     "EOF",
 	NewLine: `\n`,
 
-	Addition:       "+",
-	Subtraction:    "-",
+	Plus:           "+",
+	Minus:          "-",
 	Multiplication: "*",
 	Division:       "/",
 	Modulo:         "%",
@@ -142,8 +142,8 @@ var SingleCharOperators = map[rune]Symbol{
 	']': CloseBracket,
 	'(': OpenParen,
 	')': CloseParen,
-	'+': Addition,
-	'-': Subtraction,
+	'+': Plus,
+	'-': Minus,
 	'/': Division,
 	'%': Modulo,
 }

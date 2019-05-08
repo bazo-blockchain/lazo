@@ -94,6 +94,13 @@ func assertAssignmentStatement(t *testing.T, node *node.AssignmentStatementNode,
 	assertExpression(t, node.Right, expr)
 }
 
+func assertShorthandAssignmentStatement(t *testing.T, node *node.ShorthandAssignmentStatementNode,
+	designator string, expr string, operator token.Symbol) {
+	assert.Equal(t, node.Designator.String(), designator)
+	assertExpression(t, node.Expression, expr)
+	assert.Equal(t, node.Operator, operator)
+}
+
 func assertIfStatement(t *testing.T, node *node.IfStatementNode, cond string, totalThen int, totalElse int) {
 	assertExpression(t, node.Condition, cond)
 	assert.Equal(t, len(node.Then), totalThen)

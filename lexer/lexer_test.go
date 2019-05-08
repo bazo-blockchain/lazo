@@ -73,7 +73,7 @@ func TestUInt256Max(t *testing.T) {
 
 func TestNegativeInt(t *testing.T) {
 	tester := newLexerTestUtil(t, "-10")
-	tester.assertFixToken(0, token.Subtraction)
+	tester.assertFixToken(0, token.Minus)
 	tester.assertInteger(1, big.NewInt(10))
 }
 
@@ -337,12 +337,24 @@ func TestCloseParen(t *testing.T) {
 
 func TestAddition(t *testing.T) {
 	tester := newLexerTestUtil(t, "+")
-	tester.assertFixToken(0, token.Addition)
+	tester.assertFixToken(0, token.Plus)
+}
+
+func TestIncrement(t *testing.T) {
+	tester := newLexerTestUtil(t, "++")
+	tester.assertFixToken(0, token.Plus)
+	tester.assertFixToken(1, token.Plus)
 }
 
 func TestSubtraction(t *testing.T) {
 	tester := newLexerTestUtil(t, "-")
-	tester.assertFixToken(0, token.Subtraction)
+	tester.assertFixToken(0, token.Minus)
+}
+
+func TestDecrement(t *testing.T) {
+	tester := newLexerTestUtil(t, "--")
+	tester.assertFixToken(0, token.Minus)
+	tester.assertFixToken(1, token.Minus)
 }
 
 func TestMultiplication(t *testing.T) {

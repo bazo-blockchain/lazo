@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
 	"testing"
@@ -780,6 +781,27 @@ func TestMultiAssignmentStatementInvalidDesignator(t *testing.T) {
 
 	assert.Assert(t, ok)
 	assertErrorAt(t, p, 0, "Symbol = expected, but got x")
+}
+
+// Shorthand Assignment
+// --------------------
+
+func TestPostfixIncrement(t *testing.T) {
+	p := newParserFromInput("x++ \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Plus)
+	assertNoErrors(t, p)
+}
+
+func TestPostfixDecrement(t *testing.T) {
+	p := newParserFromInput("x-- \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Minus)
+	assertNoErrors(t, p)
 }
 
 // Statement with Fix token

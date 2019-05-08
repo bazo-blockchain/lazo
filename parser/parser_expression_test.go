@@ -90,22 +90,22 @@ func TestRelationalComparisonAssociativity(t *testing.T) {
 
 func TestAddition(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 + 2")
-	assertBinaryExpression(t, e, "1", "2", token.Addition)
+	assertBinaryExpression(t, e, "1", "2", token.Plus)
 }
 
 func TestConcatenation(t *testing.T) {
 	e := parseExpressionFromInput(t, ` "hello" + "world" `)
-	assertBinaryExpression(t, e, "hello", "world", token.Addition)
+	assertBinaryExpression(t, e, "hello", "world", token.Plus)
 }
 
 func TestSubstraction(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 - 2")
-	assertBinaryExpression(t, e, "1", "2", token.Subtraction)
+	assertBinaryExpression(t, e, "1", "2", token.Minus)
 }
 
 func TestTermAssociativity(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 + 2 - 3")
-	assertBinaryExpression(t, e, "(1 + 2)", "3", token.Subtraction)
+	assertBinaryExpression(t, e, "(1 + 2)", "3", token.Minus)
 }
 
 func TestTermPrecedence(t *testing.T) {
@@ -138,7 +138,7 @@ func TestFactorAssociativity(t *testing.T) {
 
 func TestFactorPrecedence(t *testing.T) {
 	e := parseExpressionFromInput(t, "1 + 2 * 3")
-	assertBinaryExpression(t, e, "1", "(2 * 3)", token.Addition)
+	assertBinaryExpression(t, e, "1", "(2 * 3)", token.Plus)
 }
 
 // Exponent Expressions
@@ -164,15 +164,15 @@ func TestFactorWithExponent(t *testing.T) {
 
 func TestUnaryPlus(t *testing.T) {
 	e := parseExpressionFromInput(t, "+x")
-	assertUnaryExpression(t, e, "x", token.Addition)
+	assertUnaryExpression(t, e, "x", token.Plus)
 }
 
 func TestUnaryMinus(t *testing.T) {
 	e := parseExpressionFromInput(t, "2 - -3")
-	assertBinaryExpression(t, e, "2", "(-3)", token.Subtraction)
+	assertBinaryExpression(t, e, "2", "(-3)", token.Minus)
 
 	unExpr := e.(*node.BinaryExpressionNode).Right
-	assertUnaryExpression(t, unExpr, "3", token.Subtraction)
+	assertUnaryExpression(t, unExpr, "3", token.Minus)
 }
 
 func TestUnaryNot(t *testing.T) {
@@ -182,17 +182,17 @@ func TestUnaryNot(t *testing.T) {
 
 func TestUnaryPrecedence(t *testing.T) {
 	e := parseExpressionFromInput(t, "-4 + 2")
-	assertBinaryExpression(t, e, "(-4)", "2", token.Addition)
+	assertBinaryExpression(t, e, "(-4)", "2", token.Plus)
 }
 
 func TestUnaryWithFactor(t *testing.T) {
 	e := parseExpressionFromInput(t, "-4 * 2")
-	assertUnaryExpression(t, e, "(4 * 2)", token.Subtraction)
+	assertUnaryExpression(t, e, "(4 * 2)", token.Minus)
 }
 
 func TestUnaryAssociativity(t *testing.T) {
 	e := parseExpressionFromInput(t, "-+-+x")
-	assertUnaryExpression(t, e, "(+(-(+x)))", token.Subtraction)
+	assertUnaryExpression(t, e, "(+(-(+x)))", token.Minus)
 }
 
 // Designator Expressions

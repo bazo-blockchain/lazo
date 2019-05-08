@@ -81,7 +81,7 @@ func (p *Parser) parseTerm() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseFactor()
 
-	for p.isAnySymbol(token.Addition, token.Subtraction) {
+	for p.isAnySymbol(token.Plus, token.Minus) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
@@ -126,7 +126,7 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 }
 
 func (p *Parser) parseExpressionRest() node.ExpressionNode {
-	if p.isAnySymbol(token.Addition, token.Subtraction, token.Not) {
+	if p.isAnySymbol(token.Plus, token.Minus, token.Not) {
 		return p.parseUnaryExpression()
 	}
 

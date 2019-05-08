@@ -20,6 +20,7 @@ type Visitor interface {
 	VisitReturnStatementNode(node *ReturnStatementNode)
 	VisitAssignmentStatementNode(node *AssignmentStatementNode)
 	VisitMultiAssignmentStatementNode(node *MultiAssignmentStatementNode)
+	VisitShorthandAssignmentNode(node *ShorthandAssignmentStatementNode)
 	VisitCallStatementNode(node *CallStatementNode)
 	VisitDeleteStatementNode(node *DeleteStatementNode)
 	VisitBinaryExpressionNode(node *BinaryExpressionNode)

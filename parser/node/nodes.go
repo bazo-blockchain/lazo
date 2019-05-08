@@ -402,6 +402,25 @@ func (n *MultiAssignmentStatementNode) Accept(v Visitor) {
 
 // --------------------------
 
+// ShorthandAssignmentStatementNode composes abstract node and holds the designator, operator and expression.
+type ShorthandAssignmentStatementNode struct {
+	AbstractNode
+	Designator DesignatorNode
+	Operator   token.Symbol
+	Expression ExpressionNode
+}
+
+func (n *ShorthandAssignmentStatementNode) String() string {
+	return fmt.Sprintf("\n %s %s=%s", n.Designator, token.SymbolLexeme[n.Operator], n.Expression)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *ShorthandAssignmentStatementNode) Accept(v Visitor) {
+	v.VisitShorthandAssignmentNode(n)
+}
+
+// --------------------------
+
 // CallStatementNode composes abstract node and holds the function call expression
 type CallStatementNode struct {
 	AbstractNode

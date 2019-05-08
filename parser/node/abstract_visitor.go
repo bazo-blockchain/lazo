@@ -138,6 +138,12 @@ func (v *AbstractVisitor) VisitMultiAssignmentStatementNode(node *MultiAssignmen
 	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
+// VisitShorthandAssignmentNode traverses the target designator and the expression
+func (v *AbstractVisitor) VisitShorthandAssignmentNode(node *ShorthandAssignmentStatementNode) {
+	node.Designator.Accept(v.ConcreteVisitor)
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
 // VisitCallStatementNode traverses the function call expression
 func (v *AbstractVisitor) VisitCallStatementNode(node *CallStatementNode) {
 	node.Call.Accept(v.ConcreteVisitor)
