@@ -215,9 +215,7 @@ func (lex *Lexer) readFixToken() token.Token {
 		}
 	}
 
-	if lex.isChar('&') || lex.isChar('|') {
-		return lex.readLogicalFixToken()
-	} else if lex.isChar('\n') {
+	if lex.isChar('\n') {
 		lex.nextChar()
 		return &token.FixToken{
 			AbstractToken: lex.newAbstractToken(`\n`),
@@ -232,26 +230,6 @@ func (lex *Lexer) readFixToken() token.Token {
 		AbstractToken: lex.newAbstractToken(lexeme),
 		Msg:           "Invalid character",
 	}
-}
-
-func (lex *Lexer) readLogicalFixToken() token.Token {
-	buf := []rune{lex.current}
-	lex.nextChar()
-	if !lex.isEnd {
-		buf = append(buf, lex.current)
-	}
-	lexeme := string(buf)
-	abstractToken := lex.newAbstractToken(lexeme)
-
-	if symbol, ok := token.LogicalOperators[lexeme]; ok {
-		lex.nextChar()
-		return &token.FixToken{
-			AbstractToken: abstractToken,
-			Value:         symbol,
-		}
-	}
-
-	return lex.newErrorToken(abstractToken, "Invalid Symbol")
 }
 
 func (lex *Lexer) nextChar() {

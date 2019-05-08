@@ -15,6 +15,9 @@ const (
 	Modulo
 	Exponent
 
+	ShiftLeft
+	ShiftRight
+
 	Less
 	LessEqual
 	GreaterEqual
@@ -37,6 +40,11 @@ const (
 	Not
 	And
 	Or
+
+	BitwiseNot
+	BitwiseAnd
+	BitwiseOr
+	BitwiseXor
 
 	Assign
 
@@ -68,6 +76,9 @@ var SymbolLexeme = map[Symbol]string{
 	Modulo:         "%",
 	Exponent:       "**",
 
+	ShiftLeft:  "<<",
+	ShiftRight: ">>",
+
 	Less:         "<",
 	LessEqual:    "<=",
 	GreaterEqual: ">=",
@@ -90,6 +101,11 @@ var SymbolLexeme = map[Symbol]string{
 	Not: "!",
 	And: "&&",
 	Or:  "||",
+
+	BitwiseNot: "~",
+	BitwiseAnd: "&",
+	BitwiseOr:  "|",
+	BitwiseXor: "^",
 
 	Assign: "=",
 
@@ -146,6 +162,8 @@ var SingleCharOperators = map[rune]Symbol{
 	'-': Minus,
 	'/': Division,
 	'%': Modulo,
+	'~': BitwiseNot,
+	'^': BitwiseXor,
 }
 
 // PossibleMultiCharOperators maps the first character of a possible operation to the Symbol type.
@@ -156,6 +174,9 @@ var PossibleMultiCharOperators = map[rune]Symbol{
 	'!': Not,
 
 	'*': Multiplication,
+
+	'|': BitwiseOr,
+	'&': BitwiseAnd,
 }
 
 // MultiCharOperators maps the full literal value of the operation to the Symbol type.
@@ -166,10 +187,10 @@ var MultiCharOperators = map[string]Symbol{
 	"<=": LessEqual,
 
 	"**": Exponent,
-}
 
-// LogicalOperators maps the logical operator to Symbol type.
-var LogicalOperators = map[string]Symbol{
-	"&&": And,
+	"<<": ShiftLeft,
+	">>": ShiftRight,
+
 	"||": Or,
+	"&&": And,
 }
