@@ -180,6 +180,11 @@ func TestUnaryNot(t *testing.T) {
 	assertUnaryExpression(t, e, "true", token.Not)
 }
 
+func TestUnaryBinaryNot(t *testing.T) {
+	e := parseExpressionFromInput(t, "~x")
+	assertUnaryExpression(t, e, "x", token.BitwiseNot)
+}
+
 func TestUnaryPrecedence(t *testing.T) {
 	e := parseExpressionFromInput(t, "-4 + 2")
 	assertBinaryExpression(t, e, "(-4)", "2", token.Plus)
