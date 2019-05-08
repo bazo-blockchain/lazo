@@ -44,7 +44,7 @@ const (
 	BitwiseNot
 	BitwiseAnd
 	BitwiseOr
-	BitwiseXor
+	BitwiseXOr
 
 	Assign
 
@@ -105,7 +105,7 @@ var SymbolLexeme = map[Symbol]string{
 	BitwiseNot: "~",
 	BitwiseAnd: "&",
 	BitwiseOr:  "|",
-	BitwiseXor: "^",
+	BitwiseXOr: "^",
 
 	Assign: "=",
 
@@ -163,7 +163,7 @@ var SingleCharOperators = map[rune]Symbol{
 	'/': Division,
 	'%': Modulo,
 	'~': BitwiseNot,
-	'^': BitwiseXor,
+	'^': BitwiseXOr,
 }
 
 // PossibleMultiCharOperators maps the first character of a possible operation to the Symbol type.

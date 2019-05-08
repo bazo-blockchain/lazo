@@ -130,6 +130,13 @@ func (p *Parser) parseExpressionRest() node.ExpressionNode {
 		return p.parseUnaryExpression()
 	}
 
+	if p.isSymbol(token.OpenParen) {
+		p.nextToken()
+		expr := p.parseExpression()
+		p.check(token.OpenParen)
+		return expr
+	}
+
 	return p.parseOperand()
 }
 

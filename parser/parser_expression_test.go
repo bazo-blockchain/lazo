@@ -448,6 +448,24 @@ func TestArrayValueAssignmentNegativeIndex(t *testing.T) {
 	assertNoErrors(t, p)
 }
 
+// Parentheses
+// ------------
+
+func TestParentheses(t *testing.T) {
+	e := parseExpressionFromInput(t, "(x + y)")
+	assertBinaryExpression(t, e, "x", "y", token.Plus)
+}
+
+func TestParenthesesPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * (3 + 4)")
+	assertBinaryExpression(t, e, "2", "(3 + 4)", token.Multiplication)
+}
+
+func TestNestedParentheses(t *testing.T) {
+	e := parseExpressionFromInput(t, "((2) * (3 + 4))")
+	assertBinaryExpression(t, e, "2", "(3 + 4)", token.Multiplication)
+}
+
 // Literal Expressions
 // -------------------
 

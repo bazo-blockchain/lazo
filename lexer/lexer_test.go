@@ -419,7 +419,7 @@ func TestBitwiseLogicalSymbols(t *testing.T) {
 	tester.assertFixToken(0, token.BitwiseOr)
 	tester.assertFixToken(1, token.BitwiseAnd)
 	tester.assertFixToken(2, token.BitwiseNot)
-	tester.assertFixToken(3, token.BitwiseXor)
+	tester.assertFixToken(3, token.BitwiseXOr)
 }
 
 func TestEqual(t *testing.T) {
