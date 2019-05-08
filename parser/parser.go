@@ -378,6 +378,10 @@ func (p *Parser) parseMultiAssignmentStatement(designator node.DesignatorNode) *
 var allowedShorthandOperators = []token.Symbol{
 	token.Plus,
 	token.Minus,
+	token.Multiplication,
+	token.Division,
+	token.Modulo,
+	token.Exponent,
 }
 
 func (p *Parser) parseShorthandAssignmentStatement(designator node.DesignatorNode, operator token.Symbol) node.StatementNode {

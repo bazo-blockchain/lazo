@@ -98,7 +98,7 @@ func assertShorthandAssignmentStatement(t *testing.T, node *node.ShorthandAssign
 	designator string, expr string, operator token.Symbol) {
 	assert.Equal(t, node.Designator.String(), designator)
 	assertExpression(t, node.Expression, expr)
-	assert.Equal(t, node.Operator, operator)
+	assert.Equal(t, node.Operator, operator, token.SymbolLexeme[node.Operator])
 }
 
 func assertIfStatement(t *testing.T, node *node.IfStatementNode, cond string, totalThen int, totalElse int) {
