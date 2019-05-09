@@ -60,7 +60,6 @@ const (
 	ArrInsert
 	ArrRemove
 	ArrAt
-	ArrLen
 	NewStr
 	StoreFld
 	LoadFld

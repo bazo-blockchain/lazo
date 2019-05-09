@@ -241,10 +241,11 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 		return
 	}
 
-	node.Designator.Accept(v)
-	if node.Identifier == "length" && v.isArray(node.Designator) {
-		v.assembler.Emit(il.ArrLen)
-	}
+	// TODO as soon as VM has ARRLEN Opcode
+	//node.Designator.Accept(v)
+	//if node.Identifier == "length" && v.isArray(node.Designator) {
+	//	v.assembler.Emit(il.ArrLen)
+	//}
 
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	v.loadVariable(decl)
@@ -502,8 +503,12 @@ func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
 }
 
 func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
-	if structType, ok := typeSymbol.(*symbol.StructTypeSymbol); ok {
-		v.pushDefaultStruct(structType)
+	switch typeSymbol.(type) {
+	case *symbol.StructTypeSymbol:
+		v.pushDefaultStruct(typeSymbol.(*symbol.StructTypeSymbol))
+		return
+	case *symbol.ArrayTypeSymbol:
+		v.assembler.Emit(il.NewArr)
 		return
 	}
 
