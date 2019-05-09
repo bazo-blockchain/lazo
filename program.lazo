@@ -1,1 +1,12 @@
-int[][] a = new int[]{{1, 2}, {3, 4}}
+contract Test {
+    int x
+
+    constructor() {
+        x = 1
+    }
+
+    function bool isOne(int value) {
+        return value == 1
+    }
+
+}
