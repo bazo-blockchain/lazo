@@ -94,6 +94,13 @@ func assertAssignmentStatement(t *testing.T, node *node.AssignmentStatementNode,
 	assertExpression(t, node.Right, expr)
 }
 
+func assertShorthandAssignmentStatement(t *testing.T, node *node.ShorthandAssignmentStatementNode,
+	designator string, expr string, operator token.Symbol) {
+	assert.Equal(t, node.Designator.String(), designator)
+	assertExpression(t, node.Expression, expr)
+	assert.Equal(t, node.Operator, operator, token.SymbolLexeme[node.Operator])
+}
+
 func assertIfStatement(t *testing.T, node *node.IfStatementNode, cond string, totalThen int, totalElse int) {
 	assertExpression(t, node.Condition, cond)
 	assert.Equal(t, len(node.Then), totalThen)
@@ -145,6 +152,15 @@ func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {
 	} else {
 		assert.Equal(t, node.String(), expr)
 	}
+}
+
+func assertTernaryExpression(t *testing.T, n node.ExpressionNode, condition string, trueExpr string, falseExpr string) {
+	ternary, ok := n.(*node.TernaryExpression)
+
+	assert.Equal(t, ok, true)
+	assert.Equal(t, ternary.Condition.String(), condition)
+	assert.Equal(t, ternary.True.String(), trueExpr)
+	assert.Equal(t, ternary.False.String(), falseExpr)
 }
 
 func assertBinaryExpression(t *testing.T, n node.ExpressionNode, left string, right string, op token.Symbol) {
@@ -250,6 +266,14 @@ func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string,
 		assert.Equal(t, field.Expression.String(), pair.value)
 		i++
 	}
+}
+
+func assertTypeCast(t *testing.T, n node.ExpressionNode, typeName string, expr string) {
+	typeCast, ok := n.(*node.TypeCastNode)
+
+	assert.Assert(t, ok)
+	assert.Equal(t, typeCast.Type.String(), typeName)
+	assertExpression(t, typeCast.Expression, expr)
 }
 
 type pair struct {

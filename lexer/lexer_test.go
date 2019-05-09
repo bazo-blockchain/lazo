@@ -73,7 +73,7 @@ func TestUInt256Max(t *testing.T) {
 
 func TestNegativeInt(t *testing.T) {
 	tester := newLexerTestUtil(t, "-10")
-	tester.assertFixToken(0, token.Subtraction)
+	tester.assertFixToken(0, token.Minus)
 	tester.assertInteger(1, big.NewInt(10))
 }
 
@@ -337,12 +337,24 @@ func TestCloseParen(t *testing.T) {
 
 func TestAddition(t *testing.T) {
 	tester := newLexerTestUtil(t, "+")
-	tester.assertFixToken(0, token.Addition)
+	tester.assertFixToken(0, token.Plus)
+}
+
+func TestIncrement(t *testing.T) {
+	tester := newLexerTestUtil(t, "++")
+	tester.assertFixToken(0, token.Plus)
+	tester.assertFixToken(1, token.Plus)
 }
 
 func TestSubtraction(t *testing.T) {
 	tester := newLexerTestUtil(t, "-")
-	tester.assertFixToken(0, token.Subtraction)
+	tester.assertFixToken(0, token.Minus)
+}
+
+func TestDecrement(t *testing.T) {
+	tester := newLexerTestUtil(t, "--")
+	tester.assertFixToken(0, token.Minus)
+	tester.assertFixToken(1, token.Minus)
 }
 
 func TestMultiplication(t *testing.T) {
@@ -381,6 +393,12 @@ func TestLess(t *testing.T) {
 	tester.assertFixToken(0, token.Less)
 }
 
+func TestBitwiseShift(t *testing.T) {
+	tester := newLexerTestUtil(t, "<< >>")
+	tester.assertFixToken(0, token.ShiftLeft)
+	tester.assertFixToken(1, token.ShiftRight)
+}
+
 func TestNot(t *testing.T) {
 	tester := newLexerTestUtil(t, "!")
 	tester.assertFixToken(0, token.Not)
@@ -396,14 +414,12 @@ func TestOr(t *testing.T) {
 	tester.assertFixToken(0, token.Or)
 }
 
-func TestUnsupportedSymbol(t *testing.T) {
-	tester := newLexerTestUtil(t, "|") // Bitwise | is not supported yet, there it is an error
-	tester.assertError(0, "|")
-}
-
-func TestInvalidLogicalSymbol(t *testing.T) {
-	tester := newLexerTestUtil(t, "&|")
-	tester.assertError(0, "&|")
+func TestBitwiseLogicalSymbols(t *testing.T) {
+	tester := newLexerTestUtil(t, "| & ~ ^")
+	tester.assertFixToken(0, token.BitwiseOr)
+	tester.assertFixToken(1, token.BitwiseAnd)
+	tester.assertFixToken(2, token.BitwiseNot)
+	tester.assertFixToken(3, token.BitwiseXOr)
 }
 
 func TestEqual(t *testing.T) {

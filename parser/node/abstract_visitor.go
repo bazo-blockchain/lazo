@@ -138,6 +138,12 @@ func (v *AbstractVisitor) VisitMultiAssignmentStatementNode(node *MultiAssignmen
 	node.FuncCall.Accept(v.ConcreteVisitor)
 }
 
+// VisitShorthandAssignmentNode traverses the target designator and the expression
+func (v *AbstractVisitor) VisitShorthandAssignmentNode(node *ShorthandAssignmentStatementNode) {
+	node.Designator.Accept(v.ConcreteVisitor)
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
 // VisitCallStatementNode traverses the function call expression
 func (v *AbstractVisitor) VisitCallStatementNode(node *CallStatementNode) {
 	node.Call.Accept(v.ConcreteVisitor)
@@ -148,6 +154,13 @@ func (v *AbstractVisitor) VisitDeleteStatementNode(node *DeleteStatementNode) {
 	node.Element.Accept(v.ConcreteVisitor)
 }
 
+// VisitTernaryExpressionNode traverses the condition, true and false expressions.
+func (v *AbstractVisitor) VisitTernaryExpressionNode(node *TernaryExpression) {
+	node.Condition.Accept(v.ConcreteVisitor)
+	node.True.Accept(v.ConcreteVisitor)
+	node.False.Accept(v.ConcreteVisitor)
+}
+
 // VisitBinaryExpressionNode traverses the left and right expressions.
 func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) {
 	node.Left.Accept(v.ConcreteVisitor)
@@ -156,6 +169,12 @@ func (v *AbstractVisitor) VisitBinaryExpressionNode(node *BinaryExpressionNode) 
 
 // VisitUnaryExpressionNode traverses the expression.
 func (v *AbstractVisitor) VisitUnaryExpressionNode(node *UnaryExpressionNode) {
+	node.Expression.Accept(v.ConcreteVisitor)
+}
+
+// VisitTypeCastNode traverses the type and the designator.
+func (v *AbstractVisitor) VisitTypeCastNode(node *TypeCastNode) {
+	node.Type.Accept(v.ConcreteVisitor)
 	node.Expression.Accept(v.ConcreteVisitor)
 }
 

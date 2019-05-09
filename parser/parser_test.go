@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
 	"gotest.tools/assert"
 	"testing"
@@ -780,6 +781,114 @@ func TestMultiAssignmentStatementInvalidDesignator(t *testing.T) {
 
 	assert.Assert(t, ok)
 	assertErrorAt(t, p, 0, "Symbol = expected, but got x")
+}
+
+// Shorthand Assignment
+// --------------------
+
+func TestPostfixIncrement(t *testing.T) {
+	p := newParserFromInput("x++ \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Plus)
+	assertNoErrors(t, p)
+}
+
+func TestPostfixDecrement(t *testing.T) {
+	p := newParserFromInput("x-- \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Minus)
+	assertNoErrors(t, p)
+}
+
+func TestPostfixIncrementMissingNewline(t *testing.T) {
+	p := newParserFromInput("x++")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Plus)
+	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestPostfixIncrementError(t *testing.T) {
+	p := newParserFromInput("x+++ \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "1", token.Plus)
+	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestPostfixIncrementError2(t *testing.T) {
+	p := newParserFromInput("x+- \n")
+	_, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol = expected")
+}
+
+func TestPostfixIncrementError3(t *testing.T) {
+	p := newParserFromInput("x// \n")
+	_, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertErrorAt(t, p, 0, "Symbol = expected")
+}
+
+func TestShorthandAssignment(t *testing.T) {
+	p := newParserFromInput("x += 2 \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "2", token.Plus)
+	assertNoErrors(t, p)
+}
+
+func TestShorthandAssignmentMult(t *testing.T) {
+	p := newParserFromInput("x *= 3 \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "3", token.Multiplication)
+	assertNoErrors(t, p)
+}
+
+func TestShorthandAssignmentExp(t *testing.T) {
+	p := newParserFromInput("x **= 3 \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "3", token.Exponent)
+	assertNoErrors(t, p)
+}
+
+func TestShorthandAssignmentBitwiseOp(t *testing.T) {
+	p := newParserFromInput("x &= 3 \n")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "3", token.BitwiseAnd)
+	assertNoErrors(t, p)
+}
+
+func TestShorthandAssignmentMissingNewline(t *testing.T) {
+	p := newParserFromInput("x /= 3")
+	sa, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, ok)
+	assertShorthandAssignmentStatement(t, sa, "x", "3", token.Division)
+	assertErrorAt(t, p, 0, "Symbol \\n expected")
+}
+
+func TestShorthandAssignmentInvalid(t *testing.T) {
+	p := newParserFromInput("x ~= 3 \n")
+	_, ok := p.parseStatement().(*node.ShorthandAssignmentStatementNode)
+
+	assert.Assert(t, !ok)
+	assertErrorAt(t, p, 0, "Unsupported symbol ~")
 }
 
 // Statement with Fix token

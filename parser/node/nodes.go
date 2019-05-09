@@ -402,6 +402,25 @@ func (n *MultiAssignmentStatementNode) Accept(v Visitor) {
 
 // --------------------------
 
+// ShorthandAssignmentStatementNode composes abstract node and holds the designator, operator and expression.
+type ShorthandAssignmentStatementNode struct {
+	AbstractNode
+	Designator DesignatorNode
+	Operator   token.Symbol
+	Expression ExpressionNode
+}
+
+func (n *ShorthandAssignmentStatementNode) String() string {
+	return fmt.Sprintf("\n %s %s=%s", n.Designator, token.SymbolLexeme[n.Operator], n.Expression)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *ShorthandAssignmentStatementNode) Accept(v Visitor) {
+	v.VisitShorthandAssignmentNode(n)
+}
+
+// --------------------------
+
 // CallStatementNode composes abstract node and holds the function call expression
 type CallStatementNode struct {
 	AbstractNode
@@ -438,6 +457,25 @@ func (n *DeleteStatementNode) Accept(v Visitor) {
 // Expression Nodes
 // --------------------------
 
+// TernaryExpression composes abstract node and holds the binary operator and left & right expressions.
+type TernaryExpression struct {
+	AbstractNode
+	Condition ExpressionNode
+	True      ExpressionNode
+	False     ExpressionNode
+}
+
+func (n *TernaryExpression) String() string {
+	return fmt.Sprintf("%s ? %s : %s", n.Condition, n.True, n.False)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *TernaryExpression) Accept(v Visitor) {
+	v.VisitTernaryExpressionNode(n)
+}
+
+// --------------------------
+
 // BinaryExpressionNode composes abstract node and holds the binary operator and left & right expressions.
 type BinaryExpressionNode struct {
 	AbstractNode
@@ -471,6 +509,24 @@ func (n *UnaryExpressionNode) String() string {
 // Accept lets a visitor to traverse its node structure
 func (n *UnaryExpressionNode) Accept(v Visitor) {
 	v.VisitUnaryExpressionNode(n)
+}
+
+// --------------------------
+
+// TypeCastNode composes abstract node and holds the type and the designator
+type TypeCastNode struct {
+	AbstractNode
+	Type       *BasicTypeNode
+	Expression ExpressionNode
+}
+
+func (n *TypeCastNode) String() string {
+	return fmt.Sprintf("(%s) %s", n.Type, n.Expression)
+}
+
+// Accept lets a visitor to traverse its node structure
+func (n *TypeCastNode) Accept(v Visitor) {
+	v.VisitTypeCastNode(n)
 }
 
 // --------------------------
