@@ -1,14 +1,1 @@
-contract Test {
-    int one
-    int result
-
-    constructor() {
-        this.one = 1
-        int x = calc(5)
-    }
-
-    function int calc(int a) {
-        return this.one + a
-    }
-
-}
+int[][] a = new int[]{{1, 2}, {3, 4}}
