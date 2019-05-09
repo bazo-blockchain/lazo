@@ -983,7 +983,7 @@ func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
-	tester.assertErrorAt(0, "Array values must be of the same type as the array itself")
+	tester.assertErrorAt(0, "expected Type int, got Type char")
 }
 
 func TestArrayNestedLengthInitialization(t *testing.T) {
