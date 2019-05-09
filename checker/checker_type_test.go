@@ -990,18 +990,17 @@ func TestArrayNestedLengthInitialization(t *testing.T) {
 	tester.assertTotalErrors(0)
 }
 
-//
-//func TestArrayNestedValueInitialization(t *testing.T) {
-//	tester := newCheckerTestUtil(t, `
-//		int[][] a = new int[]{{1, 2}, {3, 4}}
-//	`, true)
-//	tester.assertTotalErrors(0)
-//}
-//
-//func TestArrayNestedValueInitializationDifferentLength(t *testing.T) {
-//	tester := newCheckerTestUtil(t, `
-//		int[][] a = new int[]{{1, 2}, {3}}
-//	`, true)
-//
-//	tester.assertTotalErrors(0)
-//}
+func TestArrayNestedValueInitialization(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[][] a = new int[]{{1, 2}, {3, 4}}
+	`, true)
+	tester.assertTotalErrors(0)
+}
+
+func TestArrayNestedValueInitializationDifferentLength(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[][] a = new int[]{{1, 2}, {3}}
+	`, true)
+
+	tester.assertTotalErrors(0)
+}

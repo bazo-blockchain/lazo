@@ -293,7 +293,7 @@ func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCrea
 		for i, element := range node.Elements.Values {
 			exprType := v.symbolTable.GetTypeByExpression(element)
 
-			if exprType.Type() != typeSymbol.Type() {
+			if exprType != nil && exprType.Type() != typeSymbol.Type() {
 				v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
 			}
 		}
