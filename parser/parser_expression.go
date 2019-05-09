@@ -371,14 +371,14 @@ func (p *Parser) parseCreation() node.ExpressionNode {
 }
 
 func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier string) node.ExpressionNode {
-	typeNode := &node.BasicTypeNode{
+	var arrayType node.TypeNode = &node.BasicTypeNode{
 		AbstractNode: abstractNode,
 		Identifier:   identifier,
 	}
 
 	// Initialization using values: new int[][]{{1, 2}, {3, 4}}
 	if p.peekIsSymbol(token.CloseBracket) {
-		arrayType := p.parseArrayType(typeNode)
+		arrayType = p.parseArrayType(arrayType)
 		return &node.ArrayValueCreationNode{
 			AbstractNode: abstractNode,
 			Type:         arrayType,
@@ -397,11 +397,16 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 		p.nextToken()
 		expressions = append(expressions, p.parseExpression())
 		p.check(token.CloseBracket)
+
+		arrayType = &node.ArrayTypeNode{
+			AbstractNode: p.newAbstractNodeWithPos(arrayType.Pos()),
+			ElementType:  arrayType,
+		}
 	}
 
 	return &node.ArrayLengthCreationNode{
 		AbstractNode: abstractNode,
-		Type:         typeNode,
+		Type:         arrayType,
 		Lengths:      expressions,
 	}
 }
