@@ -123,6 +123,22 @@ func TestStructType(t *testing.T) {
 	tester.assertField(0, gs.Structs["Person"])
 }
 
+// Map Types
+//----------
+
+func TestMapType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> map
+	`, true)
+
+	gs := tester.globalScope
+	assert.Equal(t, len(gs.Types), len(gs.BuiltInTypes)+1)
+
+	mapType := "Map<String,int>"
+	tester.assertMap(mapType, gs.StringType, gs.IntType)
+	tester.assertField(0, gs.Types[mapType])
+}
+
 // Constructor
 //------------
 

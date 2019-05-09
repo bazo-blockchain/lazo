@@ -45,7 +45,7 @@ func (t *SymbolTable) AddArrayType(elementTypeNode node.TypeNode) TypeSymbol {
 	}
 
 	arrayType := NewArrayTypeSymbol(t.GlobalScope, elementType)
-	t.GlobalScope.Types[arrayType.Type()] = arrayType
+	t.GlobalScope.Types[arrayType.Identifier()] = arrayType
 	return arrayType
 }
 
