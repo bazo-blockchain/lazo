@@ -691,6 +691,10 @@ func (n *ArrayValueCreationNode) Accept(v Visitor) {
 	v.VisitArrayValueCreationNode(n)
 }
 
+func (n *ArrayValueCreationNode) Dimension() {
+
+}
+
 // ArrayInitializationNode composes abstract node and holds the target struct and field arguments.
 type ArrayInitializationNode struct {
 	AbstractNode

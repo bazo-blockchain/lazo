@@ -149,13 +149,12 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
 		v.storeVariable(decl)
 
-	//// TODO will be done when array is implemented
-	//case *node.ElementAccessNode:
-	//	elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
-	//	elementAccess.Designator.Accept(v)
-	//	elementAccess.Expression.Accept(v)
-	//	assignNode.Right.Accept(v)
-	//	v.assembler.Emit() // TODO Store Array Element
+	case *node.ElementAccessNode:
+		elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
+		assignNode.Right.Accept(v)
+		elementAccess.Expression.Accept(v)
+		elementAccess.Designator.Accept(v)
+		v.assembler.Emit(il.ArrInsert)
 
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
@@ -183,12 +182,11 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			decl := v.symbolTable.GetDeclByDesignator(assignNode.Designators[i])
 			v.storeVariable(decl)
 
-		//// TODO will be done when array is implemented
-		//case *node.ElementAccessNode:
-		//	elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
-		//	elementAccess.Designator.Accept(v)
-		//	elementAccess.Expression.Accept(v)
-		//	v.assembler.Emit() // TODO Store Array Element
+		case *node.ElementAccessNode:
+			elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
+			elementAccess.Expression.Accept(v)
+			elementAccess.Designator.Accept(v)
+			v.assembler.Emit(il.ArrInsert)
 
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
@@ -244,21 +242,20 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 	}
 
 	node.Designator.Accept(v)
-	// TODO https://github.com/bazo-blockchain/lazo/issues/57
-	//if node.Identifier == "length" && v.isArray(node.Designator) {
-	//	v.assembler.Emit() // Load Length
-	//  }
+	if node.Identifier == "length" && v.isArray(node.Designator) {
+		v.assembler.Emit(il.ArrLen)
+	}
 
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	v.loadVariable(decl)
 }
 
-//// TODO Uncomment and implement as soon as arrays are implemented
-//func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode){
-//	node.Designator.Accept(v)
-//	node.Expression.Accept(v)
-//	v.assembler.Emit() // Load Array Element
-//}
+// VisitElementAccessNode generates the il code for an array element access
+func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
+	node.Expression.Accept(v)
+	node.Designator.Accept(v)
+	v.assembler.Emit(il.ArrAt) // Load Array Element
+}
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -427,6 +424,26 @@ func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.Struct
 	}
 }
 
+// VisitArrayLengthCreationNode generates the IL Code for the array length creation
+func (v *ILCodeGenerationVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
+	v.assembler.Emit(il.NewArr) // Pass Array length as parameter
+}
+
+// VisitArrayValueCreationNode generates the IL Code for the array value creation
+func (v *ILCodeGenerationVisitor) VisitArrayValueCreationNode(n *node.ArrayValueCreationNode) {
+	if _, isNested := n.Elements.Values[0].(*node.ArrayInitializationNode); isNested {
+		v.reportError(n, "Generator currently does not support array nesting")
+		return
+	}
+
+	v.assembler.Emit(il.NewArr)
+	for _, value := range n.Elements.Values {
+		value.Accept(v)
+		v.assembler.Emit(il.ArrAppend)
+	}
+
+}
+
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
@@ -547,6 +564,12 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	default:
 		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
+}
+
+func (v *ILCodeGenerationVisitor) isArray(node node.DesignatorNode) bool {
+	sym := v.symbolTable.GetTypeByExpression(node)
+	_, ok := sym.(*symbol.ArrayTypeSymbol)
+	return ok
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {

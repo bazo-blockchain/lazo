@@ -135,7 +135,6 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 		return
 	}
 
-	// TODO In case of arrays we most likely must differentiate between length and value initialization
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
