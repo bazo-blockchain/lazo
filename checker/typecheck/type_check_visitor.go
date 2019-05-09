@@ -288,12 +288,13 @@ func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCrea
 
 	if typeSymbol == nil {
 		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
+		v.symbolTable.MapExpressionToType(node, nil)
 	} else {
+		arrayTypeSymbol := typeSymbol.(*symbol.ArrayTypeSymbol)
 		for i, element := range node.Elements.Values {
-			exprType := v.symbolTable.GetTypeByExpression(element)
 
-			if exprType != nil && exprType.Type() != typeSymbol.Type() {
+			exprType := v.symbolTable.GetTypeByExpression(element)
+			if exprType != arrayTypeSymbol.ElementType {
 				v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
 			}
 		}
