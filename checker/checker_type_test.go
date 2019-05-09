@@ -937,6 +937,7 @@ func TestArrayInitialization(t *testing.T) {
 	`, true)
 
 	tester.assertField(0, tester.globalScope.Types[4])
+	tester.assertArrayLengthCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types[4])
 }
 
 func TestArrayInitializationWithValues(t *testing.T) {
@@ -944,7 +945,7 @@ func TestArrayInitializationWithValues(t *testing.T) {
 		int[] a = new int[]{1, 2, 3}
 	`, true)
 
-	//tester.assertField(0, tester.globalScope.Types[4])
+	tester.assertField(0, tester.globalScope.Types[4])
 	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types[4], tester.globalScope.IntType)
 }
 
@@ -964,6 +965,7 @@ func TestInvalidArrayInitialization(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given char[]")
 }
 
 func TestInvalidArrayInitializationWithValues(t *testing.T) {
@@ -972,6 +974,7 @@ func TestInvalidArrayInitializationWithValues(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given char[]")
 }
 
 func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
@@ -980,6 +983,7 @@ func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Array values must be of the same type as the array itself")
 }
 
 func TestArrayNestedLengthInitialization(t *testing.T) {
@@ -992,14 +996,14 @@ func TestArrayNestedLengthInitialization(t *testing.T) {
 
 func TestArrayNestedValueInitialization(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		int[][] a = new int[]{{1, 2}, {3, 4}}
+		int[][] a = new int[][]{{1, 2}, {3, 4}}
 	`, true)
 	tester.assertTotalErrors(0)
 }
 
 func TestArrayNestedValueInitializationDifferentLength(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		int[][] a = new int[]{{1, 2}, {3}}
+		int[][] a = new int[][]{{1, 2}, {3}}
 	`, true)
 
 	tester.assertTotalErrors(0)

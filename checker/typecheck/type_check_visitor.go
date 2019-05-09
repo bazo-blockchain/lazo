@@ -268,7 +268,7 @@ func (v *typeCheckVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCr
 	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
 	if typeSymbol == nil {
 		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
+		v.symbolTable.MapExpressionToType(node, nil)
 	} else {
 		for i, length := range node.Lengths {
 			exprType := v.symbolTable.GetTypeByExpression(length)
