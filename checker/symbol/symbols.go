@@ -287,9 +287,9 @@ type ArrayTypeSymbol struct {
 }
 
 // NewArrayTypeSymbol creates a new ArrayTypeSymbol
-func NewArrayTypeSymbol(scope Symbol, identifier string, elementType *BasicTypeSymbol) *ArrayTypeSymbol {
+func NewArrayTypeSymbol(scope Symbol, elementType TypeSymbol) *ArrayTypeSymbol {
 	return &ArrayTypeSymbol{
-		AbstractSymbol: NewAbstractSymbol(scope, identifier),
+		AbstractSymbol: NewAbstractSymbol(scope, elementType.Type()+"[]"),
 		ElementType:    elementType,
 	}
 }
@@ -301,7 +301,7 @@ func (sym *ArrayTypeSymbol) String() string {
 
 // Type returns the type
 func (sym *ArrayTypeSymbol) Type() string {
-	return sym.ElementType.Identifier()
+	return sym.Identifier()
 }
 
 //----------------

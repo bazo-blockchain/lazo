@@ -936,8 +936,8 @@ func TestArrayInitialization(t *testing.T) {
 		int[] a = new int[1]
 	`, true)
 
-	tester.assertField(0, tester.globalScope.Types[4])
-	tester.assertArrayLengthCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types[4])
+	tester.assertField(0, tester.globalScope.Types["int[]"])
+	tester.assertArrayLengthCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types["int[]"])
 }
 
 func TestArrayInitializationWithValues(t *testing.T) {
@@ -945,8 +945,8 @@ func TestArrayInitializationWithValues(t *testing.T) {
 		int[] a = new int[]{1, 2, 3}
 	`, true)
 
-	tester.assertField(0, tester.globalScope.Types[4])
-	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types[4], tester.globalScope.IntType)
+	tester.assertField(0, tester.globalScope.Types["int[]"])
+	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types["int[]"], tester.globalScope.IntType)
 }
 
 func TestArrayInitializationWithVariableLength(t *testing.T) {
@@ -956,7 +956,7 @@ func TestArrayInitializationWithVariableLength(t *testing.T) {
 	`, true)
 
 	creation := tester.getFieldNode(1).Expression.(*node.ArrayLengthCreationNode)
-	tester.assertArrayLengthCreation(creation, tester.globalScope.Types[4])
+	tester.assertArrayLengthCreation(creation, tester.globalScope.Types["int[]"])
 }
 
 func TestInvalidArrayInitialization(t *testing.T) {

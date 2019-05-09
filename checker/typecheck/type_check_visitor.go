@@ -265,18 +265,21 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 func (v *typeCheckVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
 	v.AbstractVisitor.VisitArrayLengthCreationNode(node)
 
-	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
+	// int[] has element type 'int'
+	typeSymbol := v.symbolTable.FindTypeByIdentifier(node.ElementType.String() + "[]")
 	if typeSymbol == nil {
-		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, nil)
-	} else {
-		for i, length := range node.Lengths {
-			exprType := v.symbolTable.GetTypeByExpression(length)
-			if exprType != v.symbolTable.GlobalScope.IntType {
-				v.reportError(node.Lengths[i], "Only integer expressions are allowed as array length argument")
-			}
+		typeSymbol = v.symbolTable.AddArrayType(node.ElementType)
+	}
+	if typeSymbol == nil {
+		v.reportError(node, "Invalid array type")
+	}
+
+	v.symbolTable.MapExpressionToType(node, typeSymbol)
+	for i, length := range node.Lengths {
+		exprType := v.symbolTable.GetTypeByExpression(length)
+		if exprType != v.symbolTable.GlobalScope.IntType {
+			v.reportError(node.Lengths[i], "Only integer expressions are allowed as array length argument")
 		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
 	}
 }
 
@@ -287,21 +290,19 @@ func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCrea
 	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
 
 	if typeSymbol == nil {
-		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, nil)
-	} else {
-		arrayTypeSymbol := typeSymbol.(*symbol.ArrayTypeSymbol)
-		for i, element := range node.Elements.Values {
-
-			exprType := v.symbolTable.GetTypeByExpression(element)
-			if exprType != arrayTypeSymbol.ElementType {
-				v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
-			}
-		}
-
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
+		v.reportError(node, "Invalid array type")
+		return
 	}
 
+	arrayTypeSymbol := typeSymbol.(*symbol.ArrayTypeSymbol)
+	for i, element := range node.Elements.Values {
+		exprType := v.symbolTable.GetTypeByExpression(element)
+		if exprType != arrayTypeSymbol.ElementType {
+			v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
+		}
+	}
+
+	v.symbolTable.MapExpressionToType(node, typeSymbol)
 }
 
 // VisitElementAccessNode checks that the expression is of type integer

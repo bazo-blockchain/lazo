@@ -406,7 +406,7 @@ func (p *Parser) parseArrayCreation(abstractNode node.AbstractNode, identifier s
 
 	return &node.ArrayLengthCreationNode{
 		AbstractNode: abstractNode,
-		Type:         arrayType,
+		ElementType:  arrayType,
 		Lengths:      expressions,
 	}
 }

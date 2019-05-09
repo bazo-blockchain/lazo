@@ -573,7 +573,7 @@ func TestUniqueStructName(t *testing.T) {
 		struct Person {
 		}
 	`, false)
-	tester.assertErrorAt(0, "Identifier 'Person' is already declared")
+	tester.assertErrorAt(0, "Struct 'Person' is already declared")
 }
 
 func TestUniqueStructFieldName(t *testing.T) {
