@@ -438,7 +438,7 @@ func (p *Parser) parseArrayInitialization() *node.ArrayInitializationNode {
 			expressions = append(expressions, p.parseArrayInitialization())
 		}
 
-		p.checkAndSkipNewLines(token.CloseBrace)
+		p.check(token.CloseBrace)
 
 		arrayInitialization.Values = expressions
 	} else {
