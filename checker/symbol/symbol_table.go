@@ -29,16 +29,15 @@ func (t *SymbolTable) FindTypeByNode(n node.TypeNode) TypeSymbol {
 	var result TypeSymbol
 	if basicTypeNode, ok := n.(*node.BasicTypeNode); ok {
 		return t.FindTypeByIdentifier(basicTypeNode.String())
-	} else {
-		elementTypeNode := n.(*node.ArrayTypeNode).ElementType
-		elementType := t.FindTypeByNode(elementTypeNode)
-		if elementType != nil {
-			result = t.FindArrayType(elementType)
-		} else {
-			result = nil
-		}
-
 	}
+	elementTypeNode := n.(*node.ArrayTypeNode).ElementType
+	elementType := t.FindTypeByNode(elementTypeNode)
+	if elementType != nil {
+		result = t.FindArrayType(elementType)
+	} else {
+		result = nil
+	}
+
 	return result
 }
 
@@ -66,17 +65,16 @@ func (t *SymbolTable) FindArrayType(ts TypeSymbol) *ArrayTypeSymbol {
 
 	if arrayTypeSymbol, ok := typeSymbolFromIdentifier.(*ArrayTypeSymbol); ok {
 		return arrayTypeSymbol
-	} else {
-		result := &ArrayTypeSymbol{
-			AbstractSymbol: AbstractSymbol{
-				Parent: ts.Scope(),
-				ID:     ts.Identifier() + "[]",
-			},
-			ElementType: ts,
-		}
-		t.GlobalScope.Types = append(t.GlobalScope.Types, result)
-		return result
 	}
+	result := &ArrayTypeSymbol{
+		AbstractSymbol: AbstractSymbol{
+			Parent: ts.Scope(),
+			ID:     ts.Identifier() + "[]",
+		},
+		ElementType: ts,
+	}
+	t.GlobalScope.Types = append(t.GlobalScope.Types, result)
+	return result
 }
 
 // Find recursively searches for a symbol within a specific scope
