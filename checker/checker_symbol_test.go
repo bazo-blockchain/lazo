@@ -139,6 +139,58 @@ func TestMapType(t *testing.T) {
 	tester.assertField(0, gs.Types[mapType])
 }
 
+func TestUniqueMapType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> map
+		Map<String, int> map2
+	`, true)
+
+	gs := tester.globalScope
+	assert.Equal(t, len(gs.Types), len(gs.BuiltInTypes)+1)
+
+	mapType := "Map<String,int>"
+	tester.assertMap(mapType, gs.StringType, gs.IntType)
+	tester.assertField(0, gs.Types[mapType])
+	tester.assertField(1, gs.Types[mapType])
+}
+
+func TestInvalidMapType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<None, int> map
+	`, false)
+
+	gs := tester.globalScope
+	assert.Equal(t, len(gs.Types), len(gs.BuiltInTypes))
+
+	tester.assertErrorAt(0, "Invalid type 'Map<None,int>'")
+	assert.Equal(t, gs.Contract.Fields[0].Type, nil)
+}
+
+func TestMapTypeWithStructType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, Person> map
+
+		struct Person {
+		}
+	`, true)
+
+	gs := tester.globalScope
+
+	tester.assertMap("Map<int,Person>", gs.IntType, gs.Structs["Person"])
+	tester.assertField(0, gs.Types["Map<int,Person>"])
+}
+
+func TestMapTypeWithArrayType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int[][]> map
+	`, true)
+
+	gs := tester.globalScope
+
+	tester.assertMap("Map<int,int[][]>", gs.IntType, gs.Types["int[][]"])
+	tester.assertField(0, gs.Types["Map<int,int[][]>"])
+}
+
 // Constructor
 //------------
 

@@ -109,14 +109,11 @@ func (ct *CheckerTestUtil) assertStructField(structName string, fieldIndex int, 
 
 func (ct *CheckerTestUtil) assertMap(mapName string, keyType symbol.TypeSymbol, valueType symbol.TypeSymbol) {
 	mapType := ct.globalScope.Types[mapName].(*symbol.MapTypeSymbol)
-	assert.Equal(ct.t, mapType.Scope(), ct.globalScope.Contract)
+	assert.Equal(ct.t, mapType.Scope(), ct.globalScope)
 	assert.Equal(ct.t, mapType.Identifier(), mapName)
 	assert.Equal(ct.t, mapType.KeyType, keyType)
-	assert.Equal(ct.t, mapType.ValueType, keyType)
+	assert.Equal(ct.t, mapType.ValueType, valueType)
 	assert.Equal(ct.t, len(mapType.AllDeclarations()), 0)
-
-	_, ok := ct.symbolTable.GetNodeBySymbol(mapType).(*node.MapTypeNode)
-	assert.Assert(ct.t, ok)
 }
 
 func (ct *CheckerTestUtil) assertConstructor(totalParams int, totalVars int) {

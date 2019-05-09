@@ -46,6 +46,7 @@ type DesignatorNode interface {
 // TypeNode is the interface for types, such as array types or basic types
 type TypeNode interface {
 	Node
+	Type() string
 }
 
 // Concrete Nodes
@@ -288,6 +289,11 @@ func (n *BasicTypeNode) Accept(v Visitor) {
 	v.VisitBasicTypeNode(n)
 }
 
+// Type returns the unique type representation
+func (n *BasicTypeNode) Type() string {
+	return n.Identifier
+}
+
 // --------------------------
 
 // ArrayTypeNode composes abstract node and holds the type identifier.
@@ -305,6 +311,11 @@ func (n *ArrayTypeNode) Accept(v Visitor) {
 	v.VisitArrayTypeNode(n)
 }
 
+// Type returns the unique type representation
+func (n *ArrayTypeNode) Type() string {
+	return n.String()
+}
+
 // --------------------------
 
 // MapTypeNode composes abstract node and holds the types of key and value.
@@ -315,12 +326,17 @@ type MapTypeNode struct {
 }
 
 func (n *MapTypeNode) String() string {
-	return fmt.Sprintf("Map<%s, %s>", n.KeyType, n.ValueType)
+	return fmt.Sprintf("Map<%s,%s>", n.KeyType, n.ValueType)
 }
 
 // Accept lets a visitor to traverse its node structure
 func (n *MapTypeNode) Accept(v Visitor) {
 	v.VisitMapTypeNode(n)
+}
+
+// Type returns the unique type representation
+func (n *MapTypeNode) Type() string {
+	return n.String()
 }
 
 // --------------------------
