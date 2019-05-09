@@ -1008,3 +1008,21 @@ func TestArrayNestedValueInitializationDifferentLength(t *testing.T) {
 
 	tester.assertTotalErrors(0)
 }
+
+func TestInvalidNestedArrayAssignment1(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[2][2]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given int[][]")
+}
+
+func TestInvalidNestedArrayAssignment2(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[][]{{1, 2}, {3}}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given int[][]")
+}
