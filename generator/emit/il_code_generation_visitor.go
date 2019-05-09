@@ -290,8 +290,8 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 // -----------
 
 var binaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Addition:       il.Add,
-	token.Subtraction:    il.Sub,
+	token.Plus:           il.Add,
+	token.Minus:          il.Sub,
 	token.Multiplication: il.Mul,
 	token.Division:       il.Div,
 	token.Modulo:         il.Mod,
@@ -354,7 +354,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Subtraction: il.Neg,
+	token.Minus: il.Neg,
 }
 
 // VisitUnaryExpressionNode generates the IL Code for all unary expressions
@@ -365,7 +365,7 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 		return
 	}
 
-	if expNode.Operator == token.Addition {
+	if expNode.Operator == token.Plus {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
 		return
 	}

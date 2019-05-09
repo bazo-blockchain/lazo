@@ -10,7 +10,25 @@ import (
 // -------------------------
 
 func (p *Parser) parseExpression() node.ExpressionNode {
-	return p.parseOr()
+	return p.parseTernaryExpression()
+}
+
+func (p *Parser) parseTernaryExpression() node.ExpressionNode {
+	expr := p.parseOr()
+
+	if p.isSymbol(token.QuestionMark) {
+		p.nextToken()
+
+		ternary := &node.TernaryExpression{
+			AbstractNode: p.newAbstractNodeWithPos(expr.Pos()),
+			Condition:    expr,
+			True:         p.parseOr(),
+		}
+		p.check(token.Colon)
+		ternary.False = p.parseOr()
+		return ternary
+	}
+	return expr
 }
 
 func (p *Parser) parseOr() node.ExpressionNode {
@@ -31,9 +49,57 @@ func (p *Parser) parseOr() node.ExpressionNode {
 
 func (p *Parser) parseAnd() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseEquality()
+	leftExpr := p.parseBitwiseOr()
 
 	for p.isAnySymbol(token.And) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseOr(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseBitwiseXOr()
+
+	for p.isAnySymbol(token.BitwiseOr) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseXOr(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseXOr() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseBitwiseAnd()
+
+	for p.isAnySymbol(token.BitwiseXOr) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseAnd(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseAnd() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseEquality()
+
+	for p.isAnySymbol(token.BitwiseAnd) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
@@ -63,9 +129,25 @@ func (p *Parser) parseEquality() node.ExpressionNode {
 
 func (p *Parser) parseRelationalComparison() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
-	leftExpr := p.parseTerm()
+	leftExpr := p.parseBitwiseShift()
 
 	for p.isAnySymbol(token.Less, token.LessEqual, token.GreaterEqual, token.Greater) {
+		binExpr := &node.BinaryExpressionNode{
+			AbstractNode: abstractNode,
+			Left:         leftExpr,
+			Operator:     p.readSymbol(),
+			Right:        p.parseBitwiseShift(),
+		}
+		leftExpr = binExpr
+	}
+	return leftExpr
+}
+
+func (p *Parser) parseBitwiseShift() node.ExpressionNode {
+	abstractNode := p.newAbstractNode()
+	leftExpr := p.parseTerm()
+
+	for p.isAnySymbol(token.ShiftLeft, token.ShiftRight) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
@@ -81,7 +163,7 @@ func (p *Parser) parseTerm() node.ExpressionNode {
 	abstractNode := p.newAbstractNode()
 	leftExpr := p.parseFactor()
 
-	for p.isAnySymbol(token.Addition, token.Subtraction) {
+	for p.isAnySymbol(token.Plus, token.Minus) {
 		binExpr := &node.BinaryExpressionNode{
 			AbstractNode: abstractNode,
 			Left:         leftExpr,
@@ -126,8 +208,27 @@ func (p *Parser) parseExponent() node.ExpressionNode {
 }
 
 func (p *Parser) parseExpressionRest() node.ExpressionNode {
-	if p.isAnySymbol(token.Addition, token.Subtraction, token.Not) {
+	if p.isAnySymbol(token.Plus, token.Minus, token.Not, token.BitwiseNot) {
 		return p.parseUnaryExpression()
+	}
+
+	if p.isSymbol(token.OpenParen) {
+		abstractNode := p.newAbstractNode()
+		p.nextToken()
+		expr := p.parseExpression()
+		p.check(token.CloseParen)
+
+		switch p.currentToken.Type() {
+		case token.IDENTIFER, token.CHARACTER, token.INTEGER:
+			// (String) x.y.z, (String) 'c', (String) 5
+			return p.parseTypeCast(abstractNode, expr)
+		case token.SYMBOL:
+			// (String) true
+			if p.isAnySymbol(token.True, token.False) {
+				return p.parseTypeCast(abstractNode, expr)
+			}
+		}
+		return expr
 	}
 
 	return p.parseOperand()
@@ -139,6 +240,23 @@ func (p *Parser) parseUnaryExpression() *node.UnaryExpressionNode {
 		Operator:     p.readSymbol(),
 		Expression:   p.parseFactor(),
 	}
+}
+
+func (p *Parser) parseTypeCast(abstractNode node.AbstractNode, expr node.ExpressionNode) *node.TypeCastNode {
+	typeCast := &node.TypeCastNode{
+		AbstractNode: abstractNode,
+		Expression:   p.parseOperand(),
+	}
+
+	if basicDesignator, ok := expr.(*node.BasicDesignatorNode); ok {
+		typeCast.Type = &node.BasicTypeNode{
+			AbstractNode: p.newAbstractNodeWithPos(expr.Pos()),
+			Identifier:   basicDesignator.Value,
+		}
+	} else {
+		p.addError(fmt.Sprintf("Invalid type %s", expr))
+	}
+	return typeCast
 }
 
 func (p *Parser) parseOperand() node.ExpressionNode {

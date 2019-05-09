@@ -7,6 +7,7 @@ import (
 	"github.com/bazo-blockchain/lazo/lexer"
 	"github.com/bazo-blockchain/lazo/lexer/token"
 	"github.com/bazo-blockchain/lazo/parser/node"
+	"math/big"
 )
 
 // Parser is a LL(k=2) parser, which means "Left-to-right, Leftmost derivation" top-down parser.
@@ -261,8 +262,7 @@ func (p *Parser) parseStatementWithIdentifier() node.StatementNode {
 		case token.OpenParen:
 			return p.parseCallStatement(designator)
 		default:
-			p.addError(fmt.Sprintf("Unsupported symbol %s", tok.Lexeme))
-			return nil
+			return p.parseShorthandAssignmentStatement(designator, tok.Value)
 		}
 	}
 
@@ -373,6 +373,55 @@ func (p *Parser) parseMultiAssignmentStatement(designator node.DesignatorNode) *
 	}
 	p.checkAndSkipNewLines(token.NewLine)
 	return ma
+}
+
+var allowedShorthandOperators = []token.Symbol{
+	token.Plus,
+	token.Minus,
+	token.Multiplication,
+	token.Division,
+	token.Modulo,
+	token.Exponent,
+	token.ShiftLeft,
+	token.ShiftRight,
+	token.BitwiseAnd,
+	token.BitwiseOr,
+	token.BitwiseXOr,
+}
+
+func (p *Parser) parseShorthandAssignmentStatement(designator node.DesignatorNode, operator token.Symbol) node.StatementNode {
+	if !containsSymbol(allowedShorthandOperators, operator) {
+		p.addError(fmt.Sprintf("Unsupported symbol %s", token.SymbolLexeme[operator]))
+		return nil
+	}
+
+	assignment := &node.ShorthandAssignmentStatementNode{
+		AbstractNode: p.newAbstractNodeWithPos(designator.Pos()),
+		Designator:   designator,
+		Operator:     operator,
+	}
+
+	p.nextToken()
+	if !p.isType(token.SYMBOL) {
+		p.addError(fmt.Sprintf("Symbol token expected"))
+		return nil
+	}
+
+	// postfix operator (x++ or x--)
+	if p.isAnySymbol(token.Plus, token.Minus) && p.isSymbol(operator) {
+		assignment.Expression = &node.IntegerLiteralNode{
+			AbstractNode: p.newAbstractNode(),
+			Value:        big.NewInt(1),
+		}
+		p.nextToken()
+	} else {
+		// x += 2
+		p.check(token.Assign)
+		assignment.Expression = p.parseExpression()
+	}
+
+	p.checkAndSkipNewLines(token.NewLine)
+	return assignment
 }
 
 func (p *Parser) parseIfStatement() *node.IfStatementNode {
@@ -533,10 +582,15 @@ func (p *Parser) isSymbol(symbol token.Symbol) bool {
 
 func (p *Parser) isAnySymbol(expectedSymbols ...token.Symbol) bool {
 	if tok, ok := p.currentToken.(*token.FixToken); ok {
-		for _, s := range expectedSymbols {
-			if tok.Value == s {
-				return true
-			}
+		return containsSymbol(expectedSymbols, tok.Value)
+	}
+	return false
+}
+
+func containsSymbol(symbols []token.Symbol, symbol token.Symbol) bool {
+	for _, s := range symbols {
+		if symbol == s {
+			return true
 		}
 	}
 	return false

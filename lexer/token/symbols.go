@@ -8,12 +8,15 @@ const (
 	EOF Symbol = iota
 	NewLine
 
-	Addition
-	Subtraction
+	Plus
+	Minus
 	Division
 	Multiplication
 	Modulo
 	Exponent
+
+	ShiftLeft
+	ShiftRight
 
 	Less
 	LessEqual
@@ -33,10 +36,16 @@ const (
 	Colon
 	Comma
 	Period
+	QuestionMark
 
 	Not
 	And
 	Or
+
+	BitwiseNot
+	BitwiseAnd
+	BitwiseOr
+	BitwiseXOr
 
 	Assign
 
@@ -61,12 +70,15 @@ var SymbolLexeme = map[Symbol]string{
 	EOF:     "EOF",
 	NewLine: `\n`,
 
-	Addition:       "+",
-	Subtraction:    "-",
+	Plus:           "+",
+	Minus:          "-",
 	Multiplication: "*",
 	Division:       "/",
 	Modulo:         "%",
 	Exponent:       "**",
+
+	ShiftLeft:  "<<",
+	ShiftRight: ">>",
 
 	Less:         "<",
 	LessEqual:    "<=",
@@ -83,13 +95,19 @@ var SymbolLexeme = map[Symbol]string{
 	OpenParen:    "(",
 	CloseParen:   ")",
 
-	Colon:  ":",
-	Comma:  ",",
-	Period: ".",
+	Colon:        ":",
+	Comma:        ",",
+	Period:       ".",
+	QuestionMark: "?",
 
 	Not: "!",
 	And: "&&",
 	Or:  "||",
+
+	BitwiseNot: "~",
+	BitwiseAnd: "&",
+	BitwiseOr:  "|",
+	BitwiseXOr: "^",
 
 	Assign: "=",
 
@@ -136,16 +154,19 @@ var SingleCharOperators = map[rune]Symbol{
 	':': Colon,
 	',': Comma,
 	'.': Period,
+	'?': QuestionMark,
 	'{': OpenBrace,
 	'}': CloseBrace,
 	'[': OpenBracket,
 	']': CloseBracket,
 	'(': OpenParen,
 	')': CloseParen,
-	'+': Addition,
-	'-': Subtraction,
+	'+': Plus,
+	'-': Minus,
 	'/': Division,
 	'%': Modulo,
+	'~': BitwiseNot,
+	'^': BitwiseXOr,
 }
 
 // PossibleMultiCharOperators maps the first character of a possible operation to the Symbol type.
@@ -156,6 +177,9 @@ var PossibleMultiCharOperators = map[rune]Symbol{
 	'!': Not,
 
 	'*': Multiplication,
+
+	'|': BitwiseOr,
+	'&': BitwiseAnd,
 }
 
 // MultiCharOperators maps the full literal value of the operation to the Symbol type.
@@ -166,10 +190,10 @@ var MultiCharOperators = map[string]Symbol{
 	"<=": LessEqual,
 
 	"**": Exponent,
-}
 
-// LogicalOperators maps the logical operator to Symbol type.
-var LogicalOperators = map[string]Symbol{
-	"&&": And,
+	"<<": ShiftLeft,
+	">>": ShiftRight,
+
 	"||": Or,
+	"&&": And,
 }
