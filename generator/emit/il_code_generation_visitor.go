@@ -241,8 +241,9 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 		return
 	}
 
+	node.Designator.Accept(v)
+
 	// TODO as soon as VM has ARRLEN Opcode
-	//node.Designator.Accept(v)
 	//if node.Identifier == "length" && v.isArray(node.Designator) {
 	//	v.assembler.Emit(il.ArrLen)
 	//}
