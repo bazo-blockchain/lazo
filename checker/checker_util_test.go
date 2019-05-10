@@ -48,7 +48,7 @@ func newCheckerTestUtilWithRawInput(t *testing.T, code string, isValidCode bool)
 // ----------------
 
 func (ct *CheckerTestUtil) assertTotalErrors(total int) {
-	assert.Equal(ct.t, len(ct.errors), total)
+	assert.Equal(ct.t, len(ct.errors), total, ct.errors)
 }
 
 func (ct *CheckerTestUtil) assertErrorAt(index int, errSubStr string) {

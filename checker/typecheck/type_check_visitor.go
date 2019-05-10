@@ -135,6 +135,7 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 		return
 	}
 
+	// TODO In case of arrays we most likely must differentiate between length and value initialization
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
@@ -264,42 +265,55 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 func (v *typeCheckVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
 	v.AbstractVisitor.VisitArrayLengthCreationNode(node)
 
-	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
+	// int[] has element type 'int'
+	typeSymbol := v.symbolTable.FindTypeByIdentifier(node.ElementType.String() + "[]")
 	if typeSymbol == nil {
-		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
-	} else {
-		for i, length := range node.Lengths {
-			exprType := v.symbolTable.GetTypeByExpression(length)
-			if exprType != v.symbolTable.GlobalScope.IntType {
-				v.reportError(node.Lengths[i], "Only integer expressions are allowed as array length argument")
-			}
+		typeSymbol = v.symbolTable.AddArrayType(node.ElementType)
+	}
+	if typeSymbol == nil {
+		v.reportError(node, "Invalid array type")
+	}
+
+	v.symbolTable.MapExpressionToType(node, typeSymbol)
+	for i, length := range node.Lengths {
+		exprType := v.symbolTable.GetTypeByExpression(length)
+		if exprType != v.symbolTable.GlobalScope.IntType {
+			v.reportError(node.Lengths[i], "Only integer expressions are allowed as array length argument")
 		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
 	}
 }
 
 // VisitArrayValueCreationNode checks that each value of
 func (v *typeCheckVisitor) VisitArrayValueCreationNode(node *node.ArrayValueCreationNode) {
-	v.AbstractVisitor.VisitArrayValueCreationNode(node)
-
 	typeSymbol := v.symbolTable.FindTypeByNode(node.Type)
-
 	if typeSymbol == nil {
-		v.reportError(node, "Array type is not defined")
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.NullType)
-	} else {
-		for i, element := range node.Elements.Values {
-			exprType := v.symbolTable.GetTypeByExpression(element)
-
-			if exprType != nil && exprType.Type() != typeSymbol.Type() {
-				v.reportError(node.Elements.Values[i], "Array values must be of the same type as the array itself")
-			}
-		}
-
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.FindArrayType(typeSymbol))
+		v.reportError(node, "Invalid array type")
+		return
 	}
+	v.symbolTable.MapExpressionToType(node, typeSymbol)
 
+	arrayTypeSymbol := typeSymbol.(*symbol.ArrayTypeSymbol)
+	v.symbolTable.MapExpressionToType(node.Elements, arrayTypeSymbol)
+
+	// Visit array values and check element type
+	v.AbstractVisitor.VisitArrayValueCreationNode(node)
+}
+
+func (v *typeCheckVisitor) VisitArrayInitializationNode(arrayValueInitNode *node.ArrayInitializationNode) {
+	arrayType := v.symbolTable.GetTypeByExpression(arrayValueInitNode).(*symbol.ArrayTypeSymbol)
+
+	for _, element := range arrayValueInitNode.Values {
+		if arrayInitValues, ok := element.(*node.ArrayInitializationNode); ok {
+			// e.g. new int[][]{{1, 2}, {3, 4}} --> Value {1, 2} has array type int[]
+			v.symbolTable.MapExpressionToType(arrayInitValues, arrayType.ElementType)
+			arrayInitValues.Accept(v) // check value types recursively
+		} else {
+			element.Accept(v) // resolve expression type
+
+			// e.g. new int[]{1, 2} --> Value 1 has basic type int
+			v.checkType(element, arrayType.ElementType)
+		}
+	}
 }
 
 // VisitElementAccessNode checks that the expression is of type integer

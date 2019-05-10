@@ -540,6 +540,7 @@ func TestInvalidArrayElementAccess(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Array index must be of type int")
 }
 
 func TestArrayElementAccessByDesignator(t *testing.T) {
@@ -554,4 +555,5 @@ func TestArrayElementAccessByDesignator(t *testing.T) {
 	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
 	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[1].Type, tester.globalScope.IntType)
 	tester.assertBasicDesignator(elementAccess.Expression, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
+	tester.assertDesignator(elementAccess.Designator, tester.globalScope.Contract.Fields[1], tester.globalScope.Types["int[]"])
 }

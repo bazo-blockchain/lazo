@@ -213,7 +213,7 @@ func assertArrayLengthCreation(t *testing.T, n node.ExpressionNode, name string,
 	arrayCreation, ok := n.(*node.ArrayLengthCreationNode)
 
 	assert.Assert(t, ok)
-	assert.Equal(t, arrayCreation.Type.String(), name)
+	assert.Equal(t, arrayCreation.ElementType.String(), name)
 
 	assertArrayLengths(t, arrayCreation, lengths)
 }

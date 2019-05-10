@@ -26,57 +26,36 @@ func NewSymbolTable() *SymbolTable {
 // FindTypeByNode searches for a type
 // Returns the type or nil
 func (t *SymbolTable) FindTypeByNode(n node.TypeNode) TypeSymbol {
-	var result TypeSymbol
-	if basicTypeNode, ok := n.(*node.BasicTypeNode); ok {
-		return t.FindTypeByIdentifier(basicTypeNode.String())
-	} else {
-		elementTypeNode := n.(*node.ArrayTypeNode).ElementType
-		elementType := t.FindTypeByNode(elementTypeNode)
-		if elementType != nil {
-			result = t.FindArrayType(elementType)
-		} else {
-			result = nil
-		}
-
+	if typeSymbol := t.FindTypeByIdentifier(n.String()); typeSymbol != nil {
+		return typeSymbol
 	}
-	return result
-}
 
-// FindTypeByIdentifier searches for a type
-// Returns the type or nil
-func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
-	for _, compilationType := range t.GlobalScope.Types {
-		if compilationType.Identifier() == identifier {
-			return compilationType
-		}
+	if arrayType, ok := n.(*node.ArrayTypeNode); ok {
+		return t.AddArrayType(arrayType.ElementType)
 	}
 
 	return nil
 }
 
-// FindArrayType searches for the array type
-// If the array type does not exist, it adds it to the declarations
-func (t *SymbolTable) FindArrayType(ts TypeSymbol) *ArrayTypeSymbol {
-	var typeSymbolFromIdentifier TypeSymbol
-	if _, ok := ts.(*ArrayTypeSymbol); ok {
-		typeSymbolFromIdentifier = t.FindTypeByIdentifier(ts.Identifier())
-	} else {
-		typeSymbolFromIdentifier = t.FindTypeByIdentifier(ts.Identifier() + "[]")
+// AddArrayType creates a new array type symbol and adds it to the global types
+func (t *SymbolTable) AddArrayType(elementTypeNode node.TypeNode) TypeSymbol {
+	elementType := t.FindTypeByNode(elementTypeNode)
+	if elementType == nil {
+		return nil
 	}
 
-	if arrayTypeSymbol, ok := typeSymbolFromIdentifier.(*ArrayTypeSymbol); ok {
-		return arrayTypeSymbol
-	} else {
-		result := &ArrayTypeSymbol{
-			AbstractSymbol: AbstractSymbol{
-				Parent: ts.Scope(),
-				ID:     ts.Identifier() + "[]",
-			},
-			ElementType: ts,
-		}
-		t.GlobalScope.Types = append(t.GlobalScope.Types, result)
-		return result
+	arrayType := NewArrayTypeSymbol(t.GlobalScope, elementType)
+	t.GlobalScope.Types[arrayType.Type()] = arrayType
+	return arrayType
+}
+
+// FindTypeByIdentifier searches for a type
+// Returns the type or nil
+func (t *SymbolTable) FindTypeByIdentifier(identifier string) TypeSymbol {
+	if compilationType, ok := t.GlobalScope.Types[identifier]; ok {
+		return compilationType
 	}
+	return nil
 }
 
 // Find recursively searches for a symbol within a specific scope

@@ -936,7 +936,8 @@ func TestArrayInitialization(t *testing.T) {
 		int[] a = new int[1]
 	`, true)
 
-	tester.assertField(0, tester.globalScope.Types[4])
+	tester.assertField(0, tester.globalScope.Types["int[]"])
+	tester.assertArrayLengthCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types["int[]"])
 }
 
 func TestArrayInitializationWithValues(t *testing.T) {
@@ -944,8 +945,8 @@ func TestArrayInitializationWithValues(t *testing.T) {
 		int[] a = new int[]{1, 2, 3}
 	`, true)
 
-	//tester.assertField(0, tester.globalScope.Types[4])
-	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types[4], tester.globalScope.IntType)
+	tester.assertField(0, tester.globalScope.Types["int[]"])
+	tester.assertArrayValueCreation(tester.getFieldNode(0).Expression, tester.globalScope.Types["int[]"], tester.globalScope.IntType)
 }
 
 func TestArrayInitializationWithVariableLength(t *testing.T) {
@@ -955,7 +956,7 @@ func TestArrayInitializationWithVariableLength(t *testing.T) {
 	`, true)
 
 	creation := tester.getFieldNode(1).Expression.(*node.ArrayLengthCreationNode)
-	tester.assertArrayLengthCreation(creation, tester.globalScope.Types[4])
+	tester.assertArrayLengthCreation(creation, tester.globalScope.Types["int[]"])
 }
 
 func TestInvalidArrayInitialization(t *testing.T) {
@@ -964,6 +965,7 @@ func TestInvalidArrayInitialization(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given char[]")
 }
 
 func TestInvalidArrayInitializationWithValues(t *testing.T) {
@@ -972,6 +974,7 @@ func TestInvalidArrayInitializationWithValues(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given char[]")
 }
 
 func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
@@ -980,6 +983,7 @@ func TestArrayInitializationWithValuesOfDifferentType(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "expected Type int, got Type char")
 }
 
 func TestArrayNestedLengthInitialization(t *testing.T) {
@@ -992,15 +996,33 @@ func TestArrayNestedLengthInitialization(t *testing.T) {
 
 func TestArrayNestedValueInitialization(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		int[][] a = new int[]{{1, 2}, {3, 4}}
+		int[][] a = new int[][]{{1, 2}, {3, 4}}
 	`, true)
 	tester.assertTotalErrors(0)
 }
 
 func TestArrayNestedValueInitializationDifferentLength(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
-		int[][] a = new int[]{{1, 2}, {3}}
+		int[][] a = new int[][]{{1, 2}, {3}}
 	`, true)
 
 	tester.assertTotalErrors(0)
+}
+
+func TestInvalidNestedArrayAssignment1(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[2][2]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given int[][]")
+}
+
+func TestInvalidNestedArrayAssignment2(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[][]{{1, 2}, {3}}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected int[], given int[][]")
 }

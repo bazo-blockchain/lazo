@@ -495,7 +495,7 @@ func TestArrayNewArrayAssignment2(t *testing.T) {
 func TestNestedArrayNewArrayAssignment1(t *testing.T) {
 	p := parseExpressionFromInput(t, "new int[1][2]")
 
-	assertArrayLengthCreation(t, p, "int", "1,2")
+	assertArrayLengthCreation(t, p, "int[]", "1,2")
 }
 
 func TestNestedArrayNewArrayAssignment2(t *testing.T) {

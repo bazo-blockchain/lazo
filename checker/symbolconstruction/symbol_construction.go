@@ -51,7 +51,7 @@ func (sc *symbolConstruction) registerBuiltInTypes() {
 
 func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.BasicTypeSymbol {
 	baseType := symbol.NewBasicTypeSymbol(sc.globalScope, name)
-	sc.globalScope.Types = append(sc.globalScope.Types, baseType)
+	sc.globalScope.Types[name] = baseType
 	sc.globalScope.BuiltInTypes = append(sc.globalScope.BuiltInTypes, baseType)
 	return baseType
 }
@@ -113,9 +113,16 @@ func (sc *symbolConstruction) registerField(contractSymbol *symbol.ContractSymbo
 
 func (sc *symbolConstruction) registerStruct(contractSymbol *symbol.ContractSymbol, node *node.StructNode) {
 	structType := symbol.NewStructTypeSymbol(contractSymbol, node.Name)
-	sc.globalScope.Structs[node.Name] = structType
-	sc.globalScope.Types = append(sc.globalScope.Types, structType)
 	sc.symbolTable.MapSymbolToNode(structType, node)
+
+	if _, ok := sc.globalScope.Structs[node.Name]; ok {
+		sc.reportError(structType,
+			fmt.Sprintf("Struct '%s' is already declared", structType.Identifier()))
+		return
+	}
+
+	sc.globalScope.Structs[node.Name] = structType
+	sc.globalScope.Types[node.Name] = structType
 
 	for _, fieldNode := range node.Fields {
 		fieldSymbol := symbol.NewFieldSymbol(structType, fieldNode.Identifier)
