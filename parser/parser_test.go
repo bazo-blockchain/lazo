@@ -272,7 +272,7 @@ func TestMapDeclaration(t *testing.T) {
 	p := newParserFromInput("Map<String, int> map \n")
 	f := p.parseField()
 
-	assertField(t, f, "Map<String, int>", "map", "")
+	assertField(t, f, "Map<String,int>", "map", "")
 	assertNoErrors(t, p)
 }
 
@@ -508,7 +508,7 @@ func TestMapVariableStatement(t *testing.T) {
 	p := newParserFromInput("Map<int, int> m \n")
 	v := p.parseStatement().(*node.VariableNode)
 
-	assertVariableStatement(t, v, "Map<int, int>", "m", "")
+	assertVariableStatement(t, v, "Map<int,int>", "m", "")
 }
 
 // Multi Local Variable Statements
@@ -564,9 +564,9 @@ func TestMultiMapVariableStatement(t *testing.T) {
 	mv, ok := p.parseVariableStatement().(*node.MultiVariableNode)
 
 	assert.Assert(t, ok)
-	assert.Equal(t, mv.Types[0].String(), "Map<int, int>")
+	assert.Equal(t, mv.Types[0].String(), "Map<int,int>")
 	assert.Equal(t, mv.Identifiers[0], "m")
-	assert.Equal(t, mv.Types[1].String(), "Map<int, int[]>")
+	assert.Equal(t, mv.Types[1].String(), "Map<int,int[]>")
 	assert.Equal(t, mv.Identifiers[1], "n")
 	assertFuncCall(t, mv.FuncCall, "call")
 	assertNoErrors(t, p)

@@ -97,11 +97,6 @@ func (sym *ContractSymbol) String() string {
 		sym.ID, sym.Fields, sym.Constructor, sym.Functions)
 }
 
-// Type returns the type
-func (sym *ContractSymbol) Type() string {
-	return sym.Identifier()
-}
-
 //----------------
 
 // FieldSymbol contains the type of the field
@@ -251,7 +246,6 @@ func (sym *ConstantSymbol) String() string {
 // TypeSymbol declares functions which all type symbols should implement
 type TypeSymbol interface {
 	Symbol
-	Type() string
 }
 
 //----------------
@@ -273,11 +267,6 @@ func (sym *BasicTypeSymbol) String() string {
 	return fmt.Sprintf("Type %s", sym.ID)
 }
 
-// Type returns the type
-func (sym *BasicTypeSymbol) Type() string {
-	return sym.Identifier()
-}
-
 //----------------
 
 // ArrayTypeSymbol represents a array type
@@ -289,7 +278,7 @@ type ArrayTypeSymbol struct {
 // NewArrayTypeSymbol creates a new ArrayTypeSymbol
 func NewArrayTypeSymbol(scope Symbol, elementType TypeSymbol) *ArrayTypeSymbol {
 	return &ArrayTypeSymbol{
-		AbstractSymbol: NewAbstractSymbol(scope, elementType.Type()+"[]"),
+		AbstractSymbol: NewAbstractSymbol(scope, elementType.Identifier()+"[]"),
 		ElementType:    elementType,
 	}
 }
@@ -297,11 +286,6 @@ func NewArrayTypeSymbol(scope Symbol, elementType TypeSymbol) *ArrayTypeSymbol {
 // String creates a new string representation
 func (sym *ArrayTypeSymbol) String() string {
 	return fmt.Sprintf("Array of %s", sym.ElementType)
-}
-
-// Type returns the type
-func (sym *ArrayTypeSymbol) Type() string {
-	return sym.Identifier()
 }
 
 //----------------
@@ -333,11 +317,6 @@ func (sym *StructTypeSymbol) String() string {
 	return fmt.Sprintf("Struct: %s, \nFields: %s", sym.Identifier(), sym.Fields)
 }
 
-// Type returns the struct type
-func (sym *StructTypeSymbol) Type() string {
-	return sym.Identifier()
-}
-
 // GetField returns the field symbol by identifier
 func (sym *StructTypeSymbol) GetField(identifier string) *FieldSymbol {
 	for _, f := range sym.Fields {
@@ -356,4 +335,28 @@ func (sym *StructTypeSymbol) GetFieldIndex(identifier string) int {
 		}
 	}
 	return -1
+}
+
+//----------------
+
+// MapTypeSymbol represents a map type consists of key and value type
+type MapTypeSymbol struct {
+	AbstractSymbol
+	KeyType   TypeSymbol
+	ValueType TypeSymbol
+}
+
+// NewMapTypeSymbol creates a new ArrayTypeSymbol
+func NewMapTypeSymbol(scope Symbol, keyType TypeSymbol, valueType TypeSymbol) *MapTypeSymbol {
+	return &MapTypeSymbol{
+		AbstractSymbol: NewAbstractSymbol(scope,
+			fmt.Sprintf("Map<%s,%s>", keyType.Identifier(), valueType.Identifier())),
+		KeyType:   keyType,
+		ValueType: valueType,
+	}
+}
+
+// String creates a new string representation
+func (sym *MapTypeSymbol) String() string {
+	return sym.Identifier()
 }
