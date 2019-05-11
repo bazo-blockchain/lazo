@@ -1108,6 +1108,43 @@ func TestMapElementAssignmentTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(0, "assignment of String is not compatible with target int")
 }
 
-// todo map/array mismatch
-// todo [][] on map
-// delete statement
+func TestMapNestedElementAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int[]> m
+		int i = m[1][0]
+	`, true)
+
+	tester.assertField(1, tester.globalScope.IntType)
+}
+
+func TestMapNestedElementAccessError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int> m
+		int i = m[1][0]
+	`, false)
+
+	tester.assertErrorAt(0, "Designator m[1][0] does not refer to an array/map type")
+}
+
+func TestDeleteStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			Map<char, int> m
+			delete m['c']
+		}
+	`, true)
+
+	deleteStmt := tester.getConstructorStatementNode(1).(*node.DeleteStatementNode)
+	tester.assertExpressionType(deleteStmt.Element, tester.globalScope.IntType)
+}
+
+func TestInvalidDeleteStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int[] i = new int[2]
+			delete i[0]
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "delete requires map type")
+}

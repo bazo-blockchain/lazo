@@ -174,6 +174,15 @@ func (v *typeCheckVisitor) VisitCallStatementNode(node *node.CallStatementNode) 
 	}
 }
 
+func (v *typeCheckVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNode) {
+	v.AbstractVisitor.VisitDeleteStatementNode(node)
+
+	designatorType := v.symbolTable.GetTypeByExpression(node.Element.Designator)
+	if _, ok := designatorType.(*symbol.MapTypeSymbol); !ok {
+		v.reportError(node, "delete requires map type")
+	}
+}
+
 // Expressions
 // -----------
 
