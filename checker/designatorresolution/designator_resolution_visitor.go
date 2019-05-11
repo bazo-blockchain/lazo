@@ -86,12 +86,14 @@ func (v *designatorResolutionVisitor) VisitBasicDesignatorNode(node *node.BasicD
 func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
 	v.AbstractVisitor.VisitElementAccessNode(node)
 	typeSymbol := v.symbolTable.GetTypeByExpression(node.Designator)
-	if array, ok := typeSymbol.(*symbol.ArrayTypeSymbol); ok {
-		v.symbolTable.MapExpressionToType(node, array.ElementType)
-		v.symbolTable.MapDesignatorToDecl(node, array)
+	if arrayType, ok := typeSymbol.(*symbol.ArrayTypeSymbol); ok {
+		v.symbolTable.MapExpressionToType(node, arrayType.ElementType)
+		v.symbolTable.MapDesignatorToDecl(node, arrayType)
+	} else if mapType, ok := typeSymbol.(*symbol.MapTypeSymbol); ok {
+		v.symbolTable.MapExpressionToType(node, mapType.ValueType)
+		v.symbolTable.MapDesignatorToDecl(node, mapType)
 	} else {
-		v.reportError(node, fmt.Sprintf("Designator %v does not refer to an array type", node))
-		v.symbolTable.MapExpressionToType(node, nil)
+		v.reportError(node, fmt.Sprintf("Designator %v does not refer to an array/map type", node))
 	}
 }
 
@@ -144,7 +146,6 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 		}
 
 		target = contractType.Fields[targetIndex]
-
 		targetType, err = getType(target)
 
 		if err != nil {

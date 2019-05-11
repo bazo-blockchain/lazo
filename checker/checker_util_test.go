@@ -219,16 +219,20 @@ func (ct *CheckerTestUtil) assertBasicDesignator(expr node.ExpressionNode, decl 
 	ct.assertDesignator(designator, decl, expectedType)
 }
 
-func (ct *CheckerTestUtil) assertElementAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+// Declaration: int[] i = new int[2]
+// Element access 'i[0]' should have target declaration 'int[]' (ArrayType) and element type 'int' (Basic Type).
+func (ct *CheckerTestUtil) assertElementAccess(expr node.ExpressionNode, targetDecl symbol.Symbol, elementType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.ElementAccessNode)
 	assert.Assert(ct.t, ok)
-	ct.assertDesignator(designator, decl, expectedType)
+	ct.assertDesignator(designator, targetDecl, elementType)
 }
 
-func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+// Declaration: Person p = new Person()
+// Member access p.name should have target declaration 'name' (Field Symbol) and type 'String'.
+func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, targetDecl symbol.Symbol, expectedType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.MemberAccessNode)
 	assert.Assert(ct.t, ok)
-	ct.assertDesignator(designator, decl, expectedType)
+	ct.assertDesignator(designator, targetDecl, expectedType)
 }
 
 func (ct *CheckerTestUtil) assertDesignator(designator node.DesignatorNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
