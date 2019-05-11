@@ -135,7 +135,6 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 		return
 	}
 
-	// TODO In case of arrays we most likely must differentiate between length and value initialization
 	leftType := v.symbolTable.GetTypeByExpression(node.Left)
 	rightType := v.symbolTable.GetTypeByExpression(node.Right)
 
@@ -144,6 +143,20 @@ func (v *typeCheckVisitor) VisitAssignmentStatementNode(node *node.AssignmentSta
 			fmt.Sprintf("assignment of %s is not compatible with target %s",
 				getTypeString(rightType), getTypeString(leftType)))
 	}
+}
+
+// VisitMultiAssignmentStatementNode checks whether the target designators matches with the function return types.
+func (v *typeCheckVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAssignmentStatementNode) {
+	v.AbstractVisitor.VisitMultiAssignmentStatementNode(node)
+
+	leftTypes := make([]symbol.TypeSymbol, len(node.Designators))
+	for i, designator := range node.Designators {
+		if designator.String() == symbol.This {
+			v.reportError(node, "Assigning to 'this' is not allowed!")
+		}
+		leftTypes[i] = v.symbolTable.GetTypeByExpression(designator)
+	}
+	v.checkExpressionTypes(node.FuncCall, leftTypes...)
 }
 
 // VisitIfStatementNode checks whether the condition is a boolean expression
@@ -320,8 +333,15 @@ func (v *typeCheckVisitor) VisitArrayInitializationNode(arrayValueInitNode *node
 func (v *typeCheckVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
 	v.AbstractVisitor.VisitElementAccessNode(node)
 
-	if v.symbolTable.GetTypeByExpression(node.Expression) != v.symbolTable.GlobalScope.IntType {
-		v.reportError(node, "Array index must be of type int")
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
+	if _, ok := designatorType.(*symbol.ArrayTypeSymbol); ok {
+		if v.symbolTable.GetTypeByExpression(node.Expression) != v.symbolTable.GlobalScope.IntType {
+			v.reportError(node, "Array index must be of type int")
+		}
+	} else if mapType, ok := designatorType.(*symbol.MapTypeSymbol); ok {
+		v.checkType(node.Expression, mapType.KeyType)
+	} else {
+		panic("Unsupported element access designator")
 	}
 }
 

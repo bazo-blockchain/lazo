@@ -534,18 +534,6 @@ func TestArrayElementAccess(t *testing.T) {
 	tester.assertElementAccess(elementAccess, tester.globalScope.Types["int[]"], tester.globalScope.IntType)
 }
 
-func TestInvalidArrayElementAccess(t *testing.T) {
-	tester := newCheckerTestUtil(t, `
-		int[] a = new int[1]
-		constructor() {
-			a[true] = 1
-		}
-	`, false)
-
-	tester.assertTotalErrors(1)
-	tester.assertErrorAt(0, "Array index must be of type int")
-}
-
 func TestArrayElementAccessByDesignator(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int x = 0
@@ -613,4 +601,16 @@ func TestUndefinedMapAccess(t *testing.T) {
 	tester.assertTotalErrors(2)
 	tester.assertErrorAt(0, "Designator m is undefined")
 	tester.assertErrorAt(1, "Designator m[1] does not refer to an array/map type")
+}
+
+func TestInvalidElementAccessTarget(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+		Person p
+		int n = p[1]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Designator p[1] does not refer to an array/map type")
 }
