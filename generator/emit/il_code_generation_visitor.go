@@ -428,6 +428,12 @@ func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.Struct
 
 // VisitArrayLengthCreationNode generates the IL Code for the array length creation
 func (v *ILCodeGenerationVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
+	if len(node.Lengths) > 1 {
+		v.reportError(node, "Generator currently does not support array nesting")
+		return
+	}
+
+	node.Lengths[0].Accept(v)
 	v.assembler.Emit(il.NewArr) // Pass Array length as parameter
 }
 
@@ -438,6 +444,8 @@ func (v *ILCodeGenerationVisitor) VisitArrayValueCreationNode(n *node.ArrayValue
 		return
 	}
 
+	length := big.NewInt(int64(len(n.Elements.Values)))
+	v.assembler.PushInt(length)
 	v.assembler.Emit(il.NewArr)
 	for _, value := range n.Elements.Values {
 		value.Accept(v)
