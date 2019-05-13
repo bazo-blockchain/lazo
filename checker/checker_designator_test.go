@@ -469,6 +469,9 @@ func TestStructUndefinedFieldAccess(t *testing.T) {
 	tester.assertErrorAt(0, "Member balance does not exist on struct Person")
 }
 
+// This designator
+// ---------------
+
 func TestInvalidVariableDeclarationThis(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		int this
@@ -528,19 +531,7 @@ func TestArrayElementAccess(t *testing.T) {
 	`, true)
 
 	elementAccess := tester.getConstructorStatementNode(0).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
-	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[0].Type, tester.globalScope.IntType)
-}
-
-func TestInvalidArrayElementAccess(t *testing.T) {
-	tester := newCheckerTestUtil(t, `
-		int[] a = new int[1]
-		constructor() {
-			a[true] = 1
-		}
-	`, false)
-
-	tester.assertTotalErrors(1)
-	tester.assertErrorAt(0, "Array index must be of type int")
+	tester.assertElementAccess(elementAccess, tester.globalScope.Types["int[]"], tester.globalScope.IntType)
 }
 
 func TestArrayElementAccessByDesignator(t *testing.T) {
@@ -556,4 +547,70 @@ func TestArrayElementAccessByDesignator(t *testing.T) {
 	tester.assertElementAccess(elementAccess, tester.globalScope.Contract.Fields[1].Type, tester.globalScope.IntType)
 	tester.assertBasicDesignator(elementAccess.Expression, tester.globalScope.Contract.Fields[0], tester.globalScope.IntType)
 	tester.assertDesignator(elementAccess.Designator, tester.globalScope.Contract.Fields[1], tester.globalScope.Types["int[]"])
+}
+
+// Map
+// ---
+
+func TestMapAssignment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int> m
+		Map<int, int> m2 = m
+	`, true)
+
+	tester.assertBasicDesignator(
+		tester.getFieldNode(1).Expression,
+		tester.globalScope.Contract.Fields[0],
+		tester.globalScope.Types["Map<int,int>"])
+}
+
+func TestMapKeyAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int> m
+		int n = m[1]
+	`, true)
+
+	elementAccess := tester.getFieldNode(1).Expression.(*node.ElementAccessNode)
+	mapType := tester.globalScope.Types["Map<int,int>"]
+
+	tester.assertElementAccess(elementAccess, mapType, tester.globalScope.IntType)
+	tester.assertBasicDesignator(elementAccess.Designator, tester.globalScope.Contract.Fields[0], mapType)
+}
+
+func TestMapValueAssigment(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			Map<int, int> m
+			m[1] = 2 
+		}
+	`, true)
+
+	elementAccess := tester.getConstructorStatementNode(1).(*node.AssignmentStatementNode).Left.(*node.ElementAccessNode)
+	mapType := tester.globalScope.Types["Map<int,int>"]
+
+	tester.assertElementAccess(elementAccess, mapType, tester.globalScope.IntType)
+	tester.assertBasicDesignator(elementAccess.Designator,
+		tester.globalScope.Contract.Constructor.LocalVariables[0], mapType)
+}
+
+func TestUndefinedMapAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int n = m[1]
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Designator m is undefined")
+	tester.assertErrorAt(1, "Designator m[1] does not refer to an array/map type")
+}
+
+func TestInvalidElementAccessTarget(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+		}
+		Person p
+		int n = p[1]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Designator p[1] does not refer to an array/map type")
 }
