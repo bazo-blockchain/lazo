@@ -215,9 +215,14 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	switch node.Operator {
 	case token.And, token.Or:
 		if !v.isBool(leftType) || !v.isBool(rightType) {
-			v.reportError(node, "&& and || can only be applied to expressions of type bool")
+			v.reportError(node, "Logic operators can only be applied to bool types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.BitwiseAnd, token.BitwiseOr, token.BitwiseXOr:
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "Bitwise logic operators can only be applied to int types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Plus, token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to int types")
@@ -238,6 +243,11 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.ShiftLeft, token.ShiftRight:
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "Bitwise shift operators can only be applied to int types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	default:
 		panic(fmt.Sprintf("Illegal binary operator %s", token.SymbolLexeme[node.Operator]))
 	}

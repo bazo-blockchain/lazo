@@ -291,6 +291,33 @@ func TestLogicOrTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+	tester.assertErrorAt(0, "Logic operators can only be applied to bool types")
+}
+
+func TestBitwiseLogicTypes(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 & 2
+		int x = i | 3
+		int y = x ^ i
+		int z = i & x | y ^ 4
+	`, true)
+
+	intType := tester.globalScope.IntType
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, intType)
+}
+
+func TestBitwiseLogicTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true & 2
+		int x = 'c' | false
+		int y = x ^ "string"
+	`, false)
+
+	tester.assertTotalErrors(3)
+	tester.assertErrorAt(0, "Bitwise logic operators can only be applied to int types")
 }
 
 func TestAdditionType(t *testing.T) {
@@ -308,6 +335,7 @@ func TestSubtractionTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+	tester.assertErrorAt(0, "Arithmetric operators can only be applied to int types")
 }
 
 func TestMixedArithmeticExpr(t *testing.T) {
@@ -340,6 +368,10 @@ func TestEqualityComparisonTypeMismatch(t *testing.T) {
 		bool d = "hello" != 5
 	`, false)
 	tester.assertTotalErrors(4)
+	tester.assertErrorAt(0, "Equality comparison should have the same type")
+	tester.assertErrorAt(1, "Equality comparison should have the same type")
+	tester.assertErrorAt(2, "Equality comparison should have the same type")
+	tester.assertErrorAt(3, "Equality comparison should have the same type")
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
 	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
@@ -383,6 +415,27 @@ func TestStringRelationalComparison(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestBitwiseShiftType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 2 << 3
+		int x = i >> 1
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.IntType)
+}
+
+func TestBitwiseShiftTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 2 << true
+		int x = 'c' >> 1
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Bitwise shift operators can only be applied to int types")
+	tester.assertErrorAt(1, "Bitwise shift operators can only be applied to int types")
 }
 
 // Unary Expression Types
