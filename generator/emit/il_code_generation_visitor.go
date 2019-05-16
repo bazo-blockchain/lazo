@@ -155,6 +155,8 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		elementAccess.Expression.Accept(v)
 		elementAccess.Designator.Accept(v)
 		v.assembler.Emit(il.ArrInsert)
+		fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+		v.storeVariable(fieldSymbol)
 
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
@@ -187,6 +189,8 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			elementAccess.Expression.Accept(v)
 			elementAccess.Designator.Accept(v)
 			v.assembler.Emit(il.ArrInsert)
+			fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+			v.storeVariable(fieldSymbol)
 
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
@@ -447,9 +451,12 @@ func (v *ILCodeGenerationVisitor) VisitArrayValueCreationNode(n *node.ArrayValue
 	length := big.NewInt(int64(len(n.Elements.Values)))
 	v.assembler.PushInt(length)
 	v.assembler.Emit(il.NewArr)
-	for _, value := range n.Elements.Values {
+	for i, value := range n.Elements.Values {
 		value.Accept(v)
-		v.assembler.Emit(il.ArrAppend)
+		v.assembler.Emit(il.Swap)                 // array is be popped from stack before value
+		v.assembler.PushInt(big.NewInt(int64(i))) // array is popped from stack before index
+		v.assembler.Emit(il.Swap)
+		v.assembler.Emit(il.ArrInsert)
 	}
 
 }
@@ -517,7 +524,7 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 		v.pushDefaultStruct(typeSymbol.(*symbol.StructTypeSymbol))
 		return
 	case *symbol.ArrayTypeSymbol:
-		v.assembler.Emit(il.NewArr)
+		v.assembler.PushNil()
 		return
 	}
 

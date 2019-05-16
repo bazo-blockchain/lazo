@@ -853,20 +853,15 @@ func TestUninitializedArray(t *testing.T) {
 		int[] a
 	`)
 
-	expected := []byte{
-		0x02,       // array type
-		0x00, 0x00, // default size = 2
-	}
-
 	variable, err := tester.context.GetContractVariable(0)
 	assert.NilError(t, err)
-	tester.compareBytes(variable, expected)
+	tester.compareBytes(variable, []byte{})
 }
 
 func TestElementAssignment1(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int x
-		int[] a
+		int[] a = new int[1]
 
 		constructor() {
 			x = a[0]
@@ -881,7 +876,7 @@ func TestElementAssignment1(t *testing.T) {
 
 func TestElementAssignment2(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
-		int[] a
+		int[] a = new int[1]
 
 		constructor() {
 			a[0] = 1
@@ -890,7 +885,9 @@ func TestElementAssignment2(t *testing.T) {
 
 	expected := []byte{
 		0x02,       // array type
-		0x01, 0x00, // default size = 2
+		0x00, 0x01, // size = 1
+		0x00, 0x02, // length of value
+		0x00, 0x01, // int value
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -913,7 +910,12 @@ func TestElementAccessMultiAssignment(t *testing.T) {
 
 	expected := []byte{
 		0x02,       // array type
-		0x01, 0x02, // default size = 2
+		0x00, 0x02, // size = 2
+		0x00, 0x02, // length of first element
+		0x00, 0x01, // first element
+		0x00, 0x02, // length of second element
+		0x00, 0x02, // second element
+
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -928,7 +930,11 @@ func TestArrayLengthCreation(t *testing.T) {
 
 	expected := []byte{
 		0x02,       // array type
-		0x00, 0x00, // default size = 2
+		0x00, 0x02, // size = 2
+		0x00, 0x01, // length of first element
+		0x00,       // first element
+		0x00, 0x01, // length of second element
+		0x00, // second element
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -951,7 +957,11 @@ func TestArrayValueCreation(t *testing.T) {
 
 	expected := []byte{
 		0x02,       // array type
-		0x01, 0x02, // default size = 2
+		0x00, 0x02, // size = 2
+		0x00, 0x02, // length of first element
+		0x00, 0x01, // first element
+		0x00, 0x02, // length of second element
+		0x00, 0x02, // second element
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -965,18 +975,6 @@ func TestNestedArrayValueCreation(t *testing.T) {
 	`)
 
 	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
-}
-
-func TestArrayIndexOutOfBounds(t *testing.T) {
-	tester := newGeneratorTestUtil(t, `
-		int[] a
-
-		constructor() {
-			a[5] = 1
-		}
-	`)
-
-	assertErrorAt(t, tester, 0, "array index out of bounds")
 }
 
 // Arithmetic Expressions
