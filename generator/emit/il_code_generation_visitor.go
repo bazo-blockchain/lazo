@@ -594,12 +594,6 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	}
 }
 
-func (v *ILCodeGenerationVisitor) isArray(node node.DesignatorNode) bool {
-	sym := v.symbolTable.GetTypeByExpression(node)
-	_, ok := sym.(*symbol.ArrayTypeSymbol)
-	return ok
-}
-
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
 }
