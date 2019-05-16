@@ -223,7 +223,16 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			v.reportError(node, "Bitwise logic operators can only be applied to int types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
-	case token.Plus, token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
+	case token.Plus:
+		if v.isString(leftType) && v.isString(rightType) {
+			v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
+			return
+		}
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "Arithmetic operators can only be applied to int types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+	case token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to int types")
 		}
@@ -283,7 +292,7 @@ func (v *typeCheckVisitor) VisitTypeCastNode(typeCastNode *node.TypeCastNode) {
 	exprType := v.symbolTable.GetTypeByExpression(typeCastNode.Expression)
 
 	gs := v.symbolTable.GlobalScope
-	if castType == gs.StringType {
+	if v.isString(castType) {
 		if v.isAnyType(exprType, gs.IntType, gs.CharType, gs.BoolType, gs.StringType) {
 			v.symbolTable.MapExpressionToType(typeCastNode, gs.StringType)
 		} else {
@@ -493,6 +502,10 @@ func (v *typeCheckVisitor) isBool(symbol symbol.TypeSymbol) bool {
 
 func (v *typeCheckVisitor) isChar(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
+}
+
+func (v *typeCheckVisitor) isString(symbol symbol.TypeSymbol) bool {
+	return symbol == v.symbolTable.GlobalScope.StringType
 }
 
 func (v *typeCheckVisitor) isAnyType(symbol symbol.TypeSymbol, expectedTypes ...symbol.TypeSymbol) bool {

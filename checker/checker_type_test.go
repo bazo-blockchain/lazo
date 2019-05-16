@@ -335,7 +335,7 @@ func TestSubtractionTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
-	tester.assertErrorAt(0, "Arithmetric operators can only be applied to int types")
+	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
 }
 
 func TestMixedArithmeticExpr(t *testing.T) {
@@ -344,6 +344,24 @@ func TestMixedArithmeticExpr(t *testing.T) {
 	`, true)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestStringConcatenation(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = "hello" + "world"
+		String s2 = "int " + (String) 1
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.StringType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.StringType)
+}
+
+func TestStringConcatenationError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = "hello" + 1
+	`, false)
+
+	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
 }
 
 func TestEqualityComparisonType(t *testing.T) {
