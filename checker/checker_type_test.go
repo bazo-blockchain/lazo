@@ -210,6 +210,98 @@ func TestFieldAssignmentTypeMismatch(t *testing.T) {
 	`, false)
 }
 
+// Shorthand Assignment Types
+// ---------------------------
+
+func TestPostfixIncAndDecrementType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x++
+			x--
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(1).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+
+	assignment = tester.getConstructorStatementNode(2).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+}
+
+func TestPostfixIncAndDecrementTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			bool x
+		}
+
+		constructor() {
+			Person p
+			p.x++
+			p.x--
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "expected Type int, got Type bool")
+	tester.assertErrorAt(1, "expected Type int, got Type bool")
+}
+
+func TestShorthandAssignmentIntType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x += 2
+			x -= 2
+			x *= 2
+			x /= 2
+			x **= 2
+			x <<= 2
+			x >>= 2
+			x &= 2
+			x |= 2
+			x ^= 2
+		}
+	`, true)
+
+	for i := 1; i <= 10; i++ {
+		assignment := tester.getConstructorStatementNode(i).(*node.ShorthandAssignmentStatementNode)
+		tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+		tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+	}
+}
+
+func TestShorthandAssignmentStringType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			String s = "hello"
+			s += "World"
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(1).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.StringType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.StringType)
+}
+
+func TestShorthandAssignmentTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x += true
+
+			String s
+			s += x
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "expected Type int, got Type bool")
+	tester.assertErrorAt(1, "expected Type String, got Type int")
+}
+
 // If Statement Types
 // ------------------
 

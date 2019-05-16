@@ -159,6 +159,22 @@ func (v *typeCheckVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAss
 	v.checkExpressionTypes(node.FuncCall, leftTypes...)
 }
 
+func (v *typeCheckVisitor) VisitShorthandAssignmentNode(node *node.ShorthandAssignmentStatementNode) {
+	v.AbstractVisitor.VisitShorthandAssignmentNode(node)
+
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
+
+	// str += "hello"
+	if v.isString(designatorType) && node.Operator == token.Plus {
+		v.checkType(node.Expression, v.symbolTable.GlobalScope.StringType)
+		return
+	}
+
+	// x += 1 or x++
+	v.checkType(node.Designator, v.symbolTable.GlobalScope.IntType)
+	v.checkType(node.Expression, v.symbolTable.GlobalScope.IntType)
+}
+
 // VisitIfStatementNode checks whether the condition is a boolean expression
 func (v *typeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
