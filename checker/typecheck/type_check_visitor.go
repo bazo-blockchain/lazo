@@ -186,6 +186,23 @@ func (v *typeCheckVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNo
 // Expressions
 // -----------
 
+func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpression) {
+	v.AbstractVisitor.VisitTernaryExpressionNode(node)
+
+	conditionType := v.symbolTable.GetTypeByExpression(node.Condition)
+	if !v.isBool(conditionType) {
+		v.reportError(node.Condition, "condition should be bool type")
+	}
+
+	trueExprType := v.symbolTable.GetTypeByExpression(node.True)
+	falseExprType := v.symbolTable.GetTypeByExpression(node.False)
+	if trueExprType != falseExprType {
+		v.reportError(node, "ternary expression should return same type")
+	} else {
+		v.symbolTable.MapExpressionToType(node, trueExprType)
+	}
+}
+
 // VisitBinaryExpressionNode checks if the types for different binary expressions match
 // Expressions are &&, ||, +, -, *, /, %, **, ==, !=, >, >=, <= and <
 func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {

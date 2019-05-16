@@ -235,6 +235,45 @@ func TestIfConditionIntType(t *testing.T) {
 	`, false)
 }
 
+// Ternary Expressions
+// -------------------
+
+func TestTernaryExpressionType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 == 2 ? 1 : 2 
+	`, true)
+
+	ternaryExpr := tester.getFieldNode(0).Expression.(*node.TernaryExpression)
+	tester.assertExpressionType(ternaryExpr, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.Condition, tester.globalScope.BoolType)
+	tester.assertExpressionType(ternaryExpr.True, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.False, tester.globalScope.IntType)
+}
+
+func TestTernaryExpressionConditionTypeError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 + 2 ? 1 : 2 
+	`, false)
+
+	tester.assertErrorAt(0, "condition should be bool type")
+}
+
+func TestTernaryExpressionReturnTypeError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true ? 1 : false 
+	`, false)
+
+	tester.assertErrorAt(0, "ternary expression should return same type")
+}
+
+func TestTernaryExpressionAssignmentError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true ? true : false
+	`, false)
+
+	tester.assertErrorAt(0, "Type mismatch: expected int, given bool")
+}
+
 // Binary Expression Types
 // -----------------------
 
