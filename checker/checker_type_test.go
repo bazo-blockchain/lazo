@@ -438,6 +438,49 @@ func TestBitwiseShiftTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(1, "Bitwise shift operators can only be applied to int types")
 }
 
+// Type cast expression
+// --------------------
+
+func TestTypeCastToString(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = (String) 1
+		String s2 = (String) true
+		String s3 = (String) 'c'
+		String s4 = (String) s
+	`, true)
+
+	typeCast := tester.getFieldNode(0).Expression.(*node.TypeCastNode)
+
+	stringType := tester.globalScope.StringType
+	tester.assertExpressionType(typeCast, stringType)
+	tester.assertExpressionType(typeCast.Expression, tester.globalScope.IntType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, stringType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, stringType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, stringType)
+}
+
+func TestTypeCastToStringError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] i
+
+		String s = (String) i
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "String type cast is not supported for Array of Type int")
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, nil)
+}
+
+func TestTypeCastUnsupportedType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = (int) true
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Unsupported type cast to Type int")
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, nil)
+}
+
 // Unary Expression Types
 // -----------------------
 

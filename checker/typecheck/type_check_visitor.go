@@ -276,6 +276,25 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 	}
 }
 
+func (v *typeCheckVisitor) VisitTypeCastNode(typeCastNode *node.TypeCastNode) {
+	v.AbstractVisitor.VisitTypeCastNode(typeCastNode)
+
+	castType := v.symbolTable.FindTypeByNode(typeCastNode.Type)
+	exprType := v.symbolTable.GetTypeByExpression(typeCastNode.Expression)
+
+	gs := v.symbolTable.GlobalScope
+	if castType == gs.StringType {
+		if v.isAnyType(exprType, gs.IntType, gs.CharType, gs.BoolType, gs.StringType) {
+			v.symbolTable.MapExpressionToType(typeCastNode, gs.StringType)
+		} else {
+			v.reportError(typeCastNode, fmt.Sprintf("String type cast is not supported for %s", exprType))
+		}
+		return
+	}
+
+	v.reportError(typeCastNode, fmt.Sprintf("Unsupported type cast to %s", castType))
+}
+
 // VisitFuncCallNode checks the types of passed arguments and declared return types.
 func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 	v.AbstractVisitor.VisitFuncCallNode(funcCallNode)
@@ -474,6 +493,15 @@ func (v *typeCheckVisitor) isBool(symbol symbol.TypeSymbol) bool {
 
 func (v *typeCheckVisitor) isChar(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
+}
+
+func (v *typeCheckVisitor) isAnyType(symbol symbol.TypeSymbol, expectedTypes ...symbol.TypeSymbol) bool {
+	for _, t := range expectedTypes {
+		if t == symbol {
+			return true
+		}
+	}
+	return false
 }
 
 func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
