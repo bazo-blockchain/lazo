@@ -512,7 +512,10 @@ func (p *Parser) parseType() node.TypeNode {
 	if p.isSymbol(token.Map) {
 		return p.parseMapType()
 	}
-	return p.newErrorNode("Invalid type")
+
+	p.addError("Invalid type")
+	p.nextToken()
+	return nil
 }
 
 func (p *Parser) parseTypeWithIdentifier(abstractNode node.AbstractNode, identifier string) node.TypeNode {

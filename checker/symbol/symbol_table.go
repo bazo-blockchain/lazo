@@ -23,18 +23,23 @@ func NewSymbolTable() *SymbolTable {
 	}
 }
 
-// FindTypeByNode searches for a type
-// Returns the type or nil
-func (t *SymbolTable) FindTypeByNode(n node.TypeNode) TypeSymbol {
-	if typeSymbol := t.FindTypeByIdentifier(n.String()); typeSymbol != nil {
+// FindTypeByNode searches for a type symbol.
+// If an array type or map type are not found, they will be added to the global types.
+func (t *SymbolTable) FindTypeByNode(typeNode node.TypeNode) TypeSymbol {
+	if typeSymbol := t.FindTypeByIdentifier(typeNode.Type()); typeSymbol != nil {
 		return typeSymbol
 	}
 
-	if arrayType, ok := n.(*node.ArrayTypeNode); ok {
+	switch typeNode.(type) {
+	case *node.ArrayTypeNode:
+		arrayType := typeNode.(*node.ArrayTypeNode)
 		return t.AddArrayType(arrayType.ElementType)
+	case *node.MapTypeNode:
+		mapType := typeNode.(*node.MapTypeNode)
+		return t.AddMapType(mapType)
+	default:
+		return nil
 	}
-
-	return nil
 }
 
 // AddArrayType creates a new array type symbol and adds it to the global types
@@ -45,8 +50,23 @@ func (t *SymbolTable) AddArrayType(elementTypeNode node.TypeNode) TypeSymbol {
 	}
 
 	arrayType := NewArrayTypeSymbol(t.GlobalScope, elementType)
-	t.GlobalScope.Types[arrayType.Type()] = arrayType
+	t.GlobalScope.Types[arrayType.Identifier()] = arrayType
 	return arrayType
+}
+
+// AddMapType creates a new map type and adds it to the global scope types
+func (t *SymbolTable) AddMapType(mapTypeNode *node.MapTypeNode) TypeSymbol {
+	keyType := t.FindTypeByNode(mapTypeNode.KeyType)
+	valueType := t.FindTypeByNode(mapTypeNode.ValueType)
+
+	// To create a map type, both types should be valid
+	if keyType == nil || valueType == nil {
+		return nil
+	}
+
+	mapType := NewMapTypeSymbol(t.GlobalScope, keyType, valueType)
+	t.GlobalScope.Types[mapType.Identifier()] = mapType
+	return mapType
 }
 
 // FindTypeByIdentifier searches for a type

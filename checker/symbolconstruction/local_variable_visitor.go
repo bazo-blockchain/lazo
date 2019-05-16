@@ -73,6 +73,11 @@ func (v *localVariableVisitor) VisitReturnStatementNode(node *node.ReturnStateme
 	v.recordVisiblity(node)
 }
 
+// VisitDeleteStatementNode records the visibility
+func (v *localVariableVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNode) {
+	v.recordVisiblity(node)
+}
+
 func (v *localVariableVisitor) recordVisiblity(stmt node.StatementNode) {
 	for _, scope := range v.blockScopes {
 		for _, localVariable := range scope {

@@ -620,6 +620,22 @@ func TestFuncCallMultiVarTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
 }
 
+func TestFuncCallMultiVarAssignmentTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			int y
+			bool b
+			y, b = test2()
+		}
+
+		function (int, int) test2() {
+			return 1, 2
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "Return type mismatch: expected int, given bool")
+}
+
 func TestMultiFuncCallBinary(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
@@ -1025,4 +1041,110 @@ func TestInvalidNestedArrayAssignment2(t *testing.T) {
 
 	tester.assertTotalErrors(1)
 	tester.assertErrorAt(0, "Type mismatch: expected int[], given int[][]")
+}
+
+func TestInvalidArrayElementAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] a = new int[1]
+		constructor() {
+			a[true] = 1
+		}
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Array index must be of type int")
+}
+
+// Maps
+// ----
+
+func TestMapTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> m
+		Map<int, int> m2 = m
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected Map<int,int>, given Map<String,int>")
+}
+
+func TestMapElementAccessType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> m
+		int i = m["key"]
+	`, true)
+
+	tester.assertField(1, tester.globalScope.IntType)
+}
+
+func TestMapElementAccessTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> m
+		String s = m["key"]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "Type mismatch: expected String, given int")
+}
+
+func TestMapKeyTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<String, int> m
+		int i = m[1]
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "expected Type String, got Type int")
+}
+
+func TestMapElementAssignmentTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor(){
+			Map<bool, int> m
+			m[true] = "string"
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "assignment of String is not compatible with target int")
+}
+
+func TestMapNestedElementAccess(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int[]> m
+		int i = m[1][0]
+	`, true)
+
+	tester.assertField(1, tester.globalScope.IntType)
+}
+
+func TestMapNestedElementAccessError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<int, int> m
+		int i = m[1][0]
+	`, false)
+
+	tester.assertErrorAt(0, "Designator m[1][0] does not refer to an array/map type")
+}
+
+func TestDeleteStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			Map<char, int> m
+			delete m['c']
+		}
+	`, true)
+
+	deleteStmt := tester.getConstructorStatementNode(1).(*node.DeleteStatementNode)
+	tester.assertExpressionType(deleteStmt.Element, tester.globalScope.IntType)
+}
+
+func TestInvalidDeleteStatement(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int[] i = new int[2]
+			delete i[0]
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "delete requires map type")
 }

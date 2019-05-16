@@ -107,6 +107,15 @@ func (ct *CheckerTestUtil) assertStructField(structName string, fieldIndex int, 
 	assert.Equal(ct.t, fieldSymbol.Identifier(), structFieldNode.Identifier)
 }
 
+func (ct *CheckerTestUtil) assertMap(mapName string, keyType symbol.TypeSymbol, valueType symbol.TypeSymbol) {
+	mapType := ct.globalScope.Types[mapName].(*symbol.MapTypeSymbol)
+	assert.Equal(ct.t, mapType.Scope(), ct.globalScope)
+	assert.Equal(ct.t, mapType.Identifier(), mapName)
+	assert.Equal(ct.t, mapType.KeyType, keyType)
+	assert.Equal(ct.t, mapType.ValueType, valueType)
+	assert.Equal(ct.t, len(mapType.AllDeclarations()), 0)
+}
+
 func (ct *CheckerTestUtil) assertConstructor(totalParams int, totalVars int) {
 	functionSymbol := ct.symbolTable.GlobalScope.Contract.Constructor
 	assert.Equal(ct.t, functionSymbol.Scope(), ct.symbolTable.GlobalScope.Contract)
@@ -210,16 +219,20 @@ func (ct *CheckerTestUtil) assertBasicDesignator(expr node.ExpressionNode, decl 
 	ct.assertDesignator(designator, decl, expectedType)
 }
 
-func (ct *CheckerTestUtil) assertElementAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+// Declaration: int[] i = new int[2]
+// Element access 'i[0]' should have target declaration 'int[]' (ArrayType) and element type 'int' (Basic Type).
+func (ct *CheckerTestUtil) assertElementAccess(expr node.ExpressionNode, targetDecl symbol.Symbol, elementType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.ElementAccessNode)
 	assert.Assert(ct.t, ok)
-	ct.assertDesignator(designator, decl, expectedType)
+	ct.assertDesignator(designator, targetDecl, elementType)
 }
 
-func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
+// Declaration: Person p = new Person()
+// Member access p.name should have target declaration 'name' (Field Symbol) and type 'String'.
+func (ct *CheckerTestUtil) assertMemberAccess(expr node.ExpressionNode, targetDecl symbol.Symbol, expectedType symbol.TypeSymbol) {
 	designator, ok := expr.(*node.MemberAccessNode)
 	assert.Assert(ct.t, ok)
-	ct.assertDesignator(designator, decl, expectedType)
+	ct.assertDesignator(designator, targetDecl, expectedType)
 }
 
 func (ct *CheckerTestUtil) assertDesignator(designator node.DesignatorNode, decl symbol.Symbol, expectedType symbol.TypeSymbol) {
