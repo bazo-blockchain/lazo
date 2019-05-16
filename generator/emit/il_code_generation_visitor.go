@@ -92,6 +92,13 @@ func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
 	v.AbstractVisitor.VisitFieldNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
 
+	if arrayType, ok := targetType.(*symbol.ArrayTypeSymbol); ok {
+		if _, ok := arrayType.ElementType.(*symbol.BasicTypeSymbol); !ok {
+			v.reportError(node, "Generator currently does not support array nesting")
+			return
+		}
+	}
+
 	if node.Expression == nil {
 		v.pushDefault(targetType)
 	}
