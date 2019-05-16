@@ -92,6 +92,13 @@ func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
 	v.AbstractVisitor.VisitFieldNode(node)
 	targetType := v.symbolTable.FindTypeByNode(node.Type)
 
+	if arrayType, ok := targetType.(*symbol.ArrayTypeSymbol); ok {
+		if _, ok := arrayType.ElementType.(*symbol.BasicTypeSymbol); !ok {
+			v.reportError(node, "Generator currently does not support array nesting")
+			return
+		}
+	}
+
 	if node.Expression == nil {
 		v.pushDefault(targetType)
 	}
@@ -149,13 +156,14 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
 		v.storeVariable(decl)
 
-	//// TODO will be done when array is implemented
-	//case *node.ElementAccessNode:
-	//	elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
-	//	elementAccess.Designator.Accept(v)
-	//	elementAccess.Expression.Accept(v)
-	//	assignNode.Right.Accept(v)
-	//	v.assembler.Emit() // TODO Store Array Element
+	case *node.ElementAccessNode:
+		elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
+		assignNode.Right.Accept(v)
+		elementAccess.Expression.Accept(v)
+		elementAccess.Designator.Accept(v)
+		v.assembler.Emit(il.ArrInsert)
+		fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+		v.storeVariable(fieldSymbol)
 
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
@@ -183,12 +191,13 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			decl := v.symbolTable.GetDeclByDesignator(assignNode.Designators[i])
 			v.storeVariable(decl)
 
-		//// TODO will be done when array is implemented
-		//case *node.ElementAccessNode:
-		//	elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
-		//	elementAccess.Designator.Accept(v)
-		//	elementAccess.Expression.Accept(v)
-		//	v.assembler.Emit() // TODO Store Array Element
+		case *node.ElementAccessNode:
+			elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
+			elementAccess.Expression.Accept(v)
+			elementAccess.Designator.Accept(v)
+			v.assembler.Emit(il.ArrInsert)
+			fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+			v.storeVariable(fieldSymbol)
 
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
@@ -244,21 +253,22 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 	}
 
 	node.Designator.Accept(v)
-	// TODO https://github.com/bazo-blockchain/lazo/issues/57
+
+	// TODO as soon as VM has ARRLEN Opcode
 	//if node.Identifier == "length" && v.isArray(node.Designator) {
-	//	v.assembler.Emit() // Load Length
-	//  }
+	//	v.assembler.Emit(il.ArrLen)
+	//}
 
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	v.loadVariable(decl)
 }
 
-//// TODO Uncomment and implement as soon as arrays are implemented
-//func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode){
-//	node.Designator.Accept(v)
-//	node.Expression.Accept(v)
-//	v.assembler.Emit() // Load Array Element
-//}
+// VisitElementAccessNode generates the il code for an array element access
+func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
+	node.Expression.Accept(v)
+	node.Designator.Accept(v)
+	v.assembler.Emit(il.ArrAt) // Load Array Element
+}
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
@@ -427,6 +437,37 @@ func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.Struct
 	}
 }
 
+// VisitArrayLengthCreationNode generates the IL Code for the array length creation
+func (v *ILCodeGenerationVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
+	if len(node.Lengths) > 1 {
+		v.reportError(node, "Generator currently does not support array nesting")
+		return
+	}
+
+	node.Lengths[0].Accept(v)
+	v.assembler.Emit(il.NewArr) // Pass Array length as parameter
+}
+
+// VisitArrayValueCreationNode generates the IL Code for the array value creation
+func (v *ILCodeGenerationVisitor) VisitArrayValueCreationNode(n *node.ArrayValueCreationNode) {
+	if _, isNested := n.Elements.Values[0].(*node.ArrayInitializationNode); isNested {
+		v.reportError(n, "Generator currently does not support array nesting")
+		return
+	}
+
+	length := big.NewInt(int64(len(n.Elements.Values)))
+	v.assembler.PushInt(length)
+	v.assembler.Emit(il.NewArr)
+	for i, value := range n.Elements.Values {
+		value.Accept(v)
+		v.assembler.Emit(il.Swap)                 // array is be popped from stack before value
+		v.assembler.PushInt(big.NewInt(int64(i))) // array is popped from stack before index
+		v.assembler.Emit(il.Swap)
+		v.assembler.Emit(il.ArrInsert)
+	}
+
+}
+
 // VisitBasicDesignatorNode generates the IL Code for a designator
 func (v *ILCodeGenerationVisitor) VisitBasicDesignatorNode(node *node.BasicDesignatorNode) {
 	decl := v.symbolTable.GetDeclByDesignator(node)
@@ -485,8 +526,12 @@ func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
 }
 
 func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
-	if structType, ok := typeSymbol.(*symbol.StructTypeSymbol); ok {
-		v.pushDefaultStruct(structType)
+	switch typeSymbol.(type) {
+	case *symbol.StructTypeSymbol:
+		v.pushDefaultStruct(typeSymbol.(*symbol.StructTypeSymbol))
+		return
+	case *symbol.ArrayTypeSymbol:
+		v.assembler.PushNil()
 		return
 	}
 

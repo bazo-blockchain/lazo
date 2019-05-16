@@ -845,6 +845,138 @@ func TestStructNestedMultiFieldAssignment(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
+// Arrays
+// ------
+
+func TestUninitializedArray(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] a
+	`)
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, []byte{})
+}
+
+func TestElementAssignment1(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+		int[] a = new int[1]
+
+		constructor() {
+			x = a[0]
+		}
+	`)
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, []byte{0})
+
+}
+
+func TestElementAssignment2(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] a = new int[1]
+
+		constructor() {
+			a[0] = 1
+		}
+	`)
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x01, // size = 1
+		0x00, 0x02, // length of value
+		0x00, 0x01, // int value
+	}
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, expected)
+}
+
+func TestElementAccessMultiAssignment(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] a = new int[2]
+
+		constructor() {
+			a[0], a[1] = initArray()
+		}
+
+		function (int, int) initArray() {
+			return 1, 2
+		}
+	`)
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x02, // size = 2
+		0x00, 0x02, // length of first element
+		0x00, 0x01, // first element
+		0x00, 0x02, // length of second element
+		0x00, 0x02, // second element
+
+	}
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, expected)
+}
+
+func TestArrayLengthCreation(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] a = new int[2]
+	`)
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x02, // size = 2
+		0x00, 0x01, // length of first element
+		0x00,       // first element
+		0x00, 0x01, // length of second element
+		0x00, // second element
+	}
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, expected)
+}
+
+func TestNestedArrayLengthCreation(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[][] a = new int[2][2]
+	`)
+
+	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+}
+
+func TestArrayValueCreation(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] a = new int[]{1, 2}
+	`)
+
+	expected := []byte{
+		0x02,       // array type
+		0x00, 0x02, // size = 2
+		0x00, 0x02, // length of first element
+		0x00, 0x01, // first element
+		0x00, 0x02, // length of second element
+		0x00, 0x02, // second element
+	}
+
+	variable, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(variable, expected)
+}
+
+func TestNestedArrayValueCreation(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[][] a = new int[][]{{1, 2}, {3}}
+	`)
+
+	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+}
+
 // Arithmetic Expressions
 // ----------------------
 
