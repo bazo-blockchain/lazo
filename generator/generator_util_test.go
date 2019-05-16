@@ -160,3 +160,9 @@ func assertIntExpr(t *testing.T, expr string, expected int64) {
 	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
 }
+
+func assertErrorAt(t *testing.T, gt *generatorTestUtil, index int, errSubStr string) {
+	assert.Assert(t, len(gt.errors) > index)
+	err := gt.errors[index].Error()
+	assert.Assert(t, strings.Contains(err, errSubStr), err)
+}
