@@ -277,9 +277,14 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Not:
 		if !v.isBool(operandType) {
-			v.reportError(node, "! unary operators can only be applied to expressions of type bool")
+			v.reportError(node, "! unary operator can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.BitwiseNot:
+		if !v.isInt(operandType) {
+			v.reportError(node, "~ unary operator can only be applied to int type")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	default:
 		panic(fmt.Sprintf("Illegal unary operator %s", token.SymbolLexeme[node.Operator]))
 	}

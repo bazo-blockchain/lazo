@@ -558,6 +558,23 @@ func TestMixedExpressionTypeMismatch(t *testing.T) {
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
 }
 
+func TestBitwiseNotType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = ~4
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestBitwiseNotTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = ~true
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "~ unary operator can only be applied to int type")
+}
+
 // Function Calls
 // --------------
 
