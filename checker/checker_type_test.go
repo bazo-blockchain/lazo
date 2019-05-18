@@ -210,6 +210,98 @@ func TestFieldAssignmentTypeMismatch(t *testing.T) {
 	`, false)
 }
 
+// Shorthand Assignment Types
+// ---------------------------
+
+func TestPostfixIncAndDecrementType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x++
+			x--
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(1).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+
+	assignment = tester.getConstructorStatementNode(2).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+}
+
+func TestPostfixIncAndDecrementTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		struct Person {
+			bool x
+		}
+
+		constructor() {
+			Person p
+			p.x++
+			p.x--
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "expected Type int, got Type bool")
+	tester.assertErrorAt(1, "expected Type int, got Type bool")
+}
+
+func TestShorthandAssignmentIntType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x += 2
+			x -= 2
+			x *= 2
+			x /= 2
+			x **= 2
+			x <<= 2
+			x >>= 2
+			x &= 2
+			x |= 2
+			x ^= 2
+		}
+	`, true)
+
+	for i := 1; i <= 10; i++ {
+		assignment := tester.getConstructorStatementNode(i).(*node.ShorthandAssignmentStatementNode)
+		tester.assertExpressionType(assignment.Designator, tester.globalScope.IntType)
+		tester.assertExpressionType(assignment.Expression, tester.globalScope.IntType)
+	}
+}
+
+func TestShorthandAssignmentStringType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			String s = "hello"
+			s += "World"
+		}
+	`, true)
+
+	assignment := tester.getConstructorStatementNode(1).(*node.ShorthandAssignmentStatementNode)
+	tester.assertExpressionType(assignment.Designator, tester.globalScope.StringType)
+	tester.assertExpressionType(assignment.Expression, tester.globalScope.StringType)
+}
+
+func TestShorthandAssignmentTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		constructor() {
+			int x
+			x += true
+
+			String s
+			s += x
+		}
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "expected Type int, got Type bool")
+	tester.assertErrorAt(1, "expected Type String, got Type int")
+}
+
 // If Statement Types
 // ------------------
 
@@ -235,6 +327,45 @@ func TestIfConditionIntType(t *testing.T) {
 	`, false)
 }
 
+// Ternary Expressions
+// -------------------
+
+func TestTernaryExpressionType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 == 2 ? 1 : 2 
+	`, true)
+
+	ternaryExpr := tester.getFieldNode(0).Expression.(*node.TernaryExpression)
+	tester.assertExpressionType(ternaryExpr, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.Condition, tester.globalScope.BoolType)
+	tester.assertExpressionType(ternaryExpr.True, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.False, tester.globalScope.IntType)
+}
+
+func TestTernaryExpressionConditionTypeError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 + 2 ? 1 : 2 
+	`, false)
+
+	tester.assertErrorAt(0, "condition should be bool type")
+}
+
+func TestTernaryExpressionReturnTypeError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true ? 1 : false 
+	`, false)
+
+	tester.assertErrorAt(0, "ternary expression should return same type")
+}
+
+func TestTernaryExpressionAssignmentError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true ? true : false
+	`, false)
+
+	tester.assertErrorAt(0, "Type mismatch: expected int, given bool")
+}
+
 // Binary Expression Types
 // -----------------------
 
@@ -252,6 +383,33 @@ func TestLogicOrTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+	tester.assertErrorAt(0, "Logic operators can only be applied to bool types")
+}
+
+func TestBitwiseLogicTypes(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 1 & 2
+		int x = i | 3
+		int y = x ^ i
+		int z = i & x | y ^ 4
+	`, true)
+
+	intType := tester.globalScope.IntType
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, intType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, intType)
+}
+
+func TestBitwiseLogicTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = true & 2
+		int x = 'c' | false
+		int y = x ^ "string"
+	`, false)
+
+	tester.assertTotalErrors(3)
+	tester.assertErrorAt(0, "Bitwise logic operators can only be applied to int types")
 }
 
 func TestAdditionType(t *testing.T) {
@@ -269,6 +427,7 @@ func TestSubtractionTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
 }
 
 func TestMixedArithmeticExpr(t *testing.T) {
@@ -277,6 +436,24 @@ func TestMixedArithmeticExpr(t *testing.T) {
 	`, true)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestStringConcatenation(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = "hello" + "world"
+		String s2 = "int " + (String) 1
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.StringType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.StringType)
+}
+
+func TestStringConcatenationError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = "hello" + 1
+	`, false)
+
+	tester.assertErrorAt(0, "+ operator can only be applied to int/string types")
 }
 
 func TestEqualityComparisonType(t *testing.T) {
@@ -301,6 +478,10 @@ func TestEqualityComparisonTypeMismatch(t *testing.T) {
 		bool d = "hello" != 5
 	`, false)
 	tester.assertTotalErrors(4)
+	tester.assertErrorAt(0, "Equality comparison should have the same type")
+	tester.assertErrorAt(1, "Equality comparison should have the same type")
+	tester.assertErrorAt(2, "Equality comparison should have the same type")
+	tester.assertErrorAt(3, "Equality comparison should have the same type")
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
 	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
@@ -344,6 +525,70 @@ func TestStringRelationalComparison(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestBitwiseShiftType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 2 << 3
+		int x = i >> 1
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.IntType)
+}
+
+func TestBitwiseShiftTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = 2 << true
+		int x = 'c' >> 1
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Bitwise shift operators can only be applied to int types")
+	tester.assertErrorAt(1, "Bitwise shift operators can only be applied to int types")
+}
+
+// Type cast expression
+// --------------------
+
+func TestTypeCastToString(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		String s = (String) 1
+		String s2 = (String) true
+		String s3 = (String) 'c'
+		String s4 = (String) s
+	`, true)
+
+	typeCast := tester.getFieldNode(0).Expression.(*node.TypeCastNode)
+
+	stringType := tester.globalScope.StringType
+	tester.assertExpressionType(typeCast, stringType)
+	tester.assertExpressionType(typeCast.Expression, tester.globalScope.IntType)
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, stringType)
+	tester.assertExpressionType(tester.getFieldNode(2).Expression, stringType)
+	tester.assertExpressionType(tester.getFieldNode(3).Expression, stringType)
+}
+
+func TestTypeCastToStringError(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int[] i
+
+		String s = (String) i
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "String type cast is not supported for Array of Type int")
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, nil)
+}
+
+func TestTypeCastUnsupportedType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = (int) true
+	`, false)
+
+	tester.assertTotalErrors(2)
+	tester.assertErrorAt(0, "Unsupported type cast to Type int")
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, nil)
 }
 
 // Unary Expression Types
@@ -403,6 +648,23 @@ func TestMixedExpressionTypeMismatch(t *testing.T) {
 	`, false)
 
 	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.BoolType)
+}
+
+func TestBitwiseNotType(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = ~4
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(0).Expression, tester.globalScope.IntType)
+}
+
+func TestBitwiseNotTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		int i = ~true
+	`, false)
+
+	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "~ unary operator can only be applied to int type")
 }
 
 // Function Calls
@@ -647,7 +909,7 @@ func TestMultiFuncCallBinary(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
+	tester.assertErrorAt(0, "+ operator can only be applied to int/string types")
 }
 
 func TestMultiFuncCallReturn(t *testing.T) {

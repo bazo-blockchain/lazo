@@ -159,6 +159,22 @@ func (v *typeCheckVisitor) VisitMultiAssignmentStatementNode(node *node.MultiAss
 	v.checkExpressionTypes(node.FuncCall, leftTypes...)
 }
 
+func (v *typeCheckVisitor) VisitShorthandAssignmentNode(node *node.ShorthandAssignmentStatementNode) {
+	v.AbstractVisitor.VisitShorthandAssignmentNode(node)
+
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
+
+	// str += "hello"
+	if v.isString(designatorType) && node.Operator == token.Plus {
+		v.checkType(node.Expression, v.symbolTable.GlobalScope.StringType)
+		return
+	}
+
+	// x += 1 or x++
+	v.checkType(node.Designator, v.symbolTable.GlobalScope.IntType)
+	v.checkType(node.Expression, v.symbolTable.GlobalScope.IntType)
+}
+
 // VisitIfStatementNode checks whether the condition is a boolean expression
 func (v *typeCheckVisitor) VisitIfStatementNode(node *node.IfStatementNode) {
 	v.AbstractVisitor.VisitIfStatementNode(node)
@@ -186,6 +202,23 @@ func (v *typeCheckVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNo
 // Expressions
 // -----------
 
+func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpression) {
+	v.AbstractVisitor.VisitTernaryExpressionNode(node)
+
+	conditionType := v.symbolTable.GetTypeByExpression(node.Condition)
+	if !v.isBool(conditionType) {
+		v.reportError(node.Condition, "condition should be bool type")
+	}
+
+	trueExprType := v.symbolTable.GetTypeByExpression(node.True)
+	falseExprType := v.symbolTable.GetTypeByExpression(node.False)
+	if trueExprType != falseExprType {
+		v.reportError(node, "ternary expression should return same type")
+	} else {
+		v.symbolTable.MapExpressionToType(node, trueExprType)
+	}
+}
+
 // VisitBinaryExpressionNode checks if the types for different binary expressions match
 // Expressions are &&, ||, +, -, *, /, %, **, ==, !=, >, >=, <= and <
 func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpressionNode) {
@@ -198,10 +231,24 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	switch node.Operator {
 	case token.And, token.Or:
 		if !v.isBool(leftType) || !v.isBool(rightType) {
-			v.reportError(node, "&& and || can only be applied to expressions of type bool")
+			v.reportError(node, "Logic operators can only be applied to bool types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
-	case token.Plus, token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
+	case token.BitwiseAnd, token.BitwiseOr, token.BitwiseXOr:
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "Bitwise logic operators can only be applied to int types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+	case token.Plus:
+		if v.isString(leftType) && v.isString(rightType) {
+			v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
+			return
+		}
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "+ operator can only be applied to int/string types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+	case token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to int types")
 		}
@@ -221,6 +268,11 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.ShiftLeft, token.ShiftRight:
+		if !v.isInt(leftType) || !v.isInt(rightType) {
+			v.reportError(node, "Bitwise shift operators can only be applied to int types")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	default:
 		panic(fmt.Sprintf("Illegal binary operator %s", token.SymbolLexeme[node.Operator]))
 	}
@@ -241,12 +293,36 @@ func (v *typeCheckVisitor) VisitUnaryExpressionNode(node *node.UnaryExpressionNo
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Not:
 		if !v.isBool(operandType) {
-			v.reportError(node, "! unary operators can only be applied to expressions of type bool")
+			v.reportError(node, "! unary operator can only be applied to expressions of type bool")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+	case token.BitwiseNot:
+		if !v.isInt(operandType) {
+			v.reportError(node, "~ unary operator can only be applied to int type")
+		}
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	default:
 		panic(fmt.Sprintf("Illegal unary operator %s", token.SymbolLexeme[node.Operator]))
 	}
+}
+
+func (v *typeCheckVisitor) VisitTypeCastNode(typeCastNode *node.TypeCastNode) {
+	v.AbstractVisitor.VisitTypeCastNode(typeCastNode)
+
+	castType := v.symbolTable.FindTypeByNode(typeCastNode.Type)
+	exprType := v.symbolTable.GetTypeByExpression(typeCastNode.Expression)
+
+	gs := v.symbolTable.GlobalScope
+	if v.isString(castType) {
+		if v.isAnyType(exprType, gs.IntType, gs.CharType, gs.BoolType, gs.StringType) {
+			v.symbolTable.MapExpressionToType(typeCastNode, gs.StringType)
+		} else {
+			v.reportError(typeCastNode, fmt.Sprintf("String type cast is not supported for %s", exprType))
+		}
+		return
+	}
+
+	v.reportError(typeCastNode, fmt.Sprintf("Unsupported type cast to %s", castType))
 }
 
 // VisitFuncCallNode checks the types of passed arguments and declared return types.
@@ -447,6 +523,19 @@ func (v *typeCheckVisitor) isBool(symbol symbol.TypeSymbol) bool {
 
 func (v *typeCheckVisitor) isChar(symbol symbol.TypeSymbol) bool {
 	return symbol == v.symbolTable.GlobalScope.CharType
+}
+
+func (v *typeCheckVisitor) isString(symbol symbol.TypeSymbol) bool {
+	return symbol == v.symbolTable.GlobalScope.StringType
+}
+
+func (v *typeCheckVisitor) isAnyType(symbol symbol.TypeSymbol, expectedTypes ...symbol.TypeSymbol) bool {
+	for _, t := range expectedTypes {
+		if t == symbol {
+			return true
+		}
+	}
+	return false
 }
 
 func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
