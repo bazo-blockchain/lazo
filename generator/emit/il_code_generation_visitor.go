@@ -156,12 +156,21 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
 		v.storeVariable(decl)
 
-	case *node.ElementAccessNode:
+	case *node.ElementAccessNode: // arr[0] or map["key"]
 		elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
 		assignNode.Right.Accept(v)
 		elementAccess.Expression.Accept(v)
 		elementAccess.Designator.Accept(v)
-		v.assembler.Emit(il.ArrInsert)
+
+		designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
+		if v.isArrayType(designatorType) {
+			v.assembler.Emit(il.ArrInsert)
+		} else if v.isMapType(designatorType) {
+			v.assembler.Emit(il.MapPush)
+		} else {
+			panic("Unsupported element access type")
+		}
+
 		fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
 		v.storeVariable(fieldSymbol)
 
@@ -267,7 +276,15 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
 	node.Expression.Accept(v)
 	node.Designator.Accept(v)
-	v.assembler.Emit(il.ArrAt) // Load Array Element
+
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
+	if v.isArrayType(designatorType) {
+		v.assembler.Emit(il.ArrAt) // Load Array Element
+	} else if v.isMapType(designatorType) {
+		v.assembler.Emit(il.MapGetVal)
+	} else {
+		panic("Unsupported element access type")
+	}
 }
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
@@ -533,6 +550,9 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 	case *symbol.ArrayTypeSymbol:
 		v.assembler.PushNil()
 		return
+	case *symbol.MapTypeSymbol:
+		v.assembler.Emit(il.NewMap)
+		return
 	}
 
 	gs := v.symbolTable.GlobalScope
@@ -592,6 +612,16 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	default:
 		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
+}
+
+func (v *ILCodeGenerationVisitor) isMapType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.MapTypeSymbol)
+	return ok
+}
+
+func (v *ILCodeGenerationVisitor) isArrayType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.ArrayTypeSymbol)
+	return ok
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {

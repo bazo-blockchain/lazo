@@ -977,6 +977,111 @@ func TestNestedArrayValueCreation(t *testing.T) {
 	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
 }
 
+// Map
+// ---
+
+func TestEmptyMap(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<int, int> m
+	`)
+
+	expected := []byte{
+		0x01,       // Map type
+		0x00, 0x00, // Map size
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPush(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<int, bool> m
+
+		constructor() {
+			m[3] = true 
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x01,
+		0x00, 0x02, // length of key
+		0x00, 0x03, // key 3
+		0x00, 0x01, // length of value
+		0x01, // value true
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPushMultiple(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<String, int> m
+
+		constructor() {
+			m["a"] = 1
+			m["ab"] = 2
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x02,
+		0x00, 0x01, // length of key
+		0x61,       // key "a"
+		0x00, 0x02, // length of value
+		0x00, 0x01, // value
+		0x00, 0x02, // length of key
+		0x61, 0x62, // key "ab"
+		0x00, 0x02, // length of value
+		0x00, 0x02, // value
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPushOverride(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<String, int> m
+
+		constructor() {
+			m["a"] = 1
+			m["a"] = 2
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x01,
+		0x00, 0x02, // length of key
+		0x61,       // key "a"
+		0x00, 0x02, // length of value
+		0x00, 0x02, // value
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapGetVal(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			Map<String, int> m
+			m["a"] = 1234
+			return m["a"]
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1234))
+}
+
 // Arithmetic Expressions
 // ----------------------
 
