@@ -245,7 +245,7 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 			return
 		}
 		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Arithmetic operators can only be applied to int types")
+			v.reportError(node, "+ operator can only be applied to int/string types")
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:

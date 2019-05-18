@@ -453,7 +453,7 @@ func TestStringConcatenationError(t *testing.T) {
 		String s = "hello" + 1
 	`, false)
 
-	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
+	tester.assertErrorAt(0, "+ operator can only be applied to int/string types")
 }
 
 func TestEqualityComparisonType(t *testing.T) {
@@ -909,7 +909,7 @@ func TestMultiFuncCallBinary(t *testing.T) {
 		}
 	`, false)
 
-	tester.assertErrorAt(0, "Arithmetic operators can only be applied to int types")
+	tester.assertErrorAt(0, "+ operator can only be applied to int/string types")
 }
 
 func TestMultiFuncCallReturn(t *testing.T) {
