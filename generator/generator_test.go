@@ -1167,6 +1167,29 @@ func TestMapDeleteKey(t *testing.T) {
 	tester.assertBytes(1, 0, 0) // Empty map
 }
 
+func TestMapContainsKey(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function bool test() {
+			Map<String, int> m
+			m["a"] = 1234
+			return m.contains("a")
+		}
+	`, boolTestSig)
+
+	tester.assertBool(true)
+}
+
+func TestMapContainsKeyFalse(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function bool test() {
+			Map<String, int> m
+			return m.contains("a")
+		}
+	`, boolTestSig)
+
+	tester.assertBool(false)
+}
+
 func TestMapStructValError(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		struct Person {

@@ -427,12 +427,18 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 }
 
 // VisitFuncCallNode generates the IL Code for the function call
-func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
-	for _, arg := range node.Args {
+func (v *ILCodeGenerationVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
+	for _, arg := range funcCallNode.Args {
 		arg.Accept(v.ConcreteVisitor)
 	}
 
-	funcSym := v.symbolTable.GetDeclByDesignator(node.Designator).(*symbol.FunctionSymbol)
+	funcSym := v.symbolTable.GetDeclByDesignator(funcCallNode.Designator).(*symbol.FunctionSymbol)
+
+	if funcSym == v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains] {
+		funcCallNode.Designator.(*node.MemberAccessNode).Designator.Accept(v) // load map
+		v.assembler.Emit(il.MapHasKey)
+		return
+	}
 	v.assembler.CallFunc(funcSym)
 }
 
