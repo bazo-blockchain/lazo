@@ -68,7 +68,9 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	}
 
 	tester.metadata, tester.errors = New(symbolTable).Run()
-	assert.Equal(t, len(err), 0, "Error while generating byte code")
+	if len(tester.errors) > 0 {
+		return tester
+	}
 
 	byteCode, variables := tester.metadata.CreateContract()
 	context := vm.NewMockContext(byteCode)

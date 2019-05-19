@@ -171,9 +171,13 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 			panic("Unsupported element access type")
 		}
 
-		fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-		v.storeVariable(fieldSymbol)
-
+		targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+		if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
+			v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
+			return
+		}
+		// Workaround for single dereference
+		v.storeVariable(targetDecl)
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
@@ -556,6 +560,8 @@ func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
 		v.assembler.StoreLocal(byte(index))
 	case *symbol.StructTypeSymbol:
 		v.assembler.StoreField(uint16(index))
+	default:
+		panic("Unsupported variable type")
 	}
 }
 
@@ -639,6 +645,21 @@ func (v *ILCodeGenerationVisitor) isMapType(typeSymbol symbol.TypeSymbol) bool {
 func (v *ILCodeGenerationVisitor) isArrayType(typeSymbol symbol.TypeSymbol) bool {
 	_, ok := typeSymbol.(*symbol.ArrayTypeSymbol)
 	return ok
+}
+
+func (v *ILCodeGenerationVisitor) isStructType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.StructTypeSymbol)
+	return ok
+}
+
+// Variable has an static identifier which can be compiled (e.g. int x)
+func (v *ILCodeGenerationVisitor) isVariableDecl(decl symbol.Symbol) bool {
+	switch decl.(type) {
+	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol, *symbol.FieldSymbol:
+		return true
+	default:
+		return false
+	}
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {

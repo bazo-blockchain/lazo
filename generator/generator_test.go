@@ -977,6 +977,39 @@ func TestNestedArrayValueCreation(t *testing.T) {
 	tester.assertErrorAt(0, "Generator currently does not support array nesting")
 }
 
+func TestArrayInStructUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		struct Person{
+			int[] nums
+		}
+		constructor(){
+			Person p = new Person(nums = new int[2])
+			p.nums[0] = 1
+		}
+	`)
+
+	tester.assertErrorAt(0, "Multiple dereferences on value types are not supported")
+}
+
+func TestArrayInStructUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int[] nums
+		}
+		
+		function int test(){
+			Person p = new Person(nums = new int[2])
+			int[] copy = p.nums
+			copy[0] = 1
+			p.nums = copy
+			
+			return p.nums[0] 
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1))
+}
+
 // Map
 // ---
 
@@ -1162,6 +1195,36 @@ func TestMapStructValOverride(t *testing.T) {
 	`, intTestSig)
 
 	tester.assertInt(big.NewInt(1001))
+}
+
+func TestMapArrayValueUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		constructor(){
+			Map<String, int[]> m
+			m["a"] = new int[2]
+
+			m["a"][0] = 2
+		}
+	`)
+
+	tester.assertErrorAt(0, "Multiple dereferences on value types are not supported")
+}
+
+func TestMapArrayValueUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test(){
+			Map<String, int[]> m
+			m["a"] = new int[2]
+			
+			int[] copy = m["a"] 
+			copy[0] = 2
+			m["a"] = copy
+
+			return m["a"][0]
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(2))
 }
 
 // Arithmetic Expressions
