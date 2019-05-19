@@ -208,10 +208,23 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
 			elementAccess.Expression.Accept(v)
 			elementAccess.Designator.Accept(v)
-			v.assembler.Emit(il.ArrInsert)
-			fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-			v.storeVariable(fieldSymbol)
 
+			designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
+			if v.isArrayType(designatorType) {
+				v.assembler.Emit(il.ArrInsert)
+			} else if v.isMapType(designatorType) {
+				v.assembler.Emit(il.MapSetVal)
+			} else {
+				panic("Unsupported element access type")
+			}
+
+			targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+			if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
+				v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
+				return
+			}
+			// Workaround for single dereference
+			v.storeVariable(targetDecl)
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
 			memberAccessNode.Designator.Accept(v)

@@ -1277,6 +1277,24 @@ func TestMapArrayValueUpdate(t *testing.T) {
 	tester.assertInt(big.NewInt(2))
 }
 
+func TestMapElementMultiAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, int) test(){
+			Map<String, int> m
+			m["a"], m["b"] = test2()
+			
+			return m["a"], m["b"]
+		}
+
+		function (int, int) test2() {
+			return 10, 20
+		}
+	`, "(int,int)test()")
+
+	tester.assertIntAt(0, big.NewInt(10))
+	tester.assertIntAt(1, big.NewInt(20))
+}
+
 // Arithmetic Expressions
 // ----------------------
 
