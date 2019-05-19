@@ -1059,7 +1059,7 @@ func TestMapPushOverride(t *testing.T) {
 	expected := []byte{
 		0x01,
 		0x00, 0x01,
-		0x00, 0x02, // length of key
+		0x00, 0x01, // length of key
 		0x61,       // key "a"
 		0x00, 0x02, // length of value
 		0x00, 0x02, // value

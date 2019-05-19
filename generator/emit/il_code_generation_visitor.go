@@ -166,7 +166,7 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		if v.isArrayType(designatorType) {
 			v.assembler.Emit(il.ArrInsert)
 		} else if v.isMapType(designatorType) {
-			v.assembler.Emit(il.MapPush)
+			v.assembler.Emit(il.MapSetVal)
 		} else {
 			panic("Unsupported element access type")
 		}

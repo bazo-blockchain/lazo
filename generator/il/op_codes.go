@@ -51,7 +51,6 @@ const (
 	CallData // Parameters and function signature hash
 	NewMap
 	MapHasKey
-	MapPush
 	MapGetVal
 	MapSetVal
 	MapRemove
