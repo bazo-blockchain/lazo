@@ -570,6 +570,7 @@ func (v *ILCodeGenerationVisitor) loadVariable(decl symbol.Symbol) {
 }
 
 func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
+	// Variable has an static identifier which can be compiled (e.g. int x)
 	index := v.getVarIndex(decl)
 
 	switch decl.Scope().(type) {
@@ -669,16 +670,6 @@ func (v *ILCodeGenerationVisitor) isArrayType(typeSymbol symbol.TypeSymbol) bool
 func (v *ILCodeGenerationVisitor) isStructType(typeSymbol symbol.TypeSymbol) bool {
 	_, ok := typeSymbol.(*symbol.StructTypeSymbol)
 	return ok
-}
-
-// Variable has an static identifier which can be compiled (e.g. int x)
-func (v *ILCodeGenerationVisitor) isVariableDecl(decl symbol.Symbol) bool {
-	switch decl.(type) {
-	case *symbol.LocalVariableSymbol, *symbol.ParameterSymbol, *symbol.FieldSymbol:
-		return true
-	default:
-		return false
-	}
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {
