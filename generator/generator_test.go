@@ -947,7 +947,7 @@ func TestNestedArrayLengthCreation(t *testing.T) {
 		int[][] a = new int[2][2]
 	`)
 
-	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+	tester.assertErrorAt(0, "Generator currently does not support array nesting")
 }
 
 func TestArrayValueCreation(t *testing.T) {
@@ -974,7 +974,7 @@ func TestNestedArrayValueCreation(t *testing.T) {
 		int[][] a = new int[][]{{1, 2}, {3}}
 	`)
 
-	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+	tester.assertErrorAt(0, "Generator currently does not support array nesting")
 }
 
 // Map
@@ -1082,6 +1082,18 @@ func TestMapGetVal(t *testing.T) {
 	tester.assertInt(big.NewInt(1234))
 }
 
+func TestMapGetVal_NonExistingKey(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			Map<String, int> m
+			return m["a"]
+		}
+	`, intTestSig)
+
+	// todo: It should set default value (0) and return it
+	tester.assertInt(big.NewInt(0))
+}
+
 func TestMapDeleteKey(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		function Map<String, int> test() {
@@ -1093,6 +1105,63 @@ func TestMapDeleteKey(t *testing.T) {
 	`, "(Map<String,int>)test()")
 
 	tester.assertBytes(1, 0, 0) // Empty map
+}
+
+func TestMapStructValError(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		constructor() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+			m['a'].balance = 1001
+		}
+	`, intTestSig)
+
+	tester.assertErrorAt(0, "Updating struct value type in array/map is not supported")
+}
+
+func TestMapStructVal(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		function int test() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+
+			Person p = m['a']
+			p.balance = 1001
+			return m['a'].balance
+		}
+	`, intTestSig)
+
+	// Struct is a value type, so changing the copy will not affect the map's value
+	tester.assertInt(big.NewInt(1000))
+}
+
+func TestMapStructValOverride(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		function int test() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+
+			Person p = m['a']
+			p.balance = 1001
+
+			m['a'] = p
+			return m['a'].balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1001))
 }
 
 // Arithmetic Expressions

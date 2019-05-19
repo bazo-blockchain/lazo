@@ -247,6 +247,12 @@ func (v *ILCodeGenerationVisitor) updateStruct(targetStruct node.DesignatorNode)
 			v.updateStruct(targetStructMemberAccessNode.Designator)
 		}
 		return
+	} else if _, ok := targetStruct.(*node.ElementAccessNode); ok {
+		// Since array and map are value types, they are not updated automatically.
+		// 		m['a'] = new Person(1000)
+		//		m['a'].balance = 1001
+		v.reportError(targetStruct, "Updating struct value type in array/map is not supported")
+		return
 	}
 
 	// targetStruct.field = x
