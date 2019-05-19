@@ -335,27 +335,34 @@ func (v *typeCheckVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
 		return
 	}
 
-	totalParams := len(funcSym.Parameters)
-	totalArgs := len(funcCallNode.Args)
-	if len(funcSym.ReturnTypes) > 0 {
-		if totalParams != totalArgs {
-			v.reportError(funcCallNode, fmt.Sprintf("expected %d args, got %d", totalParams, totalArgs))
-		} else {
-			for i, arg := range funcCallNode.Args {
-				if arg.String() == symbol.This {
-					v.reportError(funcCallNode, "'this' cannot be used as an argument")
-					return
-				}
-				v.checkType(arg, funcSym.Parameters[i].Type)
-			}
-		}
-	}
-
 	// Function with multiple return values are allowed only in multi-variable, multi-assignment and return statements.
 	// Otherwise, the function call should have only one return type.
 	// Void function has no type.
 	if len(funcSym.ReturnTypes) == 1 {
 		v.symbolTable.MapExpressionToType(funcCallNode, funcSym.ReturnTypes[0])
+	}
+
+	totalParams := len(funcSym.Parameters)
+	totalArgs := len(funcCallNode.Args)
+	if totalParams != totalArgs {
+		v.reportError(funcCallNode, fmt.Sprintf("expected %d args, got %d", totalParams, totalArgs))
+		return
+	}
+
+	// Check generic map key type
+	if funcSym == v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains] {
+		targetMap := funcCallNode.Designator.(*node.MemberAccessNode).Designator
+		targetMapType := v.symbolTable.GetTypeByExpression(targetMap).(*symbol.MapTypeSymbol)
+		v.checkType(funcCallNode.Args[0], targetMapType.KeyType)
+		return
+	}
+
+	for i, arg := range funcCallNode.Args {
+		if arg.String() == symbol.This {
+			v.reportError(funcCallNode, "'this' cannot be used as an argument")
+			return
+		}
+		v.checkType(arg, funcSym.Parameters[i].Type)
 	}
 }
 

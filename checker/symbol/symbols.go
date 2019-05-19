@@ -6,8 +6,11 @@ import (
 	"github.com/bazo-blockchain/lazo/parser/node"
 )
 
-// This is a constant for the this keyword
+// This is a constant for the 'this' keyword
 const This = "this"
+
+// Contains is an identifier for built-in map member function.
+const Contains = "contains"
 
 // Symbol declares functions which symbols have to implement
 type Symbol interface {

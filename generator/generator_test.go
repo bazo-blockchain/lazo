@@ -1154,18 +1154,6 @@ func TestMapGetVal(t *testing.T) {
 	tester.assertInt(big.NewInt(1234))
 }
 
-func TestMapGetVal_NonExistingKey(t *testing.T) {
-	tester := newGeneratorTestUtilWithFunc(t, `
-		function int test() {
-			Map<String, int> m
-			return m["a"]
-		}
-	`, intTestSig)
-
-	// todo: It should set default value (0) and return it
-	tester.assertInt(big.NewInt(0))
-}
-
 func TestMapDeleteKey(t *testing.T) {
 	tester := newGeneratorTestUtilWithFunc(t, `
 		function Map<String, int> test() {

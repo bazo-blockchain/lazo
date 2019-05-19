@@ -19,10 +19,14 @@ type GlobalScope struct {
 	StringType *BasicTypeSymbol
 	IntType    *BasicTypeSymbol
 
+	ArrayLengthField *FieldSymbol
+
+	StringMemberFunctions map[string]*FunctionSymbol
+	MapMemberFunctions    map[string]*FunctionSymbol
+
 	TrueConstant  *ConstantSymbol
 	FalseConstant *ConstantSymbol
 	NullConstant  *ConstantSymbol
-	ArrayLength   *FieldSymbol
 }
 
 func newGlobalScope() *GlobalScope {
@@ -30,6 +34,9 @@ func newGlobalScope() *GlobalScope {
 	gs.NullType = NewBasicTypeSymbol(gs, "@NULL")
 	gs.Structs = make(map[string]*StructTypeSymbol)
 	gs.Types = make(map[string]TypeSymbol)
+
+	gs.StringMemberFunctions = make(map[string]*FunctionSymbol)
+	gs.MapMemberFunctions = make(map[string]*FunctionSymbol)
 	return gs
 }
 
