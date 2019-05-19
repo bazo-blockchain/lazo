@@ -287,6 +287,17 @@ func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAcces
 	}
 }
 
+// VisitDeleteStatementNode generates the il code for deleting a map entry
+func (v *ILCodeGenerationVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNode) {
+	node.Element.Expression.Accept(v) // load key
+	node.Element.Designator.Accept(v) // load map
+	v.assembler.Emit(il.MapRemove)
+
+	// Update designator variable with the updated map
+	designatorVar := v.symbolTable.GetDeclByDesignator(node.Element.Designator)
+	v.storeVariable(designatorVar)
+}
+
 // VisitReturnStatementNode generates the IL Code for returning within a function
 func (v *ILCodeGenerationVisitor) VisitReturnStatementNode(node *node.ReturnStatementNode) {
 	v.AbstractVisitor.VisitReturnStatementNode(node)

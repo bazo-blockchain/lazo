@@ -1082,6 +1082,19 @@ func TestMapGetVal(t *testing.T) {
 	tester.assertInt(big.NewInt(1234))
 }
 
+func TestMapDeleteKey(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function Map<String, int> test() {
+			Map<String, int> m
+			m["a"] = 1234
+			delete m["a"]
+			return m
+		}
+	`, "(Map<String,int>)test()")
+
+	tester.assertBytes(1, 0, 0) // Empty map
+}
+
 // Arithmetic Expressions
 // ----------------------
 
