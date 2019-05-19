@@ -1010,6 +1010,45 @@ func TestArrayInStructUpdate(t *testing.T) {
 	tester.assertInt(big.NewInt(1))
 }
 
+func TestStructArrayUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int balance
+		}
+		
+		function int test(){
+			Person[] p = new Person[2]
+			p[0] = new Person(100)
+			p[0].balance = 101
+
+			return p[0].balance
+		}
+	`, intTestSig)
+
+	tester.assertErrorAt(0, "Updating struct value type in array/map is not supported")
+}
+
+func TestStructArrayUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int balance
+		}
+		
+		function int test(){
+			Person[] p = new Person[2]
+			p[0] = new Person(100)
+
+			Person copy = p[0]
+			copy.balance = 101
+			p[0] = copy
+
+			return p[0].balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(101))
+}
+
 // Map
 // ---
 
