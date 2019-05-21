@@ -293,6 +293,7 @@ func TestFunctionMaximumReturnTypes(t *testing.T) {
 	`, false)
 
 	tester.assertTotalErrors(1)
+	tester.assertErrorAt(0, "More than 3 return types are not allowed")
 	tester.assertFunction(0, 4, 0, 0)
 }
 
