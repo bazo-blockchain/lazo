@@ -16,11 +16,6 @@ func TestTernaryExpression(t *testing.T) {
 	assertTernaryExpression(t, e, "(x == y)", "true", "false")
 }
 
-func TestTernaryExpressionPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "x == y ? x + 1 : 2 * 3 + 4")
-	assertTernaryExpression(t, e, "(x == y)", "(x + 1)", "((2 * 3) + 4)")
-}
-
 func TestNestedTernary(t *testing.T) {
 	p := newParserFromInput("x ? y ? 1 : 2 : z")
 	_ = p.parseExpression()
@@ -95,11 +90,6 @@ func TestUnequlity(t *testing.T) {
 	assertBinaryExpression(t, e, "5", "4", token.Unequal)
 }
 
-func TestEqualityPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "false == 5 > 3")
-	assertBinaryExpression(t, e, "false", "(5 > 3)", token.Equal)
-}
-
 func TestEqualityAssociativity(t *testing.T) {
 	e := parseExpressionFromInput(t, "x == y == true")
 	assertBinaryExpression(t, e, "(x == y)", "true", token.Equal)
@@ -151,12 +141,6 @@ func TestShiftAssociativity(t *testing.T) {
 	assertBinaryExpression(t, e, "(13 << 3)", "1", token.ShiftRight)
 }
 
-func TestShiftPrecedence(t *testing.T) {
-	// precedence order: +, <<, <
-	e := parseExpressionFromInput(t, "2 < 3 << 3 + 4")
-	assertBinaryExpression(t, e, "2", "(3 << (3 + 4))", token.Less)
-}
-
 // Term Expressions
 // --------------------
 
@@ -180,11 +164,6 @@ func TestTermAssociativity(t *testing.T) {
 	assertBinaryExpression(t, e, "(1 + 2)", "3", token.Minus)
 }
 
-func TestTermPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "1 + 2 <= 3")
-	assertBinaryExpression(t, e, "(1 + 2)", "3", token.LessEqual)
-}
-
 // Factor Expressions
 // ------------------
 
@@ -206,11 +185,6 @@ func TestModulo(t *testing.T) {
 func TestFactorAssociativity(t *testing.T) {
 	e := parseExpressionFromInput(t, "3 * 4 / 2 % 5")
 	assertBinaryExpression(t, e, "((3 * 4) / 2)", "5", token.Modulo)
-}
-
-func TestFactorPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "1 + 2 * 3")
-	assertBinaryExpression(t, e, "1", "(2 * 3)", token.Plus)
 }
 
 // Exponent Expressions
@@ -259,11 +233,6 @@ func TestTypeCastRightAssociativity(t *testing.T) {
 	assertTypeCast(t, e, "String", "x.y.z")
 }
 
-func TestTypeCastPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "(String) x + y")
-	assertBinaryExpression(t, e, "(String) x", "y", token.Plus)
-}
-
 func TestTypeCastStringConcat(t *testing.T) {
 	e := parseExpressionFromInput(t, `"Hello " + (String) 5 + (String) true`)
 	assertBinaryExpression(t, e, "(Hello  + (String) 5)", "(String) true", token.Plus)
@@ -293,11 +262,6 @@ func TestUnaryNot(t *testing.T) {
 func TestUnaryBinaryNot(t *testing.T) {
 	e := parseExpressionFromInput(t, "~x")
 	assertUnaryExpression(t, e, "x", token.BitwiseNot)
-}
-
-func TestUnaryPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "-4 + 2")
-	assertBinaryExpression(t, e, "(-4)", "2", token.Plus)
 }
 
 func TestUnaryWithFactor(t *testing.T) {
@@ -571,11 +535,6 @@ func TestParentheses(t *testing.T) {
 	assertBinaryExpression(t, e, "x", "y", token.Plus)
 }
 
-func TestParenthesesPrecedence(t *testing.T) {
-	e := parseExpressionFromInput(t, "2 * (3 + 4)")
-	assertBinaryExpression(t, e, "2", "(3 + 4)", token.Multiplication)
-}
-
 func TestNestedParentheses(t *testing.T) {
 	e := parseExpressionFromInput(t, "((2) * (3 + 4))")
 	assertBinaryExpression(t, e, "2", "(3 + 4)", token.Multiplication)
@@ -644,6 +603,95 @@ func TestInvalidBoolLiteral(t *testing.T) {
 	assertHasError(t, p)
 	tok, _ := b.(*node.ErrorNode)
 	assertError(t, tok, "Invalid boolean value if")
+}
+
+// Precedence
+// -----------------
+
+func TestElementAccessPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * a[0]")
+	assertBinaryExpression(t, e, "2", "a[0]", token.Multiplication)
+}
+
+func TestMemberAccessPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * a.b")
+	assertBinaryExpression(t, e, "2", "a.b", token.Multiplication)
+}
+
+func TestParenthesesPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * (3 + 4)")
+	assertBinaryExpression(t, e, "2", "(3 + 4)", token.Multiplication)
+}
+
+func TestFuncCallPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * a()")
+	assertBinaryExpression(t, e, "2", "a([])", token.Multiplication)
+}
+
+func TestUnaryPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "-4 + 2")
+	assertBinaryExpression(t, e, "(-4)", "2", token.Plus)
+}
+
+func TestTypeCastPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "(String) x + y")
+	assertBinaryExpression(t, e, "(String) x", "y", token.Plus)
+}
+
+func TestExponentiationPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 * 3 ** 4")
+	assertBinaryExpression(t, e, "2", "(3 ** 4)", token.Multiplication)
+}
+
+func TestFactorPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 * 3")
+	assertBinaryExpression(t, e, "1", "(2 * 3)", token.Plus)
+}
+
+func TestTermPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "1 + 2 <= 3")
+	assertBinaryExpression(t, e, "(1 + 2)", "3", token.LessEqual)
+}
+
+func TestShiftPrecedence(t *testing.T) {
+	// precedence order: +, <<, <
+	e := parseExpressionFromInput(t, "2 < 3 << 3 + 4")
+	assertBinaryExpression(t, e, "2", "(3 << (3 + 4))", token.Less)
+}
+
+func TestComparisonPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "false == 5 > 3")
+	assertBinaryExpression(t, e, "false", "(5 > 3)", token.Equal)
+}
+
+func TestEqualityPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "false & 3 == 2")
+	assertBinaryExpression(t, e, "false", "(3 == 2)", token.BitwiseAnd)
+}
+
+func TestBitwiseAndPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 ^ 5 & 3")
+	assertBinaryExpression(t, e, "2", "(5 & 3)", token.BitwiseXOr)
+}
+
+func TestBitwiseXOrPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 | 5 ^ 3")
+	assertBinaryExpression(t, e, "2", "(5 ^ 3)", token.BitwiseOr)
+}
+
+func TestBitwiseOrPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "2 && 5 | 3")
+	assertBinaryExpression(t, e, "2", "(5 | 3)", token.And)
+}
+
+func TestLogicalPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "false || true && false")
+	assertBinaryExpression(t, e, "false", "(true && false)", token.Or)
+}
+
+func TestTernaryExpressionPrecedence(t *testing.T) {
+	e := parseExpressionFromInput(t, "x == y ? x + 1 : 2 * 3 + 4")
+	assertTernaryExpression(t, e, "(x == y)", "(x + 1)", "((2 * 3) + 4)")
 }
 
 // --------------
