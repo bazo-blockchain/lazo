@@ -779,6 +779,19 @@ func TestVoidFuncCallTypeMismatch(t *testing.T) {
 	tester.assertErrorAt(0, "expected 1 return value(s), but function returns 0")
 }
 
+func TestVoidFuncCallArgTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		function void test() {
+			test2(true)
+		}
+
+		function void test2(int a) {
+		}
+	`, false)
+
+	tester.assertErrorAt(0, "expected Type int, got Type bool")
+}
+
 func TestIntFuncCallAsStatement(t *testing.T) {
 	tester := newCheckerTestUtil(t, `
 		function void test() {
@@ -1409,4 +1422,22 @@ func TestInvalidDeleteStatement(t *testing.T) {
 	`, false)
 
 	tester.assertErrorAt(0, "delete requires map type")
+}
+
+func TestMapContainsKey(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<char, int> m
+		bool b = m.contains('c')
+	`, true)
+
+	tester.assertExpressionType(tester.getFieldNode(1).Expression, tester.globalScope.BoolType)
+}
+
+func TestMapContainsKeyTypeMismatch(t *testing.T) {
+	tester := newCheckerTestUtil(t, `
+		Map<char, int> m
+		bool b = m.contains("c")
+	`, false)
+
+	tester.assertErrorAt(0, "expected Type char, got Type String")
 }

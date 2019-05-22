@@ -156,15 +156,30 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 		decl := v.symbolTable.GetDeclByDesignator(assignNode.Left)
 		v.storeVariable(decl)
 
-	case *node.ElementAccessNode:
+	case *node.ElementAccessNode: // arr[0] or map["key"]
 		elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
 		assignNode.Right.Accept(v)
 		elementAccess.Expression.Accept(v)
 		elementAccess.Designator.Accept(v)
-		v.assembler.Emit(il.ArrInsert)
-		fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-		v.storeVariable(fieldSymbol)
 
+		designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
+		if v.isArrayType(designatorType) {
+			v.assembler.Emit(il.ArrInsert)
+		} else if v.isMapType(designatorType) {
+			v.assembler.Emit(il.MapSetVal)
+		} else {
+			panic("Unsupported element access type")
+		}
+
+		targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+		if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
+			v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
+			return
+		}
+
+		// Workaround for single dereference
+		// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
+		v.storeVariable(targetDecl)
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
@@ -195,10 +210,24 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
 			elementAccess.Expression.Accept(v)
 			elementAccess.Designator.Accept(v)
-			v.assembler.Emit(il.ArrInsert)
-			fieldSymbol := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-			v.storeVariable(fieldSymbol)
 
+			designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
+			if v.isArrayType(designatorType) {
+				v.assembler.Emit(il.ArrInsert)
+			} else if v.isMapType(designatorType) {
+				v.assembler.Emit(il.MapSetVal)
+			} else {
+				panic("Unsupported element access type")
+			}
+
+			targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+			if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
+				v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
+				return
+			}
+			// Workaround for single dereference
+			// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
+			v.storeVariable(targetDecl)
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
 			memberAccessNode.Designator.Accept(v)
@@ -238,6 +267,12 @@ func (v *ILCodeGenerationVisitor) updateStruct(targetStruct node.DesignatorNode)
 			v.updateStruct(targetStructMemberAccessNode.Designator)
 		}
 		return
+	} else if _, ok := targetStruct.(*node.ElementAccessNode); ok {
+		// Since array and map are value types, they are not updated automatically.
+		// 		m['a'] = new Person(1000)
+		//		m['a'].balance = 1001
+		v.reportError(targetStruct, "Updating struct value type in array/map is not supported")
+		return
 	}
 
 	// targetStruct.field = x
@@ -267,7 +302,26 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAccessNode) {
 	node.Expression.Accept(v)
 	node.Designator.Accept(v)
-	v.assembler.Emit(il.ArrAt) // Load Array Element
+
+	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
+	if v.isArrayType(designatorType) {
+		v.assembler.Emit(il.ArrAt) // Load Array Element
+	} else if v.isMapType(designatorType) {
+		v.assembler.Emit(il.MapGetVal)
+	} else {
+		panic("Unsupported element access type")
+	}
+}
+
+// VisitDeleteStatementNode generates the il code for deleting a map entry
+func (v *ILCodeGenerationVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNode) {
+	node.Element.Expression.Accept(v) // load key
+	node.Element.Designator.Accept(v) // load map
+	v.assembler.Emit(il.MapRemove)
+
+	// Update designator variable with the updated map
+	designatorVar := v.symbolTable.GetDeclByDesignator(node.Element.Designator)
+	v.storeVariable(designatorVar)
 }
 
 // VisitReturnStatementNode generates the IL Code for returning within a function
@@ -389,12 +443,18 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 }
 
 // VisitFuncCallNode generates the IL Code for the function call
-func (v *ILCodeGenerationVisitor) VisitFuncCallNode(node *node.FuncCallNode) {
-	for _, arg := range node.Args {
+func (v *ILCodeGenerationVisitor) VisitFuncCallNode(funcCallNode *node.FuncCallNode) {
+	for _, arg := range funcCallNode.Args {
 		arg.Accept(v.ConcreteVisitor)
 	}
 
-	funcSym := v.symbolTable.GetDeclByDesignator(node.Designator).(*symbol.FunctionSymbol)
+	funcSym := v.symbolTable.GetDeclByDesignator(funcCallNode.Designator).(*symbol.FunctionSymbol)
+
+	if funcSym == v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains] {
+		funcCallNode.Designator.(*node.MemberAccessNode).Designator.Accept(v) // load map
+		v.assembler.Emit(il.MapHasKey)
+		return
+	}
 	v.assembler.CallFunc(funcSym)
 }
 
@@ -513,6 +573,7 @@ func (v *ILCodeGenerationVisitor) loadVariable(decl symbol.Symbol) {
 }
 
 func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
+	// Variable has an static identifier which can be compiled (e.g. int x)
 	index := v.getVarIndex(decl)
 
 	switch decl.Scope().(type) {
@@ -522,6 +583,8 @@ func (v *ILCodeGenerationVisitor) storeVariable(decl symbol.Symbol) {
 		v.assembler.StoreLocal(byte(index))
 	case *symbol.StructTypeSymbol:
 		v.assembler.StoreField(uint16(index))
+	default:
+		panic("Unsupported variable type")
 	}
 }
 
@@ -532,6 +595,9 @@ func (v *ILCodeGenerationVisitor) pushDefault(typeSymbol symbol.TypeSymbol) {
 		return
 	case *symbol.ArrayTypeSymbol:
 		v.assembler.PushNil()
+		return
+	case *symbol.MapTypeSymbol:
+		v.assembler.Emit(il.NewMap)
 		return
 	}
 
@@ -592,6 +658,21 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	default:
 		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
+}
+
+func (v *ILCodeGenerationVisitor) isMapType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.MapTypeSymbol)
+	return ok
+}
+
+func (v *ILCodeGenerationVisitor) isArrayType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.ArrayTypeSymbol)
+	return ok
+}
+
+func (v *ILCodeGenerationVisitor) isStructType(typeSymbol symbol.TypeSymbol) bool {
+	_, ok := typeSymbol.(*symbol.StructTypeSymbol)
+	return ok
 }
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {

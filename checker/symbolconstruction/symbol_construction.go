@@ -39,7 +39,8 @@ func Run(programNode *node.ProgramNode) (*symbol.SymbolTable, []error) {
 func (sc *symbolConstruction) registerBuiltins() {
 	sc.registerBuiltInTypes()
 	sc.registerBuiltInConstants()
-	sc.registerBuiltinField()
+	sc.registerBuiltInField()
+	sc.registerBuiltInMemberFunctions()
 }
 
 func (sc *symbolConstruction) registerBuiltInTypes() {
@@ -68,12 +69,27 @@ func (sc *symbolConstruction) registerBuiltInConstant(typeSymbol *symbol.BasicTy
 	return constant
 }
 
-func (sc *symbolConstruction) registerBuiltinField() {
+func (sc *symbolConstruction) registerBuiltInField() {
 	arrayLength := &symbol.FieldSymbol{
 		AbstractSymbol: symbol.NewAbstractSymbol(sc.globalScope, "length"),
 		Type:           sc.symbolTable.FindTypeByIdentifier("int"),
 	}
-	sc.globalScope.ArrayLength = arrayLength
+	sc.globalScope.ArrayLengthField = arrayLength
+}
+
+func (sc *symbolConstruction) registerBuiltInMemberFunctions() {
+	sc.registerMapMemberFunctions()
+}
+
+func (sc *symbolConstruction) registerMapMemberFunctions() {
+	containsFunc := symbol.NewFunctionSymbol(sc.globalScope, symbol.Contains)
+	containsFunc.ReturnTypes = append(containsFunc.ReturnTypes, sc.globalScope.BoolType)
+
+	// Parameter types are generic, therefore no need to specify type here
+	keyParam := symbol.NewParameterSymbol(containsFunc, "key")
+	containsFunc.Parameters = append(containsFunc.Parameters, keyParam)
+
+	sc.globalScope.MapMemberFunctions[symbol.Contains] = containsFunc
 }
 
 func (sc *symbolConstruction) registerDeclarations() {

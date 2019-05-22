@@ -68,7 +68,9 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	}
 
 	tester.metadata, tester.errors = New(symbolTable).Run()
-	assert.Equal(t, len(err), 0, "Error while generating byte code")
+	if len(tester.errors) > 0 {
+		return tester
+	}
 
 	byteCode, variables := tester.metadata.CreateContract()
 	context := vm.NewMockContext(byteCode)
@@ -149,6 +151,12 @@ func (gt *generatorTestUtil) compareBytes(actual []byte, expected []byte) {
 	}
 }
 
+func (gt *generatorTestUtil) assertErrorAt(index int, errSubStr string) {
+	assert.Assert(gt.t, len(gt.errors) > index)
+	err := gt.errors[index].Error()
+	assert.Assert(gt.t, strings.Contains(err, errSubStr), err)
+}
+
 func assertBoolExpr(t *testing.T, expr string, expected bool) {
 	code := fmt.Sprintf("function bool test() {\n return %s \n }", expr)
 	tester := newGeneratorTestUtilWithFunc(t, code, boolTestSig)
@@ -159,10 +167,4 @@ func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
 	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
-}
-
-func assertErrorAt(t *testing.T, gt *generatorTestUtil, index int, errSubStr string) {
-	assert.Assert(t, len(gt.errors) > index)
-	err := gt.errors[index].Error()
-	assert.Assert(t, strings.Contains(err, errSubStr), err)
 }

@@ -111,7 +111,7 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 
 	switch designatorType.(type) {
 	case *symbol.ArrayTypeSymbol:
-		arrayLength := v.symbolTable.GlobalScope.ArrayLength
+		arrayLength := v.symbolTable.GlobalScope.ArrayLengthField
 		if node.Identifier == arrayLength.Identifier() {
 			target = arrayLength
 			targetType, err = getType(arrayLength)
@@ -136,6 +136,12 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 		if err != nil {
 			v.reportError(node, err.Error())
 		}
+	case *symbol.MapTypeSymbol:
+		if node.Identifier == symbol.Contains {
+			target = v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains]
+		} else {
+			v.reportError(node, fmt.Sprintf("Invalid member access %v on map %v", node.Identifier, node))
+		}
 	case *symbol.ContractSymbol:
 		contractType := designatorType.(*symbol.ContractSymbol)
 		targetIndex := contractType.GetFieldIndex(node.Identifier)
@@ -152,7 +158,6 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 			v.reportError(node, err.Error())
 		}
 	default:
-
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a composite type", node))
 	}
 	v.symbolTable.MapDesignatorToDecl(node, target)

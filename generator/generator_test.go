@@ -947,7 +947,7 @@ func TestNestedArrayLengthCreation(t *testing.T) {
 		int[][] a = new int[2][2]
 	`)
 
-	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+	tester.assertErrorAt(0, "Generator currently does not support array nesting")
 }
 
 func TestArrayValueCreation(t *testing.T) {
@@ -974,7 +974,325 @@ func TestNestedArrayValueCreation(t *testing.T) {
 		int[][] a = new int[][]{{1, 2}, {3}}
 	`)
 
-	assertErrorAt(t, tester, 0, "Generator currently does not support array nesting")
+	tester.assertErrorAt(0, "Generator currently does not support array nesting")
+}
+
+func TestArrayInStructUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		struct Person{
+			int[] nums
+		}
+		constructor(){
+			Person p = new Person(nums = new int[2])
+			p.nums[0] = 1
+		}
+	`)
+
+	tester.assertErrorAt(0, "Multiple dereferences on value types are not supported")
+}
+
+func TestArrayInStructUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int[] nums
+		}
+		
+		function int test(){
+			Person p = new Person(nums = new int[2])
+			int[] copy = p.nums
+			copy[0] = 1
+			p.nums = copy
+			
+			return p.nums[0] 
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1))
+}
+
+func TestStructArrayUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int balance
+		}
+		
+		function int test(){
+			Person[] p = new Person[2]
+			p[0] = new Person(100)
+			p[0].balance = 101
+
+			return p[0].balance
+		}
+	`, intTestSig)
+
+	tester.assertErrorAt(0, "Updating struct value type in array/map is not supported")
+}
+
+func TestStructArrayUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person{
+			int balance
+		}
+		
+		function int test(){
+			Person[] p = new Person[2]
+			p[0] = new Person(100)
+
+			Person copy = p[0]
+			copy.balance = 101
+			p[0] = copy
+
+			return p[0].balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(101))
+}
+
+// Map
+// ---
+
+func TestEmptyMap(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<int, int> m
+	`)
+
+	expected := []byte{
+		0x01,       // Map type
+		0x00, 0x00, // Map size
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPush(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<int, bool> m
+
+		constructor() {
+			m[3] = true 
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x01,
+		0x00, 0x02, // length of key
+		0x00, 0x03, // key 3
+		0x00, 0x01, // length of value
+		0x01, // value true
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPushMultiple(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<String, int> m
+
+		constructor() {
+			m["a"] = 1
+			m["ab"] = 2
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x02,
+		0x00, 0x01, // length of key
+		0x61,       // key "a"
+		0x00, 0x02, // length of value
+		0x00, 0x01, // value
+		0x00, 0x02, // length of key
+		0x61, 0x62, // key "ab"
+		0x00, 0x02, // length of value
+		0x00, 0x02, // value
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapPushOverride(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		Map<String, int> m
+
+		constructor() {
+			m["a"] = 1
+			m["a"] = 2
+		}
+	`)
+
+	expected := []byte{
+		0x01,
+		0x00, 0x01,
+		0x00, 0x01, // length of key
+		0x61,       // key "a"
+		0x00, 0x02, // length of value
+		0x00, 0x02, // value
+	}
+
+	field, err := tester.context.GetContractVariable(0)
+	assert.NilError(t, err)
+	tester.compareBytes(field, expected)
+}
+
+func TestMapGetVal(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			Map<String, int> m
+			m["a"] = 1234
+			return m["a"]
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1234))
+}
+
+func TestMapDeleteKey(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function Map<String, int> test() {
+			Map<String, int> m
+			m["a"] = 1234
+			delete m["a"]
+			return m
+		}
+	`, "(Map<String,int>)test()")
+
+	tester.assertBytes(1, 0, 0) // Empty map
+}
+
+func TestMapContainsKey(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function bool test() {
+			Map<String, int> m
+			m["a"] = 1234
+			return m.contains("a")
+		}
+	`, boolTestSig)
+
+	tester.assertBool(true)
+}
+
+func TestMapContainsKeyFalse(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function bool test() {
+			Map<String, int> m
+			return m.contains("a")
+		}
+	`, boolTestSig)
+
+	tester.assertBool(false)
+}
+
+func TestMapStructValError(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		constructor() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+			m['a'].balance = 1001
+		}
+	`, intTestSig)
+
+	tester.assertErrorAt(0, "Updating struct value type in array/map is not supported")
+}
+
+func TestMapStructVal(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		function int test() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+
+			Person p = m['a']
+			p.balance = 1001
+			return m['a'].balance
+		}
+	`, intTestSig)
+
+	// Struct is a value type, so changing the copy will not affect the map's value
+	tester.assertInt(big.NewInt(1000))
+}
+
+func TestMapStructValOverride(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		struct Person {
+			int balance
+		}
+	
+		function int test() {
+			Map<char, Person> m
+			m['a'] = new Person(1000)
+
+			Person p = m['a']
+			p.balance = 1001
+
+			m['a'] = p
+			return m['a'].balance
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(1001))
+}
+
+func TestMapArrayValueUpdateError(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		constructor(){
+			Map<String, int[]> m
+			m["a"] = new int[2]
+
+			m["a"][0] = 2
+		}
+	`)
+
+	tester.assertErrorAt(0, "Multiple dereferences on value types are not supported")
+}
+
+func TestMapArrayValueUpdate(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test(){
+			Map<String, int[]> m
+			m["a"] = new int[2]
+			
+			int[] copy = m["a"] 
+			copy[0] = 2
+			m["a"] = copy
+
+			return m["a"][0]
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(2))
+}
+
+func TestMapElementMultiAssignment(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function (int, int) test(){
+			Map<String, int> m
+			m["a"], m["b"] = test2()
+			
+			return m["a"], m["b"]
+		}
+
+		function (int, int) test2() {
+			return 10, 20
+		}
+	`, "(int,int)test()")
+
+	tester.assertIntAt(0, big.NewInt(10))
+	tester.assertIntAt(1, big.NewInt(20))
 }
 
 // Arithmetic Expressions
