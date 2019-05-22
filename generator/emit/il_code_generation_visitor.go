@@ -176,7 +176,9 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 			v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
 			return
 		}
+
 		// Workaround for single dereference
+		// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
 		v.storeVariable(targetDecl)
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
@@ -224,6 +226,7 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 				return
 			}
 			// Workaround for single dereference
+			// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
 			v.storeVariable(targetDecl)
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
