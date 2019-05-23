@@ -335,7 +335,7 @@ func TestTernaryExpressionType(t *testing.T) {
 		int i = 1 == 2 ? 1 : 2 
 	`, true)
 
-	ternaryExpr := tester.getFieldNode(0).Expression.(*node.TernaryExpression)
+	ternaryExpr := tester.getFieldNode(0).Expression.(*node.TernaryExpressionNode)
 	tester.assertExpressionType(ternaryExpr, tester.globalScope.IntType)
 	tester.assertExpressionType(ternaryExpr.Condition, tester.globalScope.BoolType)
 	tester.assertExpressionType(ternaryExpr.True, tester.globalScope.IntType)

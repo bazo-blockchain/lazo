@@ -19,7 +19,7 @@ func (p *Parser) parseTernaryExpression() node.ExpressionNode {
 	if p.isSymbol(token.QuestionMark) {
 		p.nextToken()
 
-		ternary := &node.TernaryExpression{
+		ternary := &node.TernaryExpressionNode{
 			AbstractNode: p.newAbstractNodeWithPos(expr.Pos()),
 			Condition:    expr,
 			True:         p.parseOr(),

@@ -155,7 +155,7 @@ func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {
 }
 
 func assertTernaryExpression(t *testing.T, n node.ExpressionNode, condition string, trueExpr string, falseExpr string) {
-	ternary, ok := n.(*node.TernaryExpression)
+	ternary, ok := n.(*node.TernaryExpressionNode)
 
 	assert.Equal(t, ok, true)
 	assert.Equal(t, ternary.Condition.String(), condition)

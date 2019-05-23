@@ -367,7 +367,13 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Unequal:        il.NotEq,
 }
 
-// VisitBinaryExpressionNode generates the IL Code for all Binary Expressions
+// VisitTernaryExpressionNode generates the IL Code for all ternary expressions
+func (v *ILCodeGenerationVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
+	// TODO
+	v.AbstractVisitor.VisitTernaryExpressionNode(node)
+}
+
+// VisitBinaryExpressionNode generates the IL Code for all binary expressions
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
@@ -414,6 +420,27 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		v.assembler.SetLabel(endLabel)
 		return
 	}
+	//
+	//if expNode.Operator == token.ShiftLeft {
+	//	// TODO
+	//}
+	//
+	//if expNode.Operator == token.ShiftRight {
+	//	// TODO
+	//}
+	//
+	//if expNode.Operator == token.BitwiseAnd {
+	//	// TODO
+	//}
+	//
+	//if expNode.Operator == token.BitwiseXOr {
+	//	// TODO
+	//}
+	//
+	//if expNode.Operator == token.BitwiseOr {
+	//	// TODO
+	//}
+
 	v.reportError(expNode, fmt.Sprintf("binary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
@@ -439,7 +466,18 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 		v.assembler.Emit(il.Neg)
 		return
 	}
+
+	//if expNode.Operator == token.BitwiseNot {
+	//	// TODO
+	//}
+
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
+}
+
+// VisitShorthandAssignmentNode generates the IL Code for shorthand assignment operations
+func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(node *node.ShorthandAssignmentStatementNode) {
+	// TODO ++ and +=...
+	v.AbstractVisitor.VisitShorthandAssignmentNode(node)
 }
 
 // VisitFuncCallNode generates the IL Code for the function call

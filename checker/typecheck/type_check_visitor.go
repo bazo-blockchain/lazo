@@ -202,7 +202,7 @@ func (v *typeCheckVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNo
 // Expressions
 // -----------
 
-func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpression) {
+func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
 	v.AbstractVisitor.VisitTernaryExpressionNode(node)
 
 	conditionType := v.symbolTable.GetTypeByExpression(node.Condition)
