@@ -169,6 +169,12 @@ func assertIntExpr(t *testing.T, expr string, expected int64) {
 	tester.assertInt(big.NewInt(expected))
 }
 
+func assertBigIntExpr(t *testing.T, expr string, expected *big.Int) {
+	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
+	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
+	tester.assertInt(expected)
+}
+
 func assertTernaryExpr(t *testing.T, expr string, resultType string, expected string) {
 	code := fmt.Sprintf(
 		"function bool test() {\n "+

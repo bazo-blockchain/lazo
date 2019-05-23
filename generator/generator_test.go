@@ -1417,11 +1417,22 @@ func TestParentheses(t *testing.T) {
 func TestShiftLeft(t *testing.T) {
 	// 1 --> 1000
 	assertIntExpr(t, "1 << 3", 8)
+	assertIntExpr(t, "1 << 0", 1)
 }
 
 func TestShiftRight(t *testing.T) {
 	// 1000 --> 1
 	assertIntExpr(t, "8 >> 3", 1)
+}
+
+func TestShift_24bit(t *testing.T) {
+	bigShift := big.NewInt(1)
+	assertBigIntExpr(t, "1 << 0x101010", bigShift.Lsh(bigShift, 0x101010))
+}
+
+func TestShift_32bit(t *testing.T) {
+	bigShift := big.NewInt(1)
+	assertBigIntExpr(t, "1 << 0x10101010", bigShift.Lsh(bigShift, 0x10101010))
 }
 
 // Logical Expressions
