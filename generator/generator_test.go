@@ -1457,8 +1457,9 @@ func TestLogicNot(t *testing.T) {
 // ---------------------------
 
 func TestBitwiseNot(t *testing.T) {
-	// 0101 --> 1010
-	assertIntExpr(t, "~5", 10)
+	// Check http://bitwisecmd.com/
+	assertIntExpr(t, "~5", -6)
+	assertIntExpr(t, "~-6", 5)
 }
 
 func TestBitwiseAnd(t *testing.T) {
@@ -1482,7 +1483,7 @@ func TestBitwiseXOr(t *testing.T) {
 	// 0011 -> 3
 	// ---- ^
 	// 0110 -> 6
-	assertIntExpr(t, "5 | 3", 6)
+	assertIntExpr(t, "5 ^ 3", 6)
 }
 
 // Type Cast

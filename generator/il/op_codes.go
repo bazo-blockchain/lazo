@@ -30,6 +30,10 @@ const (
 	GtEq
 	ShiftL
 	ShiftR
+	BitwiseAnd
+	BitwiseOr
+	BitwiseXor
+	BitwiseNot
 	NoOp
 	Jmp
 	JmpTrue

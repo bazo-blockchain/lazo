@@ -389,6 +389,9 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Unequal:        il.NotEq,
 	token.ShiftLeft:      il.ShiftL,
 	token.ShiftRight:     il.ShiftR,
+	token.BitwiseAnd:     il.BitwiseAnd,
+	token.BitwiseOr:      il.BitwiseOr,
+	token.BitwiseXOr:     il.BitwiseXor,
 }
 
 // VisitBinaryExpressionNode generates the IL Code for all binary expressions
@@ -455,8 +458,9 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Minus: il.Neg,
-	token.Not:   il.Neg,
+	token.Minus:      il.Neg,
+	token.Not:        il.Neg,
+	token.BitwiseNot: il.BitwiseNot,
 }
 
 // VisitUnaryExpressionNode generates the IL Code for all unary expressions
@@ -470,10 +474,6 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 	if expNode.Operator == token.Plus {
 		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
 		return
-	}
-
-	if expNode.Operator == token.BitwiseNot {
-		// TODO
 	}
 
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
