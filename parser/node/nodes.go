@@ -477,12 +477,12 @@ func (n *DeleteStatementNode) Accept(v Visitor) {
 type TernaryExpressionNode struct {
 	AbstractNode
 	Condition ExpressionNode
-	True      ExpressionNode
-	False     ExpressionNode
+	Then      ExpressionNode
+	Else      ExpressionNode
 }
 
 func (n *TernaryExpressionNode) String() string {
-	return fmt.Sprintf("%s ? %s : %s", n.Condition, n.True, n.False)
+	return fmt.Sprintf("%s ? %s : %s", n.Condition, n.Then, n.Else)
 }
 
 // Accept lets a visitor to traverse its node structure

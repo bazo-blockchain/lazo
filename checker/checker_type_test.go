@@ -338,8 +338,8 @@ func TestTernaryExpressionType(t *testing.T) {
 	ternaryExpr := tester.getFieldNode(0).Expression.(*node.TernaryExpressionNode)
 	tester.assertExpressionType(ternaryExpr, tester.globalScope.IntType)
 	tester.assertExpressionType(ternaryExpr.Condition, tester.globalScope.BoolType)
-	tester.assertExpressionType(ternaryExpr.True, tester.globalScope.IntType)
-	tester.assertExpressionType(ternaryExpr.False, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.Then, tester.globalScope.IntType)
+	tester.assertExpressionType(ternaryExpr.Else, tester.globalScope.IntType)
 }
 
 func TestTernaryExpressionConditionTypeError(t *testing.T) {

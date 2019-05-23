@@ -1299,7 +1299,7 @@ func TestMapElementMultiAssignment(t *testing.T) {
 // ------------------
 
 func TestTernaryExpression(t *testing.T) {
-	assertTernaryExpr(t, "true ? 1 : 2", "int", "1")
+	assertTernaryExpr(t, "true ? 1 + 2 : 3 + 4", "int", "3")
 }
 
 func TestTernaryExpressionFalse(t *testing.T) {
@@ -1410,6 +1410,20 @@ func TestMixedOperators(t *testing.T) {
 	assertIntExpr(t, "5 * 4 + 2 ** 3 - 1", 27)
 }
 
+func TestParentheses(t *testing.T) {
+	assertIntExpr(t, "(2 + 3) * 4", 20)
+}
+
+func TestShiftLeft(t *testing.T) {
+	// 1 --> 1000
+	assertIntExpr(t, "1 << 3", 8)
+}
+
+func TestShiftRight(t *testing.T) {
+	// 1000 --> 1
+	assertIntExpr(t, "8 >> 3", 1)
+}
+
 // Logical Expressions
 // -------------------
 
@@ -1437,6 +1451,51 @@ func TestLogicNot(t *testing.T) {
 	assertBoolExpr(t, "!true", false)
 	assertBoolExpr(t, "!false", true)
 	assertBoolExpr(t, "!!true", true)
+}
+
+// Bitwise Logical Expressions
+// ---------------------------
+
+func TestBitwiseNot(t *testing.T) {
+	// 0101 --> 1010
+	assertIntExpr(t, "~5", 10)
+}
+
+func TestBitwiseAnd(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- &
+	// 0001 -> 1
+	assertIntExpr(t, "5 & 3", 1)
+}
+
+func TestBitwiseOr(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- |
+	// 0111 -> 7
+	assertIntExpr(t, "5 | 3", 7)
+}
+
+func TestBitwiseXOr(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- ^
+	// 0110 -> 6
+	assertIntExpr(t, "5 | 3", 6)
+}
+
+// Type Cast
+// ---------
+
+func TestIntToStringTypeCast(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function String test() {
+			return (String) 1
+		}
+	`, stringTestSig)
+
+	tester.assertErrorAt(0, "VM currently does not support types")
 }
 
 // Equality Comparison

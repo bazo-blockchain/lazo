@@ -355,6 +355,26 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 // Expressions
 // -----------
 
+// VisitTernaryExpressionNode generates the IL Code for all ternary expressions
+func (v *ILCodeGenerationVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
+	elseLabel := v.assembler.CreateLabel()
+	endLabel := v.assembler.CreateLabel()
+
+	// Condition
+	node.Condition.Accept(v)
+	v.assembler.JmpFalse(elseLabel)
+
+	// Then
+	node.Then.Accept(v)
+	v.assembler.Jmp(endLabel)
+
+	// Else
+	v.assembler.SetLabel(elseLabel)
+	node.Else.Accept(v)
+
+	v.assembler.SetLabel(endLabel)
+}
+
 var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Plus:           il.Add,
 	token.Minus:          il.Sub,
@@ -367,26 +387,8 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Less:           il.Lt,
 	token.Equal:          il.Eq,
 	token.Unequal:        il.NotEq,
-}
-
-// VisitTernaryExpressionNode generates the IL Code for all ternary expressions
-func (v *ILCodeGenerationVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
-	elseLabel := v.assembler.CreateLabel()
-	endLabel := v.assembler.CreateLabel()
-
-	// Condition
-	node.Condition.Accept(v)
-	v.assembler.JmpFalse(elseLabel)
-
-	// Then
-	node.True.Accept(v)
-	v.assembler.Jmp(endLabel)
-
-	// Else
-	v.assembler.SetLabel(elseLabel)
-	node.False.Accept(v)
-
-	v.assembler.SetLabel(endLabel)
+	token.ShiftLeft:      il.ShiftL,
+	token.ShiftRight:     il.ShiftR,
 }
 
 // VisitBinaryExpressionNode generates the IL Code for all binary expressions
@@ -437,14 +439,6 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		return
 	}
 
-	if expNode.Operator == token.ShiftLeft {
-		// TODO
-	}
-
-	if expNode.Operator == token.ShiftRight {
-		// TODO
-	}
-
 	if expNode.Operator == token.BitwiseAnd {
 		// TODO
 	}
@@ -462,6 +456,7 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Minus: il.Neg,
+	token.Not:   il.Neg,
 }
 
 // VisitUnaryExpressionNode generates the IL Code for all unary expressions
@@ -477,12 +472,6 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 		return
 	}
 
-	if expNode.Operator == token.Not {
-		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
-		v.assembler.Emit(il.Neg)
-		return
-	}
-
 	if expNode.Operator == token.BitwiseNot {
 		// TODO
 	}
@@ -494,6 +483,11 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(node *node.ShorthandAssignmentStatementNode) {
 	// TODO ++ and +=...
 	v.AbstractVisitor.VisitShorthandAssignmentNode(node)
+}
+
+// VisitTypeCastNode generates the IL code type cast expression
+func (v *ILCodeGenerationVisitor) VisitTypeCastNode(node *node.TypeCastNode) {
+	v.reportError(node, "VM currently does not support types")
 }
 
 // VisitFuncCallNode generates the IL Code for the function call

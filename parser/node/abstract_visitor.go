@@ -157,8 +157,8 @@ func (v *AbstractVisitor) VisitDeleteStatementNode(node *DeleteStatementNode) {
 // VisitTernaryExpressionNode traverses the condition, true and false expressions.
 func (v *AbstractVisitor) VisitTernaryExpressionNode(node *TernaryExpressionNode) {
 	node.Condition.Accept(v.ConcreteVisitor)
-	node.True.Accept(v.ConcreteVisitor)
-	node.False.Accept(v.ConcreteVisitor)
+	node.Then.Accept(v.ConcreteVisitor)
+	node.Else.Accept(v.ConcreteVisitor)
 }
 
 // VisitBinaryExpressionNode traverses the left and right expressions.
