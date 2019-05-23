@@ -3,7 +3,7 @@ module github.com/bazo-blockchain/lazo
 go 1.12
 
 require (
-	github.com/bazo-blockchain/bazo-vm v1.4.0
+	github.com/bazo-blockchain/bazo-vm v1.4.1
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/pkg/errors v0.8.1

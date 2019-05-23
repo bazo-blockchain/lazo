@@ -81,7 +81,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	tester.context = context
 
 	bazoVM := vm.NewVM(context)
-	isSuccess := bazoVM.Exec(true)
+	isSuccess := bazoVM.Exec(false)
 	result, vmError := bazoVM.PeekResult()
 	assert.Assert(t, isSuccess, string(result))
 
@@ -167,12 +167,6 @@ func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
 	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
-}
-
-func assertBigIntExpr(t *testing.T, expr string, expected *big.Int) {
-	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
-	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
-	tester.assertInt(expected)
 }
 
 func assertTernaryExpr(t *testing.T, expr string, resultType string, expected string) {

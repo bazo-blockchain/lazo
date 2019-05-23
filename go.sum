@@ -26,6 +26,8 @@ github.com/bazo-blockchain/bazo-vm v1.3.1 h1:k+N46KrKrO853dwzmM6r0ZRFNKVhOg3AUlU
 github.com/bazo-blockchain/bazo-vm v1.3.1/go.mod h1:3QXvDH1ORfI6kptEjjb6Rr21rkl6ySh2fllxFYWB9l4=
 github.com/bazo-blockchain/bazo-vm v1.4.0 h1:i6TKvcWIwQA+qOP4MEI/2k/y5KTaFN1esRLn/Dh0+DQ=
 github.com/bazo-blockchain/bazo-vm v1.4.0/go.mod h1:3QXvDH1ORfI6kptEjjb6Rr21rkl6ySh2fllxFYWB9l4=
+github.com/bazo-blockchain/bazo-vm v1.4.1 h1:SQZvT2Yq8kPVjdlat3Om78H1oa7FL2fPsgoBS9fuNOE=
+github.com/bazo-blockchain/bazo-vm v1.4.1/go.mod h1:3QXvDH1ORfI6kptEjjb6Rr21rkl6ySh2fllxFYWB9l4=
 github.com/boltdb/bolt v1.3.1 h1:JQmyP4ZBrce+ZQu0dY660FMfatumYDLun9hBCUVIkF4=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/google/go-cmp v0.2.0 h1:+dTQ8DZQJz0Mb/HjFlkptS1FeQ4cWSnN941F8aEG4SQ=

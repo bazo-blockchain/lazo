@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"bytes"
 	"gotest.tools/assert"
 	"math/big"
 	"testing"
@@ -1423,16 +1424,27 @@ func TestShiftLeft(t *testing.T) {
 func TestShiftRight(t *testing.T) {
 	// 1000 --> 1
 	assertIntExpr(t, "8 >> 3", 1)
+	assertIntExpr(t, "-8 >> 3", -1)
 }
 
-func TestShift_24bit(t *testing.T) {
-	bigShift := big.NewInt(1)
-	assertBigIntExpr(t, "1 << 0x101010", bigShift.Lsh(bigShift, 0x101010))
-}
+// Make sure the VM trace is set to false.
+// Otherwise printing 536870913 bytes on console slows down the test extremely.
+func TestShiftLeft_32bit_Max(t *testing.T) {
+	expected := big.NewInt(1)
+	expected.Lsh(expected, 0xffffffff)
 
-func TestShift_32bit(t *testing.T) {
-	bigShift := big.NewInt(1)
-	assertBigIntExpr(t, "1 << 0x10101010", bigShift.Lsh(bigShift, 0x10101010))
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			return 1 << 0xffffffff
+		}
+	`, intTestSig)
+	actual := tester.result[1:] // first byte is sign. It can be ignored, since it is 0.
+
+	// DO NOT use assertBytes helper function, because iterating 536870913 bytes
+	// and asserting every byte takes extremely long.
+	// Using built-in compare is much faster for much larger slice.
+	result := bytes.Compare(actual, expected.Bytes())
+	assert.Equal(t, result, 0)
 }
 
 // Logical Expressions
