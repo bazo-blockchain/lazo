@@ -1295,6 +1295,13 @@ func TestMapElementMultiAssignment(t *testing.T) {
 	tester.assertIntAt(1, big.NewInt(20))
 }
 
+// Ternary Expression
+// ------------------
+
+func TestTernaryExpression(t *testing.T) {
+	assertTernaryExpr(t, "true ? 1 : 2", "int", "1")
+}
+
 // Arithmetic Expressions
 // ----------------------
 
@@ -1540,4 +1547,22 @@ func TestThisMemberAccess(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(3))
 	tester.context.PersistChanges()
 	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 3})
+}
+
+// Length Member
+// -------------
+
+func TestLengthMemberAccess(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] x = new int[2]
+		int y
+
+		constructor(){
+			y = x.length
+		}
+	`)
+
+	tester.assertVariableInt(1, big.NewInt(2))
+	tester.context.PersistChanges()
+	tester.compareBytes(tester.context.ContractVariables[1], []byte{0, 2})
 }
