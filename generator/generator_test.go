@@ -1302,6 +1302,10 @@ func TestTernaryExpression(t *testing.T) {
 	assertTernaryExpr(t, "true ? 1 : 2", "int", "1")
 }
 
+func TestTernaryExpressionFalse(t *testing.T) {
+	assertTernaryExpr(t, "false ? 1 : 2", "int", "2")
+}
+
 // Arithmetic Expressions
 // ----------------------
 
