@@ -1570,7 +1570,7 @@ func TestLogicNot(t *testing.T) {
 // ---------------------------
 
 func TestBitwiseNot(t *testing.T) {
-	// Check http://bitwisecmd.com/
+	// Use http://bitwisecmd.com/ to verify the results visually
 	assertIntExpr(t, "~5", -6)
 	assertIntExpr(t, "~-6", 5)
 }
@@ -1729,7 +1729,7 @@ func TestThisMemberAccess(t *testing.T) {
 // Length Member
 // -------------
 
-func TestLengthMemberAccess(t *testing.T) {
+func TestArrayLengthMemberAccess(t *testing.T) {
 	tester := newGeneratorTestUtil(t, `
 		int[] x = new int[2]
 		int y
