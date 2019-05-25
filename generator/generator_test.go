@@ -359,6 +359,66 @@ func TestPostfixIncrement(t *testing.T) {
 	tester.assertInt(big.NewInt(3))
 }
 
+func TestPostfixDecrement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+		
+		constructor() {
+			x--
+		}
+	`)
+
+	tester.assertVariableInt(0, big.NewInt(-1))
+}
+
+func TestShorthandAssignments(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int add = 1
+		int sub = 2
+		int mul = -3
+		int div = 4
+		int mod = 5
+		int exp = 2
+		int shiftL = 1
+		int shiftR = 8
+		int bitAnd = 5
+		int bitOr = 5
+		int bitXor = 5
+
+		constructor() {
+			add += 1
+			sub -= 1
+			mul *= -1
+			div /= 2
+			mod %= 2
+			exp **= 3
+			shiftL <<= 3
+			shiftR >>= 3
+			bitAnd &= 3
+			bitOr |= 3
+			bitXor ^= 3	
+		}
+	`)
+
+	expected := []int64{
+		2, // 1 + 1
+		1, // 2 - 1
+		3, // -3 * -1
+		2, // 4 / 2
+		1, // 5 % 2
+		8, // 2 ** 3
+		8, // 1 << 3
+		1, // 8 >> 3
+		1, // 5 & 3
+		7, // 5 | 3
+		6, // 5 ^ 3
+	}
+	assert.Equal(t, len(tester.context.ContractVariables), len(expected))
+	for i := 0; i < len(expected); i++ {
+		tester.assertVariableInt(i, big.NewInt(expected[i]))
+	}
+}
+
 // Return statements
 // -----------------
 
@@ -931,7 +991,6 @@ func TestElementAccessMultiAssignment(t *testing.T) {
 		0x00, 0x01, // first element
 		0x00, 0x02, // length of second element
 		0x00, 0x02, // second element
-
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -1359,6 +1418,8 @@ func TestSubtractionVar(t *testing.T) {
 
 func TestMultiplication(t *testing.T) {
 	assertIntExpr(t, "2 * 3", 6)
+	assertIntExpr(t, "-2 * 3", -6)
+	assertIntExpr(t, "-2 * -3", 6)
 }
 
 func TestMultiplicationVar(t *testing.T) {
@@ -1440,6 +1501,7 @@ func TestShiftRight(t *testing.T) {
 	// 1000 --> 1
 	assertIntExpr(t, "8 >> 3", 1)
 	assertIntExpr(t, "-8 >> 3", -1)
+	assertIntExpr(t, "1 >> 3", 0)
 }
 
 // Make sure the VM trace is set to false.

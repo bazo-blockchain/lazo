@@ -76,7 +76,7 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	context := vm.NewMockContext(byteCode)
 	context.ContractVariables = variables
 	context.Data = txData
-	context.Fee += (uint64(len(variables))) * 1000
+	context.Fee += (uint64(len(variables))) * 2000
 	context.Fee += 10000 // To be able to calculate 2^16
 	tester.context = context
 

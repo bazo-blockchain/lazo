@@ -257,6 +257,7 @@ func TestShorthandAssignmentIntType(t *testing.T) {
 			x -= 2
 			x *= 2
 			x /= 2
+			x %= 2
 			x **= 2
 			x <<= 2
 			x >>= 2

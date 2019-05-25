@@ -293,25 +293,21 @@ var shorthandOpCodes = map[token.Symbol]il.OpCode{
 }
 
 // VisitShorthandAssignmentNode generates IL code for a shorthand assignment
-func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(node *node.ShorthandAssignmentStatementNode) {
-	if node.Operator == token.Plus && v.isStringType(v.symbolTable.GetTypeByExpression(node.Designator)) {
-		v.reportError(node, "String concatenation is not supported")
-		return
+func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(shorthandAssignment *node.ShorthandAssignmentStatementNode) {
+	// x++ or x += 1 is equivalent to x = x + 1
+	// Instead of repeating the same VisitAssignmentStatementNode logic for all 3 types of designators,
+	// restructure the node to assignment node and call VisitAssignmentStatementNode.
+	assignment := &node.AssignmentStatementNode{
+		AbstractNode: shorthandAssignment.AbstractNode,
+		Left:         shorthandAssignment.Designator,
+		Right: &node.BinaryExpressionNode{
+			AbstractNode: shorthandAssignment.AbstractNode,
+			Left:         shorthandAssignment.Designator,
+			Operator:     shorthandAssignment.Operator,
+			Right:        shorthandAssignment.Expression,
+		},
 	}
-
-	// x **= 2 --> exponent '2' should be pushed first because of right associativity.
-	if node.Operator == token.Exponent {
-		node.Expression.Accept(v)
-		node.Designator.Accept(v)
-		v.assembler.Emit(il.Exp)
-	} else if opCode, ok := shorthandOpCodes[node.Operator]; ok {
-		node.Designator.Accept(v)
-		node.Expression.Accept(v)
-		v.assembler.Emit(opCode)
-	} else {
-		panic("Unsupported shorthand operation " + token.SymbolLexeme[node.Operator])
-	}
-
+	v.VisitAssignmentStatementNode(assignment)
 }
 
 // VisitMemberAccessNode generates the IL Code for a member access node
