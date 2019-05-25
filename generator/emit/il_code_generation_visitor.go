@@ -279,19 +279,6 @@ func (v *ILCodeGenerationVisitor) updateStruct(targetStruct node.DesignatorNode)
 	v.storeVariable(v.symbolTable.GetDeclByDesignator(targetStruct))
 }
 
-var shorthandOpCodes = map[token.Symbol]il.OpCode{
-	token.Plus:           il.Add,
-	token.Minus:          il.Sub,
-	token.Multiplication: il.Mul,
-	token.Division:       il.Div,
-	token.Modulo:         il.Mod,
-	token.ShiftLeft:      il.ShiftL,
-	token.ShiftRight:     il.ShiftR,
-	token.BitwiseAnd:     il.BitwiseAnd,
-	token.BitwiseOr:      il.BitwiseOr,
-	token.BitwiseXOr:     il.BitwiseXor,
-}
-
 // VisitShorthandAssignmentNode generates IL code for a shorthand assignment
 func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(shorthandAssignment *node.ShorthandAssignmentStatementNode) {
 	// x++ or x += 1 is equivalent to x = x + 1
