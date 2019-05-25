@@ -344,6 +344,21 @@ func TestMultiAssignmentWithField(t *testing.T) {
 	tester.assertBoolAt(1, true)
 }
 
+// Shorthand Assignments
+// ---------------------
+
+func TestPostfixIncrement(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			int x = 2
+			x++
+			return x
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(3))
+}
+
 // Return statements
 // -----------------
 
@@ -1307,8 +1322,8 @@ func TestTernaryExpressionFalse(t *testing.T) {
 	assertTernaryExpr(t, "false ? 1 : 2", "int", "2")
 }
 
-// Arithmetic Expressions
-// ----------------------
+// Binary Arithmetic Expressions
+// -----------------------------
 
 func TestAddition(t *testing.T) {
 	assertIntExpr(t, "1 + 2", 3)
@@ -1445,6 +1460,19 @@ func TestShiftLeft_32bit_Max(t *testing.T) {
 	// Using built-in compare is much faster for much larger slice.
 	result := bytes.Compare(actual, expected.Bytes())
 	assert.Equal(t, result, 0)
+}
+
+// String Concatenation
+// --------------------
+
+func TestStringConcatenation(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function String test() {
+			return "Hello" + "World"
+		}
+	`, stringTestSig)
+
+	tester.assertErrorAt(0, "String concatenation is not supported")
 }
 
 // Logical Expressions
