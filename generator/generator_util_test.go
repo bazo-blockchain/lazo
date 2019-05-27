@@ -76,12 +76,12 @@ func newGeneratorTestUtilWithRawInput(t *testing.T, code string, txData []byte) 
 	context := vm.NewMockContext(byteCode)
 	context.ContractVariables = variables
 	context.Data = txData
-	context.Fee += (uint64(len(variables))) * 1000
+	context.Fee += (uint64(len(variables))) * 2000
 	context.Fee += 10000 // To be able to calculate 2^16
 	tester.context = context
 
 	bazoVM := vm.NewVM(context)
-	isSuccess := bazoVM.Exec(true)
+	isSuccess := bazoVM.Exec(false)
 	result, vmError := bazoVM.PeekResult()
 	assert.Assert(t, isSuccess, string(result))
 
@@ -167,4 +167,14 @@ func assertIntExpr(t *testing.T, expr string, expected int64) {
 	code := fmt.Sprintf("function int test() {\n return %s \n }", expr)
 	tester := newGeneratorTestUtilWithFunc(t, code, intTestSig)
 	tester.assertInt(big.NewInt(expected))
+}
+
+func assertTernaryExpr(t *testing.T, expr string, resultType string, expected string) {
+	code := fmt.Sprintf(
+		"function bool test() {\n "+
+			"      %s result = %s \n "+
+			"      return result == %s "+
+			"\n}", resultType, expr, expected)
+	tester := newGeneratorTestUtilWithFunc(t, code, boolTestSig)
+	tester.assertBool(true)
 }

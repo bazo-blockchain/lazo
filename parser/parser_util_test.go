@@ -155,12 +155,12 @@ func assertExpression(t *testing.T, node node.ExpressionNode, expr string) {
 }
 
 func assertTernaryExpression(t *testing.T, n node.ExpressionNode, condition string, trueExpr string, falseExpr string) {
-	ternary, ok := n.(*node.TernaryExpression)
+	ternary, ok := n.(*node.TernaryExpressionNode)
 
 	assert.Equal(t, ok, true)
 	assert.Equal(t, ternary.Condition.String(), condition)
-	assert.Equal(t, ternary.True.String(), trueExpr)
-	assert.Equal(t, ternary.False.String(), falseExpr)
+	assert.Equal(t, ternary.Then.String(), trueExpr)
+	assert.Equal(t, ternary.Else.String(), falseExpr)
 }
 
 func assertBinaryExpression(t *testing.T, n node.ExpressionNode, left string, right string, op token.Symbol) {

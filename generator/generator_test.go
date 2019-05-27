@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"bytes"
 	"gotest.tools/assert"
 	"math/big"
 	"testing"
@@ -341,6 +342,81 @@ func TestMultiAssignmentWithField(t *testing.T) {
 
 	tester.assertIntAt(0, big.NewInt(1))
 	tester.assertBoolAt(1, true)
+}
+
+// Shorthand Assignments
+// ---------------------
+
+func TestPostfixIncrement(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			int x = 2
+			x++
+			return x
+		}
+	`, intTestSig)
+
+	tester.assertInt(big.NewInt(3))
+}
+
+func TestPostfixDecrement(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int x
+		
+		constructor() {
+			x--
+		}
+	`)
+
+	tester.assertVariableInt(0, big.NewInt(-1))
+}
+
+func TestShorthandAssignments(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int add = 1
+		int sub = 2
+		int mul = -3
+		int div = 4
+		int mod = 5
+		int exp = 2
+		int shiftL = 1
+		int shiftR = 8
+		int bitAnd = 5
+		int bitOr = 5
+		int bitXor = 5
+
+		constructor() {
+			add += 1
+			sub -= 1
+			mul *= -1
+			div /= 2
+			mod %= 2
+			exp **= 3
+			shiftL <<= 3
+			shiftR >>= 3
+			bitAnd &= 3
+			bitOr |= 3
+			bitXor ^= 3	
+		}
+	`)
+
+	expected := []int64{
+		2, // 1 + 1
+		1, // 2 - 1
+		3, // -3 * -1
+		2, // 4 / 2
+		1, // 5 % 2
+		8, // 2 ** 3
+		8, // 1 << 3
+		1, // 8 >> 3
+		1, // 5 & 3
+		7, // 5 | 3
+		6, // 5 ^ 3
+	}
+	assert.Equal(t, len(tester.context.ContractVariables), len(expected))
+	for i := 0; i < len(expected); i++ {
+		tester.assertVariableInt(i, big.NewInt(expected[i]))
+	}
 }
 
 // Return statements
@@ -915,7 +991,6 @@ func TestElementAccessMultiAssignment(t *testing.T) {
 		0x00, 0x01, // first element
 		0x00, 0x02, // length of second element
 		0x00, 0x02, // second element
-
 	}
 
 	variable, err := tester.context.GetContractVariable(0)
@@ -1295,8 +1370,19 @@ func TestMapElementMultiAssignment(t *testing.T) {
 	tester.assertIntAt(1, big.NewInt(20))
 }
 
-// Arithmetic Expressions
-// ----------------------
+// Ternary Expression
+// ------------------
+
+func TestTernaryExpression(t *testing.T) {
+	assertTernaryExpr(t, "true ? 1 + 2 : 3 + 4", "int", "3")
+}
+
+func TestTernaryExpressionFalse(t *testing.T) {
+	assertTernaryExpr(t, "false ? 1 : 2", "int", "2")
+}
+
+// Binary Arithmetic Expressions
+// -----------------------------
 
 func TestAddition(t *testing.T) {
 	assertIntExpr(t, "1 + 2", 3)
@@ -1332,6 +1418,8 @@ func TestSubtractionVar(t *testing.T) {
 
 func TestMultiplication(t *testing.T) {
 	assertIntExpr(t, "2 * 3", 6)
+	assertIntExpr(t, "-2 * 3", -6)
+	assertIntExpr(t, "-2 * -3", 6)
 }
 
 func TestMultiplicationVar(t *testing.T) {
@@ -1399,6 +1487,56 @@ func TestMixedOperators(t *testing.T) {
 	assertIntExpr(t, "5 * 4 + 2 ** 3 - 1", 27)
 }
 
+func TestParentheses(t *testing.T) {
+	assertIntExpr(t, "(2 + 3) * 4", 20)
+}
+
+func TestShiftLeft(t *testing.T) {
+	// 1 --> 1000
+	assertIntExpr(t, "1 << 3", 8)
+	assertIntExpr(t, "1 << 0", 1)
+}
+
+func TestShiftRight(t *testing.T) {
+	// 1000 --> 1
+	assertIntExpr(t, "8 >> 3", 1)
+	assertIntExpr(t, "-8 >> 3", -1)
+	assertIntExpr(t, "1 >> 3", 0)
+}
+
+// Make sure the VM trace is set to false.
+// Otherwise printing 536870913 bytes on console slows down the test extremely.
+func TestShiftLeft_32bit_Max(t *testing.T) {
+	expected := big.NewInt(1)
+	expected.Lsh(expected, 0xffffffff)
+
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function int test() {
+			return 1 << 0xffffffff
+		}
+	`, intTestSig)
+	actual := tester.result[1:] // first byte is sign. It can be ignored, since it is 0.
+
+	// DO NOT use assertBytes helper function, because iterating 536870913 bytes
+	// and asserting every byte takes extremely long.
+	// Using built-in compare is much faster for much larger slice.
+	result := bytes.Compare(actual, expected.Bytes())
+	assert.Equal(t, result, 0)
+}
+
+// String Concatenation
+// --------------------
+
+func TestStringConcatenation(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function String test() {
+			return "Hello" + "World"
+		}
+	`, stringTestSig)
+
+	tester.assertErrorAt(0, "String concatenation is not supported")
+}
+
 // Logical Expressions
 // -------------------
 
@@ -1426,6 +1564,52 @@ func TestLogicNot(t *testing.T) {
 	assertBoolExpr(t, "!true", false)
 	assertBoolExpr(t, "!false", true)
 	assertBoolExpr(t, "!!true", true)
+}
+
+// Bitwise Logical Expressions
+// ---------------------------
+
+func TestBitwiseNot(t *testing.T) {
+	// Use http://bitwisecmd.com/ to verify the results visually
+	assertIntExpr(t, "~5", -6)
+	assertIntExpr(t, "~-6", 5)
+}
+
+func TestBitwiseAnd(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- &
+	// 0001 -> 1
+	assertIntExpr(t, "5 & 3", 1)
+}
+
+func TestBitwiseOr(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- |
+	// 0111 -> 7
+	assertIntExpr(t, "5 | 3", 7)
+}
+
+func TestBitwiseXOr(t *testing.T) {
+	// 0101 -> 5
+	// 0011 -> 3
+	// ---- ^
+	// 0110 -> 6
+	assertIntExpr(t, "5 ^ 3", 6)
+}
+
+// Type Cast
+// ---------
+
+func TestIntToStringTypeCast(t *testing.T) {
+	tester := newGeneratorTestUtilWithFunc(t, `
+		function String test() {
+			return (String) 1
+		}
+	`, stringTestSig)
+
+	tester.assertErrorAt(0, "VM currently does not support types")
 }
 
 // Equality Comparison
@@ -1540,4 +1724,22 @@ func TestThisMemberAccess(t *testing.T) {
 	tester.assertVariableInt(0, big.NewInt(3))
 	tester.context.PersistChanges()
 	tester.compareBytes(tester.context.ContractVariables[0], []byte{0, 3})
+}
+
+// Length Member
+// -------------
+
+func TestArrayLengthMemberAccess(t *testing.T) {
+	tester := newGeneratorTestUtil(t, `
+		int[] x = new int[2]
+		int y
+
+		constructor(){
+			y = x.length
+		}
+	`)
+
+	tester.assertVariableInt(1, big.NewInt(2))
+	tester.context.PersistChanges()
+	tester.compareBytes(tester.context.ContractVariables[1], []byte{0, 2})
 }

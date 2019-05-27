@@ -202,7 +202,7 @@ func (v *typeCheckVisitor) VisitDeleteStatementNode(node *node.DeleteStatementNo
 // Expressions
 // -----------
 
-func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpression) {
+func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
 	v.AbstractVisitor.VisitTernaryExpressionNode(node)
 
 	conditionType := v.symbolTable.GetTypeByExpression(node.Condition)
@@ -210,8 +210,8 @@ func (v *typeCheckVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressi
 		v.reportError(node.Condition, "condition should be bool type")
 	}
 
-	trueExprType := v.symbolTable.GetTypeByExpression(node.True)
-	falseExprType := v.symbolTable.GetTypeByExpression(node.False)
+	trueExprType := v.symbolTable.GetTypeByExpression(node.Then)
+	falseExprType := v.symbolTable.GetTypeByExpression(node.Else)
 	if trueExprType != falseExprType {
 		v.reportError(node, "ternary expression should return same type")
 	} else {

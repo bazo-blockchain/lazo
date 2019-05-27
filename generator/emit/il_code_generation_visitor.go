@@ -279,6 +279,24 @@ func (v *ILCodeGenerationVisitor) updateStruct(targetStruct node.DesignatorNode)
 	v.storeVariable(v.symbolTable.GetDeclByDesignator(targetStruct))
 }
 
+// VisitShorthandAssignmentNode generates IL code for a shorthand assignment
+func (v *ILCodeGenerationVisitor) VisitShorthandAssignmentNode(shorthandAssignment *node.ShorthandAssignmentStatementNode) {
+	// x++ or x += 1 is equivalent to x = x + 1
+	// Instead of repeating the same VisitAssignmentStatementNode logic for all 3 types of designators,
+	// restructure the node to assignment node and call VisitAssignmentStatementNode.
+	assignment := &node.AssignmentStatementNode{
+		AbstractNode: shorthandAssignment.AbstractNode,
+		Left:         shorthandAssignment.Designator,
+		Right: &node.BinaryExpressionNode{
+			AbstractNode: shorthandAssignment.AbstractNode,
+			Left:         shorthandAssignment.Designator,
+			Operator:     shorthandAssignment.Operator,
+			Right:        shorthandAssignment.Expression,
+		},
+	}
+	v.VisitAssignmentStatementNode(assignment)
+}
+
 // VisitMemberAccessNode generates the IL Code for a member access node
 func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
 	if node.Designator.String() == symbol.This {
@@ -289,10 +307,12 @@ func (v *ILCodeGenerationVisitor) VisitMemberAccessNode(node *node.MemberAccessN
 
 	node.Designator.Accept(v)
 
-	// TODO as soon as VM has ARRLEN Opcode
-	//if node.Identifier == "length" && v.isArray(node.Designator) {
-	//	v.assembler.Emit(il.ArrLen)
-	//}
+	designatorDecl := v.symbolTable.GetTypeByExpression(node.Designator)
+
+	if node.Identifier == "length" && v.isArrayType(designatorDecl) {
+		v.assembler.Emit(il.ArrLen)
+		return
+	}
 
 	decl := v.symbolTable.GetDeclByDesignator(node)
 	v.loadVariable(decl)
@@ -353,6 +373,26 @@ func (v *ILCodeGenerationVisitor) VisitIfStatementNode(node *node.IfStatementNod
 // Expressions
 // -----------
 
+// VisitTernaryExpressionNode generates the IL Code for all ternary expressions
+func (v *ILCodeGenerationVisitor) VisitTernaryExpressionNode(node *node.TernaryExpressionNode) {
+	elseLabel := v.assembler.CreateLabel()
+	endLabel := v.assembler.CreateLabel()
+
+	// Condition
+	node.Condition.Accept(v)
+	v.assembler.JmpFalse(elseLabel)
+
+	// Then
+	node.Then.Accept(v)
+	v.assembler.Jmp(endLabel)
+
+	// Else
+	v.assembler.SetLabel(elseLabel)
+	node.Else.Accept(v)
+
+	v.assembler.SetLabel(endLabel)
+}
+
 var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Plus:           il.Add,
 	token.Minus:          il.Sub,
@@ -365,10 +405,20 @@ var binaryOpCodes = map[token.Symbol]il.OpCode{
 	token.Less:           il.Lt,
 	token.Equal:          il.Eq,
 	token.Unequal:        il.NotEq,
+	token.ShiftLeft:      il.ShiftL,
+	token.ShiftRight:     il.ShiftR,
+	token.BitwiseAnd:     il.BitwiseAnd,
+	token.BitwiseOr:      il.BitwiseOr,
+	token.BitwiseXOr:     il.BitwiseXor,
 }
 
-// VisitBinaryExpressionNode generates the IL Code for all Binary Expressions
+// VisitBinaryExpressionNode generates the IL Code for all binary expressions
 func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.BinaryExpressionNode) {
+	if expNode.Operator == token.Plus && v.isStringType(v.symbolTable.GetTypeByExpression(expNode.Left)) {
+		v.reportError(expNode, "String concatenation is not supported")
+		return
+	}
+
 	if op, ok := binaryOpCodes[expNode.Operator]; ok {
 		v.AbstractVisitor.VisitBinaryExpressionNode(expNode)
 		v.assembler.Emit(op)
@@ -414,11 +464,14 @@ func (v *ILCodeGenerationVisitor) VisitBinaryExpressionNode(expNode *node.Binary
 		v.assembler.SetLabel(endLabel)
 		return
 	}
+
 	v.reportError(expNode, fmt.Sprintf("binary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
 }
 
 var unaryOpCodes = map[token.Symbol]il.OpCode{
-	token.Minus: il.Neg,
+	token.Minus:      il.Neg,
+	token.Not:        il.Neg,
+	token.BitwiseNot: il.BitwiseNot,
 }
 
 // VisitUnaryExpressionNode generates the IL Code for all unary expressions
@@ -434,12 +487,12 @@ func (v *ILCodeGenerationVisitor) VisitUnaryExpressionNode(expNode *node.UnaryEx
 		return
 	}
 
-	if expNode.Operator == token.Not {
-		v.AbstractVisitor.VisitUnaryExpressionNode(expNode)
-		v.assembler.Emit(il.Neg)
-		return
-	}
 	v.reportError(expNode, fmt.Sprintf("unary operator %s not supported", token.SymbolLexeme[expNode.Operator]))
+}
+
+// VisitTypeCastNode generates the IL code type cast expression
+func (v *ILCodeGenerationVisitor) VisitTypeCastNode(node *node.TypeCastNode) {
+	v.reportError(node, "VM currently does not support types")
 }
 
 // VisitFuncCallNode generates the IL Code for the function call
@@ -658,6 +711,10 @@ func (v *ILCodeGenerationVisitor) getVarIndex(decl symbol.Symbol) int {
 	default:
 		panic(fmt.Sprintf("Unsupported variable type %t", decl))
 	}
+}
+
+func (v *ILCodeGenerationVisitor) isStringType(typeSymbol symbol.TypeSymbol) bool {
+	return typeSymbol == v.symbolTable.GlobalScope.StringType
 }
 
 func (v *ILCodeGenerationVisitor) isMapType(typeSymbol symbol.TypeSymbol) bool {
