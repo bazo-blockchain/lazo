@@ -27,10 +27,9 @@ func TestGlobalScope(t *testing.T) {
 	assert.Equal(t, len(gs.Types), 4)
 	assert.Equal(t, len(gs.BuiltInTypes), 4)
 	assert.Equal(t, len(gs.BuiltInFunctions), 0)
-	assert.Equal(t, len(gs.Constants), 3)
+	assert.Equal(t, len(gs.Constants), 2)
 
 	// Built-in types
-	assert.Equal(t, gs.NullType.Identifier(), "@NULL")
 	assert.Equal(t, gs.BoolType.Identifier(), "bool")
 	assert.Equal(t, gs.CharType.Identifier(), "char")
 	assert.Equal(t, gs.StringType.Identifier(), "String")
@@ -39,7 +38,6 @@ func TestGlobalScope(t *testing.T) {
 	// Constants
 	assert.Equal(t, gs.TrueConstant.Identifier(), "true")
 	assert.Equal(t, gs.FalseConstant.Identifier(), "false")
-	assert.Equal(t, gs.NullConstant.Identifier(), "null")
 }
 
 // Contract Symbol
