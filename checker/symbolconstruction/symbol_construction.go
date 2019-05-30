@@ -58,7 +58,6 @@ func (sc *symbolConstruction) registerBuiltInType(name string) *symbol.BasicType
 }
 
 func (sc *symbolConstruction) registerBuiltInConstants() {
-	sc.globalScope.NullConstant = sc.registerBuiltInConstant(sc.globalScope.NullType, "null")
 	sc.globalScope.FalseConstant = sc.registerBuiltInConstant(sc.globalScope.BoolType, "false")
 	sc.globalScope.TrueConstant = sc.registerBuiltInConstant(sc.globalScope.BoolType, "true")
 }

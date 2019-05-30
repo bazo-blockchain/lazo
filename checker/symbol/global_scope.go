@@ -13,7 +13,6 @@ type GlobalScope struct {
 	Constants        []*ConstantSymbol
 	Structs          map[string]*StructTypeSymbol
 
-	NullType   *BasicTypeSymbol
 	BoolType   *BasicTypeSymbol
 	CharType   *BasicTypeSymbol
 	StringType *BasicTypeSymbol
@@ -26,12 +25,10 @@ type GlobalScope struct {
 
 	TrueConstant  *ConstantSymbol
 	FalseConstant *ConstantSymbol
-	NullConstant  *ConstantSymbol
 }
 
 func newGlobalScope() *GlobalScope {
 	gs := &GlobalScope{}
-	gs.NullType = NewBasicTypeSymbol(gs, "@NULL")
 	gs.Structs = make(map[string]*StructTypeSymbol)
 	gs.Types = make(map[string]TypeSymbol)
 
