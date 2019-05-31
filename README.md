@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/bazo-blockchain/lazo.svg?branch=master)](https://travis-ci.org/bazo-blockchain/lazo)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bazo-blockchain_lazo&metric=alert_status)](https://sonarcloud.io/dashboard?id=bazo-blockchain_lazo)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bazo-blockchain_lazo&metric=coverage)](https://sonarcloud.io/dashboard?id=bazo-blockchain_lazo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bazo-blockchain/lazo)](https://goreportcard.com/report/github.com/bazo-blockchain/lazo)
 [![GoDoc](https://godoc.org/github.com/bazo-blockchain/lazo?status.svg)](https://godoc.org/github.com/bazo-blockchain/lazo)
 

@@ -59,7 +59,7 @@ type ProgramNode struct {
 }
 
 func (n *ProgramNode) String() string {
-	return fmt.Sprintf("%s", getNodeString(n.Contract))
+	return getNodeString(n.Contract)
 }
 
 // Accept lets a visitor to traverse its node structure.
@@ -281,7 +281,7 @@ type BasicTypeNode struct {
 }
 
 func (n *BasicTypeNode) String() string {
-	return fmt.Sprintf("%s", n.Identifier)
+	return n.Identifier
 }
 
 // Accept lets a visitor to traverse its node structure
@@ -554,7 +554,7 @@ type BasicDesignatorNode struct {
 }
 
 func (n *BasicDesignatorNode) String() string {
-	return fmt.Sprintf("%s", n.Value)
+	return n.Value
 }
 
 // Accept lets a visitor to traverse its node structure.

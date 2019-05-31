@@ -34,7 +34,7 @@ var compileCommand = &cobra.Command{
 	Example: "  lazo compile program.lazo --stage=l",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			cmd.Help()
+			_ = cmd.Help()
 		} else {
 			compile(args[0])
 		}

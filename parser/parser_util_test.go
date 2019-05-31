@@ -264,7 +264,6 @@ func assertStructNamedCreation(t *testing.T, n node.ExpressionNode, name string,
 		field := structCreation.FieldValues[i]
 		assert.Equal(t, field.Name, pair.key)
 		assert.Equal(t, field.Expression.String(), pair.value)
-		i++
 	}
 }
 

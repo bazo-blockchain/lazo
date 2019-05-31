@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Short: "Lazo is a tool for managing Lazo source code",
 	Long:  `Lazo is a tool for managing Lazo source code on the Bazo Blockchain`,
 	Run: func(cmd *cobra.Command, _ []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
