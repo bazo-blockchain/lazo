@@ -240,14 +240,7 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 	case token.Plus:
-		if v.isString(leftType) && v.isString(rightType) {
-			v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
-			return
-		}
-		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "+ operator can only be applied to int/string types")
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		v.visitBinaryPlusOperator(node, leftType, rightType)
 	case token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Arithmetic operators can only be applied to int types")
@@ -260,14 +253,7 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 		}
 		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 	case token.Less, token.LessEqual, token.GreaterEqual, token.Greater:
-		if leftType != rightType {
-			v.reportError(node,
-				fmt.Sprintf("Both sides of a compare operation need to have the same type, given %s and %s",
-					leftType, rightType))
-		} else if !(v.isInt(leftType) || v.isChar(leftType)) {
-			v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+		v.visitBinaryRelationalComparisonOperator(node, leftType, rightType)
 	case token.ShiftLeft, token.ShiftRight:
 		if !v.isInt(leftType) || !v.isInt(rightType) {
 			v.reportError(node, "Bitwise shift operators can only be applied to int types")
@@ -276,6 +262,32 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 	default:
 		panic(fmt.Sprintf("Illegal binary operator %s", token.SymbolLexeme[node.Operator]))
 	}
+}
+
+// visitBinaryPlusOperator checks addition (1 + 1) and string concatenation ("hello" + "world").
+func (v *typeCheckVisitor) visitBinaryPlusOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if v.isString(leftType) && v.isString(rightType) {
+		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.StringType)
+		return
+	}
+	if !v.isInt(leftType) || !v.isInt(rightType) {
+		v.reportError(node, "+ operator can only be applied to int/string types")
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+}
+
+// visitBinaryRelationalComparisonOperator checks comparison with <, <=, >, >= operators.
+func (v *typeCheckVisitor) visitBinaryRelationalComparisonOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if leftType != rightType {
+		v.reportError(node,
+			fmt.Sprintf("Both sides of a compare operation need to have the same type, given %s and %s",
+				leftType, rightType))
+	} else if !(v.isInt(leftType) || v.isChar(leftType)) {
+		v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
 }
 
 // VisitUnaryExpressionNode checks that types of unary expressions are valid
