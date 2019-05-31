@@ -14,8 +14,9 @@ func GetSignByte(value *big.Int) byte {
 	return sign
 }
 
-func GetBytesFromUInt16(element uint16) []byte {
+// GetBytesFromUInt16 returns the bytes for uint16 value
+func GetBytesFromUInt16(value uint16) []byte {
 	bytes := make([]byte, 2)
-	binary.BigEndian.PutUint16(bytes, uint16(element))
+	binary.BigEndian.PutUint16(bytes, uint16(value))
 	return bytes
 }
