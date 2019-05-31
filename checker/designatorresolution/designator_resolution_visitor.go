@@ -68,12 +68,11 @@ func (v *designatorResolutionVisitor) VisitBasicDesignatorNode(node *node.BasicD
 		return
 	}
 
-	if local, ok := sym.(*symbol.LocalVariableSymbol); ok {
-		if !containsStatement(local.VisibleIn, v.currentStatement) {
-			v.reportError(node, fmt.Sprintf("Local Variable %s is not visible", node.Value))
-			return
-		}
+	if local, ok := sym.(*symbol.LocalVariableSymbol); ok && !containsStatement(local.VisibleIn, v.currentStatement) {
+		v.reportError(node, fmt.Sprintf("Local Variable %s is not visible", node.Value))
+		return
 	}
+
 	v.symbolTable.MapDesignatorToDecl(node, sym)
 	symType, err := getType(sym)
 	if err != nil {
@@ -100,9 +99,6 @@ func (v *designatorResolutionVisitor) VisitElementAccessNode(node *node.ElementA
 func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAccessNode) {
 	v.AbstractVisitor.VisitMemberAccessNode(node)
 	designatorType := v.symbolTable.GetTypeByExpression(node.Designator)
-	var target symbol.Symbol
-	var targetType symbol.TypeSymbol
-	var err error
 
 	if node.Identifier == symbol.This {
 		v.reportError(node, "Invalid member designator 'this'")
@@ -111,55 +107,75 @@ func (v *designatorResolutionVisitor) VisitMemberAccessNode(node *node.MemberAcc
 
 	switch designatorType.(type) {
 	case *symbol.ArrayTypeSymbol:
-		arrayLength := v.symbolTable.GlobalScope.ArrayLengthField
-		if node.Identifier == arrayLength.Identifier() {
-			target = arrayLength
-			targetType, err = getType(arrayLength)
-			if err != nil {
-				v.reportError(node, err.Error())
-			}
-		} else {
-			v.reportError(node, fmt.Sprintf("Invalid member access %v on array %v", node.Identifier, node))
-		}
+		v.visitArrayMemberAccess(node)
 	case *symbol.StructTypeSymbol:
-		structType := designatorType.(*symbol.StructTypeSymbol)
-		target = structType.GetField(node.Identifier)
-
-		if target == (*symbol.FieldSymbol)(nil) {
-			v.reportError(node, fmt.Sprintf("Member %s does not exist on struct %s",
-				node.Identifier, structType.Identifier()))
-			return
-		}
-
-		targetType, err = getType(target)
-
-		if err != nil {
-			v.reportError(node, err.Error())
-		}
+		v.visitStructMemberAccess(node, designatorType.(*symbol.StructTypeSymbol))
 	case *symbol.MapTypeSymbol:
-		if node.Identifier == symbol.Contains {
-			target = v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains]
-		} else {
-			v.reportError(node, fmt.Sprintf("Invalid member access %v on map %v", node.Identifier, node))
-		}
+		v.visitMapMemberAccess(node)
 	case *symbol.ContractSymbol:
-		contractType := designatorType.(*symbol.ContractSymbol)
-		targetIndex := contractType.GetFieldIndex(node.Identifier)
-
-		if targetIndex < 0 {
-			v.reportError(node, fmt.Sprintf("Member %s does not exist on contract %v", node.Identifier, contractType.Identifier()))
-			return
-		}
-
-		target = contractType.Fields[targetIndex]
-		targetType, err = getType(target)
-
-		if err != nil {
-			v.reportError(node, err.Error())
-		}
+		v.visitContractMemberAccess(node, designatorType.(*symbol.ContractSymbol))
 	default:
 		v.reportError(node, fmt.Sprintf("Designator %v does not refer to a composite type", node))
 	}
+}
+
+func (v *designatorResolutionVisitor) visitArrayMemberAccess(node *node.MemberAccessNode) {
+	arrayLength := v.symbolTable.GlobalScope.ArrayLengthField
+	if node.Identifier != arrayLength.Identifier() {
+		v.reportError(node, fmt.Sprintf("Invalid member access %v on array %v", node.Identifier, node))
+		return
+	}
+
+	targetType, err := getType(arrayLength)
+	if err != nil {
+		v.reportError(node, err.Error())
+	}
+
+	v.symbolTable.MapDesignatorToDecl(node, arrayLength)
+	v.symbolTable.MapExpressionToType(node, targetType)
+}
+
+func (v *designatorResolutionVisitor) visitStructMemberAccess(node *node.MemberAccessNode, structType *symbol.StructTypeSymbol) {
+	fieldSymbol := structType.GetField(node.Identifier)
+
+	if fieldSymbol == (*symbol.FieldSymbol)(nil) {
+		v.reportError(node, fmt.Sprintf("Member %s does not exist on struct %s",
+			node.Identifier, structType.Identifier()))
+		return
+	}
+
+	targetType, err := getType(fieldSymbol)
+	if err != nil {
+		v.reportError(node, err.Error())
+	}
+
+	v.symbolTable.MapDesignatorToDecl(node, fieldSymbol)
+	v.symbolTable.MapExpressionToType(node, targetType)
+}
+
+func (v *designatorResolutionVisitor) visitMapMemberAccess(node *node.MemberAccessNode) {
+	if node.Identifier != symbol.Contains {
+		v.reportError(node, fmt.Sprintf("Invalid member access %v on map %v", node.Identifier, node))
+		return
+	}
+	target := v.symbolTable.GlobalScope.MapMemberFunctions[symbol.Contains]
+	v.symbolTable.MapDesignatorToDecl(node, target)
+}
+
+func (v *designatorResolutionVisitor) visitContractMemberAccess(node *node.MemberAccessNode, contractType *symbol.ContractSymbol) {
+	targetIndex := contractType.GetFieldIndex(node.Identifier)
+	if targetIndex < 0 {
+		v.reportError(node, fmt.Sprintf("Member %s does not exist on contract %v", node.Identifier, contractType.Identifier()))
+		return
+	}
+
+	target := contractType.Fields[targetIndex]
+	targetType, err := getType(target)
+
+	if err != nil {
+		v.reportError(node, err.Error())
+	}
+
 	v.symbolTable.MapDesignatorToDecl(node, target)
 	v.symbolTable.MapExpressionToType(node, targetType)
 }
