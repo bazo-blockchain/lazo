@@ -94,7 +94,7 @@ func (v *ILCodeGenerationVisitor) VisitFieldNode(node *node.FieldNode) {
 
 	if arrayType, ok := targetType.(*symbol.ArrayTypeSymbol); ok {
 		if _, ok := arrayType.ElementType.(*symbol.BasicTypeSymbol); !ok {
-			v.reportError(node, "Generator currently does not support array nesting")
+			v.reportError(node, unsupportedArrayNestingMsg)
 			return
 		}
 	}
@@ -159,27 +159,8 @@ func (v *ILCodeGenerationVisitor) VisitAssignmentStatementNode(assignNode *node.
 	case *node.ElementAccessNode: // arr[0] or map["key"]
 		elementAccess, _ := assignNode.Left.(*node.ElementAccessNode)
 		assignNode.Right.Accept(v)
-		elementAccess.Expression.Accept(v)
-		elementAccess.Designator.Accept(v)
+		v.visitArrayElementAssignment(elementAccess)
 
-		designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
-		if v.isArrayType(designatorType) {
-			v.assembler.Emit(il.ArrInsert)
-		} else if v.isMapType(designatorType) {
-			v.assembler.Emit(il.MapSetVal)
-		} else {
-			panic("Unsupported element access type")
-		}
-
-		targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-		if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
-			v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
-			return
-		}
-
-		// Workaround for single dereference
-		// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
-		v.storeVariable(targetDecl)
 	case *node.MemberAccessNode: // this.field or struct.field
 		memberAccessNode := assignNode.Left.(*node.MemberAccessNode)
 		memberAccessNode.Designator.Accept(v)
@@ -208,26 +189,8 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 
 		case *node.ElementAccessNode:
 			elementAccess, _ := assignNode.Designators[i].(*node.ElementAccessNode)
-			elementAccess.Expression.Accept(v)
-			elementAccess.Designator.Accept(v)
+			v.visitArrayElementAssignment(elementAccess)
 
-			designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
-			if v.isArrayType(designatorType) {
-				v.assembler.Emit(il.ArrInsert)
-			} else if v.isMapType(designatorType) {
-				v.assembler.Emit(il.MapSetVal)
-			} else {
-				panic("Unsupported element access type")
-			}
-
-			targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
-			if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
-				v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
-				return
-			}
-			// Workaround for single dereference
-			// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
-			v.storeVariable(targetDecl)
 		case *node.MemberAccessNode:
 			memberAccessNode := assignNode.Designators[i].(*node.MemberAccessNode)
 			memberAccessNode.Designator.Accept(v)
@@ -247,6 +210,30 @@ func (v *ILCodeGenerationVisitor) VisitMultiAssignmentStatementNode(assignNode *
 			v.reportError(assignNode, fmt.Sprintf("Invalid assignment %v", assignNode.Designators[i]))
 		}
 	}
+}
+
+func (v *ILCodeGenerationVisitor) visitArrayElementAssignment(elementAccess *node.ElementAccessNode) {
+	elementAccess.Expression.Accept(v)
+	elementAccess.Designator.Accept(v)
+
+	designatorType := v.symbolTable.GetTypeByExpression(elementAccess.Designator)
+	if v.isArrayType(designatorType) {
+		v.assembler.Emit(il.ArrInsert)
+	} else if v.isMapType(designatorType) {
+		v.assembler.Emit(il.MapSetVal)
+	} else {
+		panic(unsupportedElementAccessMsg)
+	}
+
+	targetDecl := v.symbolTable.GetDeclByDesignator(elementAccess.Designator)
+	if v.isArrayType(targetDecl) || v.isMapType(targetDecl) || v.isStructType(targetDecl.Scope()) {
+		v.reportError(elementAccess, "Multiple dereferences on value types are not supported")
+		return
+	}
+
+	// Workaround for single dereference
+	// e.g. a[0] = 2 --> returns a new array (value type). It should be stored in the variable a.
+	v.storeVariable(targetDecl)
 }
 
 // Struct is a value type in VM.
@@ -329,7 +316,7 @@ func (v *ILCodeGenerationVisitor) VisitElementAccessNode(node *node.ElementAcces
 	} else if v.isMapType(designatorType) {
 		v.assembler.Emit(il.MapGetVal)
 	} else {
-		panic("Unsupported element access type")
+		panic(unsupportedElementAccessMsg)
 	}
 }
 
@@ -553,7 +540,7 @@ func (v *ILCodeGenerationVisitor) VisitStructNamedCreationNode(node *node.Struct
 // VisitArrayLengthCreationNode generates the IL Code for the array length creation
 func (v *ILCodeGenerationVisitor) VisitArrayLengthCreationNode(node *node.ArrayLengthCreationNode) {
 	if len(node.Lengths) > 1 {
-		v.reportError(node, "Generator currently does not support array nesting")
+		v.reportError(node, unsupportedArrayNestingMsg)
 		return
 	}
 
@@ -564,7 +551,7 @@ func (v *ILCodeGenerationVisitor) VisitArrayLengthCreationNode(node *node.ArrayL
 // VisitArrayValueCreationNode generates the IL Code for the array value creation
 func (v *ILCodeGenerationVisitor) VisitArrayValueCreationNode(n *node.ArrayValueCreationNode) {
 	if _, isNested := n.Elements.Values[0].(*node.ArrayInitializationNode); isNested {
-		v.reportError(n, "Generator currently does not support array nesting")
+		v.reportError(n, unsupportedArrayNestingMsg)
 		return
 	}
 
@@ -731,6 +718,9 @@ func (v *ILCodeGenerationVisitor) isStructType(typeSymbol symbol.TypeSymbol) boo
 	_, ok := typeSymbol.(*symbol.StructTypeSymbol)
 	return ok
 }
+
+const unsupportedArrayNestingMsg = "Generator currently does not support array nesting"
+const unsupportedElementAccessMsg = "Unsupported element access type"
 
 func (v *ILCodeGenerationVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))

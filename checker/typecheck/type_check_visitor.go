@@ -458,7 +458,7 @@ func (v *typeCheckVisitor) VisitStructCreationNode(node *node.StructCreationNode
 		exprType := v.symbolTable.GetTypeByExpression(fieldValue)
 		expectedType := structType.Fields[i].Type
 		if exprType != expectedType {
-			v.reportError(fieldValue, fmt.Sprintf("expected %s, got %s", expectedType, exprType))
+			v.reportError(fieldValue, fmt.Sprintf(typeErrorMsgTemplate, expectedType, exprType))
 		}
 	}
 }
@@ -485,7 +485,7 @@ func (v *typeCheckVisitor) VisitStructNamedCreationNode(node *node.StructNamedCr
 		if fieldSymbol == nil {
 			v.reportError(fieldValue, fmt.Sprintf("Field %s not found", fieldValue.Name))
 		} else if exprType != fieldSymbol.Type {
-			v.reportError(fieldValue, fmt.Sprintf("expected %s, got %s", fieldSymbol.Type, exprType))
+			v.reportError(fieldValue, fmt.Sprintf(typeErrorMsgTemplate, fieldSymbol.Type, exprType))
 		}
 	}
 }
@@ -548,7 +548,7 @@ func (v *typeCheckVisitor) isAnyType(symbol symbol.TypeSymbol, expectedTypes ...
 func (v *typeCheckVisitor) checkType(expr node.ExpressionNode, expectedType symbol.TypeSymbol) {
 	actualType := v.symbolTable.GetTypeByExpression(expr)
 	if expectedType != actualType {
-		v.reportError(expr, fmt.Sprintf("expected %s, got %s", expectedType, actualType))
+		v.reportError(expr, fmt.Sprintf(typeErrorMsgTemplate, expectedType, actualType))
 	}
 }
 
@@ -589,6 +589,8 @@ func (v *typeCheckVisitor) checkExpressionTypes(expr node.ExpressionNode, expect
 			expectedTypes[0].Identifier(), getTypeString(exprType)))
 	}
 }
+
+const typeErrorMsgTemplate = "expected %s, got %s"
 
 func (v *typeCheckVisitor) reportError(node node.Node, msg string) {
 	v.Errors = append(v.Errors, fmt.Errorf("[%s] %s", node.Pos(), msg))
