@@ -230,38 +230,40 @@ func (v *typeCheckVisitor) VisitBinaryExpressionNode(node *node.BinaryExpression
 
 	switch node.Operator {
 	case token.And, token.Or:
-		if !v.isBool(leftType) || !v.isBool(rightType) {
-			v.reportError(node, "Logic operators can only be applied to bool types")
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+		v.visitBinaryLogicalOperator(node, leftType, rightType)
 	case token.BitwiseAnd, token.BitwiseOr, token.BitwiseXOr:
-		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Bitwise logic operators can only be applied to int types")
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		v.visitBinaryBitwiseLogicalOperator(node, leftType, rightType)
 	case token.Plus:
 		v.visitBinaryPlusOperator(node, leftType, rightType)
 	case token.Minus, token.Multiplication, token.Division, token.Modulo, token.Exponent:
-		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Arithmetic operators can only be applied to int types")
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		v.visitBinaryArithmeticOperator(node, leftType, rightType)
 	case token.Equal, token.Unequal:
-		if leftType != rightType {
-			v.reportError(node, fmt.Sprintf("Equality comparison should have the same type, given %s and %s",
-				leftType, rightType))
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+		v.visitBinaryEqualityComparisonOperator(node, leftType, rightType)
 	case token.Less, token.LessEqual, token.GreaterEqual, token.Greater:
 		v.visitBinaryRelationalComparisonOperator(node, leftType, rightType)
 	case token.ShiftLeft, token.ShiftRight:
-		if !v.isInt(leftType) || !v.isInt(rightType) {
-			v.reportError(node, "Bitwise shift operators can only be applied to int types")
-		}
-		v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+		v.visitBinaryShiftOperator(node, leftType, rightType)
 	default:
 		panic(fmt.Sprintf("Illegal binary operator %s", token.SymbolLexeme[node.Operator]))
 	}
+}
+
+// visitBinaryLogicalOperator checks && and || operators.
+func (v *typeCheckVisitor) visitBinaryLogicalOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if !v.isBool(leftType) || !v.isBool(rightType) {
+		v.reportError(node, "Logic operators can only be applied to bool types")
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+}
+
+// visitBinaryBitwiseLogicalOperator checks &, | and ^ operators.
+func (v *typeCheckVisitor) visitBinaryBitwiseLogicalOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if !v.isInt(leftType) || !v.isInt(rightType) {
+		v.reportError(node, "Bitwise logic operators can only be applied to int types")
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 }
 
 // visitBinaryPlusOperator checks addition (1 + 1) and string concatenation ("hello" + "world").
@@ -277,6 +279,25 @@ func (v *typeCheckVisitor) visitBinaryPlusOperator(node *node.BinaryExpressionNo
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 }
 
+// visitBinaryArithmeticOperator checks -, *, /, ** operators.
+func (v *typeCheckVisitor) visitBinaryArithmeticOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if !v.isInt(leftType) || !v.isInt(rightType) {
+		v.reportError(node, "Arithmetic operators can only be applied to int types")
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
+}
+
+// visitBinaryEqualityComparisonOperator checks == and != operators.
+func (v *typeCheckVisitor) visitBinaryEqualityComparisonOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if leftType != rightType {
+		v.reportError(node, fmt.Sprintf("Equality comparison should have the same type, given %s and %s",
+			leftType, rightType))
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+}
+
 // visitBinaryRelationalComparisonOperator checks comparison with <, <=, >, >= operators.
 func (v *typeCheckVisitor) visitBinaryRelationalComparisonOperator(node *node.BinaryExpressionNode,
 	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
@@ -288,6 +309,15 @@ func (v *typeCheckVisitor) visitBinaryRelationalComparisonOperator(node *node.Bi
 		v.reportError(node, fmt.Sprintf("Relational comparison is not supported for %s", leftType))
 	}
 	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.BoolType)
+}
+
+// visitBinaryShiftOperator checks << and >> operators.
+func (v *typeCheckVisitor) visitBinaryShiftOperator(node *node.BinaryExpressionNode,
+	leftType symbol.TypeSymbol, rightType symbol.TypeSymbol) {
+	if !v.isInt(leftType) || !v.isInt(rightType) {
+		v.reportError(node, "Bitwise shift operators can only be applied to int types")
+	}
+	v.symbolTable.MapExpressionToType(node, v.symbolTable.GlobalScope.IntType)
 }
 
 // VisitUnaryExpressionNode checks that types of unary expressions are valid
