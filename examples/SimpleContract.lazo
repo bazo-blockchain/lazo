@@ -1,13 +1,17 @@
 contract SimpleContract {
-    int x
-    int y = 1
-    bool b
-    string s = "test"
+    Map<int, int> balances
 
-    function bool calc(int a, int b) {
-        x = y
-        y = a + b
+    constructor() {
+        balances[0x01] = 10
+        balances[0x02] = 2
 
-        return a > b
+        pay(0x01, 0x02, 5)
+    }
+
+    function void pay(int from, int to, int amount) {
+        if (amount > 0 && balances[from] >= amount){
+            balances[from] -= amount
+            balances[to]   += amount
+        }
     }
 }
