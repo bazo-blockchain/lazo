@@ -45,7 +45,7 @@ into the Bazo Byte Code for the [Bazo Virtual Machine](https://github.com/bazo-b
 
 ## Result
 
-* Link to technical documentation (Bachelor Thesis 2019)
+* Technical Documentation for [Lazo Compiler](https://github.com/bazo-blockchain/lazo/releases/download/v0.5.0/Lazo.pdf) (Bachelor Thesis 2019)
 * Complete [Language Specification v1.0](https://eprints.hsr.ch/736/1/HS%202018%202019-SA-EP-Pfister-THURAIRATNAM-Improving%20the%20Bazo%20Blockchain.pdf) (Term Project 2018)
 
 ## Lazo Example 
