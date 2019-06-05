@@ -1,0 +1,26 @@
+contract LikeCounter {
+    struct Movie {
+        String name
+        int likes
+        int votes
+    }
+
+    Movie m1 = new Movie("Avengers")
+    Movie m2 = new Movie(name="Justice League", votes=1, likes=1)
+
+    constructor() {
+        m1.likes, m2.votes = like(m1)
+        m2.likes, m2.votes = dislike(m2)
+    }
+
+    function (int, int) like(Movie m) {
+        m.likes++
+        m.votes++
+
+        return m.likes, m.votes
+    }
+
+    function (int, int) dislike(Movie m) {
+        return m.likes - 1, m.votes + 1
+    }
+}

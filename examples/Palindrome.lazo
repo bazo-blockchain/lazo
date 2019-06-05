@@ -1,0 +1,21 @@
+contract Palindrome {
+    constructor() {
+        char[] word = new char[]{'m', 'o', 'm'}
+        bool result = isPalindrome(word, 0)
+    }
+
+    function bool isPalindrome(char[] word, int index) {
+        int left = index
+        int right = word.length - index - 1
+
+        if (left >= right) {
+            return true
+        }
+
+        if (word[left] == word[right]){
+            return isPalindrome(word, index + 1)
+        } else {
+            return false
+        }
+    }
+}
